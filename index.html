@@ -2070,26 +2070,48 @@ window.toast=(msg,type='')=>{const t=document.getElementById('toast');t.textCont
 window.showNotif=(ico,title,body)=>{document.getElementById('notif-ico2').textContent=ico;document.getElementById('notif-title2').textContent=title;document.getElementById('notif-body2').textContent=body;const p=document.getElementById('notif-pop');p.classList.add('on');setTimeout(()=>p.classList.remove('on'),6000);};
 
 // ── RACE MAP ──
-window.initRaceMap=async(raceId, location)=>{
+window.initRaceMap=async(raceId,location,mapUrl)=>{
   const container=document.getElementById('race-map-'+raceId);
   if(!container||typeof L==='undefined')return;
-  try{
-    // Nominatim ile konum ara
-    const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`,{headers:{'Accept-Language':'tr'}});
-    const data=await res.json();
-    if(!data.length){
-      container.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">📍 ${location}<br><a href="https://www.openstreetmap.org/search?query=${encodeURIComponent(location)}" target="_blank" style="color:var(--or)">Haritada Ara →</a></div>`;
-      return;
-    }
-    const lat=parseFloat(data[0].lat);const lng=parseFloat(data[0].lon);
-    container.innerHTML='';container.style.display='block';
-    const map=L.map(container,{zoomControl:true,scrollWheelZoom:false}).setView([lat,lng],13);
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>'}).addTo(map);
-    const icon=L.divIcon({html:`<div style="background:var(--or);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)">🏆</div>`,className:'',iconSize:[36,36],iconAnchor:[18,18]});
-    L.marker([lat,lng],{icon}).addTo(map).bindPopup(`<b>${location}</b>`).openPopup();
-  }catch(e){
-    container.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">📍 ${location}<br><a href="https://www.openstreetmap.org/search?query=${encodeURIComponent(location)}" target="_blank" style="color:var(--or)">Haritada Gör →</a></div>`;
+
+  // Google Maps embed URL varsa direkt iframe göster
+  if(mapUrl&&mapUrl.includes('google.com/maps/embed')){
+    container.innerHTML=`<iframe src="${mapUrl}" width="100%" height="100%" style="border:none" allowfullscreen loading="lazy"></iframe>`;
+    return;
   }
+
+  // Nominatim ile konum ara — kısa versiyonu dene önce
+  const queries=[
+    location,
+    location.split(',')[0].trim(), // sadece ilk kısım
+    location.split('/')[0].trim(), // / öncesi
+  ];
+
+  let lat=null,lng=null,found='';
+  for(const q of queries){
+    if(!q)continue;
+    try{
+      const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(q)}&format=json&limit=1&countrycodes=tr`,{headers:{'Accept-Language':'tr','User-Agent':'RunClubTurkiye/1.0'}});
+      const data=await res.json();
+      if(data.length){lat=parseFloat(data[0].lat);lng=parseFloat(data[0].lon);found=q;break;}
+    }catch(e){}
+  }
+
+  if(!lat){
+    container.innerHTML=`
+      <div style="text-align:center;color:var(--muted);font-size:13px;padding:30px;background:var(--bg3);height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px">
+        <div style="font-size:32px">📍</div>
+        <div style="font-weight:500;color:var(--text)">${location}</div>
+        <a href="https://www.google.com/maps/search/${encodeURIComponent(location)}" target="_blank" class="btn btn-or btn-sm">Google Maps'te Aç</a>
+      </div>`;
+    return;
+  }
+
+  container.innerHTML='';container.style.display='block';
+  const map=L.map(container,{zoomControl:true,scrollWheelZoom:false}).setView([lat,lng],14);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© <a href="https://openstreetmap.org" target="_blank">OpenStreetMap</a>'}).addTo(map);
+  const icon=L.divIcon({html:`<div style="background:#FF6B00;color:#fff;width:38px;height:38px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.4)">🏆</div>`,className:'',iconSize:[38,38],iconAnchor:[19,19]});
+  L.marker([lat,lng],{icon}).addTo(map).bindPopup(`<b>${location}</b>`).openPopup();
 };
 
 // ── REACTIVE RENDER ──

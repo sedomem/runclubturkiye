@@ -1113,10 +1113,10 @@ window.saveBlogFromAdmin=async()=>{
   catch(e){toast(e.message,'err');}
 };
 
+window.previewBannerUrl=(url)=>{const img=document.getElementById('ab2-url-preview');if(img){img.src=url;img.style.display=url?'block':'none';}};
 window.saveBannerFromAdmin=async()=>{
-  const imgInput=document.getElementById('ab2-img-input');
-  let imgUrl='';
-  if(imgInput.files[0])imgUrl=await handleImgUpload(imgInput,'banners')||'';
+  let imgUrl=document.getElementById('ab2-img-url')?.value||'';
+  if(!imgUrl){const imgInput=document.getElementById('ab2-img-input');if(imgInput?.files[0])imgUrl=await handleImgUpload(imgInput,'banners')||'';}  
   const data={title:document.getElementById('ab2-title').value,subtitle:document.getElementById('ab2-sub').value,ctaText:document.getElementById('ab2-cta').value,ctaUrl:document.getElementById('ab2-url').value,imgUrl,order:parseInt(document.getElementById('ab2-order').value)||0,active:true};
   try{await addDoc(collection(db,'banners'),{...data,createdAt:serverTimestamp()});toast('Banner eklendi ✓','ok');loadBanners();}
   catch(e){toast(e.message,'err');}
@@ -1644,6 +1644,7 @@ function renderAdminSection(sec){
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Banner Ekle</h3>
         ${imgUploadHtml('ab2-img-input','Banner Görseli','Önerilen boyut: 1440×460px · 16:5 oran · Max 3MB · JPG veya WebP')}
+        <div class="form-grp"><label>Görsel URL (ImgBB veya direkt link)</label><input id="ab2-img-url" placeholder="https://i.ibb.co/xxx/banner.jpg" oninput="previewBannerUrl(this.value)"/><img id="ab2-url-preview" style="width:100%;max-height:120px;object-fit:cover;border-radius:6px;margin-top:6px;display:none"/></div>
         <div class="form-grp"><label>Başlık (HTML destekler)</label><input id="ab2-title" placeholder="Koş, Buluş..."/></div>
         <div class="form-grp"><label>Alt Başlık</label><input id="ab2-sub" placeholder="Açıklama metni"/></div>
         <div class="form-row"><div class="form-grp"><label>CTA Butonu Metni</label><input id="ab2-cta" placeholder="Hemen Başla →"/></div><div class="form-grp"><label>Tıklama URL</label><input id="ab2-url" placeholder="https://... veya /etkinlikler"/></div></div>

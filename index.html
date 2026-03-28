@@ -443,9 +443,10 @@ footer{border-top:1px solid var(--border);padding:44px 0 0;margin-top:64px}
       <h2 style="color:#fff;font-size:22px;margin-bottom:6px">📬 Haberdar Ol!</h2>
       <p style="color:rgba(255,255,255,.7);font-size:14px">Yeni etkinlikler ve duyurulardan ilk sen haberdar ol.</p>
       <div class="newsletter-form">
-        <input type="email" id="nl-email" placeholder="E-posta adresin..."/>
+        <input type="email" id="nl-email" placeholder="E-posta adresin..." style="background:rgba(255,255,255,.15);border-color:rgba(255,255,255,.3);color:#fff"/>
         <button class="btn btn-or" onclick="subscribeNewsletter()">Abone Ol</button>
       </div>
+      <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.6);display:none"></p>
     </div>
   </div>
   <div class="sec-sm">
@@ -1977,6 +1978,7 @@ const hc=document.getElementById('home-clubs');if(hc)hc.innerHTML=CLUBS.slice(0,
 const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=CLUBS.map(clubCard).join('');
 renderEvts(EVENTS,'events-list');
 loadRaces();loadBlog();renderSponsors();
+loadBannerSlotsFromDB();
 document.getElementById('pg-home').classList.add('on');
 </script>
 </body>

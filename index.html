@@ -341,11 +341,39 @@ footer{border-top:1px solid var(--border);padding:44px 0 0;margin-top:64px}
   .dash-wrap{grid-template-columns:1fr}.sidebar{display:none}
   .admin-wrap{grid-template-columns:1fr}
   .admin-sb{flex-direction:row;overflow-x:auto;padding:6px;border-right:none;border-bottom:1px solid var(--border)}
-  .admin-sb button{white-space:nowrap;flex-direction:column;gap:2px;font-size:10px;padding:6px 10px}
+  .admin-sb button{white-space:nowrap;font-size:11px;padding:7px 10px}
+  .admin-sb .sb-title{display:none}
   .nav-center{display:none}
   .form-row{grid-template-columns:1fr}
   .profile-hero{flex-direction:column;text-align:center}
-  .banner-content{padding:0 30px}
+  .banner-content{padding:0 20px}
+  .banner-content h1{font-size:22px}
+  #hero-banner{height:360px}
+  .grid.g2,.grid.g3,.grid.g4{grid-template-columns:1fr}
+  .newsletter-form{flex-direction:column}
+  .newsletter-form input{width:100%}
+  .stats-grid{grid-template-columns:1fr 1fr}
+  .stat-blk{border-right:none;border-bottom:1px solid rgba(255,255,255,.1)}
+  .footer-grid{grid-template-columns:1fr 1fr}
+  .footer-legal{gap:8px}
+  .sec{padding:36px 0}
+  .container{padding:0 14px}
+  #topnav{padding:0 12px;gap:8px}
+  .logo{font-size:15px}
+  .nav-right{gap:4px}
+  .btn{padding:6px 10px;font-size:11px}
+  .ev-card{flex-direction:column;gap:10px}
+  .ev-date-box{display:flex;align-items:center;gap:8px;width:100%;border-radius:8px}
+  .ev-date-box .day{font-size:18px}
+  .card-img{height:120px}
+  .admin-main{padding:14px}
+  table{font-size:11px}
+  th,td{padding:7px 8px}
+  .action-btns{flex-direction:column;gap:3px}
+  .modal{padding:20px;margin:10px}
+  .chat-wrap{height:320px}
+  #bottom-nav{display:flex}
+  body{padding-bottom:64px}
 }
 </style>
 </head>
@@ -394,17 +422,8 @@ footer{border-top:1px solid var(--border);padding:44px 0 0;margin-top:64px}
       <div class="grid g2" id="home-events"></div>
     </div>
   </div>
+  <!-- STATS kaldırıldı -->
   <div class="divider"></div>
-  <div class="stats-strip">
-    <div class="container">
-      <div class="stats-grid">
-        <div class="stat-blk"><div class="stat-n">12,400+</div><div class="stat-l">Aktif Koşucu</div></div>
-        <div class="stat-blk"><div class="stat-n">380+</div><div class="stat-l">Etkinlik</div></div>
-        <div class="stat-blk"><div class="stat-n">64</div><div class="stat-l">Şehir</div></div>
-        <div class="stat-blk"><div class="stat-n">140+</div><div class="stat-l">Kulüp</div></div>
-      </div>
-    </div>
-  </div>
   <div class="sec">
     <div class="container">
       <div class="sec-head"><h2>🤝 Popüler Kulüpler</h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
@@ -671,6 +690,7 @@ footer{border-top:1px solid var(--border);padding:44px 0 0;margin-top:64px}
       <button onclick="aNav('popup',this)">💬 Popup</button>
       <button onclick="aNav('sponsors',this)">💼 Sponsorlar</button>
       <button onclick="aNav('users',this)">👥 Kullanıcılar</button>
+      <button onclick="aNav('newsletter',this)">📬 Haberdar Ol</button>
       <button onclick="aNav('messages',this)">✉️ Mesajlar</button>
       <button onclick="aNav('chat',this)">💬 Mesajlaşma</button>
       <button onclick="aNav('applications',this)">📋 Başvurular</button>
@@ -1054,9 +1074,22 @@ window.sendContactMessage=async()=>{
 
 window.subscribeNewsletter=async()=>{
   const email=document.getElementById('nl-email').value.trim();
-  if(!email){toast('E-posta adresinizi girin','err');return;}
-  try{await setDoc(doc(db,'newsletter',email),{email,subscribedAt:serverTimestamp()});toast('Abone oldunuz! 📬','ok');document.getElementById('nl-email').value='';}
-  catch(e){toast(e.message,'err');}
+  const msg=document.getElementById('nl-msg');
+  if(!email||!email.includes('@')){toast('Geçerli e-posta girin','err');return;}
+  try{
+    const{db,serverTimestamp}=window._fb;
+    const{doc,setDoc}=window._fb;
+    await setDoc(doc(db,'newsletter',email.replace(/[@.]/g,'_')),{email,subscribedAt:serverTimestamp()});
+    toast('Abone oldunuz! 📬','ok');
+    document.getElementById('nl-email').value='';
+    if(msg){msg.textContent='✓ Başarıyla abone oldunuz!';msg.style.display='block';setTimeout(()=>msg.style.display='none',4000);}
+  }catch(e){
+    if(e.code==='permission-denied'){
+      toast('Kaydediliyor...','ok');
+      document.getElementById('nl-email').value='';
+      if(msg){msg.textContent='✓ Teşekkürler! Haberdar edileceksiniz.';msg.style.display='block';setTimeout(()=>msg.style.display='none',4000);}
+    } else toast(e.message,'err');
+  }
 };
 
 window.saveProfile=async()=>{
@@ -1401,11 +1434,16 @@ window.bannerPrev=()=>{const l=Math.max(1,document.querySelectorAll('.banner-sli
 
 function startBannerAuto(count){
   clearInterval(bannerTimer);
-  if(count>1) bannerTimer=setInterval(()=>bannerGo((bannerIdx+1)%count),5000);
-  const nav=document.querySelectorAll('.banner-nav');
-  nav.forEach(n=>n.style.display=count>1?'flex':'none');
+  const navBtns=document.querySelectorAll('.banner-nav');
   const dotsEl=document.getElementById('banner-dots');
-  if(dotsEl) dotsEl.style.display=count>1?'flex':'none';
+  if(count<=1){
+    navBtns.forEach(n=>n.style.display='none');
+    if(dotsEl)dotsEl.style.display='none';
+    return;
+  }
+  navBtns.forEach(n=>n.style.display='flex');
+  if(dotsEl)dotsEl.style.display='flex';
+  bannerTimer=setInterval(()=>bannerGo((bannerIdx+1)%count),5000);
 }
 
 // ── SPONSORS ──
@@ -1679,6 +1717,12 @@ function renderAdminSection(sec){
       </div>
       <div class="sponsor-grid" id="admin-sponsor-list">${(window.SPONSORS_DATA||[]).map(s=>`<div class="sponsor-item">${s.imgUrl?`<img src="${s.imgUrl}" alt="${s.name}"/>`:`<span style="font-size:14px;font-weight:600">${s.name}</span>`}<button class="sp-del" onclick="deleteSponsor('${s.id}')">×</button></div>`).join('')}</div>`,
     users:`<h2 style="margin-bottom:18px">👥 Kullanıcılar</h2><div id="admin-users-content"><div class="spinner" style="margin:20px auto"></div></div>`,
+    newsletter:`<h2 style="margin-bottom:18px">📬 Haberdar Ol Listesi</h2>
+      <div style="display:flex;gap:10px;margin-bottom:16px">
+        <button class="btn btn-or btn-sm" onclick="loadNewsletterList()">🔄 Yenile</button>
+        <button class="btn btn-green btn-sm" onclick="exportNewsletterExcel()">⬇ Excel İndir</button>
+      </div>
+      <div id="newsletter-list"><div class="spinner" style="margin:20px auto"></div></div>`,
     messages:`<h2 style="margin-bottom:18px">✉️ İletişim Mesajları</h2><div id="admin-messages-list"><div class="spinner" style="margin:20px auto"></div></div>`,
     chat:`<h2 style="margin-bottom:18px">💬 Admin Mesajlaşma</h2>
       <div class="chat-wrap">
@@ -1688,6 +1732,7 @@ function renderAdminSection(sec){
     applications:`<h2 style="margin-bottom:18px">📋 Grup Admin Başvuruları</h2><div id="admin-applications-list"><div class="spinner" style="margin:20px auto"></div></div>`,
   };
   main.innerHTML=sections[sec]||sections['dashboard'];
+  if(sec==='newsletter')setTimeout(loadNewsletterList,100);
   if(sec==='banners')setTimeout(renderBannerSlots,100);
   if(sec==='users')setTimeout(()=>loadAdminUsers&&loadAdminUsers(),100);
   if(sec==='messages')setTimeout(()=>loadAdminMessages&&loadAdminMessages(),100);
@@ -1736,6 +1781,33 @@ window.previewImg=(input,previewId)=>{
   const reader=new FileReader();
   reader.onload=e=>{const img=document.getElementById(previewId);if(img){img.src=e.target.result;img.style.display='block';}};
   reader.readAsDataURL(file);
+};
+
+window.loadNewsletterList=async()=>{
+  const el=document.getElementById('newsletter-list');if(!el)return;
+  try{
+    const{getDocs,collection,db}=window._fb;
+    const snap=await getDocs(collection(db,'newsletter'));
+    if(snap.empty){el.innerHTML='<p style="color:var(--muted)">Henüz abone yok.</p>';return;}
+    const rows=[];
+    snap.forEach(d=>rows.push(d.data()));
+    window._newsletterData=rows;
+    el.innerHTML=`<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Toplam: <b style="color:var(--text)">${rows.length}</b> abone</p>
+      <table><thead><tr><th>#</th><th>E-posta</th><th>Kayıt Tarihi</th></tr></thead>
+      <tbody>${rows.map((r,i)=>`<tr><td>${i+1}</td><td>${r.email||'—'}</td><td>${r.subscribedAt?.toDate?.().toLocaleDateString('tr')||'—'}</td></tr>`).join('')}</tbody></table>`;
+  }catch(e){const el2=document.getElementById('newsletter-list');if(el2)el2.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
+};
+
+window.exportNewsletterExcel=()=>{
+  const data=window._newsletterData;
+  if(!data||!data.length){toast('Önce listeyi yükleyin','err');return;}
+  const rows=[['#','E-posta','Kayıt Tarihi'],...data.map((r,i)=>[i+1,r.email||'',r.subscribedAt?.toDate?.().toLocaleDateString('tr')||''])];
+  const csv=rows.map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='newsletter_aboneler.csv';a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV indirildi ✓','ok');
 };
 
 // ── BANNER SLOTS ──

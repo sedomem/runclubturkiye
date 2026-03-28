@@ -1287,6 +1287,32 @@ window.shareBlogPost=(slug,title)=>{
 };
 
 // ── LOAD DATA FROM DB ──
+async function loadRacesFromDB(){
+  try{
+    const{getDocs,collection,query,orderBy,db}=window._fb;
+    const snap=await getDocs(query(collection(db,'races'),orderBy('createdAt','desc')));
+    if(!snap.empty){
+      const dbRaces=[];
+      snap.forEach(d=>dbRaces.push({id:d.id,...d.data()}));
+      window.RACES=dbRaces;
+    }
+  }catch(e){console.log('Races load:',e.message);}
+  renderRaceList();renderRacePreview();
+}
+
+async function loadBlogFromDB(){
+  try{
+    const{getDocs,collection,query,orderBy,db}=window._fb;
+    const snap=await getDocs(query(collection(db,'blog'),orderBy('createdAt','desc')));
+    if(!snap.empty){
+      const dbPosts=[];
+      snap.forEach(d=>dbPosts.push({id:d.id,...d.data()}));
+      window.BLOG_POSTS=dbPosts;
+    }
+  }catch(e){console.log('Blog load:',e.message);}
+  renderBlogList();renderBlogPreview();
+}
+
 async function loadBannersFromDB(){
   try{
     const snap=await getDocs(collection(db,'banners'));
@@ -1672,7 +1698,15 @@ function loadRaces(){
   const rl=document.getElementById('races-list');const hr=document.getElementById('home-races');
   if(rl)rl.innerHTML=html;if(hr)hr.innerHTML=html;
 }
-window.filterRaces=q=>{const el=document.getElementById('races-list');if(el)el.innerHTML=RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())).map(r=>`<div class="race-card" onclick="openRace('${r.id}')"><div class="race-img">${r.emoji||'🏆'}</div><div class="card-body"><h3>${r.name}</h3><p>📍 ${r.location}</p></div></div>`).join('');};
+window.filterRaces=q=>{
+  const el=document.getElementById('races-list');if(!el)return;
+  const filtered=window.RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||(r.location||'').toLowerCase().includes(q.toLowerCase()));
+  el.innerHTML=filtered.map(r=>`
+    <div class="race-card" onclick="openRace('${r.id}')">
+      <div class="race-img">${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}<div class="race-date-badge">${r.date||''}</div></div>
+      <div class="card-body"><h3>${r.name}</h3><p>📍 ${r.location||'—'}</p></div>
+    </div>`).join('')||'<p style="color:var(--muted)">Sonuç bulunamadı.</p>';
+};;
 window.openRace=id=>{
   const r=RACES.find(x=>x.id===id);if(!r)return;
   document.getElementById('race-detail-content').innerHTML=`
@@ -2034,6 +2068,29 @@ window.renderLegalPage=key=>{const d=LEGAL[key];if(!d)return;const el=document.g
 // ── TOAST / NOTIF ──
 window.toast=(msg,type='')=>{const t=document.getElementById('toast');t.textContent=msg;t.className=type==='ok'?'on ok':type==='err'?'on err':'on';setTimeout(()=>t.classList.remove('on'),3500);};
 window.showNotif=(ico,title,body)=>{document.getElementById('notif-ico2').textContent=ico;document.getElementById('notif-title2').textContent=title;document.getElementById('notif-body2').textContent=body;const p=document.getElementById('notif-pop');p.classList.add('on');setTimeout(()=>p.classList.remove('on'),6000);};
+
+// ── RACE MAP ──
+window.initRaceMap=async(raceId, location)=>{
+  const container=document.getElementById('race-map-'+raceId);
+  if(!container||typeof L==='undefined')return;
+  try{
+    // Nominatim ile konum ara
+    const res=await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(location)}&format=json&limit=1`,{headers:{'Accept-Language':'tr'}});
+    const data=await res.json();
+    if(!data.length){
+      container.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">📍 ${location}<br><a href="https://www.openstreetmap.org/search?query=${encodeURIComponent(location)}" target="_blank" style="color:var(--or)">Haritada Ara →</a></div>`;
+      return;
+    }
+    const lat=parseFloat(data[0].lat);const lng=parseFloat(data[0].lon);
+    container.innerHTML='';container.style.display='block';
+    const map=L.map(container,{zoomControl:true,scrollWheelZoom:false}).setView([lat,lng],13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© <a href="https://openstreetmap.org">OpenStreetMap</a>'}).addTo(map);
+    const icon=L.divIcon({html:`<div style="background:var(--or);color:#fff;width:36px;height:36px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;border:3px solid #fff;box-shadow:0 2px 8px rgba(0,0,0,.3)">🏆</div>`,className:'',iconSize:[36,36],iconAnchor:[18,18]});
+    L.marker([lat,lng],{icon}).addTo(map).bindPopup(`<b>${location}</b>`).openPopup();
+  }catch(e){
+    container.innerHTML=`<div style="text-align:center;color:var(--muted);font-size:13px;padding:20px">📍 ${location}<br><a href="https://www.openstreetmap.org/search?query=${encodeURIComponent(location)}" target="_blank" style="color:var(--or)">Haritada Gör →</a></div>`;
+  }
+};
 
 // ── REACTIVE RENDER ──
 // Her sayfa açılışında güncel veriyi render et

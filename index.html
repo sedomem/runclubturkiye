@@ -1437,7 +1437,7 @@ async function loadGroupAdmins(){
   }catch(e){el.innerHTML='<tr><td colspan="5" style="color:var(--muted)">Yüklenemedi</td></tr>';}
 }
 
-loadBannersFromDB();loadSponsorsFromDB();
+loadBannersFromDB();loadSponsorsFromDB();loadRacesFromDB();loadBlogFromDB();
 </script>
 
 <script>
@@ -2035,12 +2035,120 @@ window.renderLegalPage=key=>{const d=LEGAL[key];if(!d)return;const el=document.g
 window.toast=(msg,type='')=>{const t=document.getElementById('toast');t.textContent=msg;t.className=type==='ok'?'on ok':type==='err'?'on err':'on';setTimeout(()=>t.classList.remove('on'),3500);};
 window.showNotif=(ico,title,body)=>{document.getElementById('notif-ico2').textContent=ico;document.getElementById('notif-title2').textContent=title;document.getElementById('notif-body2').textContent=body;const p=document.getElementById('notif-pop');p.classList.add('on');setTimeout(()=>p.classList.remove('on'),6000);};
 
+// ── REACTIVE RENDER ──
+// Her sayfa açılışında güncel veriyi render et
+const _origNav=window.nav;
+window.nav=id=>{
+  _origNav(id);
+  if(id==='home'){renderHomeData();}
+  if(id==='events'){renderEvts(window.EVENTS,'events-list');}
+  if(id==='clubs'){document.getElementById('clubs-list').innerHTML=window.CLUBS.map(clubCard).join('');}
+  if(id==='races'){renderRaceList();}
+  if(id==='blog'){renderBlogList();}
+};
+
+function renderHomeData(){
+  renderEvts(window.EVENTS.slice(0,4),'home-events');
+  const hc=document.getElementById('home-clubs');if(hc)hc.innerHTML=window.CLUBS.slice(0,3).map(clubCard).join('');
+  renderRacePreview();
+  renderBlogPreview();
+}
+
+function renderRaceList(){
+  const html=window.RACES.map(r=>`
+    <div class="race-card" onclick="openRace('${r.id}')">
+      <div class="race-img">
+        ${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
+        <div class="race-date-badge">${r.date||''}</div>
+      </div>
+      <div class="card-body">
+        <h3>${r.name}</h3>
+        <p>📍 ${r.location||'—'}</p>
+        <p style="margin-top:4px;font-size:11px">${(r.about||'').substring(0,60)}${r.about?.length>60?'...':''}</p>
+      </div>
+    </div>`).join('');
+  const rl=document.getElementById('races-list');if(rl)rl.innerHTML=html||'<p style="color:var(--muted)">Henüz yarış eklenmedi.</p>';
+}
+
+function renderRacePreview(){
+  const html=window.RACES.slice(0,3).map(r=>`
+    <div class="race-card" onclick="openRace('${r.id}')">
+      <div class="race-img">
+        ${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
+        <div class="race-date-badge">${r.date||''}</div>
+      </div>
+      <div class="card-body"><h3>${r.name}</h3><p>📍 ${r.location||'—'}</p></div>
+    </div>`).join('');
+  const hr=document.getElementById('home-races');if(hr)hr.innerHTML=html||'';
+}
+
+function renderBlogList(){
+  const html=window.BLOG_POSTS.map(p=>`
+    <div class="blog-card" onclick="openBlog('${p.id}')">
+      <div class="blog-img">
+        ${p.coverUrl?`<img src="${p.coverUrl}"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'📰'}</span>`}
+      </div>
+      <div class="card-body">
+        <div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">
+          ${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}
+        </div>
+        <h3>${p.title}</h3>
+        <p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px">
+          <div style="font-size:11px;color:var(--muted)">✍️ ${p.authorName||'Editör'}</div>
+          <div style="font-size:11px;color:var(--muted)">❤️ ${p.likes||0}</div>
+        </div>
+      </div>
+    </div>`).join('');
+  const bl=document.getElementById('blog-list');if(bl)bl.innerHTML=html||'<p style="color:var(--muted)">Henüz yazı yok.</p>';
+}
+
+function renderBlogPreview(){
+  const html=window.BLOG_POSTS.slice(0,3).map(p=>`
+    <div class="blog-card" onclick="openBlog('${p.id}')">
+      <div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'📰'}</span>`}</div>
+      <div class="card-body">
+        <h3>${p.title}</h3>
+        <p style="margin-top:4px">${(p.body||'').substring(0,60)}...</p>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">❤️ ${p.likes||0}</div>
+      </div>
+    </div>`).join('');
+  const hb=document.getElementById('home-blog');if(hb)hb.innerHTML=html||'';
+}
+
+// loadRaces ve loadBlog artık reactive render'ı çağırsın
+window.loadRaces=()=>{renderRaceList();renderRacePreview();};
+window.loadBlog=()=>{renderBlogList();renderBlogPreview();};
+
+// Admin'de kayıt sonrası public render tetikle
+const _origSaveRace=window.saveRaceFromAdmin;
+window.saveRaceFromAdmin=async()=>{
+  await _origSaveRace();
+  renderRaceList();renderRacePreview();
+};
+const _origSaveBlog=window.saveBlogFromAdmin;
+window.saveBlogFromAdmin=async()=>{
+  await _origSaveBlog();
+  renderBlogList();renderBlogPreview();
+};
+const _origSaveEventEdit=window.saveEventEdit;
+window.saveEventEdit=()=>{
+  _origSaveEventEdit();
+  renderEvts(window.EVENTS.slice(0,4),'home-events');
+  renderEvts(window.EVENTS,'events-list');
+};
+const _origDeleteRace=window.deleteRace;
+window.deleteRace=id=>{_origDeleteRace(id);renderRaceList();renderRacePreview();};
+const _origDeleteBlog=window.deleteBlogItem;
+window.deleteBlogItem=id=>{_origDeleteBlog(id);renderBlogList();renderBlogPreview();};
+
 // ── INIT ──
-renderEvts(EVENTS.slice(0,4),'home-events');
-document.getElementById('home-clubs').innerHTML=CLUBS.slice(0,3).map(clubCard).join('');
-document.getElementById('clubs-list').innerHTML=CLUBS.map(clubCard).join('');
-renderEvts(EVENTS,'events-list');
-loadRaces();loadBlog();renderSponsors();
+renderHomeData();
+renderEvts(window.EVENTS,'events-list');
+document.getElementById('clubs-list').innerHTML=window.CLUBS.map(clubCard).join('');
+renderRaceList();
+renderBlogList();
+renderSponsors();
 document.getElementById('pg-home').classList.add('on');
 </script>
 </body>

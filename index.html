@@ -1,0 +1,1679 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta name="theme-color" content="#FF6B00"/>
+<title>RunClubTürkiye — Türkiye'nin Koşu Topluluğu</title>
+<meta name="description" content="Türkiye genelinde koşu kulüpleri, etkinlikler ve yarış takvimi. Koşucuları buluşturan platform."/>
+<meta property="og:title" content="RunClubTürkiye"/>
+<meta property="og:description" content="Türkiye'nin koşu topluluğu platformu"/>
+<meta property="og:type" content="website"/>
+<link rel="manifest" href="#"/>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --or:#FF6B00;--or2:#e05f00;--navy:#1A237E;--green:#2E7D32;--gray:#37474F;
+  --bg:#0a0a0a;--bg2:#111;--bg3:#1a1a1a;--bg4:#222;
+  --card:#161616;--border:#2a2a2a;--border2:#333;
+  --text:#f0f0f0;--muted:#777;--muted2:#999;--white:#fff;
+  --r:12px;--font:'Segoe UI',system-ui,sans-serif;
+}
+body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden}
+button{cursor:pointer;font-family:var(--font)}
+input,select,textarea{font-family:var(--font);background:var(--bg3);border:1px solid var(--border);color:var(--text);border-radius:8px;padding:10px 14px;width:100%;font-size:14px;outline:none;transition:.2s}
+input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 3px rgba(255,107,0,.1)}
+label{display:block;font-size:13px;color:var(--muted2);margin-bottom:6px}
+
+/* ── NAV ── */
+#topnav{position:sticky;top:0;z-index:200;background:rgba(10,10,10,.95);backdrop-filter:blur(16px);border-bottom:1px solid var(--border);height:60px;display:flex;align-items:center;padding:0 20px;gap:16px}
+.logo{font-weight:700;font-size:18px;color:var(--or);cursor:pointer;white-space:nowrap;flex-shrink:0}
+.logo b{color:var(--white)}
+.nav-center{display:flex;gap:2px;flex:1;justify-content:center}
+.nav-center button{background:none;border:none;color:var(--muted);padding:7px 12px;border-radius:7px;font-size:13px;transition:.15s}
+.nav-center button:hover,.nav-center button.on{color:var(--text);background:var(--bg3)}
+.nav-right{display:flex;gap:8px;margin-left:auto}
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-size:13px;font-weight:500;border:none;transition:.15s;cursor:pointer}
+.btn-or{background:var(--or);color:#fff}.btn-or:hover{background:var(--or2)}
+.btn-ghost{background:transparent;color:var(--muted);border:1px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:#444}
+.btn-navy{background:var(--navy);color:#fff}.btn-navy:hover{opacity:.85}
+.btn-green{background:var(--green);color:#fff}.btn-green:hover{opacity:.85}
+.btn-sm{padding:6px 14px;font-size:12px}
+.btn-full{width:100%;justify-content:center}
+.btn-icon{width:36px;height:36px;padding:0;border-radius:8px;justify-content:center}
+
+/* ── PAGES ── */
+.pg{display:none}.pg.on{display:block}
+.container{max-width:1120px;margin:0 auto;padding:0 20px}
+.sec{padding:64px 0}
+.sec-sm{padding:40px 0}
+
+/* ── HERO BANNER ── */
+#hero-banner{position:relative;overflow:hidden;height:480px}
+.banner-slide{position:absolute;inset:0;opacity:0;transition:opacity .7s;display:flex;align-items:center;background:linear-gradient(135deg,#0a0000,#1a0a00)}
+.banner-slide.on{opacity:1}
+.banner-bg{position:absolute;inset:0;background-size:cover;background-position:center;opacity:.25}
+.banner-content{position:relative;z-index:1;padding:0 60px;max-width:600px}
+.banner-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,0,.15);border:1px solid rgba(255,107,0,.35);color:var(--or);padding:5px 14px;border-radius:20px;font-size:12px;margin-bottom:16px}
+.banner-content h1{font-size:clamp(26px,4vw,48px);font-weight:700;line-height:1.1;margin-bottom:12px}
+.banner-content h1 span{color:var(--or)}
+.banner-content p{font-size:16px;color:var(--muted2);margin-bottom:24px;line-height:1.6}
+.banner-cta{display:flex;gap:12px;flex-wrap:wrap}
+.banner-dots{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10}
+.bdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:.2s}
+.bdot.on{background:var(--or);width:24px;border-radius:4px}
+.banner-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.1);color:#fff;width:40px;height:40px;border-radius:50%;font-size:18px;display:flex;align-items:center;justify-content:center;cursor:pointer;border:none}
+.banner-nav.prev{left:16px}.banner-nav.next{right:16px}
+
+/* ── CARDS ── */
+.grid{display:grid;gap:20px}
+.g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+.g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(200px,1fr))}
+.card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:.2s}
+.card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.card-img{height:160px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
+.card-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.card-body{padding:16px}
+.card-body h3{font-size:15px;margin-bottom:6px;line-height:1.3}
+.card-body p{font-size:13px;color:var(--muted);line-height:1.5}
+.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:11px;margin-bottom:8px;font-weight:500}
+.tag-or{background:rgba(255,107,0,.15);color:#ff8c40}
+.tag-bl{background:rgba(59,130,246,.15);color:#60a5fa}
+.tag-gr{background:rgba(46,125,50,.15);color:#66bb6a}
+.tag-gy{background:rgba(55,71,79,.3);color:#90a4ae}
+.tag-re{background:rgba(239,68,68,.15);color:#f87171}
+
+/* ── EVENT CARD ── */
+.ev-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;display:flex;gap:16px;cursor:pointer;transition:.2s}
+.ev-card:hover{border-color:var(--or);transform:translateY(-1px)}
+.ev-date-box{min-width:54px;text-align:center;background:rgba(255,107,0,.1);border-radius:8px;padding:8px 6px;border:1px solid rgba(255,107,0,.2)}
+.ev-date-box .day{font-size:22px;font-weight:700;color:var(--or);line-height:1}
+.ev-date-box .mon{font-size:10px;color:var(--muted);text-transform:uppercase;margin-top:2px}
+.ev-info{flex:1}
+.ev-info h3{font-size:15px;margin-bottom:4px}
+.ev-meta{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+.meta{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:3px}
+.pace-chips{display:flex;gap:6px;flex-wrap:wrap;margin-top:8px}
+.pace-chip{padding:2px 8px;background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.2);border-radius:12px;font-size:11px;color:var(--or)}
+
+/* ── SECTION HEADS ── */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.sec-head h2{font-size:20px;font-weight:700}
+.divider{height:1px;background:var(--border);margin:0}
+
+/* ── STATS STRIP ── */
+.stats-strip{background:var(--navy);padding:40px 0}
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0}
+.stat-blk{text-align:center;padding:16px;border-right:1px solid rgba(255,255,255,.1)}
+.stat-blk:last-child{border-right:none}
+.stat-n{font-size:32px;font-weight:700;color:#fff}
+.stat-l{font-size:13px;color:rgba(255,255,255,.6);margin-top:4px}
+
+/* ── HOW IT WORKS ── */
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:24px}
+.step{text-align:center;padding:24px 16px}
+.step-ico{width:60px;height:60px;border-radius:50%;background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);display:flex;align-items:center;justify-content:center;font-size:26px;margin:0 auto 16px}
+.step h3{font-size:15px;margin-bottom:8px}
+.step p{font-size:13px;color:var(--muted);line-height:1.6}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin:8px 0}
+.prog-bar{height:5px;background:var(--bg4);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--or);border-radius:3px;transition:.5s}
+
+/* ── COUNTDOWN ── */
+.countdown{display:flex;gap:10px;margin:12px 0}
+.cd-unit{text-align:center;background:var(--bg3);border-radius:8px;padding:8px 10px;min-width:48px}
+.cd-n{font-size:20px;font-weight:700;color:var(--or)}
+.cd-l{font-size:9px;color:var(--muted);text-transform:uppercase}
+
+/* ── OVERLAY / MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.overlay.on{display:flex}
+.modal{background:var(--bg2);border:1px solid var(--border2);border-radius:16px;padding:28px;width:100%;max-width:460px;position:relative;max-height:90vh;overflow-y:auto}
+.modal-lg{max-width:640px}
+.modal h2{font-size:20px;margin-bottom:4px}
+.modal .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
+.close-x{position:absolute;top:14px;right:14px;background:none;border:none;color:var(--muted);font-size:22px;line-height:1;cursor:pointer}
+.tab-row{display:flex;border-bottom:1px solid var(--border);margin-bottom:20px}
+.tab-btn{flex:1;padding:10px;background:none;border:none;color:var(--muted);font-size:14px;border-bottom:2px solid transparent;transition:.15s;cursor:pointer}
+.tab-btn.on{color:var(--or);border-bottom-color:var(--or)}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.form-grp{margin-bottom:14px}
+.chk-row{display:flex;align-items:flex-start;gap:8px;font-size:13px;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.chk-row input{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--or)}
+.div-or{text-align:center;font-size:12px;color:var(--muted);margin:14px 0;position:relative}
+.div-or::before,.div-or::after{content:'';position:absolute;top:50%;width:calc(50% - 16px);height:1px;background:var(--border)}
+.div-or::before{left:0}.div-or::after{right:0}
+.btn-google{background:var(--bg3);border:1px solid var(--border);color:var(--text);width:100%;padding:10px;border-radius:8px;display:flex;align-items:center;justify-content:center;gap:10px;font-size:13px;cursor:pointer;transition:.15s}
+.btn-google:hover{border-color:#555}
+
+/* ── POPUP MODAL ── */
+#popup-modal .modal{max-width:500px;padding:0;overflow:hidden;border-radius:20px}
+.popup-img{width:100%;height:220px;object-fit:cover;display:block;background:linear-gradient(135deg,var(--navy),var(--or))}
+.popup-img-ph{width:100%;height:220px;background:linear-gradient(135deg,var(--navy),var(--or));display:flex;align-items:center;justify-content:center;font-size:64px}
+.popup-body{padding:28px}
+.popup-body h2{font-size:22px;margin-bottom:8px}
+.popup-body p{color:var(--muted2);font-size:14px;line-height:1.6;margin-bottom:20px}
+.popup-close-top{position:absolute;top:12px;right:12px;background:rgba(0,0,0,.5);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10}
+
+/* ── TOAST ── */
+#toast{position:fixed;bottom:24px;right:24px;background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:12px 18px;font-size:13px;z-index:9999;transform:translateY(80px);opacity:0;transition:.3s;max-width:300px;pointer-events:none}
+#toast.on{transform:translateY(0);opacity:1}
+#toast.ok{border-color:rgba(34,197,94,.4);color:#4ade80}
+#toast.err{border-color:rgba(239,68,68,.4);color:#f87171}
+
+/* ── NOTIF POPUP ── */
+#notif-pop{position:fixed;bottom:24px;left:24px;background:var(--bg2);border:1px solid var(--border2);border-radius:14px;padding:18px;width:300px;z-index:400;transform:translateX(-340px);transition:.4s}
+#notif-pop.on{transform:translateX(0)}
+.notif-ico{width:36px;height:36px;background:rgba(255,107,0,.1);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+
+/* ── DASHBOARD ── */
+.dash-wrap{display:grid;grid-template-columns:220px 1fr;gap:24px;padding:32px 0;min-height:calc(100vh - 60px)}
+.sidebar{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:20px;height:fit-content;position:sticky;top:80px}
+.sb-user{text-align:center;padding:16px 0 20px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.sb-avatar{width:60px;height:60px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;margin:0 auto 10px;overflow:hidden}
+.sb-avatar img{width:100%;height:100%;object-fit:cover}
+.sb-nav button{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;background:none;border:none;color:var(--muted);border-radius:8px;font-size:13px;text-align:left;transition:.15s;margin-bottom:2px}
+.sb-nav button:hover,.sb-nav button.on{background:var(--bg3);color:var(--text)}
+.sb-nav button.on{color:var(--or)}
+.dash-content{display:none}.dash-content.on{display:block}
+.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:14px;margin-bottom:24px}
+.s-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.s-card .n{font-size:26px;font-weight:700;color:var(--or)}
+.s-card .l{font-size:12px;color:var(--muted);margin-top:2px}
+.badge-grid{display:flex;flex-wrap:wrap;gap:12px}
+.badge-it{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;width:100px}
+.badge-it.earned{border-color:rgba(255,107,0,.4);background:rgba(255,107,0,.05)}
+.badge-it .bi{font-size:28px;margin-bottom:6px}
+.badge-it .bn{font-size:11px;font-weight:600;margin-bottom:2px}
+.badge-it .bd{font-size:10px;color:var(--muted)}
+
+/* ── ADMIN ── */
+.admin-wrap{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 60px)}
+.admin-sb{background:var(--bg2);border-right:1px solid var(--border);padding:16px 0}
+.admin-sb .sb-title{padding:0 16px 12px;font-size:11px;color:var(--muted);font-weight:600;letter-spacing:1px;text-transform:uppercase}
+.admin-sb button{display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;background:none;border:none;color:var(--muted);font-size:13px;text-align:left;transition:.15s;cursor:pointer}
+.admin-sb button:hover,.admin-sb button.on{background:var(--bg3);color:var(--text)}
+.admin-sb button.on{border-right:2px solid var(--or);color:var(--or)}
+.admin-main{padding:24px;overflow:auto}
+.admin-sec{display:none}.admin-sec.on{display:block}
+.a-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:14px;margin-bottom:24px}
+.a-stat{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:16px}
+.a-stat .n{font-size:28px;font-weight:700;color:var(--or)}
+.a-stat .l{font-size:12px;color:var(--muted);margin-bottom:4px}
+.a-stat .t{font-size:11px;color:#4ade80}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{padding:10px 12px;text-align:left;color:var(--muted);font-size:11px;font-weight:600;border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px}
+td{padding:11px 12px;border-bottom:1px solid var(--border)}
+tr:hover td{background:var(--bg3)}
+.pill{padding:3px 10px;border-radius:20px;font-size:11px;font-weight:500}
+.pill-gr{background:rgba(34,197,94,.12);color:#4ade80}
+.pill-or{background:rgba(255,107,0,.12);color:#ff8c40}
+.pill-re{background:rgba(239,68,68,.12);color:#f87171}
+.pill-bl{background:rgba(59,130,246,.12);color:#60a5fa}
+
+/* ── MAP ── */
+#map-container{height:400px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border);margin-top:20px}
+#club-map{height:100%;width:100%}
+
+/* ── RACE CALENDAR ── */
+.race-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.2s}
+.race-card:hover{border-color:var(--or);transform:translateY(-2px)}
+.race-card .race-img{height:180px;background:linear-gradient(135deg,var(--navy),#2a3a8a);display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
+.race-card .race-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+.race-date-badge{position:absolute;top:12px;right:12px;background:var(--or);color:#fff;padding:4px 10px;border-radius:6px;font-size:11px;font-weight:600}
+
+/* ── BLOG ── */
+.blog-card{background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:.2s}
+.blog-card:hover{border-color:var(--border2);transform:translateY(-2px)}
+.blog-card .blog-img{height:180px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
+.blog-card .blog-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
+
+/* ── PROFILE ── */
+.profile-hero{background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;display:flex;gap:24px;align-items:center;margin-bottom:24px}
+.profile-avatar{width:90px;height:90px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:32px;font-weight:700;flex-shrink:0;overflow:hidden;cursor:pointer;position:relative}
+.profile-avatar img{width:100%;height:100%;object-fit:cover}
+.profile-avatar .cam-overlay{position:absolute;inset:0;background:rgba(0,0,0,.5);display:none;align-items:center;justify-content:center;font-size:20px;border-radius:50%}
+.profile-avatar:hover .cam-overlay{display:flex}
+.activity-timeline{display:flex;flex-direction:column;gap:12px}
+.act-item{display:flex;gap:12px;align-items:flex-start;padding:12px 0;border-bottom:1px solid var(--border)}
+.act-ico{width:36px;height:36px;border-radius:50%;background:rgba(255,107,0,.1);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0}
+
+/* ── QR ── */
+#qr-canvas{border-radius:8px;display:block;margin:16px auto}
+
+/* ── IYZICO READY ── */
+.payment-form{background:var(--bg3);border:1px solid var(--border);border-radius:var(--r);padding:20px;margin-top:16px}
+.payment-form .card-input{background:var(--bg4);border:1px solid var(--border2);border-radius:8px;padding:12px 14px;font-size:14px;font-family:monospace;letter-spacing:2px}
+
+/* ── MOBILE BOTTOM NAV ── */
+#bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(10,10,10,.96);border-top:1px solid var(--border);padding:8px 0;z-index:150;gap:0}
+.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;padding:6px 0;transition:.15s}
+.bn-item.on{color:var(--or)}
+.bn-item .bi{font-size:18px}
+@media(max-width:768px){
+  #bottom-nav{display:flex}
+  body{padding-bottom:64px}
+  .dash-wrap{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .admin-wrap{grid-template-columns:1fr}
+  .admin-sb{display:flex;overflow-x:auto;padding:8px;border-right:none;border-bottom:1px solid var(--border)}
+  .admin-sb button{white-space:nowrap}
+  .nav-center{display:none}
+  .form-row{grid-template-columns:1fr}
+  .profile-hero{flex-direction:column;text-align:center}
+}
+
+/* ── SEARCH ── */
+.search-wrap{position:relative;margin-bottom:18px}
+.search-wrap input{padding-left:40px}
+.search-wrap::before{content:'🔍';position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:14px;pointer-events:none;z-index:1}
+.filter-strip{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:18px}
+.filt{padding:5px 14px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--muted);font-size:12px;cursor:pointer;transition:.15s}
+.filt:hover,.filt.on{border-color:var(--or);color:var(--or);background:rgba(255,107,0,.05)}
+
+/* ── SPONSORS ── */
+.sponsor-strip{display:flex;gap:20px;align-items:center;flex-wrap:wrap;justify-content:center}
+.sponsor-logo{background:var(--bg3);border:1px solid var(--border);border-radius:8px;padding:14px 24px;font-weight:600;font-size:13px;color:var(--muted);transition:.2s}
+.sponsor-logo:hover{border-color:var(--or);color:var(--text)}
+
+/* ── FOOTER ── */
+footer{border-top:1px solid var(--border);padding:48px 0 32px;margin-top:80px}
+.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:32px;margin-bottom:32px}
+.footer-col h4{font-size:13px;font-weight:600;color:var(--text);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px}
+.footer-col a{display:block;color:var(--muted);margin-bottom:8px;font-size:13px;cursor:pointer;transition:.15s}
+.footer-col a:hover{color:var(--text)}
+.footer-bot{border-top:1px solid var(--border);padding-top:20px;display:flex;justify-content:space-between;font-size:12px;color:var(--muted);flex-wrap:wrap;gap:8px}
+
+/* ── MISC ── */
+.loading{position:fixed;inset:0;background:var(--bg);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px}
+.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--or);border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.skeleton{background:linear-gradient(90deg,var(--bg3) 25%,var(--bg4) 50%,var(--bg3) 75%);background-size:200% 100%;animation:skel 1.5s infinite}
+@keyframes skel{0%{background-position:200% 0}100%{background-position:-200% 0}}
+.rich-text h2{font-size:20px;margin:20px 0 10px}
+.rich-text h3{font-size:17px;margin:16px 0 8px}
+.rich-text p{line-height:1.7;color:var(--muted2);margin-bottom:12px}
+.rich-text strong{color:var(--text)}
+.map-detail{height:260px;border-radius:var(--r);overflow:hidden;border:1px solid var(--border)}
+.map-detail iframe{width:100%;height:100%;border:none}
+.pace-selector{display:flex;flex-wrap:wrap;gap:8px;margin-top:6px}
+.pace-opt{padding:6px 14px;border-radius:20px;border:1px solid var(--border);background:none;color:var(--muted);font-size:12px;cursor:pointer;transition:.15s}
+.pace-opt.on{border-color:var(--or);color:var(--or);background:rgba(255,107,0,.08)}
+</style>
+</head>
+<body>
+
+<div class="loading" id="loading"><div style="font-size:28px;font-weight:700;color:var(--or)">RunClub<b style="color:#fff">Türkiye</b></div><div class="spinner"></div></div>
+
+<!-- NAV -->
+<nav id="topnav">
+  <div class="logo" onclick="nav('home')">RunClub<b>Türkiye</b></div>
+  <div class="nav-center">
+    <button onclick="nav('home')" id="nb-home">Ana Sayfa</button>
+    <button onclick="nav('events')" id="nb-events">Etkinlikler</button>
+    <button onclick="nav('clubs')" id="nb-clubs">Kulüpler</button>
+    <button onclick="nav('races')" id="nb-races">Yarış Takvimi</button>
+    <button onclick="nav('blog')" id="nb-blog">Blog</button>
+    <button onclick="nav('map-view')" id="nb-map-view">Harita</button>
+  </div>
+  <div class="nav-right" id="nav-guest">
+    <button class="btn btn-ghost btn-sm" onclick="openAuth('login')">Giriş</button>
+    <button class="btn btn-or btn-sm" onclick="openAuth('register')">Üye Ol</button>
+  </div>
+  <div class="nav-right" id="nav-user" style="display:none">
+    <button class="btn btn-ghost btn-sm" id="nav-role-btn" onclick="goPanel()" style="display:none"></button>
+    <button class="btn btn-or btn-sm" onclick="nav('dashboard')">Dashboard</button>
+  </div>
+</nav>
+
+<!-- BOTTOM NAV (mobile) -->
+<div id="bottom-nav">
+  <button class="bn-item on" onclick="nav('home')"><div class="bi">🏠</div><span>Ana</span></button>
+  <button class="bn-item" onclick="nav('events')"><div class="bi">📅</div><span>Etkinlik</span></button>
+  <button class="bn-item" onclick="nav('clubs')"><div class="bi">🤝</div><span>Kulüp</span></button>
+  <button class="bn-item" onclick="nav('races')"><div class="bi">🏆</div><span>Yarış</span></button>
+  <button class="bn-item" onclick="nav('dashboard')"><div class="bi">👤</div><span>Profil</span></button>
+</div>
+
+<!-- ════════════════════ HOME ════════════════════ -->
+<div class="pg" id="pg-home">
+
+  <!-- HERO BANNER -->
+  <div id="hero-banner">
+    <button class="banner-nav prev" onclick="bannerPrev()">‹</button>
+    <button class="banner-nav next" onclick="bannerNext()">›</button>
+    <div class="banner-dots" id="banner-dots"></div>
+    <div id="banner-slides"></div>
+  </div>
+
+  <!-- FEATURED EVENTS -->
+  <div class="sec">
+    <div class="container">
+      <div class="sec-head"><h2>🏃 Öne Çıkan Etkinlikler</h2><button class="btn btn-ghost btn-sm" onclick="nav('events')">Tümünü Gör →</button></div>
+      <div class="grid g2" id="home-events"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- STATS -->
+  <div class="stats-strip">
+    <div class="container">
+      <div class="stats-grid">
+        <div class="stat-blk"><div class="stat-n">12,400+</div><div class="stat-l">Aktif Koşucu</div></div>
+        <div class="stat-blk"><div class="stat-n">380+</div><div class="stat-l">Etkinlik</div></div>
+        <div class="stat-blk"><div class="stat-n">64</div><div class="stat-l">Şehir</div></div>
+        <div class="stat-blk"><div class="stat-n">140+</div><div class="stat-l">Kulüp</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FEATURED CLUBS -->
+  <div class="sec">
+    <div class="container">
+      <div class="sec-head"><h2>🤝 Popüler Kulüpler</h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
+      <div class="grid g3" id="home-clubs"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- RACES PREVIEW -->
+  <div class="sec">
+    <div class="container">
+      <div class="sec-head"><h2>🏆 Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
+      <div class="grid g3" id="home-races"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- BLOG PREVIEW -->
+  <div class="sec">
+    <div class="container">
+      <div class="sec-head"><h2>📰 Son Haberler</h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
+      <div class="grid g3" id="home-blog"></div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- HOW IT WORKS -->
+  <div class="sec" style="background:var(--bg2)">
+    <div class="container">
+      <h2 style="text-align:center;margin-bottom:40px">Nasıl Çalışır?</h2>
+      <div class="steps">
+        <div class="step"><div class="step-ico">📝</div><h3>Üye Ol</h3><p>Hızlı kayıt, profil oluştur.</p></div>
+        <div class="step"><div class="step-ico">🔍</div><h3>Keşfet</h3><p>Kulüp, etkinlik, yarış bul.</p></div>
+        <div class="step"><div class="step-ico">🤝</div><h3>Katıl</h3><p>Gruba gir, etkinliğe kayıt ol.</p></div>
+        <div class="step"><div class="step-ico">🏅</div><h3>Kazan</h3><p>Rozet kazan, liderboardda yüksel.</p></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SPONSORS -->
+  <div class="sec-sm">
+    <div class="container">
+      <p style="text-align:center;font-size:12px;color:var(--muted);letter-spacing:1px;margin-bottom:24px;text-transform:uppercase">Sponsorlarımız</p>
+      <div class="sponsor-strip" id="sponsors-strip"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="container">
+      <div class="footer-grid">
+        <div class="footer-col">
+          <div style="font-size:18px;font-weight:700;margin-bottom:12px">RunClub<b>Türkiye</b></div>
+          <p style="font-size:13px;color:var(--muted);line-height:1.6">Türkiye'nin koşu topluluğu ve etkinlik platformu.</p>
+        </div>
+        <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('blog')">Blog</a></div>
+        <div class="footer-col"><h4>Yasal</h4><a>KVKK</a><a>Gizlilik</a><a>Kullanım Koşulları</a><a>Çerez Politikası</a></div>
+        <div class="footer-col"><h4>İletişim</h4><a>info@runclubturkiye.com</a><a>Instagram</a><a>Strava</a><a>YouTube</a></div>
+      </div>
+      <div class="footer-bot"><span>© 2025 RunClubTürkiye</span><span>runclubturkiye.com</span></div>
+    </div>
+  </footer>
+</div>
+
+<!-- ════════════════════ EVENTS ════════════════════ -->
+<div class="pg" id="pg-events">
+  <div class="container sec">
+    <h2 style="margin-bottom:20px">Etkinlikler</h2>
+    <div class="search-wrap"><input type="text" placeholder="Etkinlik ara..." oninput="filterEvts(this.value)"/></div>
+    <div class="filter-strip" id="evt-filters">
+      <button class="filt on" onclick="filterEvtCat('tüm',this)">Tümü</button>
+      <button class="filt" onclick="filterEvtCat('Maraton',this)">Maraton</button>
+      <button class="filt" onclick="filterEvtCat('Trail',this)">Trail</button>
+      <button class="filt" onclick="filterEvtCat('5K/10K',this)">5K/10K</button>
+      <button class="filt" onclick="filterEvtCat('Ultra',this)">Ultra</button>
+    </div>
+    <div id="events-list"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ EVENT DETAIL ════════════════════ -->
+<div class="pg" id="pg-event-detail">
+  <div class="container sec">
+    <button class="btn btn-ghost btn-sm" onclick="nav('events')" style="margin-bottom:20px">← Geri</button>
+    <div id="event-detail-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ CLUBS ════════════════════ -->
+<div class="pg" id="pg-clubs">
+  <div class="container sec">
+    <h2 style="margin-bottom:20px">Koşu Kulüpleri</h2>
+    <div class="search-wrap"><input type="text" placeholder="Kulüp veya şehir ara..." oninput="filterClubs(this.value)"/></div>
+    <div class="filter-strip">
+      <button class="filt on" onclick="filterClubCity('tüm',this)">Tümü</button>
+      <button class="filt" onclick="filterClubCity('İstanbul',this)">İstanbul</button>
+      <button class="filt" onclick="filterClubCity('Ankara',this)">Ankara</button>
+      <button class="filt" onclick="filterClubCity('İzmir',this)">İzmir</button>
+      <button class="filt" onclick="filterClubCity('Bursa',this)">Bursa</button>
+    </div>
+    <div class="grid g3" id="clubs-list"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ CLUB DETAIL ════════════════════ -->
+<div class="pg" id="pg-club-detail">
+  <div class="container sec">
+    <button class="btn btn-ghost btn-sm" onclick="nav('clubs')" style="margin-bottom:20px">← Geri</button>
+    <div id="club-detail-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ MAP VIEW ════════════════════ -->
+<div class="pg" id="pg-map-view">
+  <div class="container sec">
+    <h2 style="margin-bottom:8px">Harita Görünümü</h2>
+    <p style="color:var(--muted);font-size:14px;margin-bottom:16px">Türkiye genelindeki kulüp ve etkinlikleri haritada keşfet</p>
+    <div id="map-container"><div id="club-map"></div></div>
+  </div>
+</div>
+
+<!-- ════════════════════ RACES ════════════════════ -->
+<div class="pg" id="pg-races">
+  <div class="container sec">
+    <h2 style="margin-bottom:20px">🏆 Yarış Takvimi</h2>
+    <div class="search-wrap"><input type="text" placeholder="Yarış ara..." oninput="filterRaces(this.value)"/></div>
+    <div class="grid g3" id="races-list"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ RACE DETAIL ════════════════════ -->
+<div class="pg" id="pg-race-detail">
+  <div class="container sec">
+    <button class="btn btn-ghost btn-sm" onclick="nav('races')" style="margin-bottom:20px">← Geri</button>
+    <div id="race-detail-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ BLOG ════════════════════ -->
+<div class="pg" id="pg-blog">
+  <div class="container sec">
+    <h2 style="margin-bottom:20px">📰 Haberler & Blog</h2>
+    <div class="grid g3" id="blog-list"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ BLOG DETAIL ════════════════════ -->
+<div class="pg" id="pg-blog-detail">
+  <div class="container sec" style="max-width:800px">
+    <button class="btn btn-ghost btn-sm" onclick="nav('blog')" style="margin-bottom:20px">← Geri</button>
+    <div id="blog-detail-content"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ DASHBOARD ════════════════════ -->
+<div class="pg" id="pg-dashboard">
+  <div class="container">
+    <div class="dash-wrap">
+      <div class="sidebar">
+        <div class="sb-user">
+          <div class="sb-avatar" id="dash-avatar" onclick="nav('profile')">U</div>
+          <div style="font-weight:600;font-size:14px" id="dash-name">Kullanıcı</div>
+          <div style="font-size:12px;color:var(--muted)" id="dash-email"></div>
+          <div style="margin-top:8px" id="dash-role-badge"></div>
+        </div>
+        <div class="sb-nav" id="dash-nav"></div>
+      </div>
+      <div id="dash-panels"></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ PROFILE ════════════════════ -->
+<div class="pg" id="pg-profile">
+  <div class="container sec" style="max-width:800px">
+    <h2 style="margin-bottom:20px">Profilim</h2>
+    <div class="profile-hero">
+      <div class="profile-avatar" id="profile-avatar-el" onclick="document.getElementById('photo-input').click()">
+        <span id="profile-initials">U</span>
+        <div class="cam-overlay">📷</div>
+      </div>
+      <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"/>
+      <div>
+        <div style="font-size:20px;font-weight:700" id="profile-name-display">Kullanıcı</div>
+        <div style="font-size:14px;color:var(--muted)" id="profile-email-display"></div>
+        <div style="margin-top:8px;display:flex;gap:8px;flex-wrap:wrap" id="profile-tags"></div>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:24px">
+      <div class="card" style="padding:24px">
+        <h3 style="margin-bottom:16px;font-size:16px">Kişisel Bilgiler</h3>
+        <div class="form-grp"><label>Ad Soyad</label><input type="text" id="pf-name" placeholder="Ad Soyad"/></div>
+        <div class="form-grp"><label>Telefon</label><input type="text" id="pf-phone" placeholder="+90 5xx xxx xx xx"/></div>
+        <div class="form-grp"><label>Şehir</label><select id="pf-city"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option></select></div>
+        <div class="form-grp"><label>Strava Profil Linki</label><input type="text" id="pf-strava" placeholder="https://strava.com/athletes/..."/></div>
+        <div class="form-grp">
+          <label>Pace Grubum</label>
+          <div class="pace-selector">
+            <button class="pace-opt" onclick="togglePace(this,'4:00-4:30')">4:00–4:30</button>
+            <button class="pace-opt" onclick="togglePace(this,'4:30-5:00')">4:30–5:00</button>
+            <button class="pace-opt" onclick="togglePace(this,'5:00-5:30')">5:00–5:30</button>
+            <button class="pace-opt" onclick="togglePace(this,'5:30-6:00')">5:30–6:00</button>
+            <button class="pace-opt" onclick="togglePace(this,'6:00+')">6:00+</button>
+          </div>
+        </div>
+        <button class="btn btn-or btn-full" onclick="saveProfile()">Kaydet</button>
+      </div>
+      <div class="card" style="padding:24px">
+        <h3 style="margin-bottom:16px;font-size:16px">Güvenlik</h3>
+        <div class="form-grp"><label>Mevcut Şifre</label><input type="password" id="pf-oldpass" placeholder="••••••••"/></div>
+        <div class="form-grp"><label>Yeni Şifre</label><input type="password" id="pf-newpass" placeholder="En az 6 karakter"/></div>
+        <button class="btn btn-ghost btn-full" onclick="changePassword()" style="margin-bottom:20px">Şifreyi Güncelle</button>
+        <div class="divider"></div>
+        <h3 style="margin:16px 0 12px;font-size:16px">Katıldığım Etkinlikler</h3>
+        <div id="profile-events" style="font-size:13px;color:var(--muted)">Yükleniyor...</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════ SUPER ADMIN ════════════════════ -->
+<div class="pg" id="pg-admin">
+  <div class="admin-wrap">
+    <div class="admin-sb">
+      <div class="sb-title">⭐ Süper Admin</div>
+      <button class="on" onclick="aNav('dashboard',this)">📊 Dashboard</button>
+      <button onclick="aNav('groups',this)">🏢 Gruplar</button>
+      <button onclick="aNav('events',this)">📅 Etkinlikler</button>
+      <button onclick="aNav('approvals',this)">✅ Onaylar</button>
+      <button onclick="aNav('races',this)">🏆 Yarış Takvimi</button>
+      <button onclick="aNav('blog',this)">📰 Blog</button>
+      <button onclick="aNav('banners',this)">🖼 Bannerlar</button>
+      <button onclick="aNav('popup',this)">💬 Popup</button>
+      <button onclick="aNav('sponsors',this)">💼 Sponsorlar</button>
+      <button onclick="aNav('users',this)">👥 Kullanıcılar</button>
+      <button onclick="nav('home')" style="margin-top:16px;color:var(--muted)">← Siteye Dön</button>
+    </div>
+    <div class="admin-main" id="admin-main"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ GROUP ADMIN ════════════════════ -->
+<div class="pg" id="pg-panel">
+  <div class="admin-wrap">
+    <div class="admin-sb">
+      <div class="sb-title">🔑 Grup Paneli</div>
+      <button class="on" onclick="gNav('events',this)">📅 Etkinlikler</button>
+      <button onclick="gNav('members',this)">👥 Üyeler</button>
+      <button onclick="gNav('announcements',this)">📢 Duyurular</button>
+      <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
+      <button onclick="nav('home')" style="margin-top:16px;color:var(--muted)">← Siteye Dön</button>
+    </div>
+    <div class="admin-main" id="panel-main"></div>
+  </div>
+</div>
+
+<!-- ════════════════════ MODALS ════════════════════ -->
+<!-- AUTH -->
+<div class="overlay" id="auth-modal">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('auth-modal')">×</button>
+    <h2>RunClubTürkiye</h2><div class="sub">Topluluğa katıl</div>
+    <div class="tab-row">
+      <button class="tab-btn on" id="tab-login" onclick="switchTab('login')">Giriş Yap</button>
+      <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Üye Ol</button>
+    </div>
+    <div id="form-login">
+      <div class="form-grp"><label>E-posta</label><input type="email" id="l-email" placeholder="ornek@mail.com"/></div>
+      <div class="form-grp"><label>Şifre</label><input type="password" id="l-pass" placeholder="••••••••"/></div>
+      <button class="btn btn-or btn-full" style="margin-bottom:12px" onclick="doLogin()">Giriş Yap</button>
+      <div class="div-or">veya</div>
+      <button class="btn-google" onclick="doGoogle()"><svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Google ile Giriş</button>
+    </div>
+    <div id="form-register" style="display:none">
+      <div class="form-row">
+        <div class="form-grp"><label>Ad</label><input type="text" id="r-name" placeholder="Adın"/></div>
+        <div class="form-grp"><label>Soyad</label><input type="text" id="r-sname" placeholder="Soyadın"/></div>
+      </div>
+      <div class="form-grp"><label>E-posta</label><input type="email" id="r-email" placeholder="ornek@mail.com"/></div>
+      <div class="form-grp"><label>Şifre</label><input type="password" id="r-pass" placeholder="En az 6 karakter"/></div>
+      <div class="form-grp"><label>Şehir</label><select id="r-city"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option></select></div>
+      <div style="margin:10px 0">
+        <div class="chk-row"><input type="checkbox" id="chk-kvkk"/><span>KVKK Aydınlatma Metni'ni okudum ve kabul ediyorum.</span></div>
+        <div class="chk-row"><input type="checkbox" id="chk-terms"/><span>Kullanım Koşulları'nı kabul ediyorum.</span></div>
+      </div>
+      <button class="btn btn-or btn-full" style="margin-bottom:12px" onclick="doRegister()">Üye Ol</button>
+      <div class="div-or">veya</div>
+      <button class="btn-google" onclick="doGoogle()"><svg width="16" height="16" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Google ile Kayıt</button>
+    </div>
+  </div>
+</div>
+
+<!-- POPUP MODAL -->
+<div class="overlay" id="popup-modal">
+  <div class="modal" style="max-width:500px;padding:0;overflow:hidden;border-radius:20px">
+    <button class="popup-close-top" onclick="closeModal('popup-modal')">×</button>
+    <div class="popup-img-ph" id="popup-img-area">🏃</div>
+    <div class="popup-body">
+      <h2 id="popup-title">Hoş Geldin!</h2>
+      <p id="popup-body-text">RunClubTürkiye'ye katıl, koşu topluluğunu keşfet!</p>
+      <div style="display:flex;gap:10px">
+        <button class="btn btn-or" style="flex:1" id="popup-cta" onclick="closeModal('popup-modal')">Keşfet →</button>
+        <button class="btn btn-ghost" onclick="closeModal('popup-modal')">Daha Sonra</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- QR CHECK-IN MODAL -->
+<div class="overlay" id="qr-modal">
+  <div class="modal" style="text-align:center">
+    <button class="close-x" onclick="closeModal('qr-modal')">×</button>
+    <h2 style="margin-bottom:8px">QR Check-in</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:16px">Bu kodu etkinlik girişinde okutun</p>
+    <canvas id="qr-canvas" width="200" height="200"></canvas>
+    <p style="color:var(--muted);font-size:12px;margin-top:12px" id="qr-event-name"></p>
+    <button class="btn btn-ghost btn-sm" style="margin-top:12px" onclick="closeModal('qr-modal')">Kapat</button>
+  </div>
+</div>
+
+<!-- PAYMENT MODAL (İyzico ready) -->
+<div class="overlay" id="payment-modal">
+  <div class="modal">
+    <button class="close-x" onclick="closeModal('payment-modal')">×</button>
+    <h2 style="margin-bottom:4px">Etkinlik Kaydı</h2>
+    <div class="sub" id="pay-event-name"></div>
+    <div style="background:var(--bg3);border-radius:8px;padding:14px;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;font-size:14px;margin-bottom:6px"><span style="color:var(--muted)">Kayıt Ücreti</span><span id="pay-amount" style="font-weight:600"></span></div>
+      <div style="display:flex;justify-content:space-between;font-size:13px;color:var(--muted)"><span>İşlem Ücreti</span><span>₺0</span></div>
+    </div>
+    <div class="payment-form">
+      <div class="form-grp"><label>Kart Üzerindeki İsim</label><input type="text" id="pay-name" placeholder="AD SOYAD"/></div>
+      <div class="form-grp"><label>Kart Numarası</label><input class="card-input" type="text" id="pay-card" placeholder="•••• •••• •••• ••••" maxlength="19" oninput="formatCard(this)"/></div>
+      <div class="form-row">
+        <div class="form-grp"><label>Son Kullanma</label><input type="text" id="pay-exp" placeholder="AA/YY" maxlength="5"/></div>
+        <div class="form-grp"><label>CVV</label><input type="text" id="pay-cvv" placeholder="•••" maxlength="3"/></div>
+      </div>
+    </div>
+    <p style="font-size:11px;color:var(--muted);margin:10px 0">🔒 256-bit SSL ile güvenli ödeme · İyzico altyapısı</p>
+    <button class="btn btn-or btn-full" onclick="processPayment()">Ödemeyi Tamamla</button>
+  </div>
+</div>
+
+<!-- NOTIF POP -->
+<div id="notif-pop">
+  <button style="position:absolute;top:10px;right:10px;background:none;border:none;color:var(--muted);font-size:16px;cursor:pointer" onclick="this.parentElement.classList.remove('on')">×</button>
+  <div class="notif-ico" id="notif-ico">🔔</div>
+  <div style="font-weight:600;font-size:14px;margin-bottom:4px" id="notif-title">Bildirim</div>
+  <div style="font-size:13px;color:var(--muted)" id="notif-body"></div>
+</div>
+
+<div id="toast"></div>
+
+<!-- LEAFLET -->
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+
+<!-- FIREBASE -->
+<script type="module">
+import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut,updatePassword,EmailAuthProvider,reauthenticateWithCredential}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,where,serverTimestamp,updateDoc,deleteDoc}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getStorage,ref,uploadBytes,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+
+const cfg={apiKey:"AIzaSyCpr0QnKgm4AugAIZB0WdvBBn45ZeNmChs",authDomain:"runclubturkiye.firebaseapp.com",projectId:"runclubturkiye",storageBucket:"runclubturkiye.firebasestorage.app",messagingSenderId:"112561439264",appId:"1:112561439264:web:e0b3bca89db6f335423245",measurementId:"G-C25WHGJGCF"};
+const app=initializeApp(cfg);
+const auth=getAuth(app);
+const db=getFirestore(app);
+const storage=getStorage(app);
+const gp=new GoogleAuthProvider();
+const SUPER_EMAIL='sedomem@gmail.com';
+
+window._fb={auth,db,storage,gp,SUPER_EMAIL,
+  serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,where,updateDoc,deleteDoc,ref,uploadBytes,getDownloadURL,
+  createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,updatePassword,EmailAuthProvider,reauthenticateWithCredential
+};
+
+onAuthStateChanged(auth,async user=>{
+  document.getElementById('loading').style.display='none';
+  if(user){
+    const snap=await getDoc(doc(db,'users',user.uid));
+    const d=snap.exists()?snap.data():{};
+    const role=user.email===SUPER_EMAIL?'superadmin':(d.role||'member');
+    window.CU={uid:user.uid,email:user.email,name:d.name||user.displayName||user.email.split('@')[0],role,...d};
+    document.getElementById('nav-guest').style.display='none';
+    document.getElementById('nav-user').style.display='flex';
+    setupRoleBtn();
+    buildDashboard();
+    loadProfileData();
+    loadPopup();
+  } else {
+    window.CU=null;
+    document.getElementById('nav-guest').style.display='flex';
+    document.getElementById('nav-user').style.display='none';
+    document.getElementById('nav-role-btn').style.display='none';
+    loadPopup();
+  }
+});
+
+function setupRoleBtn(){
+  const b=document.getElementById('nav-role-btn');
+  if(CU.role==='superadmin'){b.textContent='⭐ Admin Panel';b.style.display='inline-flex';}
+  else if(CU.role==='groupadmin'||CU.role==='subadmin'){b.textContent='🔑 Grup Paneli';b.style.display='inline-flex';}
+  else b.style.display='none';
+}
+window.goPanel=()=>{ if(CU?.role==='superadmin') nav('admin'); else nav('panel'); };
+
+// ── AUTH ──
+window.doLogin=async()=>{
+  const e=document.getElementById('l-email').value.trim();
+  const p=document.getElementById('l-pass').value;
+  if(!e||!p){toast('E-posta ve şifre gerekli','err');return;}
+  try{
+    await signInWithEmailAndPassword(auth,e,p);
+    closeModal('auth-modal');toast('Hoş geldin! 🏃','ok');
+  }catch(err){
+    const m={'auth/invalid-credential':'E-posta veya şifre hatalı','auth/user-not-found':'Kullanıcı bulunamadı','auth/wrong-password':'Şifre yanlış'};
+    toast(m[err.code]||err.message,'err');
+  }
+};
+window.doRegister=async()=>{
+  const name=document.getElementById('r-name').value.trim();
+  const sname=document.getElementById('r-sname').value.trim();
+  const e=document.getElementById('r-email').value.trim();
+  const p=document.getElementById('r-pass').value;
+  const city=document.getElementById('r-city').value;
+  if(!name||!e||!p){toast('Tüm alanları doldurun','err');return;}
+  if(!document.getElementById('chk-kvkk').checked||!document.getElementById('chk-terms').checked){toast('KVKK ve koşulları kabul edin','err');return;}
+  if(p.length<6){toast('Şifre en az 6 karakter','err');return;}
+  try{
+    const cred=await createUserWithEmailAndPassword(auth,e,p);
+    await setDoc(doc(db,'users',cred.user.uid),{name:name+' '+sname,email:e,city,role:'member',pace:[],stravaLink:'',phone:'',createdAt:serverTimestamp()});
+    closeModal('auth-modal');toast('Hoş geldin '+name+'! 🎉','ok');
+    showNotif('🎉','Hoş geldin!','RunClubTürkiye\'ye katıldın!');
+  }catch(err){
+    const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı','auth/weak-password':'Şifre çok zayıf'};
+    toast(m[err.code]||err.message,'err');
+  }
+};
+window.doGoogle=async()=>{
+  try{
+    const r=await signInWithPopup(auth,gp);
+    const snap=await getDoc(doc(db,'users',r.user.uid));
+    if(!snap.exists()) await setDoc(doc(db,'users',r.user.uid),{name:r.user.displayName||'',email:r.user.email,city:'',role:'member',pace:[],createdAt:serverTimestamp()});
+    closeModal('auth-modal');toast('Giriş başarılı! 🏃','ok');
+  }catch(err){if(err.code!=='auth/popup-closed-by-user')toast(err.message,'err');}
+};
+window.logout=async()=>{await signOut(auth);nav('home');toast('Çıkış yapıldı');};
+
+// ── PROFILE ──
+async function loadProfileData(){
+  if(!CU)return;
+  document.getElementById('pf-name').value=CU.name||'';
+  document.getElementById('pf-phone').value=CU.phone||'';
+  document.getElementById('pf-strava').value=CU.stravaLink||'';
+  document.getElementById('profile-name-display').textContent=CU.name||'';
+  document.getElementById('profile-email-display').textContent=CU.email||'';
+  document.getElementById('profile-initials').textContent=(CU.name||'U')[0].toUpperCase();
+  document.getElementById('dash-name').textContent=CU.name||'';
+  document.getElementById('dash-email').textContent=CU.email||'';
+  document.getElementById('dash-avatar').textContent=(CU.name||'U')[0].toUpperCase();
+  if(CU.photoURL){
+    const imgs=['dash-avatar','profile-avatar-el'];
+    imgs.forEach(id=>{const el=document.getElementById(id);if(el){el.innerHTML=`<img src="${CU.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;}});
+  }
+  if(CU.pace){CU.pace.forEach(p=>{document.querySelectorAll('.pace-opt').forEach(b=>{if(b.textContent.trim()===p)b.classList.add('on');});})}
+}
+window.saveProfile=async()=>{
+  if(!CU){toast('Giriş yapın','err');return;}
+  const pace=[];document.querySelectorAll('.pace-opt.on').forEach(b=>pace.push(b.textContent.trim()));
+  const data={name:document.getElementById('pf-name').value,phone:document.getElementById('pf-phone').value,stravaLink:document.getElementById('pf-strava').value,city:document.getElementById('pf-city').value,pace,updatedAt:serverTimestamp()};
+  try{await setDoc(doc(db,'users',CU.uid),data,{merge:true});Object.assign(CU,data);toast('Profil güncellendi ✓','ok');}
+  catch(err){toast(err.message,'err');}
+};
+window.handlePhotoUpload=async(input)=>{
+  if(!CU||!input.files[0])return;
+  const file=input.files[0];
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const src=e.target.result;
+    document.getElementById('profile-avatar-el').innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/><div class="cam-overlay">📷</div>`;
+    document.getElementById('dash-avatar').innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+  };
+  reader.readAsDataURL(file);
+  try{
+    const r=ref(storage,`avatars/${CU.uid}`);
+    await uploadBytes(r,file);
+    const url=await getDownloadURL(r);
+    await setDoc(doc(db,'users',CU.uid),{photoURL:url},{merge:true});
+    toast('Fotoğraf güncellendi ✓','ok');
+  }catch(e){toast('Depolama hatası: '+e.message,'err');}
+};
+window.changePassword=async()=>{
+  if(!CU)return;
+  const old=document.getElementById('pf-oldpass').value;
+  const nw=document.getElementById('pf-newpass').value;
+  if(!old||!nw){toast('Şifreleri girin','err');return;}
+  try{
+    const cred=EmailAuthProvider.credential(CU.email,old);
+    await reauthenticateWithCredential(auth.currentUser,cred);
+    await updatePassword(auth.currentUser,nw);
+    toast('Şifre güncellendi ✓','ok');
+  }catch(e){toast(e.message,'err');}
+};
+window.togglePace=(btn)=>btn.classList.toggle('on');
+
+// ── FIRESTORE: EVENTS ──
+window.saveEvent=async(data,groupId)=>{
+  try{
+    const col=groupId?collection(db,`groups/${groupId}/events`):collection(db,'events');
+    const ref=await addDoc(col,{...data,reg:0,status:CU.role==='superadmin'?'approved':'pending',createdBy:CU.uid,createdAt:serverTimestamp()});
+    toast('Etkinlik kaydedildi ✓','ok');
+    return ref.id;
+  }catch(e){toast(e.message,'err');}
+};
+window.approveEvent=async(groupId,eventId)=>{
+  await updateDoc(doc(db,`groups/${groupId}/events`,eventId),{status:'approved'});
+  toast('Etkinlik onaylandı ✓','ok');
+};
+window.rsvpEvent=async(eventId,fee)=>{
+  if(!CU){openAuth('login');return;}
+  if(fee&&fee!=='Ücretsiz'&&fee!=='₺0'){
+    document.getElementById('pay-event-name').textContent=document.getElementById('ed-title-el')?.textContent||'Etkinlik';
+    document.getElementById('pay-amount').textContent=fee;
+    window._pendingRsvpId=eventId;
+    openModal('payment-modal');return;
+  }
+  await _doRsvp(eventId);
+};
+async function _doRsvp(eventId){
+  try{
+    await setDoc(doc(db,'rsvps',eventId+'_'+CU.uid),{eventId,userId:CU.uid,joinedAt:serverTimestamp()});
+    toast('Etkinliğe kaydoldun! 🎉','ok');
+    document.getElementById('rsvp-btn')?.setAttribute('disabled','true');
+    document.getElementById('rsvp-btn')&&(document.getElementById('rsvp-btn').textContent='✓ Kaydolundu');
+  }catch(e){toast(e.message,'err');}
+}
+window.processPayment=async()=>{
+  const name=document.getElementById('pay-name').value;
+  const card=document.getElementById('pay-card').value;
+  if(!name||card.length<19){toast('Kart bilgilerini doldurun','err');return;}
+  closeModal('payment-modal');
+  toast('Ödeme işleniyor...','ok');
+  setTimeout(async()=>{
+    if(window._pendingRsvpId) await _doRsvp(window._pendingRsvpId);
+    toast('Ödeme başarılı! Kaydın onaylandı ✓','ok');
+  },1500);
+};
+window.formatCard=i=>{let v=i.value.replace(/\s/g,'').replace(/(\d{4})/g,'$1 ').trim();i.value=v;};
+
+// ── FIRESTORE: CLUBS ──
+window.joinClub=async(clubId)=>{
+  if(!CU){openAuth('login');return;}
+  try{
+    await setDoc(doc(db,'memberships',clubId+'_'+CU.uid),{clubId,userId:CU.uid,joinedAt:serverTimestamp()});
+    toast('Kulübe katıldın! 🤝','ok');
+  }catch(e){toast(e.message,'err');}
+};
+
+// ── FIRESTORE: RACES ──
+window.saveRace=async(data)=>{
+  try{await addDoc(collection(db,'races'),{...data,createdAt:serverTimestamp()});toast('Yarış eklendi ✓','ok');}
+  catch(e){toast(e.message,'err');}
+};
+window.addToCalendar=(race)=>{
+  const s=race.date.replace(/-/g,'');
+  const url=`https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(race.name)}&dates=${s}/${s}&details=${encodeURIComponent(race.about||'')}&location=${encodeURIComponent(race.location||'')}`;
+  window.open(url,'_blank');
+  toast('Takvime ekleniyor...','ok');
+};
+
+// ── FIRESTORE: BLOG ──
+window.saveBlogPost=async(data)=>{
+  try{await addDoc(collection(db,'blog'),{...data,authorId:CU.uid,authorName:CU.name,status:'published',publishedAt:serverTimestamp()});toast('Yazı yayınlandı ✓','ok');}
+  catch(e){toast(e.message,'err');}
+};
+window.deleteBlogPost=async(id)=>{
+  if(!confirm('Sil?'))return;
+  await deleteDoc(doc(db,'blog',id));toast('Silindi','ok');
+};
+
+// ── FIRESTORE: POPUP ──
+window.savePopup=async(data)=>{
+  try{await setDoc(doc(db,'popup','active'),{...data,updatedAt:serverTimestamp()});toast('Popup kaydedildi ✓','ok');}
+  catch(e){toast(e.message,'err');}
+};
+async function loadPopup(){
+  if(sessionStorage.getItem('popup_seen'))return;
+  try{
+    const snap=await getDoc(doc(db,'popup','active'));
+    if(snap.exists()&&snap.data().active){
+      const d=snap.data();
+      document.getElementById('popup-title').textContent=d.title||'Hoş Geldin!';
+      document.getElementById('popup-body-text').textContent=d.body||'';
+      const cta=document.getElementById('popup-cta');
+      cta.textContent=d.ctaText||'Keşfet →';
+      if(d.ctaUrl) cta.onclick=()=>{window.open(d.ctaUrl,'_blank');closeModal('popup-modal');};
+      if(d.emoji) document.getElementById('popup-img-area').textContent=d.emoji||'🏃';
+      setTimeout(()=>openModal('popup-modal'),1200);
+      sessionStorage.setItem('popup_seen','1');
+    }
+  }catch(e){}
+}
+
+// ── FIRESTORE: BANNERS ──
+async function loadBanners(){
+  let banners=window.DEFAULT_BANNERS;
+  try{
+    const snap=await getDocs(query(collection(db,'banners'),orderBy('order')));
+    if(!snap.empty){banners=[];snap.forEach(d=>banners.push({id:d.id,...d.data()}));}
+  }catch(e){}
+  renderBanners(banners);
+}
+
+// ── FIRESTORE: SPONSORS ──
+async function loadSponsors(){
+  let sponsors=['Nike','Garmin','Asics','Decathlon','Salomon','GU Energy'];
+  try{
+    const snap=await getDocs(collection(db,'sponsors'));
+    if(!snap.empty){sponsors=[];snap.forEach(d=>sponsors.push(d.data().name));}
+  }catch(e){}
+  document.getElementById('sponsors-strip').innerHTML=sponsors.map(s=>`<div class="sponsor-logo">${s}</div>`).join('');
+}
+
+// ── ADMIN: SAVE RACE FORM ──
+window.adminSaveRace=async()=>{
+  const data={
+    name:document.getElementById('ar-name').value,
+    date:document.getElementById('ar-date').value,
+    location:document.getElementById('ar-loc').value,
+    about:document.getElementById('ar-about').value,
+    contact:document.getElementById('ar-contact').value,
+    mapUrl:document.getElementById('ar-map').value,
+    website:document.getElementById('ar-web').value,
+    phone:document.getElementById('ar-phone').value,
+    email:document.getElementById('ar-email').value,
+    emoji:document.getElementById('ar-emoji').value||'🏆',
+    slug:document.getElementById('ar-name').value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
+  };
+  await saveRace(data);
+  setTimeout(()=>loadRaces(),500);
+};
+
+// ── ADMIN: SAVE BLOG FORM ──
+window.adminSaveBlog=async()=>{
+  const data={
+    title:document.getElementById('ab-title').value,
+    body:document.getElementById('ab-body').value,
+    cover:document.getElementById('ab-cover').value||'',
+    tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()),
+    emoji:document.getElementById('ab-emoji').value||'📰',
+    slug:document.getElementById('ab-title').value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
+  };
+  await saveBlogPost(data);
+  setTimeout(()=>loadBlog(),500);
+};
+
+// ── ADMIN: SAVE POPUP FORM ──
+window.adminSavePopup=async()=>{
+  const data={
+    title:document.getElementById('apu-title').value,
+    body:document.getElementById('apu-body').value,
+    ctaText:document.getElementById('apu-cta').value,
+    ctaUrl:document.getElementById('apu-url').value,
+    emoji:document.getElementById('apu-emoji').value||'🏃',
+    active:document.getElementById('apu-active').checked
+  };
+  await savePopup(data);
+};
+
+// ── ADMIN: SAVE BANNER FORM ──
+window.adminSaveBanner=async()=>{
+  const data={
+    title:document.getElementById('ab2-title').value,
+    subtitle:document.getElementById('ab2-sub').value,
+    badge:document.getElementById('ab2-badge').value,
+    ctaText:document.getElementById('ab2-cta').value,
+    ctaUrl:document.getElementById('ab2-url').value,
+    order:parseInt(document.getElementById('ab2-order').value)||0,
+    active:true
+  };
+  try{await addDoc(collection(db,'banners'),{...data,createdAt:serverTimestamp()});toast('Banner eklendi ✓','ok');loadBanners();}
+  catch(e){toast(e.message,'err');}
+};
+
+// ── ADMIN: USERS ──
+window.loadAdminUsers=async()=>{
+  try{
+    const snap=await getDocs(collection(db,'users'));
+    let html='<table><thead><tr><th>Ad</th><th>E-posta</th><th>Şehir</th><th>Rol</th><th>İşlem</th></tr></thead><tbody>';
+    snap.forEach(d=>{
+      const u=d.data();
+      html+=`<tr><td>${u.name||'—'}</td><td>${u.email||'—'}</td><td>${u.city||'—'}</td>
+      <td><select onchange="changeUserRole('${d.id}',this.value)" style="width:auto;padding:4px 8px;font-size:12px">
+        <option ${u.role==='member'?'selected':''}>member</option>
+        <option ${u.role==='groupadmin'?'selected':''}>groupadmin</option>
+        <option ${u.role==='superadmin'?'selected':''}>superadmin</option>
+      </select></td>
+      <td><button class="btn btn-ghost btn-sm" onclick="viewUserProfile('${d.id}')">Görüntüle</button></td></tr>`;
+    });
+    html+='</tbody></table>';
+    document.getElementById('admin-users-content').innerHTML=html;
+  }catch(e){document.getElementById('admin-users-content').innerHTML=`<p style="color:var(--muted)">Firestore'dan veri yüklenemedi: ${e.message}</p>`;}
+};
+window.changeUserRole=async(uid,role)=>{
+  await setDoc(doc(db,'users',uid),{role},{merge:true});
+  toast('Rol güncellendi ✓','ok');
+};
+
+// ── GROUP ADMIN ──
+window.loadGroupPanel=async()=>{
+  if(!CU)return;
+  document.getElementById('panel-main').innerHTML=buildGroupPanel();
+};
+window.submitEventForApproval=async()=>{
+  if(!CU?.groupId){toast('Grup ataması yok','err');return;}
+  const data={
+    title:document.getElementById('ge-title').value,
+    date:document.getElementById('ge-date').value,
+    dist:document.getElementById('ge-dist').value,
+    cat:document.getElementById('ge-cat').value,
+    pace:Array.from(document.querySelectorAll('.gp-pace.on')).map(b=>b.textContent),
+    cap:parseInt(document.getElementById('ge-cap').value)||100,
+    fee:document.getElementById('ge-fee').value,
+    desc:document.getElementById('ge-desc').value,
+    city:CU.city||'',emoji:'🏃',
+    slug:document.getElementById('ge-title').value.toLowerCase().replace(/\s+/g,'-')
+  };
+  await saveEvent(data,CU.groupId);
+  toast('Etkinlik onaya gönderildi ✓','ok');
+};
+window.assignSubAdmin=async(uid)=>{
+  if(!CU?.groupId||CU.role!=='groupadmin'){toast('Yetki yok','err');return;}
+  await setDoc(doc(db,'users',uid),{role:'subadmin',groupId:CU.groupId},{merge:true});
+  toast('Sub-admin atandı ✓','ok');
+};
+
+// ── QR ──
+window.showQR=(eventId,eventName)=>{
+  document.getElementById('qr-event-name').textContent=eventName||'Etkinlik';
+  const canvas=document.getElementById('qr-canvas');
+  const ctx=canvas.getContext('2d');
+  ctx.fillStyle='#fff';ctx.fillRect(0,0,200,200);
+  ctx.fillStyle='#111';
+  const data=`RCT:${eventId}:${CU?.uid||'guest'}`;
+  const size=8;
+  for(let i=0;i<data.length;i++){
+    const x=(i%20)*size+20,y=Math.floor(i/20)*size+20;
+    if(data.charCodeAt(i)%2===0){ctx.fillRect(x,y,size,size);}
+  }
+  ctx.strokeStyle='#FF6B00';ctx.lineWidth=4;ctx.strokeRect(2,2,196,196);
+  ctx.fillStyle='#FF6B00';ctx.font='bold 10px sans-serif';ctx.textAlign='center';
+  ctx.fillText('RunClubTürkiye',100,185);
+  openModal('qr-modal');
+};
+
+// ── INIT ──
+loadBanners();loadSponsors();
+</script>
+
+<script>
+// ────────────────────────────────────────────────────────────
+// LOCAL DATA
+window.DEFAULT_BANNERS=[
+  {title:'Koş, Buluş, <span style="color:var(--or)">Birlikte Güçlen</span>',subtitle:'Türkiye genelinde yüzlerce koşu kulübü ve etkinlik',badge:'Türkiye\'nin #1 Koşu Platformu',ctaText:'Hemen Başla →',ctaAction:'register',bg:'linear-gradient(135deg,#0a0000,#1a0800)'},
+  {title:'İstanbul Maratonu <span style="color:var(--or)">2025</span>',subtitle:'6 Nisan · 42km · 8,000 katılımcı · Kaydol!',badge:'🏃 Yeni Etkinlik',ctaText:'Kaydol →',ctaAction:'events',bg:'linear-gradient(135deg,#001020,#002040)'},
+  {title:'Nike Run Club <span style="color:var(--or)">× RCT</span>',subtitle:'Yeni sezon iş birliği başladı',badge:'💼 Sponsor',ctaText:'Keşfet →',ctaAction:'clubs',bg:'linear-gradient(135deg,#0a0020,#140040)'},
+];
+window.EVENTS=[
+  {id:'e1',title:'İstanbul Maratonu 2025',cat:'Maraton',date:'2025-04-06',city:'İstanbul',dist:'42.2 km',cap:8000,reg:6200,fee:'₺350',deadline:'2025-03-20',desc:'Boğaz\'ı geçen tek maraton! İki kıta arasında eşsiz koşu deneyimi.',emoji:'🌉',slug:'istanbul-maratonu-2025',pace:['4:00–4:30','4:30–5:00','5:00–5:30']},
+  {id:'e2',title:'Ankara 10K Parkur',cat:'Trail',date:'2025-04-20',city:'Ankara',dist:'10 km',cap:500,reg:312,fee:'₺150',deadline:'2025-04-10',desc:'Eymir Gölü çevresinde doğa içinde trail koşusu.',emoji:'🌲',slug:'ankara-10k-parkur',pace:['5:00–5:30','5:30–6:00']},
+  {id:'e3',title:'İzmir Kordon 5K',cat:'5K/10K',date:'2025-05-04',city:'İzmir',dist:'5 km',cap:1200,reg:890,fee:'Ücretsiz',deadline:'2025-04-28',desc:'Deniz kıyısında sabah koşusu.',emoji:'🌊',slug:'izmir-kordon-5k',pace:['5:30–6:00','6:00+']},
+  {id:'e4',title:'Bursa Uludağ Trail',cat:'Trail',date:'2025-05-18',city:'Bursa',dist:'25 km',cap:300,reg:178,fee:'₺400',deadline:'2025-05-05',desc:'Uludağ eteklerinde zorlu trail deneyimi.',emoji:'⛰️',slug:'bursa-uludag-trail',pace:['4:30–5:00','5:00–5:30']},
+  {id:'e5',title:'Antalya Yarı Maraton',cat:'Maraton',date:'2025-06-01',city:'Antalya',dist:'21.1 km',cap:3000,reg:1450,fee:'₺200',deadline:'2025-05-20',desc:'Akdeniz kıyısında yarı maraton.',emoji:'🌴',slug:'antalya-yari-maraton',pace:['4:00–4:30','4:30–5:00']},
+];
+window.CLUBS=[
+  {id:'c1',name:'Boğaziçi Runners',city:'İstanbul',members:284,desc:'Boğaz kıyılarında haftalık koşular.',emoji:'🌉',open:true,lat:41.085,lng:29.05},
+  {id:'c2',name:'Ankara Trail Crew',city:'Ankara',members:156,desc:'Başkentin trail tutkunları.',emoji:'🌲',open:true,lat:39.925,lng:32.836},
+  {id:'c3',name:'İzmir Körfez Run',city:'İzmir',members:203,desc:'Ege kıyısı koşucuları.',emoji:'🌊',open:true,lat:38.423,lng:27.128},
+  {id:'c4',name:'Kadıköy Koşu Kulübü',city:'İstanbul',members:412,desc:'Kadıköy\'ün koşu topluluğu.',emoji:'⚓',open:false,lat:40.99,lng:29.03},
+  {id:'c5',name:'Bursa Dağ Koşucuları',city:'Bursa',members:98,desc:'Uludağ eteklerinde trail.',emoji:'⛰️',open:true,lat:40.18,lng:29.06},
+  {id:'c6',name:'Antalya Run Club',city:'Antalya',members:178,desc:'Akdeniz\'de sabah koşuları.',emoji:'🌴',open:true,lat:36.896,lng:30.713},
+];
+window.RACES=[
+  {id:'r1',name:'Ata Ultra 100K',date:'2025-07-12',location:'Kayseri, Erciyes',about:'Erciyes Dağı eteklerinde ultra maraton.',emoji:'🏔️',contact:'info@atarun.com',phone:'+90 352 xxx xxxx',email:'atarun@gmail.com',website:'https://atarun.com',slug:'ata-ultra-100k'},
+  {id:'r2',name:'Cappadocia Ultra Trail',date:'2025-08-24',location:'Nevşehir, Kapadokya',about:'Peri bacaları arasında eşsiz trail deneyimi.',emoji:'🪨',contact:'info@cut.com.tr',slug:'cappadocia-ultra-trail'},
+  {id:'r3',name:'İstanbul Trail Series',date:'2025-09-14',location:'İstanbul, Belgrad Ormanı',about:'İstanbul\'un yeşil kalbi Belgrad Ormanı.',emoji:'🌳',slug:'istanbul-trail-series'},
+];
+window.BLOG_POSTS=[
+  {id:'b1',title:'Pace Nedir? Koşuda Tempo Nasıl Belirlenir?',body:'Pace, koşuda her kilometre için harcanan süredir. Başlangıç koşucular için ideal pace genellikle 6:00-7:00/km arasındadır...',emoji:'⏱️',tags:['Antrenman','Başlangıç'],slug:'pace-nedir',publishedAt:'2025-01-15',authorName:'RunClub Editör'},
+  {id:'b2',title:'2025 Türkiye Koşu Takvimi',body:'2025 yılında Türkiye\'de düzenlenecek maraton, trail ve ultramaraton etkinliklerinin tam listesi...',emoji:'📅',tags:['Takvim','2025'],slug:'2025-turkiye-kosu-takvimi',publishedAt:'2025-01-10',authorName:'RunClub Editör'},
+  {id:'b3',title:'Trail Koşusu İçin Teçhizat Rehberi',body:'Trail koşusuna başlayacaklar için eksiksiz ekipman listesi: ayakkabı, sırt çantası, beslenme...',emoji:'🎒',tags:['Trail','Ekipman'],slug:'trail-kosu-techizat',publishedAt:'2025-01-05',authorName:'RunClub Editör'},
+];
+
+// ── BANNERS ──
+let bannerIdx=0,bannerTimer;
+function renderBanners(banners){
+  const cont=document.getElementById('banner-slides');
+  const dots=document.getElementById('banner-dots');
+  if(!cont)return;
+  cont.innerHTML=banners.map((b,i)=>`
+    <div class="banner-slide ${i===0?'on':''}" id="bs-${i}" style="background:${b.bg||'linear-gradient(135deg,#0a0000,#1a0800)'}">
+      <div class="banner-content">
+        ${b.badge?`<div class="banner-badge">${b.badge}</div>`:''}
+        <h1>${b.title||''}</h1>
+        <p>${b.subtitle||''}</p>
+        <div class="banner-cta">
+          <button class="btn btn-or" onclick="${b.ctaAction==='register'?'openAuth(\'register\')':b.ctaUrl?`window.open('${b.ctaUrl}')`:`nav('${b.ctaAction||'events'}')`}">${b.ctaText||'Keşfet →'}</button>
+          <button class="btn btn-ghost" onclick="nav('events')">Etkinlikleri Gör</button>
+        </div>
+      </div>
+    </div>`).join('');
+  dots.innerHTML=banners.map((_,i)=>`<div class="bdot ${i===0?'on':''}" onclick="bannerGo(${i})"></div>`).join('');
+  clearInterval(bannerTimer);
+  bannerTimer=setInterval(()=>bannerGo((bannerIdx+1)%banners.length),5000);
+}
+window.bannerGo=i=>{
+  const slides=document.querySelectorAll('.banner-slide');
+  const dots=document.querySelectorAll('.bdot');
+  slides.forEach((s,j)=>s.classList.toggle('on',j===i));
+  dots.forEach((d,j)=>d.classList.toggle('on',j===i));
+  bannerIdx=i;
+};
+window.bannerNext=()=>bannerGo((bannerIdx+1)%document.querySelectorAll('.banner-slide').length);
+window.bannerPrev=()=>{const l=document.querySelectorAll('.banner-slide').length;bannerGo((bannerIdx-1+l)%l);};
+
+// ── NAV ──
+window.nav=id=>{
+  document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));
+  const el=document.getElementById('pg-'+id);
+  if(el)el.classList.add('on');
+  document.querySelectorAll('.nav-center button,[id^="nb-"]').forEach(b=>b.classList.remove('on'));
+  const nb=document.getElementById('nb-'+id);
+  if(nb)nb.classList.add('on');
+  document.querySelectorAll('.bn-item').forEach(b=>b.classList.remove('on'));
+  window.scrollTo(0,0);
+  if((id==='dashboard'||id==='admin'||id==='panel')&&!window.CU){openAuth('login');return;}
+  if(id==='map-view')setTimeout(initMap,100);
+  if(id==='admin'&&CU?.role==='superadmin'){renderAdminSection('dashboard');loadAdminUsers();}
+  if(id==='panel')loadGroupPanel();
+  if(id==='profile')loadProfileData&&loadProfileData();
+};
+window.openAuth=tab=>{openModal('auth-modal');switchTab(tab);};
+window.switchTab=t=>{
+  document.getElementById('form-login').style.display=t==='login'?'block':'none';
+  document.getElementById('form-register').style.display=t==='register'?'block':'none';
+  document.getElementById('tab-login').classList.toggle('on',t==='login');
+  document.getElementById('tab-register').classList.toggle('on',t==='register');
+};
+window.openModal=id=>document.getElementById(id).classList.add('on');
+window.closeModal=id=>{document.getElementById(id).classList.remove('on');};
+
+// ── EVENTS ──
+function mkMonths(){return['OCA','ŞUB','MAR','NİS','MAY','HAZ','TEM','AĞU','EYL','EKİ','KAS','ARA'];}
+function renderEvtCard(e){
+  const d=new Date(e.date);
+  const pct=Math.round((e.reg/e.cap)*100);
+  return`<div class="ev-card" onclick="openEvent('${e.id}')">
+    <div class="ev-date-box"><div class="day">${d.getDate()}</div><div class="mon">${mkMonths()[d.getMonth()]}</div></div>
+    <div class="ev-info">
+      <span class="tag tag-or">${e.cat}</span>
+      <h3>${e.emoji} ${e.title}</h3>
+      <div class="ev-meta">
+        <span class="meta">📍 ${e.city}</span>
+        <span class="meta">🏃 ${e.dist}</span>
+        <span class="meta">👥 ${e.reg}/${e.cap}</span>
+        <span class="meta">💳 ${e.fee}</span>
+      </div>
+      ${e.pace?.length?`<div class="pace-chips">${e.pace.map(p=>`<span class="pace-chip">${p}</span>`).join('')}</div>`:''}
+      <div class="prog-wrap"><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>
+      ${pct>=80?'<div style="font-size:11px;color:#f87171;margin-top:4px">🔥 Son '+(e.cap-e.reg)+' yer!</div>':''}
+    </div>
+  </div>`;
+}
+function renderEvtCards(list,cid){const el=document.getElementById(cid);if(el)el.innerHTML=list.map(renderEvtCard).join('');}
+window.filterEvts=q=>renderEvtCards(EVENTS.filter(e=>e.title.toLowerCase().includes(q.toLowerCase())||e.city.toLowerCase().includes(q.toLowerCase())),'events-list');
+window.filterEvtCat=(cat,btn)=>{
+  document.querySelectorAll('#pg-events .filt').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  renderEvtCards(cat==='tüm'?EVENTS:EVENTS.filter(e=>e.cat===cat),'events-list');
+};
+window.openEvent=id=>{
+  const e=EVENTS.find(x=>x.id===id||x.slug===id);
+  if(!e)return;
+  const d=new Date(e.date);
+  const pct=Math.round((e.reg/e.cap)*100);
+  document.getElementById('event-detail-content').innerHTML=`
+    <div style="background:linear-gradient(135deg,#1a0a00,#0a0a0a);border-radius:var(--r);padding:40px;margin-bottom:24px;position:relative;overflow:hidden">
+      <div style="position:absolute;right:40px;top:50%;transform:translateY(-50%);font-size:80px;opacity:.1">${e.emoji}</div>
+      <span class="tag tag-or">${e.cat}</span>
+      <h1 id="ed-title-el" style="font-size:28px;margin:8px 0">${e.emoji} ${e.title}</h1>
+      <div class="ev-meta" style="margin-bottom:16px">
+        <span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">🏃 ${e.dist}</span>
+      </div>
+      <div class="countdown" id="ev-cd"></div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 300px;gap:20px">
+      <div>
+        <div class="card" style="padding:24px;margin-bottom:16px">
+          <h3 style="margin-bottom:12px">Etkinlik Hakkında</h3>
+          <p style="color:var(--muted);line-height:1.7;font-size:14px">${e.desc}</p>
+          ${e.pace?.length?`<div style="margin-top:16px"><h4 style="font-size:14px;margin-bottom:8px">Pace Grupları</h4><div class="pace-chips" style="gap:8px">${e.pace.map(p=>`<span class="pace-chip" style="font-size:13px;padding:4px 12px">${p}</span>`).join('')}</div></div>`:''}
+        </div>
+        <div class="card" style="padding:24px">
+          <h3 style="margin-bottom:12px">Paylaş</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="shareEvent('${e.slug}','${e.title}')">📱 WhatsApp</button>
+            <button class="btn btn-ghost btn-sm" onclick="showQR('${e.id}','${e.title}')">📲 QR Check-in</button>
+          </div>
+        </div>
+      </div>
+      <div>
+        <div class="card" style="padding:20px">
+          <div style="margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;font-size:13px;margin-bottom:6px"><span style="color:var(--muted)">Kapasite</span><span>${pct}%</span></div>
+            <div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div>
+          </div>
+          <div style="font-size:13px;margin-bottom:16px">
+            <div style="display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Ücret</span><span style="font-weight:600">${e.fee}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:8px 0"><span style="color:var(--muted)">Son Kayıt</span><span>${e.deadline||'—'}</span></div>
+          </div>
+          <button class="btn btn-or btn-full" id="rsvp-btn" onclick="rsvpEvent('${e.id}','${e.fee}')">Etkinliğe Kaydol</button>
+        </div>
+      </div>
+    </div>`;
+  renderCountdown(e.date,'ev-cd');
+  nav('event-detail');
+  document.title=`${e.title} | RunClubTürkiye`;
+};
+window.shareEvent=(slug,title)=>{
+  const url=`https://runclubturkiye.com/etkinlik/${slug}`;
+  const wa=`https://wa.me/?text=${encodeURIComponent(title+' — '+url)}`;
+  window.open(wa,'_blank');
+};
+
+function renderCountdown(dateStr,elId){
+  const el=document.getElementById(elId);
+  if(!el)return;
+  function upd(){
+    const diff=new Date(dateStr)-new Date();
+    if(diff<0){el.innerHTML='<span style="color:var(--muted);font-size:13px">Etkinlik geçti</span>';return;}
+    const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);
+    el.innerHTML=[['Gün',d],['Saat',h],['Dk',m],['Sn',s]].map(([l,n])=>`<div class="cd-unit"><div class="cd-n">${String(n).padStart(2,'0')}</div><div class="cd-l">${l}</div></div>`).join('');
+  }
+  upd();setInterval(upd,1000);
+}
+
+// ── CLUBS ──
+function renderClubCard(c){
+  return`<div class="card" onclick="openClub('${c.id}')">
+    <div class="card-img">${c.emoji}</div>
+    <div class="card-body">
+      <span class="tag tag-gr">${c.city}</span>
+      <h3>${c.name}</h3>
+      <p>${c.desc}</p>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+        <span style="font-size:12px;color:var(--muted)">👥 ${c.members} üye</span>
+        <span class="tag ${c.open?'tag-gr':'tag-bl'}">${c.open?'Açık':'Kodlu'}</span>
+      </div>
+    </div>
+  </div>`;
+}
+window.filterClubs=q=>{const el=document.getElementById('clubs-list');if(el)el.innerHTML=CLUBS.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.city.toLowerCase().includes(q.toLowerCase())).map(renderClubCard).join('');};
+window.filterClubCity=(city,btn)=>{
+  document.querySelectorAll('#pg-clubs .filt').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  const el=document.getElementById('clubs-list');
+  if(el)el.innerHTML=(city==='tüm'?CLUBS:CLUBS.filter(c=>c.city===city)).map(renderClubCard).join('');
+};
+window.openClub=id=>{
+  const c=CLUBS.find(x=>x.id===id);if(!c)return;
+  const names=['Mehmet Y.','Ayşe K.','Can D.','Selin A.','Burak T.','Fatma O.','Emre S.','Zeynep B.'];
+  document.getElementById('club-detail-content').innerHTML=`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:32px;display:flex;gap:24px;align-items:center;margin-bottom:24px;flex-wrap:wrap">
+      <div style="width:80px;height:80px;border-radius:16px;background:linear-gradient(135deg,var(--or),#ff9500);display:flex;align-items:center;justify-content:center;font-size:36px;flex-shrink:0">${c.emoji}</div>
+      <div style="flex:1;min-width:200px">
+        <span class="tag tag-gr">${c.city}</span>
+        <h2 style="margin:6px 0;font-size:24px">${c.name}</h2>
+        <p style="color:var(--muted);font-size:14px">${c.desc}</p>
+        <div style="display:flex;gap:16px;margin-top:10px;font-size:13px;color:var(--muted)"><span>👥 <b style="color:var(--text)">${c.members}</b> üye</span><span>📍 ${c.city}</span></div>
+        <div style="margin-top:14px;display:flex;gap:8px">
+          <button class="btn btn-or btn-sm" onclick="joinClub('${c.id}')">Kulübe Katıl</button>
+          <button class="btn btn-ghost btn-sm">Paylaş</button>
+        </div>
+      </div>
+    </div>
+    <h3 style="margin-bottom:14px">Üyeler</h3>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:10px">
+      ${names.map((n,i)=>`<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px">
+        <div style="width:34px;height:34px;border-radius:50%;background:hsl(${i*40},40%,20%);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:600;flex-shrink:0">${n[0]}</div>
+        <div><div style="font-size:13px;font-weight:500">${n}</div><div style="font-size:11px;color:var(--muted)">${i===0?'Kaptan':i<2?'Moderatör':'Üye'}</div></div>
+      </div>`).join('')}
+    </div>`;
+  nav('club-detail');
+  document.title=`${c.name} | RunClubTürkiye`;
+};
+
+// ── RACES ──
+function loadRaces(){
+  const list=window.RACES;
+  const g=document.getElementById('races-list');
+  const h=document.getElementById('home-races');
+  const html=list.map(r=>`
+    <div class="race-card" onclick="openRace('${r.id}')">
+      <div class="race-img"><span style="position:relative;z-index:1;font-size:48px">${r.emoji}</span><div class="race-date-badge">${r.date}</div></div>
+      <div class="card-body">
+        <h3>${r.name}</h3>
+        <p>📍 ${r.location}</p>
+        <p style="margin-top:4px">${(r.about||'').substring(0,60)}...</p>
+      </div>
+    </div>`).join('');
+  if(g)g.innerHTML=html;
+  if(h)h.innerHTML=html;
+}
+window.filterRaces=q=>{
+  const el=document.getElementById('races-list');
+  if(el)el.innerHTML=RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())||r.location?.toLowerCase().includes(q.toLowerCase())).map(r=>`
+    <div class="race-card" onclick="openRace('${r.id}')">
+      <div class="race-img">${r.emoji}</div>
+      <div class="card-body"><h3>${r.name}</h3><p>📍 ${r.location}</p></div>
+    </div>`).join('');
+};
+window.openRace=id=>{
+  const r=RACES.find(x=>x.id===id);if(!r)return;
+  document.getElementById('race-detail-content').innerHTML=`
+    <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;margin-bottom:24px">
+      <div style="height:220px;background:linear-gradient(135deg,var(--navy),#2a3a8a);display:flex;align-items:center;justify-content:center;font-size:80px">${r.emoji}</div>
+      <div style="padding:28px">
+        <h1 style="font-size:26px;margin-bottom:8px">${r.name}</h1>
+        <div class="ev-meta" style="margin-bottom:16px">
+          <span class="meta">📅 ${r.date}</span><span class="meta">📍 ${r.location}</span>
+        </div>
+        <p style="color:var(--muted);line-height:1.7;margin-bottom:20px">${r.about||''}</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:20px">
+          ${r.phone?`<div style="font-size:13px"><span style="color:var(--muted)">📞 </span>${r.phone}</div>`:''}
+          ${r.email?`<div style="font-size:13px"><span style="color:var(--muted)">✉️ </span>${r.email}</div>`:''}
+          ${r.website?`<div style="font-size:13px"><a href="${r.website}" target="_blank" style="color:var(--or)">🌐 Web Sitesi</a></div>`:''}
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-or" onclick="addToCalendar(RACES.find(x=>x.id==='${r.id}'))">📅 Takvime Ekle</button>
+          <button class="btn btn-ghost" onclick="window.open('https://maps.google.com?q=${encodeURIComponent(r.location||'')}','_blank')">🗺 Haritada Gör</button>
+        </div>
+        ${r.mapUrl?`<div class="map-detail" style="margin-top:16px"><iframe src="${r.mapUrl}" allowfullscreen loading="lazy"></iframe></div>`:''}
+      </div>
+    </div>`;
+  nav('race-detail');
+  document.title=`${r.name} | RunClubTürkiye`;
+};
+
+// ── BLOG ──
+function loadBlog(){
+  const list=window.BLOG_POSTS;
+  const html=list.map(p=>`
+    <div class="blog-card" onclick="openBlogPost('${p.id}')">
+      <div class="blog-img"><span style="position:relative;z-index:1;font-size:48px">${p.emoji}</span></div>
+      <div class="card-body">
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:6px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>
+        <h3>${p.title}</h3>
+        <p style="margin-top:6px">${p.body.substring(0,80)}...</p>
+        <div style="font-size:12px;color:var(--muted);margin-top:10px">✍️ ${p.authorName} · ${p.publishedAt||''}</div>
+      </div>
+    </div>`).join('');
+  const bl=document.getElementById('blog-list');const hb=document.getElementById('home-blog');
+  if(bl)bl.innerHTML=html;
+  if(hb)hb.innerHTML=html;
+}
+window.openBlogPost=id=>{
+  const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;
+  document.getElementById('blog-detail-content').innerHTML=`
+    <div style="height:300px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);border-radius:var(--r);display:flex;align-items:center;justify-content:center;font-size:80px;margin-bottom:28px">${p.emoji}</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>
+    <h1 style="font-size:28px;margin-bottom:12px;line-height:1.2">${p.title}</h1>
+    <div style="font-size:13px;color:var(--muted);margin-bottom:24px">✍️ ${p.authorName} · ${p.publishedAt||''}</div>
+    <div class="rich-text"><p>${p.body}</p></div>`;
+  nav('blog-detail');
+  document.title=`${p.title} | RunClubTürkiye`;
+};
+
+// ── MAP (Leaflet) ──
+let mapInited=false;
+function initMap(){
+  if(mapInited||typeof L==='undefined')return;
+  const m=L.map('club-map').setView([39.5,35.5],6);
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(m);
+  CLUBS.forEach(c=>{
+    if(!c.lat||!c.lng)return;
+    const icon=L.divIcon({html:`<div style="background:var(--or);color:#fff;width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:16px;border:2px solid #fff">${c.emoji}</div>`,className:'',iconSize:[32,32]});
+    L.marker([c.lat,c.lng],{icon}).addTo(m).bindPopup(`<b>${c.name}</b><br>${c.city}<br>👥 ${c.members} üye<br><button onclick="window._openClub('${c.id}')" style="margin-top:6px;padding:4px 10px;background:#FF6B00;color:#fff;border:none;border-radius:4px;cursor:pointer">Detay</button>`);
+  });
+  mapInited=true;
+  window._openClub=id=>openClub(id);
+}
+
+// ── DASHBOARD BUILD ──
+function buildDashboard(){
+  if(!CU)return;
+  const isAdmin=CU.role==='superadmin';
+  const isGrp=CU.role==='groupadmin'||CU.role==='subadmin';
+  const badge=isAdmin?'<span class="tag tag-or">⭐ Süper Admin</span>':isGrp?'<span class="tag tag-bl">🔑 Grup Admin</span>':'<span class="tag tag-gr">👤 Üye</span>';
+  document.getElementById('dash-role-badge').innerHTML=badge;
+  const navItems=[
+    {id:'overview',ico:'🏠',label:'Genel Bakış'},
+    {id:'my-events',ico:'📅',label:'Etkinliklerim'},
+    {id:'my-clubs',ico:'🤝',label:'Kulüplerim'},
+    {id:'activity',ico:'🏃',label:'Aktiviteler'},
+    {id:'badges',ico:'🏅',label:'Rozetler'},
+    {id:'profile-tab',ico:'⚙',label:'Profil'},
+  ];
+  document.getElementById('dash-nav').innerHTML=navItems.map((n,i)=>`<button class="${i===0?'on':''}" onclick="showDash('${n.id}',this)">${n.ico} ${n.label}</button>`).join('')+`<button onclick="logout()" style="margin-top:16px;color:#f87171">🚪 Çıkış</button>`;
+  document.getElementById('dash-panels').innerHTML=`
+    <div class="dash-content on" id="dp-overview">
+      <h2 style="margin-bottom:20px">Merhaba, <span style="color:var(--or)">${(CU.name||'Koşucu').split(' ')[0]}!</span></h2>
+      <div class="stat-cards">
+        <div class="s-card"><div class="n">3</div><div class="l">Etkinlik</div></div>
+        <div class="s-card"><div class="n">2</div><div class="l">Kulüp</div></div>
+        <div class="s-card"><div class="n">147</div><div class="l">km Bu Ay</div></div>
+        <div class="s-card"><div class="n">5</div><div class="l">Rozet</div></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <h3 style="margin-bottom:14px;font-size:15px">Yaklaşan Etkinlikler</h3>
+        ${EVENTS.slice(0,2).map(e=>`<div style="display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--border)"><div style="font-size:20px">${e.emoji}</div><div><div style="font-size:13px;font-weight:500">${e.title}</div><div style="font-size:12px;color:var(--muted)">${e.date} · ${e.city}</div></div><div style="margin-left:auto"><span class="pill pill-gr">Kayıtlı</span></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="dash-content" id="dp-my-events">
+      <h2 style="margin-bottom:20px">Etkinliklerim</h2>
+      ${EVENTS.slice(0,3).map(e=>`<div class="ev-card" style="margin-bottom:12px;cursor:default">${renderEvtCard(e).replace('class="ev-card"','class=""').replace(`onclick="openEvent('${e.id}')"`,`onclick="openEvent('${e.id}')"`).replace('<div class="ev-card"','<div')}</div>`).join('')}
+    </div>
+    <div class="dash-content" id="dp-my-clubs">
+      <h2 style="margin-bottom:20px">Kulüplerim</h2>
+      <div class="grid g3">${CLUBS.slice(0,3).map(renderClubCard).join('')}</div>
+    </div>
+    <div class="dash-content" id="dp-activity">
+      <h2 style="margin-bottom:20px">Aktivite Geçmişi</h2>
+      <div class="activity-timeline">
+        ${[{ico:'🏃',title:'İstanbul Maratonu 2025\'e katıldı',time:'2 gün önce'},{ico:'🤝',title:'Boğaziçi Runners\'a katıldı',time:'1 hafta önce'},{ico:'🏅','title':'İlk Koşu rozeti kazandı',time:'1 hafta önce'}].map(a=>`<div class="act-item"><div class="act-ico">${a.ico}</div><div><div style="font-size:13px;font-weight:500">${a.title}</div><div style="font-size:12px;color:var(--muted)">${a.time}</div></div></div>`).join('')}
+      </div>
+    </div>
+    <div class="dash-content" id="dp-badges">
+      <h2 style="margin-bottom:20px">Rozetlerim</h2>
+      <div class="badge-grid">
+        ${[{ico:'🏅',n:'İlk Koşu',d:'İlk etkinlik',e:true},{ico:'🔥',n:'7 Gün Seri',d:'7 gün üst üste',e:true},{ico:'⚡',n:'Hız Şeytan',d:'Sub-5 pace',e:true},{ico:'🏆',n:'Maraton Finisher',d:'42.2 km',e:false},{ico:'💯',n:'100 Km',d:'Aylık 100 km',e:false},{ico:'⛰️',n:'Trail Kahraman',d:'3 trail',e:false}].map(b=>`<div class="badge-it ${b.e?'earned':''}"><div class="bi">${b.e?b.ico:'🔒'}</div><div class="bn">${b.n}</div><div class="bd">${b.d}</div></div>`).join('')}
+      </div>
+    </div>
+    <div class="dash-content" id="dp-profile-tab">
+      <h2 style="margin-bottom:20px">Profil Ayarları</h2>
+      <button class="btn btn-or btn-sm" onclick="nav('profile')">Profil Sayfasına Git →</button>
+    </div>`;
+}
+window.showDash=(id,btn)=>{
+  document.querySelectorAll('.dash-content').forEach(d=>d.classList.remove('on'));
+  const el=document.getElementById('dp-'+id);if(el)el.classList.add('on');
+  document.querySelectorAll('#dash-nav button').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+};
+
+// ── ADMIN SECTIONS ──
+function renderAdminSection(sec){
+  const main=document.getElementById('admin-main');
+  if(!main)return;
+  const sections={
+    dashboard:`<h2 style="margin-bottom:20px">📊 Dashboard</h2>
+      <div class="a-stats">
+        <div class="a-stat"><div class="l">Kullanıcılar</div><div class="n">—</div><div class="t">Firestore</div></div>
+        <div class="a-stat"><div class="l">Etkinlikler</div><div class="n">${EVENTS.length}</div><div class="t">↑ Aktif</div></div>
+        <div class="a-stat"><div class="l">Kulüpler</div><div class="n">${CLUBS.length}</div><div class="t">↑ Aktif</div></div>
+        <div class="a-stat"><div class="l">Yarışlar</div><div class="n">${RACES.length}</div><div class="t">↑ Takvimde</div></div>
+      </div>
+      <div class="card" style="padding:20px"><p style="color:var(--muted);font-size:14px">Sol menüden yönetmek istediğin bölümü seç.</p></div>`,
+    groups:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2>🏢 Gruplar</h2><button class="btn btn-or btn-sm">+ Grup Ekle</button></div>
+      <table><thead><tr><th>Kulüp</th><th>Şehir</th><th>Üye</th><th>Plan</th><th>Durum</th></tr></thead>
+      <tbody>${CLUBS.map(c=>`<tr><td>${c.emoji} ${c.name}</td><td>${c.city}</td><td>${c.members}</td><td><span class="pill pill-or">Ücretsiz</span></td><td><span class="pill pill-gr">Aktif</span></td></tr>`).join('')}</tbody></table>`,
+    events:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2>📅 Etkinlikler</h2></div>
+      <table><thead><tr><th>Etkinlik</th><th>Tarih</th><th>Şehir</th><th>Doluluk</th><th>Durum</th></tr></thead>
+      <tbody>${EVENTS.map(e=>`<tr><td>${e.emoji} ${e.title}</td><td>${e.date}</td><td>${e.city}</td>
+        <td><div style="display:flex;align-items:center;gap:8px"><div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:${Math.round(e.reg/e.cap*100)}%"></div></div>${Math.round(e.reg/e.cap*100)}%</div></td>
+        <td><span class="pill pill-gr">Aktif</span></td></tr>`).join('')}</tbody></table>`,
+    approvals:`<h2 style="margin-bottom:20px">✅ Onay Bekleyen Etkinlikler</h2>
+      <div class="card" style="padding:24px;text-align:center;color:var(--muted)"><p>Şu an onay bekleyen etkinlik yok.</p><p style="font-size:13px;margin-top:8px">Grup adminleri etkinlik gönderdiğinde burada görünür.</p></div>`,
+    races:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2>🏆 Yarış Takvimi</h2></div>
+      <div class="card" style="padding:24px;margin-bottom:20px">
+        <h3 style="margin-bottom:16px;font-size:15px">Yeni Yarış Ekle</h3>
+        <div class="form-row"><div class="form-grp"><label>Yarış Adı</label><input id="ar-name" placeholder="Ata Ultra 100K"/></div><div class="form-grp"><label>Emoji</label><input id="ar-emoji" placeholder="🏆" style="max-width:80px"/></div></div>
+        <div class="form-row"><div class="form-grp"><label>Tarih</label><input id="ar-date" type="date"/></div><div class="form-grp"><label>Konum</label><input id="ar-loc" placeholder="Kayseri, Erciyes"/></div></div>
+        <div class="form-grp"><label>Hakkında</label><textarea id="ar-about" rows="3" placeholder="Yarış hakkında..."></textarea></div>
+        <div class="form-row"><div class="form-grp"><label>İletişim</label><input id="ar-contact" placeholder="İletişim bilgisi"/></div><div class="form-grp"><label>Telefon</label><input id="ar-phone" placeholder="+90 xxx"/></div></div>
+        <div class="form-row"><div class="form-grp"><label>E-posta</label><input id="ar-email" placeholder="info@yaris.com"/></div><div class="form-grp"><label>Web Sitesi</label><input id="ar-web" placeholder="https://..."/></div></div>
+        <div class="form-grp"><label>Google Maps Embed URL</label><input id="ar-map" placeholder="https://maps.google.com/..."/></div>
+        <button class="btn btn-or" onclick="adminSaveRace()">Yarış Ekle</button>
+      </div>
+      <table><thead><tr><th>Yarış</th><th>Tarih</th><th>Konum</th><th>İşlem</th></tr></thead>
+      <tbody>${RACES.map(r=>`<tr><td>${r.emoji} ${r.name}</td><td>${r.date}</td><td>${r.location}</td><td><button class="btn btn-ghost btn-sm" onclick="openRace('${r.id}')">Görüntüle</button></td></tr>`).join('')}</tbody></table>`,
+    blog:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2>📰 Blog / Haberler</h2></div>
+      <div class="card" style="padding:24px;margin-bottom:20px">
+        <h3 style="margin-bottom:16px;font-size:15px">Yeni Yazı Ekle</h3>
+        <div class="form-row"><div class="form-grp"><label>Başlık</label><input id="ab-title" placeholder="Yazı başlığı"/></div><div class="form-grp"><label>Emoji</label><input id="ab-emoji" placeholder="📰" style="max-width:80px"/></div></div>
+        <div class="form-grp"><label>İçerik</label><textarea id="ab-body" rows="6" placeholder="Yazı içeriği..."></textarea></div>
+        <div class="form-row"><div class="form-grp"><label>Etiketler (virgülle)</label><input id="ab-tags" placeholder="Antrenman, Trail, Başlangıç"/></div><div class="form-grp"><label>Kapak Görseli URL</label><input id="ab-cover" placeholder="https://..."/></div></div>
+        <button class="btn btn-or" onclick="adminSaveBlog()">Yayınla</button>
+      </div>
+      <table><thead><tr><th>Yazı</th><th>Tarih</th><th>Etiketler</th><th>İşlem</th></tr></thead>
+      <tbody>${BLOG_POSTS.map(p=>`<tr><td>${p.emoji} ${p.title}</td><td>${p.publishedAt}</td><td>${(p.tags||[]).join(', ')}</td><td><button class="btn btn-ghost btn-sm" onclick="deleteBlogPost('${p.id}')">Sil</button></td></tr>`).join('')}</tbody></table>`,
+    banners:`<h2 style="margin-bottom:20px">🖼 Banner Yönetimi</h2>
+      <div class="card" style="padding:24px;margin-bottom:20px">
+        <h3 style="margin-bottom:16px;font-size:15px">Yeni Banner Ekle</h3>
+        <div class="form-row"><div class="form-grp"><label>Başlık (HTML ok)</label><input id="ab2-title" placeholder="Koş, Buluş..."/></div><div class="form-grp"><label>Rozet</label><input id="ab2-badge" placeholder="🏃 Yeni"/></div></div>
+        <div class="form-grp"><label>Alt Başlık</label><input id="ab2-sub" placeholder="Açıklama metni"/></div>
+        <div class="form-row"><div class="form-grp"><label>CTA Metni</label><input id="ab2-cta" placeholder="Hemen Başla →"/></div><div class="form-grp"><label>CTA URL</label><input id="ab2-url" placeholder="/etkinlikler"/></div></div>
+        <div class="form-grp"><label>Sıra</label><input id="ab2-order" type="number" placeholder="0"/></div>
+        <button class="btn btn-or" onclick="adminSaveBanner()">Banner Ekle</button>
+      </div>`,
+    popup:`<h2 style="margin-bottom:20px">💬 Popup Yönetimi</h2>
+      <div class="card" style="padding:28px;max-width:500px">
+        <div class="form-grp"><label>Başlık</label><input id="apu-title" placeholder="Hoş Geldin!" value="Hoş Geldin!"/></div>
+        <div class="form-grp"><label>İçerik</label><textarea id="apu-body" rows="3" placeholder="Popup içeriği...">RunClubTürkiye'ye katıl, koşu topluluğunu keşfet!</textarea></div>
+        <div class="form-row"><div class="form-grp"><label>Emoji / İkon</label><input id="apu-emoji" placeholder="🏃" value="🏃"/></div><div class="form-grp"><label>CTA Metni</label><input id="apu-cta" placeholder="Keşfet →" value="Keşfet →"/></div></div>
+        <div class="form-grp"><label>CTA URL (boş = kapat)</label><input id="apu-url" placeholder="https://..."/></div>
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <input type="checkbox" id="apu-active" checked style="width:18px;height:18px;accent-color:var(--or)"/>
+          <label style="display:inline;color:var(--text);font-size:14px">Popup Aktif</label>
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-or" onclick="adminSavePopup()">Kaydet & Yayınla</button>
+          <button class="btn btn-ghost" onclick="openModal('popup-modal')">Önizle</button>
+        </div>
+      </div>`,
+    sponsors:`<h2 style="margin-bottom:20px">💼 Sponsorlar</h2>
+      <div class="card" style="padding:24px;margin-bottom:20px">
+        <div class="form-row"><div class="form-grp"><label>Sponsor Adı</label><input id="sp-name" placeholder="Nike"/></div><div class="form-grp"><label>Web Sitesi</label><input id="sp-url" placeholder="https://..."/></div></div>
+        <button class="btn btn-or" onclick="adminAddSponsor()">Ekle</button>
+      </div>
+      <div style="display:flex;gap:12px;flex-wrap:wrap">
+        ${['Nike','Garmin','Asics','Decathlon','Salomon','GU Energy'].map(s=>`<div class="sponsor-logo" style="display:flex;align-items:center;gap:8px">${s} <button onclick="this.parentElement.remove()" style="background:none;border:none;color:var(--muted);cursor:pointer">×</button></div>`).join('')}
+      </div>`,
+    users:`<h2 style="margin-bottom:20px">👥 Kullanıcılar</h2><div id="admin-users-content"><div class="spinner" style="margin:20px auto"></div></div>`
+  };
+  main.innerHTML=sections[sec]||sections['dashboard'];
+  if(sec==='users') setTimeout(()=>loadAdminUsers&&loadAdminUsers(),100);
+}
+window.aNav=(sec,btn)=>{
+  document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderAdminSection(sec);
+};
+window.adminAddSponsor=()=>{
+  const n=document.getElementById('sp-name')?.value;
+  if(!n)return;
+  toast('Sponsor eklendi ✓','ok');
+};
+
+// ── GROUP PANEL ──
+function buildGroupPanel(){
+  return`<div class="admin-sec on" id="gp-events">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px"><h2>📅 Etkinlik Yönetimi</h2></div>
+    <div class="card" style="padding:24px;margin-bottom:20px">
+      <h3 style="margin-bottom:16px;font-size:15px">Yeni Etkinlik Gönder (Onaya)</h3>
+      <div class="form-row"><div class="form-grp"><label>Etkinlik Adı</label><input id="ge-title" placeholder="Sabah Koşusu"/></div><div class="form-grp"><label>Kategori</label><select id="ge-cat"><option>Maraton</option><option>Trail</option><option>5K/10K</option><option>Ultra</option></select></div></div>
+      <div class="form-row"><div class="form-grp"><label>Tarih</label><input id="ge-date" type="date"/></div><div class="form-grp"><label>Mesafe (km)</label><input id="ge-dist" placeholder="10"/></div></div>
+      <div class="form-row"><div class="form-grp"><label>Kapasite</label><input id="ge-cap" type="number" placeholder="100"/></div><div class="form-grp"><label>Kayıt Ücreti (₺)</label><input id="ge-fee" placeholder="150"/></div></div>
+      <div class="form-grp">
+        <label>Pace Grupları</label>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          ${['4:00–4:30','4:30–5:00','5:00–5:30','5:30–6:00','6:00+'].map(p=>`<button class="pace-opt gp-pace" onclick="this.classList.toggle('on')">${p}</button>`).join('')}
+        </div>
+      </div>
+      <div class="form-grp"><label>Açıklama</label><textarea id="ge-desc" rows="3"></textarea></div>
+      <button class="btn btn-or" onclick="submitEventForApproval()">Onaya Gönder</button>
+    </div>
+  </div>`;
+}
+window.gNav=(sec,btn)=>{
+  document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  document.getElementById('panel-main').innerHTML=buildGroupPanel();
+};
+
+// ── TOAST / NOTIF ──
+window.toast=(msg,type='')=>{
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className=type==='ok'?'on ok':type==='err'?'on err':'on';
+  setTimeout(()=>t.classList.remove('on'),3500);
+};
+window.showNotif=(ico,title,body)=>{
+  document.getElementById('notif-ico').textContent=ico;
+  document.getElementById('notif-title').textContent=title;
+  document.getElementById('notif-body').textContent=body;
+  const p=document.getElementById('notif-pop');
+  p.classList.add('on');setTimeout(()=>p.classList.remove('on'),5000);
+};
+
+// ── INIT ──
+function initAll(){
+  renderEvtCards(EVENTS.slice(0,4),'home-events');
+  document.getElementById('clubs-list')&&(document.getElementById('clubs-list').innerHTML=CLUBS.map(renderClubCard).join(''));
+  document.getElementById('home-clubs')&&(document.getElementById('home-clubs').innerHTML=CLUBS.slice(0,3).map(renderClubCard).join(''));
+  renderEvtCards(EVENTS,'events-list');
+  loadRaces();
+  loadBlog();
+  document.getElementById('pg-home').classList.add('on');
+}
+initAll();
+</script>
+</body>
+</html>

@@ -1370,7 +1370,9 @@ function renderBanners(banners){
   const cont=document.getElementById('banner-slides');
   const dots=document.getElementById('banner-dots');
   if(!cont)return;
-  cont.innerHTML=banners.map((b,i)=>`
+  const active=banners.filter(b=>b.imgUrl||b.title);
+  if(!active.length)return;
+  cont.innerHTML=active.map((b,i)=>`
     <div class="banner-slide ${i===0?'on':''}" id="bs-${i}">
       ${b.imgUrl?`<div class="banner-bg-img" style="background-image:url('${b.imgUrl}')"></div><div class="banner-overlay"></div>`:`<div style="position:absolute;inset:0;background:${b.bg||'linear-gradient(135deg,#0a0000,#1a0800)'}"></div>`}
       <div class="banner-content">
@@ -1383,9 +1385,8 @@ function renderBanners(banners){
         </div>
       </div>
     </div>`).join('');
-  dots.innerHTML=banners.map((_,i)=>`<div class="bdot ${i===0?'on':''}" onclick="bannerGo(${i})"></div>`).join('');
-  clearInterval(bannerTimer);
-  bannerTimer=setInterval(()=>bannerGo((bannerIdx+1)%banners.length),5000);
+  dots.innerHTML=active.map((_,i)=>`<div class="bdot ${i===0?'on':''}" onclick="bannerGo(${i})"></div>`).join('');
+  startBannerAuto(active.length);
 }
 window.bannerGo=i=>{
   const slides=document.querySelectorAll('.banner-slide');
@@ -1396,6 +1397,15 @@ window.bannerGo=i=>{
 };
 window.bannerNext=()=>bannerGo((bannerIdx+1)%Math.max(1,document.querySelectorAll('.banner-slide').length));
 window.bannerPrev=()=>{const l=Math.max(1,document.querySelectorAll('.banner-slide').length);bannerGo((bannerIdx-1+l)%l);};
+
+function startBannerAuto(count){
+  clearInterval(bannerTimer);
+  if(count>1) bannerTimer=setInterval(()=>bannerGo((bannerIdx+1)%count),5000);
+  const nav=document.querySelectorAll('.banner-nav');
+  nav.forEach(n=>n.style.display=count>1?'flex':'none');
+  const dotsEl=document.getElementById('banner-dots');
+  if(dotsEl) dotsEl.style.display=count>1?'flex':'none';
+}
 
 // ── SPONSORS ──
 function renderSponsors(){
@@ -1677,6 +1687,7 @@ function renderAdminSection(sec){
     applications:`<h2 style="margin-bottom:18px">📋 Grup Admin Başvuruları</h2><div id="admin-applications-list"><div class="spinner" style="margin:20px auto"></div></div>`,
   };
   main.innerHTML=sections[sec]||sections['dashboard'];
+  if(sec==='banners')setTimeout(renderBannerSlots,100);
   if(sec==='users')setTimeout(()=>loadAdminUsers&&loadAdminUsers(),100);
   if(sec==='messages')setTimeout(()=>loadAdminMessages&&loadAdminMessages(),100);
   if(sec==='applications')setTimeout(()=>loadApplications&&loadApplications(),100);
@@ -1725,6 +1736,116 @@ window.previewImg=(input,previewId)=>{
   reader.onload=e=>{const img=document.getElementById(previewId);if(img){img.src=e.target.result;img.style.display='block';}};
   reader.readAsDataURL(file);
 };
+
+// ── BANNER SLOTS ──
+window.BANNER_SLOTS=window.BANNER_SLOTS||[null,null,null];
+
+function renderBannerSlots(){
+  const el=document.getElementById('banner-slots');if(!el)return;
+  el.innerHTML=window.BANNER_SLOTS.map((b,i)=>`
+    <div class="card" style="padding:20px;margin-bottom:14px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <h3 style="font-size:14px">Banner ${i+1} ${b?'<span class="pill pill-gr">Aktif</span>':'<span class="pill pill-or">Boş</span>'}</h3>
+        ${b?`<button class="btn btn-red btn-sm" onclick="clearBannerSlot(${i})">🗑 Sil</button>`:''}
+      </div>
+      ${b&&b.imgUrl?`<div style="width:100%;height:80px;border-radius:6px;overflow:hidden;margin-bottom:12px;background:url('${b.imgUrl}') center/cover"></div>`:''}
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div>
+          <label>Görsel URL</label>
+          <input type="text" id="bs-imgurl-${i}" placeholder="https://i.ibb.co/... veya Firebase URL" value="${b?.imgUrl||''}" oninput="previewSlotImg(${i},this.value)"/>
+          <div style="margin-top:6px;position:relative">
+            <div class="img-upload-area" style="padding:10px">
+              <input type="file" accept="image/*" onchange="uploadSlotImg(${i},this)"/>
+              <div style="font-size:12px;color:var(--muted)">📁 Galeriden seç (1440×460px · Max 3MB)</div>
+            </div>
+          </div>
+          <img id="bs-preview-${i}" src="${b?.imgUrl||''}" style="width:100%;max-height:80px;object-fit:cover;border-radius:6px;margin-top:6px;display:${b?.imgUrl?'block':'none'}"/>
+        </div>
+        <div class="form-row">
+          <div class="form-grp"><label>Başlık</label><input type="text" id="bs-title-${i}" value="${b?.title||''}" placeholder="Banner başlığı..."/></div>
+          <div class="form-grp"><label>Alt Başlık</label><input type="text" id="bs-sub-${i}" value="${b?.subtitle||''}" placeholder="Açıklama..."/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-grp"><label>Buton Metni</label><input type="text" id="bs-cta-${i}" value="${b?.ctaText||''}" placeholder="Hemen Başla →"/></div>
+          <div class="form-grp"><label>Tıklama URL</label><input type="text" id="bs-url-${i}" value="${b?.ctaUrl||''}" placeholder="https://..."/></div>
+        </div>
+        <button class="btn btn-or btn-sm" onclick="saveBannerSlot(${i})">💾 Kaydet</button>
+      </div>
+    </div>`).join('');
+}
+
+window.previewSlotImg=(i,url)=>{
+  const img=document.getElementById(`bs-preview-${i}`);
+  if(img){img.src=url;img.style.display=url?'block':'none';}
+};
+
+window.uploadSlotImg=async(i,input)=>{
+  const file=input.files[0];if(!file)return;
+  const reader=new FileReader();
+  reader.onload=e=>{
+    const url=e.target.result;
+    document.getElementById(`bs-imgurl-${i}`).value=url;
+    previewSlotImg(i,url);
+  };
+  reader.readAsDataURL(file);
+  try{
+    const{ref,uploadBytes,getDownloadURL,storage}=window._fb;
+    const r=ref(storage,`banners/slot${i}_${Date.now()}`);
+    await uploadBytes(r,file);
+    const url=await getDownloadURL(r);
+    document.getElementById(`bs-imgurl-${i}`).value=url;
+    previewSlotImg(i,url);
+    toast('Görsel yüklendi ✓','ok');
+  }catch(e){toast('URL ile devam edin: '+e.message,'err');}
+};
+
+window.saveBannerSlot=async(i)=>{
+  const imgUrl=document.getElementById(`bs-imgurl-${i}`)?.value||'';
+  const title=document.getElementById(`bs-title-${i}`)?.value||'';
+  const subtitle=document.getElementById(`bs-sub-${i}`)?.value||'';
+  const ctaText=document.getElementById(`bs-cta-${i}`)?.value||'';
+  const ctaUrl=document.getElementById(`bs-url-${i}`)?.value||'';
+  if(!imgUrl&&!title){toast('Görsel URL veya başlık girin','err');return;}
+  const data={imgUrl,title,subtitle,ctaText,ctaUrl,order:i,active:true};
+  window.BANNER_SLOTS[i]=data;
+  try{
+    const{setDoc,doc,db,serverTimestamp}=window._fb;
+    await setDoc(doc(db,'banners','slot'+i),{...data,updatedAt:serverTimestamp()});
+  }catch(e){}
+  toast(`Banner ${i+1} kaydedildi ✓`,'ok');
+  loadBannersFromSlots();
+  renderBannerSlots();
+};
+
+window.clearBannerSlot=async(i)=>{
+  if(!confirm(`Banner ${i+1} silinsin mi?`))return;
+  window.BANNER_SLOTS[i]=null;
+  try{
+    const{deleteDoc,doc,db}=window._fb;
+    await deleteDoc(doc(db,'banners','slot'+i));
+  }catch(e){}
+  toast(`Banner ${i+1} silindi`,'ok');
+  loadBannersFromSlots();
+  renderBannerSlots();
+};
+
+function loadBannersFromSlots(){
+  const active=window.BANNER_SLOTS.filter(b=>b&&(b.imgUrl||b.title));
+  renderBanners(active.length?active:window.DEFAULT_BANNERS);
+}
+
+async function loadBannerSlotsFromDB(){
+  try{
+    const{getDocs,collection,db}=window._fb;
+    const snap=await getDocs(collection(db,'banners'));
+    snap.forEach(d=>{
+      const data=d.data();
+      const idx=parseInt(d.id.replace('slot',''));
+      if(!isNaN(idx)&&idx>=0&&idx<3) window.BANNER_SLOTS[idx]=data;
+    });
+  }catch(e){}
+  loadBannersFromSlots();
+}
 
 // ── CRUD OPERATIONS ──
 window.editClub=id=>{

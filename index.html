@@ -317,6 +317,9 @@ tr:hover td{background:var(--or-soft)}
 .newsletter-form{display:flex;gap:10px;max-width:500px;margin:18px auto 0}
 .newsletter-form input{flex:1;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff}
 .newsletter-form input::placeholder{color:rgba(255,255,255,.5)}
+@media(max-width:768px){
+  #global-footer .container>div[style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr!important;padding:32px 24px!important}
+}
 
 /* ━━ FOOTER ━━ */
 footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
@@ -949,15 +952,90 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 <!-- ── GLOBAL NEWSLETTER + FOOTER ── -->
 <div id="global-footer" style="display:none">
-  <div class="newsletter-wrap" style="background:linear-gradient(135deg,#2C1810,#1A0A04)"><div class="container" style="text-align:center">
-    <h2 style="color:#fff;font-size:22px;margin-bottom:6px;font-family:'Raleway',sans-serif">📬 Haberdar Ol!</h2>
-    <p style="color:rgba(255,255,255,.7);font-size:14px">Yeni etkinlikler ve duyurulardan ilk sen haberdar ol.</p>
-    <div class="newsletter-form">
-      <input type="email" id="nl-email" placeholder="E-posta adresin..."/>
-      <button class="btn btn-or" onclick="subscribeNewsletter()">Abone Ol</button>
+  <!-- NEWSLETTER — Geniş Kart Tasarımı -->
+  <div style="background:var(--bg2);padding:40px 0 0">
+    <div class="container">
+      <div style="
+        background:linear-gradient(135deg,#E8622A 0%,#C94E1C 50%,#A83A10 100%);
+        border-radius:24px;padding:48px 56px;
+        display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center;
+        position:relative;overflow:hidden;
+        box-shadow:0 20px 60px rgba(232,98,42,.3)
+      ">
+        <!-- Arka plan daireler -->
+        <div style="position:absolute;top:-60px;right:-60px;width:280px;height:280px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none"></div>
+        <div style="position:absolute;bottom:-40px;right:200px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.05);pointer-events:none"></div>
+        <div style="position:absolute;top:20px;right:300px;width:80px;height:80px;border-radius:50%;background:rgba(255,255,255,.04);pointer-events:none"></div>
+
+        <!-- Sol: İkon + Metin -->
+        <div style="position:relative;z-index:1">
+          <!-- Animasyonlu SVG ikon -->
+          <div style="margin-bottom:20px">
+            <svg width="72" height="72" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg">
+              <defs>
+                <style>
+                  .nl-env{animation:nlEnvBounce 2s ease-in-out infinite}
+                  .nl-line1{animation:nlLine 2s ease-in-out infinite .1s}
+                  .nl-line2{animation:nlLine 2s ease-in-out infinite .25s}
+                  .nl-line3{animation:nlLine 2s ease-in-out infinite .4s}
+                  .nl-dot1{animation:nlPop 2s ease-in-out infinite .0s}
+                  .nl-dot2{animation:nlPop 2s ease-in-out infinite .3s}
+                  .nl-dot3{animation:nlPop 2s ease-in-out infinite .6s}
+                  @keyframes nlEnvBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-5px)}}
+                  @keyframes nlLine{0%,100%{opacity:.5;transform:translateX(0)}50%{opacity:1;transform:translateX(4px)}}
+                  @keyframes nlPop{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.4);opacity:1}}
+                </style>
+              </defs>
+              <!-- Zarf gövdesi -->
+              <g class="nl-env">
+                <rect x="8" y="20" width="56" height="38" rx="6" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.6)" stroke-width="2"/>
+                <path d="M8 26 L36 44 L64 26" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                <path d="M8 58 L26 40" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-linecap="round"/>
+                <path d="M64 58 L46 40" fill="none" stroke="rgba(255,255,255,.5)" stroke-width="1.5" stroke-linecap="round"/>
+              </g>
+              <!-- Hareketli noktalar (bildirim) -->
+              <circle class="nl-dot1" cx="56" cy="16" r="5" fill="#fff"/>
+              <circle class="nl-dot2" cx="62" cy="10" r="3.5" fill="rgba(255,255,255,.7)"/>
+              <circle class="nl-dot3" cx="66" cy="18" r="2.5" fill="rgba(255,255,255,.5)"/>
+            </svg>
+          </div>
+
+          <h2 style="font-family:'Raleway',sans-serif;font-size:28px;font-weight:800;color:#fff;margin-bottom:10px;line-height:1.2">Gelişmeleri Takip Et</h2>
+          <p style="color:rgba(255,255,255,.8);font-size:14px;line-height:1.7;margin-bottom:16px">Yeni etkinlikler, kulüp duyuruları ve koşu ipuçlarından ilk sen haberdar ol.</p>
+
+          <!-- Özellik chips -->
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:11px;padding:4px 12px;border-radius:20px;font-family:'Raleway',sans-serif;font-weight:600;border:1px solid rgba(255,255,255,.2)">🏃 Etkinlik Haberleri</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:11px;padding:4px 12px;border-radius:20px;font-family:'Raleway',sans-serif;font-weight:600;border:1px solid rgba(255,255,255,.2)">🏆 Yarış Sonuçları</span>
+            <span style="background:rgba(255,255,255,.15);color:#fff;font-size:11px;padding:4px 12px;border-radius:20px;font-family:'Raleway',sans-serif;font-weight:600;border:1px solid rgba(255,255,255,.2)">📝 Antrenman İpuçları</span>
+          </div>
+        </div>
+
+        <!-- Sağ: Form -->
+        <div style="position:relative;z-index:1">
+          <div style="background:rgba(255,255,255,.12);border-radius:16px;padding:28px;backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.2)">
+            <p style="color:rgba(255,255,255,.9);font-size:13px;font-family:'Raleway',sans-serif;font-weight:600;margin-bottom:14px;letter-spacing:.3px">E-POSTA ADRESİNİZ</p>
+            <input type="email" id="nl-email"
+              placeholder="ornek@mail.com"
+              style="background:rgba(255,255,255,.95);border:none;border-radius:10px;padding:14px 18px;width:100%;font-size:14px;color:#2C1810;margin-bottom:12px;font-family:'Open Sans',sans-serif"
+            />
+            <button onclick="subscribeNewsletter()" style="
+              width:100%;background:#2C1810;color:#fff;border:none;
+              padding:14px;border-radius:10px;font-size:14px;
+              font-family:'Raleway',sans-serif;font-weight:700;
+              cursor:pointer;transition:all .2s ease;
+              letter-spacing:.3px
+            " onmouseover="this.style.background='#1A0A04';this.style.transform='translateY(-1px)'"
+               onmouseout="this.style.background='#2C1810';this.style.transform='translateY(0)'">
+              Hemen Abone Ol →
+            </button>
+            <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.85);display:none;text-align:center;font-family:'Open Sans',sans-serif"></p>
+            <p style="color:rgba(255,255,255,.5);font-size:11px;text-align:center;margin-top:12px;font-family:'Open Sans',sans-serif">🔒 Spam yok. İstediğin zaman çıkabilirsin.</p>
+          </div>
+        </div>
+      </div>
     </div>
-    <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.7);display:none"></p>
-  </div></div>
+  </div>
   <footer><div class="container">
     <div class="footer-grid">
       <div class="footer-col"><svg width="240" height="56" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">

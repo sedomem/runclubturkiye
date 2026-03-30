@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
 <title>RunClubTürkiye — Türkiye'nin Koşu Topluluğu</title>
 <meta name="description" content="Türkiye genelinde koşu kulüpleri, etkinlikler ve yarış takvimi."/>
+<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23E8622A'/%3E%3Ccircle cx='112' cy='60' r='18' fill='%23fff'/%3E%3Cellipse cx='104' cy='98' rx='12' ry='24' fill='%23fff' transform='rotate(-12 104 98)'/%3E%3Cpath d='M98 82 L68 64' stroke='%23F5F0E8' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 80 L136 90' stroke='%23F5F0E8' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3Cpath d='M96 120 L74 144' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 122 L130 135' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"/>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Open+Sans:wght@300;400;500;600&family=Alatsi&display=swap');
 /* ━━ ROOT TOKENS ━━ */
@@ -61,7 +62,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 
 /* ━━ NAV ━━ */
 #topnav{position:sticky;top:0;z-index:200;background:rgba(253,250,246,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--border);height:64px;display:flex;align-items:center;padding:0 20px;gap:14px;box-shadow:var(--shadow-sm)}
-.logo{font-family:var(--font-display);font-weight:400;font-size:18px;color:var(--dark2);cursor:pointer;white-space:nowrap;flex-shrink:0;letter-spacing:.5px}
+.logo{cursor:pointer;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;line-height:1}
 .logo span{color:var(--or)}
 .logo b{color:var(--dark2);font-family:var(--font-head);font-weight:700}
 .nav-center{display:flex;gap:2px;flex:1;justify-content:center}
@@ -396,10 +397,32 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 </style>
 </head>
 <body>
-<div class="loading" id="loading"><div style="font-size:26px;font-weight:700;color:var(--or)">RunClub<b style="color:#fff">Türkiye</b></div><div class="spinner"></div></div>
+<div class="loading" id="loading" style="background:#F5F0E8"><svg width="90" height="90" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <rect x="0" y="0" width="200" height="200" rx="44" fill="#E8622A"/>
+  <circle cx="112" cy="60" r="18" fill="#fff"/>
+  <ellipse cx="104" cy="98" rx="12" ry="24" fill="#fff" transform="rotate(-12 104 98)"/>
+  <path d="M98 82 L68 64" stroke="#F5F0E8" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M108 80 L136 90" stroke="#F5F0E8" stroke-width="8" stroke-linecap="round" fill="none"/>
+  <path d="M96 120 L74 144" stroke="#fff" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M108 122 L130 135" stroke="#fff" stroke-width="9" stroke-linecap="round" fill="none"/>
+  <path d="M62 68 L46 68" stroke="#F5F0E8" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M58 80 L40 80" stroke="#F5F0E8" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.5"/>
+  <text x="100" y="180" text-anchor="middle" font-family="Raleway,sans-serif" font-weight="800" font-size="22" fill="#fff" letter-spacing="2" opacity="0.9">RC</text>
+</svg><div style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:#2C1810;margin-top:14px">RunClub<span style="color:#E8622A">Türkiye</span></div><div class="spinner" style="margin-top:12px;border-top-color:#E8622A;border-color:#E0D8CC"></div></div>
 
 <nav id="topnav">
-  <div class="logo" onclick="nav('home')">RunClub<b>Türkiye</b></div>
+  <div class="logo" onclick="nav('home')" style="display:flex;align-items:center;cursor:pointer"><svg width="180" height="48" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <circle cx="54" cy="38" r="11" fill="#2C1810"/>
+  <ellipse cx="52" cy="58" rx="8" ry="16" fill="#2C1810" transform="rotate(-10 52 58)"/>
+  <path d="M49 48 L30 35" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M55 46 L73 54" stroke="#E8622A" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M46 73 L28 88" stroke="#2C1810" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M56 74 L74 83" stroke="#2C1810" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M26 40 L14 40" stroke="#E8622A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <path d="M23 50 L9 50" stroke="#E8622A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4"/>
+  <text x="100" y="68" font-family="Alatsi,serif" font-size="52" fill="#E8622A">Run</text>
+  <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#2C1810">Club</text>
+</svg></div>
   <div class="nav-center">
     <button onclick="nav('home')" id="nb-home">Ana Sayfa</button>
     <button onclick="nav('events')" id="nb-events">Etkinlikler</button>
@@ -494,13 +517,25 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   </div></div>
   <footer><div class="container">
     <div class="footer-grid">
-      <div class="footer-col"><div style="font-size:16px;font-weight:700;margin-bottom:10px">RunClub<b>Türkiye</b></div><p style="font-size:12px;color:var(--muted);line-height:1.6">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:var(--muted);margin-top:8px">📧 runclubturkiye@gmail.com</p></div>
+      <div class="footer-col"><svg width="240" height="56" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <circle cx="54" cy="38" r="11" fill="#E8622A"/>
+  <ellipse cx="52" cy="58" rx="8" ry="16" fill="#E8622A" transform="rotate(-10 52 58)"/>
+  <path d="M49 48 L30 35" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M55 46 L73 54" stroke="#F5F0E8" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M46 73 L28 88" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M56 74 L74 83" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M26 40 L14 40" stroke="#E8622A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M23 50 L9 50" stroke="#E8622A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5"/>
+  <text x="100" y="68" font-family="Alatsi,serif" font-size="52" fill="#E8622A">Run</text>
+  <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#fff">Club</text>
+  <text x="100" y="92" font-family="Raleway,sans-serif" font-size="14" fill="#8A7060" letter-spacing="5">TÜRKİYE</text>
+</svg><p style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;margin-top:8px">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:rgba(255,255,255,.35);margin-top:6px">📧 runclubturkiye@gmail.com</p></div>
       <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a></div>
       <div class="footer-col"><h4>Yasal</h4><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
       <div class="footer-col"><h4>Sosyal</h4><a>Instagram</a><a>Strava</a><a>YouTube</a></div>
     </div>
     <div class="footer-legal"><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
-    <div class="footer-bot"><span>© 2025 RunClubTürkiye</span><span>runclubturkiye.com</span></div>
+    <div class="footer-bot"><span style="font-family:'Raleway',sans-serif;letter-spacing:.5px">© 2025 RunClub<b style="color:#E8622A">Türkiye</b></span><span>runclubturkiye.com</span></div>
   </div></footer>
 </div>
 
@@ -699,7 +734,17 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <!-- MODALS -->
 <div class="overlay" id="auth-modal">
   <div class="modal"><button class="close-x" onclick="closeModal('auth-modal')">×</button>
-    <h2>RunClubTürkiye</h2><div class="sub" id="auth-subtitle">Topluluğa katıl</div>
+    <svg width="180" height="54" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 16px">
+  <circle cx="40" cy="38" r="11" fill="#2C1810"/>
+  <ellipse cx="38" cy="58" rx="8" ry="15" fill="#2C1810" transform="rotate(-10 38 58)"/>
+  <path d="M35 48 L18 36" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M41 46 L58 54" stroke="#E8622A" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M33 72 L16 86" stroke="#2C1810" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M42 73 L58 82" stroke="#2C1810" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M13 42 L3 42" stroke="#E8622A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
+  <text x="80" y="65" font-family="Alatsi,serif" font-size="52" fill="#E8622A">Run</text>
+  <text x="158" y="65" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#2C1810">Club</text>
+</svg><div class="sub" id="auth-subtitle" style="text-align:center;margin-top:4px">Topluluğa katıl</div>
     <div class="tab-row" id="auth-tabs">
       <button class="tab-btn on" id="tab-login" onclick="switchTab('login')">Giriş Yap</button>
       <button class="tab-btn" id="tab-register" onclick="switchTab('register')">Üye Ol</button>
@@ -2927,10 +2972,14 @@ window.gSaveSettings=async()=>{
   try{
     // users koleksiyonuna yaz (auth gerekli)
     await fb.setDoc(fb.doc(fb.db,'users',CU.uid),data,{merge:true});
-    // clubs koleksiyonuna da yaz (public read için) — kulüp adını key olarak kullan
-    const clubsData={name:data.clubName,city:data.city,desc:data.clubDesc,imgUrl:clubImg,open:data.clubOpen,members:data.clubMemberCount||0,adminUid:CU.uid,insta:data.clubInsta,strava:data.clubStrava,updatedAt:fb.serverTimestamp()};
-    await fb.setDoc(fb.doc(fb.db,'clubs',CU.uid),clubsData,{merge:true});
     Object.assign(CU,data);
+    // clubs koleksiyonuna da yaz (public read için) — Rules'da izin yoksa sessizce geç
+    try{
+      const clubsData={name:data.clubName||'',city:data.city||'',desc:data.clubDesc||'',imgUrl:clubImg,open:data.clubOpen!==false,members:CU.clubMemberCount||0,adminUid:CU.uid,insta:data.clubInsta||'',strava:data.clubStrava||'',updatedAt:fb.serverTimestamp()};
+      await fb.setDoc(fb.doc(fb.db,'clubs',CU.uid),clubsData,{merge:true});
+    }catch(clubErr){
+      console.warn('clubs koleksiyonu yazılamadı (Firestore rules güncellemesi gerekiyor):',clubErr.message);
+    }
     toast('Kulüp bilgileri güncellendi ✓','ok');
     // Logo preview güncelle
     const prev=document.getElementById('gs-logo-preview');

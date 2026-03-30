@@ -2026,7 +2026,8 @@ window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=
 window.loadPendingEvents=async()=>{
   const el=document.getElementById('admin-approvals-list');if(!el)return;
   try{
-    const snap=await getDocs(query(collection(db,'events'),where('status','==','pending')));
+    const fb=window._fb;
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'events'),fb.where('status','==','pending')));
     if(snap.empty){
       el.innerHTML='<div class="card" style="padding:20px;text-align:center;color:var(--muted)">✅ Onay bekleyen etkinlik yok.</div>';
       return;
@@ -2035,7 +2036,7 @@ window.loadPendingEvents=async()=>{
     snap.forEach(d=>{
       const e=d.data();
       html+=`<tr>
-        <td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat} · ${e.dist}</span></td>
+        <td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat||''} · ${e.dist||''}</span></td>
         <td><span style="font-size:11px">${e.clubName||'—'}</span><br><span style="font-size:10px;color:var(--muted)">${e.groupAdminName||'—'}</span></td>
         <td>${e.date||'—'}</td>
         <td>${e.city||'—'}</td>
@@ -2049,19 +2050,20 @@ window.loadPendingEvents=async()=>{
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
 };
 window.approveEvent=async(id)=>{
+  const fb=window._fb;
   try{
-    await setDoc(doc(db,'events',id),{status:'approved',approvedAt:serverTimestamp()},{merge:true});
+    await fb.setDoc(fb.doc(fb.db,'events',id),{status:'approved',approvedAt:fb.serverTimestamp()},{merge:true});
     toast('Etkinlik onaylandı ve yayınlandı ✓','ok');
-    // Local array'e ekle
-    await loadEventsFromDB();
+    if(window.loadEventsFromDB)await window.loadEventsFromDB();
     renderEvts(EVENTS.slice(0,4),'home-events');
     loadPendingEvents();
   }catch(e){toast('Hata: '+e.message,'err');}
 };
 window.rejectEvent=async(id)=>{
   const reason=prompt('Red sebebi (opsiyonel):');
+  const fb=window._fb;
   try{
-    await setDoc(doc(db,'events',id),{status:'rejected',rejectReason:reason||'',rejectedAt:serverTimestamp()},{merge:true});
+    await fb.setDoc(fb.doc(fb.db,'events',id),{status:'rejected',rejectReason:reason||'',rejectedAt:fb.serverTimestamp()},{merge:true});
     toast('Etkinlik reddedildi','ok');loadPendingEvents();
   }catch(e){toast('Hata: '+e.message,'err');}
 };
@@ -2116,6 +2118,7 @@ function renderBannerSlots(){
 // ── CRUD ──
 window.editClub=id=>{const c=CLUBS.find(x=>x.id===id);if(!c)return;document.getElementById('edit-club-title').textContent='Kulüp Düzenle';document.getElementById('edit-club-id').value=id;document.getElementById('edit-club-name').value=c.name;document.getElementById('edit-club-city').value=c.city;document.getElementById('edit-club-desc').value=c.desc;document.getElementById('edit-club-open').value=c.open.toString();document.getElementById('edit-club-imgurl').value=c.imgUrl||'';openModal('edit-club-modal');};
 window.saveClubEdit=async()=>{
+  const fb=window._fb;
   const id=document.getElementById('edit-club-id').value;
   const imgInput=document.getElementById('edit-club-img');
   let imgUrl=document.getElementById('edit-club-imgurl').value||'';
@@ -2124,10 +2127,10 @@ window.saveClubEdit=async()=>{
   try{
     if(id){
       // Firestore'da clubs koleksiyonuna yaz
-      await setDoc(doc(db,'clubs',id),{...data,updatedAt:serverTimestamp()},{merge:true});
+      await fb.setDoc(fb.doc(fb.db,'clubs',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
       const c=CLUBS.find(x=>x.id===id);if(c)Object.assign(c,data);
     }else{
-      const r=await addDoc(collection(db,'clubs'),{...data,members:0,createdAt:serverTimestamp()});
+      const r=await fb.addDoc(fb.collection(fb.db,'clubs'),{...data,members:0,createdAt:fb.serverTimestamp()});
       CLUBS.unshift({id:r.id,...data,members:0});
     }
     closeModal('edit-club-modal');toast('Kaydedildi ✓','ok');
@@ -2138,9 +2141,10 @@ window.saveClubEdit=async()=>{
   }catch(e){toast('Hata: '+e.message,'err');}
 };
 window.deleteClub=async(id)=>{
+  const fb=window._fb;
   if(!confirm('Sil?'))return;
   try{
-    await deleteDoc(doc(db,'clubs',id));
+    await fb.deleteDoc(fb.doc(fb.db,'clubs',id));
     const i=CLUBS.findIndex(x=>x.id===id);if(i>-1)CLUBS.splice(i,1);
     toast('Silindi','ok');renderAdminSection('groups');
     const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=CLUBS.map(clubCard).join('');
@@ -2149,15 +2153,16 @@ window.deleteClub=async(id)=>{
 window.openAddEventModal=()=>{document.getElementById('edit-event-id').value='';document.getElementById('edit-event-title-label').textContent='Yeni Etkinlik';['edit-ev-name','edit-ev-dist','edit-ev-desc'].forEach(id=>document.getElementById(id).value='');openModal('edit-event-modal');};
 window.editEvent=id=>{const e=EVENTS.find(x=>x.id===id);if(!e)return;document.getElementById('edit-event-id').value=id;document.getElementById('edit-event-title-label').textContent='Etkinlik Düzenle';document.getElementById('edit-ev-name').value=e.title;document.getElementById('edit-ev-date').value=e.date;document.getElementById('edit-ev-dist').value=e.dist;document.getElementById('edit-ev-cap').value=e.cap;document.getElementById('edit-ev-fee').value=e.fee;document.getElementById('edit-ev-deadline').value=e.deadline||'';document.getElementById('edit-ev-desc').value=e.desc||'';openModal('edit-event-modal');};
 window.saveEventEdit=async()=>{
+  const fb=window._fb;
   const id=document.getElementById('edit-event-id').value;
   const pace=[];document.querySelectorAll('#edit-ev-pace .pace-opt.on').forEach(b=>pace.push(b.textContent));
   const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',status:'approved',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
   try{
     if(id){
-      await setDoc(doc(db,'events',id),{...data,updatedAt:serverTimestamp()},{merge:true});
+      await fb.setDoc(fb.doc(fb.db,'events',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
       const e=EVENTS.find(x=>x.id===id);if(e)Object.assign(e,data);
     }else{
-      const r=await addDoc(collection(db,'events'),{...data,reg:0,createdAt:serverTimestamp()});
+      const r=await fb.addDoc(fb.collection(fb.db,'events'),{...data,reg:0,createdAt:fb.serverTimestamp()});
       EVENTS.unshift({id:r.id,reg:0,...data});
     }
     closeModal('edit-event-modal');toast('Kaydedildi ✓','ok');
@@ -2165,45 +2170,50 @@ window.saveEventEdit=async()=>{
   }catch(e){toast('Hata: '+e.message,'err');}
 };
 window.deleteEvent=async(id)=>{
+  const fb=window._fb;
   if(!confirm('Sil?'))return;
   try{
-    await deleteDoc(doc(db,'events',id));
+    await fb.deleteDoc(fb.doc(fb.db,'events',id));
     const i=EVENTS.findIndex(x=>x.id===id);if(i>-1)EVENTS.splice(i,1);
     toast('Silindi','ok');renderAdminSection('events');renderEvts(EVENTS,'events-list');renderHomeData();
   }catch(e){toast(e.message,'err');}
 };
 window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;document.getElementById('edit-race-id').value=id;document.getElementById('edit-race-name').value=r.name;document.getElementById('edit-race-date').value=r.date||'';document.getElementById('edit-race-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
 window.saveRaceEdit=async()=>{
+  const fb=window._fb;
   const id=document.getElementById('edit-race-id').value;
   const data={name:document.getElementById('edit-race-name').value,date:document.getElementById('edit-race-date').value,location:document.getElementById('edit-race-loc').value,about:document.getElementById('edit-race-about').value,phone:document.getElementById('edit-race-phone').value,email:document.getElementById('edit-race-email').value,website:document.getElementById('edit-race-web').value,mapUrl:document.getElementById('edit-race-map').value};
   try{
-    await setDoc(doc(db,'races',id),{...data,updatedAt:serverTimestamp()},{merge:true});
+    await fb.setDoc(fb.doc(fb.db,'races',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
     const r=RACES.find(x=>x.id===id);if(r)Object.assign(r,data);
     closeModal('edit-race-modal');toast('Güncellendi ✓','ok');renderRaceList();renderRacePreview();renderAdminSection('races');
   }catch(e){toast('Hata: '+e.message,'err');}
 };
 window.deleteRace=async(id)=>{
+  const fb=window._fb;
   if(!confirm('Sil?'))return;
   try{
-    await deleteDoc(doc(db,'races',id));
+    await fb.deleteDoc(fb.doc(fb.db,'races',id));
     const i=RACES.findIndex(x=>x.id===id);if(i>-1)RACES.splice(i,1);
     toast('Silindi','ok');renderRaceList();renderRacePreview();renderAdminSection('races');
   }catch(e){toast(e.message,'err');}
 };
 window.editBlog=id=>{const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;document.getElementById('edit-blog-id').value=id;document.getElementById('edit-blog-title').value=p.title;document.getElementById('edit-blog-body').value=p.body;document.getElementById('edit-blog-tags').value=(p.tags||[]).join(', ');openModal('edit-blog-modal');};
 window.saveBlogEdit=async()=>{
+  const fb=window._fb;
   const id=document.getElementById('edit-blog-id').value;
   const data={title:document.getElementById('edit-blog-title').value,body:document.getElementById('edit-blog-body').value,tags:document.getElementById('edit-blog-tags').value.split(',').map(t=>t.trim())};
   try{
-    await setDoc(doc(db,'blog',id),{...data,updatedAt:serverTimestamp()},{merge:true});
+    await fb.setDoc(fb.doc(fb.db,'blog',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
     const p=BLOG_POSTS.find(x=>x.id===id);if(p)Object.assign(p,data);
     closeModal('edit-blog-modal');toast('Güncellendi ✓','ok');renderBlogList();renderBlogPreview();renderAdminSection('blog');
   }catch(e){toast('Hata: '+e.message,'err');}
 };
 window.deleteBlogItem=async(id)=>{
+  const fb=window._fb;
   if(!confirm('Sil?'))return;
   try{
-    await deleteDoc(doc(db,'blog',id));
+    await fb.deleteDoc(fb.doc(fb.db,'blog',id));
     const i=BLOG_POSTS.findIndex(x=>x.id===id);if(i>-1)BLOG_POSTS.splice(i,1);
     toast('Silindi','ok');renderBlogList();renderBlogPreview();renderAdminSection('blog');
   }catch(e){toast(e.message,'err');}

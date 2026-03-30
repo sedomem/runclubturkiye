@@ -1100,76 +1100,114 @@ window.saveRaceFromAdmin=async()=>{
 };
 
 // ── ✅ AI BLOG ASSISTANT ──
+// NOT: Anthropic API direkt browser'dan çağrılamaz (x-api-key güvenlik kısıtı).
+// Çözüm: Kullanıcı haber metnini yapıştırır, biz URL'yi meta olarak ekleriz,
+// sonra Cloudflare Worker proxy üzerinden API'ye gideriz.
+// Worker URL'si tanımlı değilse metin tabanlı yardım moduna geçer.
+const CF_WORKER_URL = ''; // Cloudflare Worker URL'si varsa buraya yaz (örn: https://rct-ai.sedomem.workers.dev)
+
 window.aiBlogAssist=async()=>{
-  const urlInput=document.getElementById('ab-news-url');
-  const url=urlInput?.value?.trim();
-  if(!url){toast('Haber linki girin','err');return;}
+  const newsUrl=document.getElementById('ab-news-url')?.value?.trim()||'';
+  const newsText=document.getElementById('ab-news-text')?.value?.trim()||'';
+
+  if(!newsUrl&&!newsText){
+    toast('URL veya haber metni girin','err');
+    return;
+  }
+
   const statusEl=document.getElementById('ai-blog-status');
-  const btnEl=document.querySelector('[onclick="aiBlogAssist()"]');
+  const btnEl=document.getElementById('ai-doldur-btn');
   if(statusEl)statusEl.style.display='flex';
   if(btnEl){btnEl.disabled=true;btnEl.textContent='⏳ İşleniyor...';}
+
+  const prompt=`Sen RunClubTürkiye platformu için SEO odaklı Türkçe içerik üreten bir editörsün.
+
+${newsUrl?`Kaynak URL: ${newsUrl}`:''}
+${newsText?`Haber içeriği:\n${newsText.substring(0,3000)}`:''}
+
+Bu haberi RunClubTürkiye koşu topluluğu için yeniden yaz. Motive edici, ilgi çekici ve SEO uyumlu olsun.
+
+SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma:
+{"baslik":"Başlık max 65 karakter","icerik":"En az 300 kelime içerik, paragraflar halinde","etiketler":["etiket1","etiket2","etiket3"],"meta_baslik":"50-60 karakter meta başlık","meta_aciklama":"150-160 karakter meta açıklama"}`;
+
   try{
-    const prompt=`Sen RunClubTürkiye platformu için SEO odaklı içerik üreten bir editörsün. Türkiye'nin önde gelen koşu topluluğu platformu için içerik üretiyorsun.
+    let raw='';
 
-Kullanıcı aşağıdaki URL'yi paylaştı. Bu URL'deki haberi RunClubTürkiye okuyucuları için Türkçe olarak yeniden yaz.
-
-URL: ${url}
-
-GÖREV: Bu haberi/konuyu RunClubTürkiye koşu topluluğu için ilgi çekici, motive edici ve SEO uyumlu şekilde yeniden yaz. URL'ye erişemesen bile konuyu tahmin edip içerik üret.
-
-ZORUNLU: Sadece aşağıdaki JSON formatında yanıt ver, başka hiçbir şey yazma:
-{"baslik":"SEO uyumlu başlık (max 65 karakter)","icerik":"En az 300 kelime blog içeriği. RunClubTürkiye sesini kullan. Paragraflar halinde yaz.","etiketler":["etiket1","etiket2","etiket3"],"meta_baslik":"Meta başlık 50-60 karakter","meta_aciklama":"Meta açıklama 150-160 karakter","ozet":"2 cümle özet"}`;
-
-    const resp=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{
-        'Content-Type':'application/json',
-        'anthropic-version':'2023-06-01',
-        'anthropic-dangerous-direct-browser-access':'true'
-      },
-      body:JSON.stringify({
-        model:'claude-sonnet-4-20250514',
-        max_tokens:1500,
-        messages:[{role:'user',content:prompt}]
-      })
-    });
-
-    if(!resp.ok){
-      const errData=await resp.json().catch(()=>({}));
-      throw new Error(errData.error?.message||`HTTP ${resp.status}`);
+    if(CF_WORKER_URL){
+      // Cloudflare Worker proxy varsa kullan
+      const resp=await fetch(CF_WORKER_URL,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prompt,model:'claude-haiku-4-5-20251001',max_tokens:1500})
+      });
+      if(!resp.ok)throw new Error(`Worker HTTP ${resp.status}`);
+      const data=await resp.json();
+      raw=data.content?.[0]?.text||data.response||data.text||'';
+    } else {
+      // Worker yok → direkt API dene (Claude.ai artifact ortamında çalışır)
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({
+          model:'claude-haiku-4-5-20251001',
+          max_tokens:1500,
+          messages:[{role:'user',content:prompt}]
+        })
+      });
+      if(!resp.ok){
+        const err=await resp.json().catch(()=>({}));
+        // API key hatası → kullanıcıya bilgi ver
+        if(resp.status===401||err.error?.message?.includes('api-key')){
+          showAiBlogManualMode();
+          return;
+        }
+        throw new Error(err.error?.message||`HTTP ${resp.status}`);
+      }
+      const data=await resp.json();
+      raw=data.content?.[0]?.text||'';
     }
 
-    const data=await resp.json();
-    const raw=data.content?.[0]?.text||'';
-    // JSON'u temizle (bazen ``` bloğu içinde gelir)
+    // JSON parse
     const clean=raw.replace(/^```json?\s*/,'').replace(/\s*```$/,'').trim();
     let parsed;
     try{parsed=JSON.parse(clean);}
-    catch(e){
-      // JSON parse başarısız, raw metin içinden JSON bul
+    catch{
       const m=raw.match(/\{[\s\S]*\}/);
       if(m)parsed=JSON.parse(m[0]);
       else throw new Error('AI yanıtı parse edilemedi');
     }
 
-    // Formu doldur
     const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
     set('ab-title',parsed.baslik);
     set('ab-body',parsed.icerik);
     set('ab-tags',(parsed.etiketler||[]).join(', '));
     set('ab-meta-title',parsed.meta_baslik);
     set('ab-meta-desc',parsed.meta_aciklama);
-
     updateSeoScore&&updateSeoScore();
-    toast('Blog formu AI ile dolduruldu! ✓','ok');
+    toast('Blog AI ile dolduruldu ✓','ok');
+
   }catch(e){
-    toast('AI hatası: '+e.message,'err');
     console.error('AI Blog error:',e);
+    if(e.message.includes('api-key')||e.message.includes('401')){
+      showAiBlogManualMode();
+    }else{
+      toast('AI hatası: '+e.message,'err');
+    }
   }finally{
     if(statusEl)statusEl.style.display='none';
     if(btnEl){btnEl.disabled=false;btnEl.textContent='🤖 AI ile Doldur';}
   }
 };
+
+function showAiBlogManualMode(){
+  const box=document.getElementById('ai-manual-mode');
+  if(box)box.style.display='block';
+  toast('API key gerekli — haber metnini yapıştır moduna geçildi','err');
+}
 
 // ── BLOG ──
 window.saveBlogFromAdmin=async()=>{
@@ -1373,12 +1411,10 @@ window.loadApplications=async()=>{
 };
 window.approveApplication=async(appId,uid)=>{
   try{
-    // 1. Kullanıcı rolünü groupadmin yap
+    // users koleksiyonuna yazma izni var
     await setDoc(doc(db,'users',uid),{role:'groupadmin'},{merge:true});
-    // 2. Başvuruyu onaylandı olarak işaretle
-    await updateDoc(doc(db,'applications',appId),{status:'approved'});
-    // NOT: groups koleksiyonuna ayrıca yazmaya gerek yok.
-    // Kulüp verisi users doc içinde (clubName, city) zaten mevcut.
+    // applications'a setDoc+merge - updateDoc yerine (Rules uyumlu)
+    await setDoc(doc(db,'applications',appId),{status:'approved'},{merge:true});
     toast('Başvuru onaylandı ✓','ok');
     if(window._adminAppCount>0){
       window._adminAppCount--;
@@ -1392,10 +1428,17 @@ window.approveApplication=async(appId,uid)=>{
   }
 };
 window.rejectApplication=async(appId)=>{
-  await updateDoc(doc(db,'applications',appId),{status:'rejected'});
-  toast('Reddedildi','ok');
-  if(window._adminAppCount>0){window._adminAppCount--;updateAdminSidebarBadges(window._adminMsgCount||0,window._adminAppCount);}
-  loadApplications();
+  try{
+    await setDoc(doc(db,'applications',appId),{status:'rejected'},{merge:true});
+    toast('Başvuru reddedildi','ok');
+    if(window._adminAppCount>0){
+      window._adminAppCount--;
+      updateAdminSidebarBadges(window._adminMsgCount||0,window._adminAppCount);
+    }
+    loadApplications();
+  }catch(e){
+    toast('Hata: '+e.message,'err');
+  }
 };
 
 // ── NEWSLETTER ──
@@ -1868,12 +1911,21 @@ function renderAdminSection(sec){
         <!-- ✅ AI BLOG ASSİSTANI -->
         <div class="ai-assistant-box">
           <h3>🤖 AI Blog Asistanı</h3>
-          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Haber linkini yapıştır, AI haberi araştırıp RunClubTürkiye için yeniden yazsın, SEO alanlarını otomatik doldursun. Sadece görseli sen ekle.</p>
-          <div style="display:flex;gap:8px">
-            <input type="text" id="ab-news-url" placeholder="https://... (haber linki)" style="flex:1"/>
-            <button class="btn btn-or" onclick="aiBlogAssist()" style="white-space:nowrap;flex-shrink:0">🤖 AI ile Doldur</button>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Haber linkini <b>ve/veya</b> haber metnini yapıştır → AI RunClubTürkiye için yeniden yazsın.</p>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input type="text" id="ab-news-url" placeholder="https://... (opsiyonel — haber linki)" style="flex:1;font-size:12px"/>
           </div>
-          <div class="ai-loading" id="ai-blog-status" style="display:none"><div class="spinner"></div><span>Haber analiz ediliyor...</span></div>
+          <div class="form-grp">
+            <label>Haber Metni (haberi kopyalayıp buraya yapıştır — gerekli)</label>
+            <textarea id="ab-news-text" rows="4" placeholder="Haberin tam metnini buraya yapıştır. Site açılmıyorsa veya AI link okuyamıyorsa bu alan üzerinden çalışır..."></textarea>
+          </div>
+          <button class="btn btn-or" id="ai-doldur-btn" onclick="aiBlogAssist()" style="white-space:nowrap">🤖 AI ile Doldur</button>
+          <div class="ai-loading" id="ai-blog-status" style="display:none"><div class="spinner"></div><span>AI yazıyor...</span></div>
+          <!-- Cloudflare Worker kurulmamışsa göster -->
+          <div id="ai-manual-mode" style="display:none;margin-top:10px;background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:12px;font-size:12px;color:var(--muted)">
+            ⚠️ <b>API key gerekli.</b> AI asistanı için Cloudflare Worker proxy kurulması gerekiyor.<br>
+            Şimdilik: Haberi yukarıdaki metin alanına yapıştır ve tekrar dene, ya da formu manuel doldur.
+          </div>
         </div>
         <div class="form-grp"><label>Başlık</label><input id="ab-title" oninput="updateSeoScore()"/></div>
         ${imgUploadHtml('ab-img-input','Kapak Görseli','1200×630px')}

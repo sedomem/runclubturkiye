@@ -1373,27 +1373,23 @@ window.loadApplications=async()=>{
 };
 window.approveApplication=async(appId,uid)=>{
   try{
-    // 1. Kullanıcı rolünü güncelle
+    // 1. Kullanıcı rolünü groupadmin yap
     await setDoc(doc(db,'users',uid),{role:'groupadmin'},{merge:true});
-    // 2. Başvuruyu onayla
+    // 2. Başvuruyu onaylandı olarak işaretle
     await updateDoc(doc(db,'applications',appId),{status:'approved'});
-    // 3. Kullanıcı verisini çek, groups koleksiyonuna ekle
-    const userSnap=await getDoc(doc(db,'users',uid));
-    if(userSnap.exists()){
-      const u=userSnap.data();
-      await setDoc(doc(db,'groups',uid),{
-        name:u.clubName||'Yeni Grup',city:u.city||'',adminUid:uid,
-        adminName:u.name||'',adminEmail:u.email||'',
-        members:0,open:true,desc:'',imgUrl:'',
-        createdAt:serverTimestamp()
-      },{merge:true});
+    // NOT: groups koleksiyonuna ayrıca yazmaya gerek yok.
+    // Kulüp verisi users doc içinde (clubName, city) zaten mevcut.
+    toast('Başvuru onaylandı ✓','ok');
+    if(window._adminAppCount>0){
+      window._adminAppCount--;
+      updateAdminSidebarBadges(window._adminMsgCount||0,window._adminAppCount);
     }
-    toast('Onaylandı ve grup oluşturuldu ✓','ok');
-    if(window._adminAppCount>0){window._adminAppCount--;updateAdminSidebarBadges(window._adminMsgCount||0,window._adminAppCount);}
     loadApplications();
-    // Grup adminler listesini de güncelle
     setTimeout(()=>loadGroupAdmins&&loadGroupAdmins(),300);
-  }catch(e){toast('Hata: '+e.message,'err');}
+  }catch(e){
+    toast('Hata: '+e.message,'err');
+    console.error('approveApplication error:',e);
+  }
 };
 window.rejectApplication=async(appId)=>{
   await updateDoc(doc(db,'applications',appId),{status:'rejected'});

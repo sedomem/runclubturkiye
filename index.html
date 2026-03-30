@@ -1622,28 +1622,31 @@ async function loadClubsFromDB(){
   try{
     const seen=new Set();
     const clubs=[];
-    // 1) users/groupadmin'den çek
-    const snap1=await getDocs(query(collection(db,'users'),where('role','==','groupadmin')));
-    snap1.forEach(d=>{
-      const u=d.data();
-      if(u.clubName){
-        seen.add(d.id);
-        clubs.push({id:d.id,name:u.clubName,city:u.city||'',desc:u.clubDesc||'',imgUrl:u.clubImg||'',open:u.clubOpen!==false,members:u.clubMemberCount||0,adminUid:d.id,insta:u.clubInsta||'',strava:u.clubStrava||'',lat:u.lat||null,lng:u.lng||null});
-      }
-    });
-    // 2) clubs koleksiyonundan çek (süper admin ekledi ise)
+    // 1) clubs koleksiyonu — public read, herkes görebilir
     try{
       const snap2=await getDocs(collection(db,'clubs'));
       snap2.forEach(d=>{
-        if(!seen.has(d.id)){
-          const c=d.data();
+        const c=d.data();
+        if(c.name||c.clubName){
+          seen.add(d.id);
           clubs.push({id:d.id,name:c.name||c.clubName||'',city:c.city||'',desc:c.desc||c.clubDesc||'',imgUrl:c.imgUrl||c.clubImg||'',open:c.open!==false,members:c.members||0,adminUid:c.adminUid||'',insta:c.insta||'',strava:c.strava||''});
         }
       });
-    }catch(e2){}
+    }catch(e2){console.warn('clubs collection:',e2.message);}
+    // 2) users/groupadmin — auth gerekebilir, başarısız olursa sessizce geç
+    try{
+      const snap1=await getDocs(query(collection(db,'users'),where('role','==','groupadmin')));
+      snap1.forEach(d=>{
+        const u=d.data();
+        if(u.clubName&&!seen.has(d.id)){
+          seen.add(d.id);
+          clubs.push({id:d.id,name:u.clubName,city:u.city||'',desc:u.clubDesc||'',imgUrl:u.clubImg||'',open:u.clubOpen!==false,members:u.clubMemberCount||0,adminUid:d.id,insta:u.clubInsta||'',strava:u.clubStrava||'',lat:u.lat||null,lng:u.lng||null});
+        }
+      });
+    }catch(e1){console.warn('users/groupadmin (auth gerekebilir):',e1.message);}
     window.CLUBS=clubs;
-    console.log('Clubs loaded:',clubs.length);
-  }catch(e){console.warn('Clubs load:',e.message);}
+    console.log('[loadClubsFromDB] loaded:',clubs.length,'clubs');
+  }catch(e){console.warn('Clubs load error:',e.message);}
 }
 window.loadClubsFromDB=loadClubsFromDB;
 async function loadRacesFromDB(){
@@ -1718,23 +1721,16 @@ window.nav=id=>{
   if(id==='panel')loadGroupPanel();
   if(id==='profile')syncProfileUI&&syncProfileUI();
   if(['kvkk','gizlilik','kosullar','riza','cerez'].includes(id))renderLegalPage(id);
-  if(id==='events'){loadEventsFromDB&&loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
-  else if(id==='clubs'){
-    const doLoadClubs=window.loadClubsFromDB||loadClubsFromDB;
-    if(doLoadClubs){doLoadClubs().then(()=>{
-      const cl=document.getElementById('clubs-list');
-      if(cl)cl.innerHTML=window.CLUBS&&window.CLUBS.length?window.CLUBS.map(clubCard).join(''):'<p style="color:var(--muted);font-size:13px;padding:20px 0">Henüz kulüp eklenmemiş.</p>';
-    });
-    }}
-  else if(id==='races'){loadRacesFromDB&&loadRacesFromDB().then(()=>renderRaceList());}
-  else if(id==='blog'){loadBlogFromDB&&loadBlogFromDB().then(()=>renderBlogList());}
+  if(id==='events'){if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
+  if(id==='clubs'){renderClubsPage();}
+  if(id==='races'){if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
+  if(id==='blog'){if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
   if(id==='home'){
-    // Veri varsa direkt render, yoksa Firestore'dan çek
     if(window.EVENTS.length||window.CLUBS.length||window.RACES.length||window.BLOG_POSTS.length){
       renderHomeData();
     } else {
-      window.loadAllFromDB&&window.loadAllFromDB();
+      if(window.loadAllFromDB)window.loadAllFromDB();
     }
   }
 };
@@ -1927,6 +1923,52 @@ function clubCard(c){
 }
 window.filterClubs=q=>{const el=document.getElementById('clubs-list');if(el)el.innerHTML=CLUBS.filter(c=>c.name.toLowerCase().includes(q.toLowerCase())||c.city.toLowerCase().includes(q.toLowerCase())).map(clubCard).join('');};
 window.filterClubCity=(city,btn)=>{document.querySelectorAll('#pg-clubs .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');const el=document.getElementById('clubs-list');if(el)el.innerHTML=(city==='tüm'?CLUBS:CLUBS.filter(c=>c.city===city)).map(clubCard).join('');};
+
+window.renderClubsPage=async()=>{
+  const el=document.getElementById('clubs-list');
+  if(!el)return;
+  el.innerHTML='<div class="spinner" style="margin:40px auto"></div>';
+  try{
+    // Her zaman Firestore'dan taze çek
+    const fb=window._fb;
+    const allClubs=[];
+    const seen=new Set();
+    // 1. users/groupadmin — public read izni var
+    try{
+      const s1=await fb.getDocs(fb.query(fb.collection(fb.db,'users'),fb.where('role','==','groupadmin')));
+      s1.forEach(d=>{
+        const u=d.data();
+        if(u.clubName){
+          seen.add(d.id);
+          allClubs.push({id:d.id,name:u.clubName,city:u.city||'',desc:u.clubDesc||'',imgUrl:u.clubImg||'',open:u.clubOpen!==false,members:u.clubMemberCount||0,adminUid:d.id,insta:u.clubInsta||'',strava:u.clubStrava||''});
+        }
+      });
+    }catch(e1){console.warn('users query:',e1.message);}
+    // 2. clubs koleksiyonu — süper admin ekledi ise
+    try{
+      const s2=await fb.getDocs(fb.collection(fb.db,'clubs'));
+      s2.forEach(d=>{
+        if(!seen.has(d.id)){
+          const c=d.data();
+          if(c.name||c.clubName){
+            allClubs.push({id:d.id,name:c.name||c.clubName||'',city:c.city||'',desc:c.desc||c.clubDesc||'',imgUrl:c.imgUrl||c.clubImg||'',open:c.open!==false,members:c.members||0,adminUid:c.adminUid||''});
+          }
+        }
+      });
+    }catch(e2){console.warn('clubs query:',e2.message);}
+    // window.CLUBS güncelle
+    window.CLUBS=allClubs;
+    console.log('[renderClubsPage] toplam kulüp:',allClubs.length);
+    if(!allClubs.length){
+      el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">🏃</div><p style="font-size:14px">Henüz kulüp eklenmemiş.</p></div>';
+      return;
+    }
+    el.innerHTML=allClubs.map(clubCard).join('');
+  }catch(e){
+    console.error('[renderClubsPage] HATA:',e.message);
+    el.innerHTML='<p style="color:var(--muted);padding:20px">Kulüpler yüklenemedi: '+e.message+'</p>';
+  }
+};
 window.openClub=async(id)=>{
   const c=CLUBS.find(x=>x.id===id);if(!c)return;
   const isJoined=CU&&localStorage.getItem(`club_${c.id}_${CU.uid}`);
@@ -2883,20 +2925,23 @@ window.gSaveSettings=async()=>{
     clubStrava:g('gs-strava')||''
   };
   try{
+    // users koleksiyonuna yaz (auth gerekli)
     await fb.setDoc(fb.doc(fb.db,'users',CU.uid),data,{merge:true});
+    // clubs koleksiyonuna da yaz (public read için) — kulüp adını key olarak kullan
+    const clubsData={name:data.clubName,city:data.city,desc:data.clubDesc,imgUrl:clubImg,open:data.clubOpen,members:data.clubMemberCount||0,adminUid:CU.uid,insta:data.clubInsta,strava:data.clubStrava,updatedAt:fb.serverTimestamp()};
+    await fb.setDoc(fb.doc(fb.db,'clubs',CU.uid),clubsData,{merge:true});
     Object.assign(CU,data);
     toast('Kulüp bilgileri güncellendi ✓','ok');
     // Logo preview güncelle
     const prev=document.getElementById('gs-logo-preview');
     if(prev&&clubImg)prev.innerHTML=`<img src="${clubImg}" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>`;
     // Kulüpler listesini yenile
-    if(window.loadClubsFromDB){
-      window.loadClubsFromDB().then(()=>{
-        const cl=document.getElementById('clubs-list');
-        if(cl&&window.clubCard)cl.innerHTML=window.CLUBS.map(window.clubCard).join('');
-        if(window.renderHomeData)window.renderHomeData();
-      });
+    if(window.renderClubsPage){
+      window.CLUBS=[];
+      const cl=document.getElementById('clubs-list');
+      if(cl)await window.renderClubsPage();
     }
+    if(window.renderHomeData)window.renderHomeData();
   }catch(e){toast('Hata: '+e.message,'err');}
 };
 

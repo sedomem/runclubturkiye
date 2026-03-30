@@ -1467,32 +1467,67 @@ async function loadBannersFromDB(){
 // ── GROUP ADMINS ──
 window.loadGroupAdmins=async()=>{const el=document.getElementById('groupadmins-tbody');if(!el)return;try{const snap=await getDocs(query(collection(db,'users'),where('role','in',['groupadmin','subadmin','pending_groupadmin'])));if(snap.empty){el.innerHTML='<tr><td colspan="5" style="text-align:center;color:var(--muted)">Kayıtlı yok</td></tr>';return;}let html='';snap.forEach(d=>{const u=d.data();html+=`<tr><td>${u.name||'—'}</td><td>${u.email||'—'}</td><td>${u.clubName||'—'}</td><td>${u.city||'—'}</td><td><span class="pill ${u.role==='groupadmin'?'pill-gr':u.role==='pending_groupadmin'?'pill-or':'pill-bl'}">${u.role==='groupadmin'?'Aktif':u.role==='pending_groupadmin'?'Bekliyor':'Sub-Admin'}</span></td></tr>`;});el.innerHTML=html;}catch(e){}};
 
+// ── FIRESTORE'DAN TÜM VERİLERİ YÜKLE ──
+async function loadEventsFromDB(){
+  try{
+    const snap=await getDocs(query(collection(db,'events'),orderBy('date','desc')));
+    const evts=[];
+    snap.forEach(d=>{const e={id:d.id,...d.data()};if(!e.status||e.status==='approved')evts.push(e);});
+    window.EVENTS=evts;
+  }catch(e){console.warn('Events load:',e.message);}
+}
+window.loadEventsFromDB=loadEventsFromDB;
+
+async function loadClubsFromDB(){
+  try{
+    const snap=await getDocs(query(collection(db,'users'),where('role','==','groupadmin')));
+    const clubs=[];
+    snap.forEach(d=>{
+      const u=d.data();
+      if(u.clubName){clubs.push({id:d.id,name:u.clubName,city:u.city||'',desc:u.clubDesc||'',imgUrl:u.clubImg||'',open:u.clubOpen!==false,members:u.clubMemberCount||0,adminUid:d.id,insta:u.clubInsta||'',strava:u.clubStrava||'',lat:u.lat||null,lng:u.lng||null});}
+    });
+    window.CLUBS=clubs;
+  }catch(e){console.warn('Clubs load:',e.message);}
+}
+window.loadClubsFromDB=loadClubsFromDB;
+async function loadRacesFromDB(){
+  try{
+    const snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
+    const races=[];snap.forEach(d=>races.push({id:d.id,...d.data()}));
+    if(races.length)window.RACES=races;
+  }catch(e){console.warn('Races load:',e.message);}
+}
+window.loadRacesFromDB=loadRacesFromDB;
+
+async function loadBlogFromDB(){
+  try{
+    const snap=await getDocs(query(collection(db,'blog'),orderBy('createdAt','desc')));
+    const posts=[];snap.forEach(d=>posts.push({id:d.id,...d.data()}));
+    if(posts.length)window.BLOG_POSTS=posts;
+  }catch(e){console.warn('Blog load:',e.message);}
+}
+window.loadBlogFromDB=loadBlogFromDB;
+async function loadAllFromDB(){
+  await Promise.allSettled([loadEventsFromDB(),loadClubsFromDB(),loadRacesFromDB(),loadBlogFromDB()]);
+  renderHomeData();
+  renderEvts(window.EVENTS,'events-list');
+  const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=window.CLUBS.map(clubCard).join('');
+  renderRaceList();renderBlogList();renderFirsatlar();
+}
+window.reloadSiteData=loadAllFromDB;
+
 loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
 </script>
 
 <script>
 // ── LOCAL DATA ──
-window.EVENTS=[
-  {id:'e1',title:'İstanbul Maratonu 2025',cat:'Maraton',date:'2025-04-06',city:'İstanbul',dist:'42.2 km',cap:8000,reg:6200,fee:'₺350',deadline:'2025-03-20',desc:'Boğaz\'ı geçen tek maraton!',emoji:'🌉',slug:'istanbul-maratonu',pace:['4:00–4:30','4:30–5:00','5:00–5:30']},
-  {id:'e2',title:'Ankara 10K Parkur',cat:'Trail',date:'2025-04-20',city:'Ankara',dist:'10 km',cap:500,reg:312,fee:'₺150',deadline:'2025-04-10',desc:'Eymir Gölü trail koşusu.',emoji:'🌲',slug:'ankara-10k',pace:['5:00–5:30','5:30–6:00']},
-  {id:'e3',title:'İzmir Kordon 5K',cat:'5K/10K',date:'2025-05-04',city:'İzmir',dist:'5 km',cap:1200,reg:890,fee:'Ücretsiz',deadline:'2025-04-28',desc:'Deniz kıyısında sabah koşusu.',emoji:'🌊',slug:'izmir-5k',pace:['5:30–6:00','6:00+']},
-];
-window.CLUBS=[
-  {id:'c1',name:'Boğaziçi Runners',city:'İstanbul',members:284,desc:'Boğaz kıyılarında haftalık koşular.',imgUrl:'',open:true,lat:41.085,lng:29.05},
-  {id:'c2',name:'Ankara Trail Crew',city:'Ankara',members:156,desc:'Başkentin trail tutkunları.',imgUrl:'',open:true,lat:39.925,lng:32.836},
-  {id:'c3',name:'İzmir Körfez Run',city:'İzmir',members:203,desc:'Ege kıyısı koşucuları.',imgUrl:'',open:true,lat:38.423,lng:27.128},
-  {id:'c4',name:'Kadıköy Koşu Kulübü',city:'İstanbul',members:412,desc:'Kadıköy koşu topluluğu.',imgUrl:'',open:false,lat:40.99,lng:29.03},
-];
-window.RACES=[
-  {id:'r1',name:'Ata Ultra 100K',date:'2025-07-12',location:'Kayseri',about:'Erciyes eteklerinde ultra.',emoji:'🏔️',slug:'ata-ultra'},
-  {id:'r2',name:'Cappadocia Ultra Trail',date:'2025-08-24',location:'Nevşehir',about:'Peri bacaları trail.',emoji:'🪨',slug:'cut'},
-];
-window.BLOG_POSTS=[
-  {id:'b1',title:'Pace Nedir?',body:'Pace, koşuda her kilometre için harcanan süredir.',emoji:'⏱️',coverUrl:'',tags:['Antrenman'],slug:'pace-nedir',publishedAt:'2025-01-15',authorName:'RunClub Editör',likes:12},
-  {id:'b2',title:'2025 Koşu Takvimi',body:'2025 yılında Türkiye\'de düzenlenecek maraton ve trail etkinliklerinin listesi.',emoji:'📅',coverUrl:'',tags:['Takvim'],slug:'takvim-2025',publishedAt:'2025-01-10',authorName:'RunClub Editör',likes:8},
-];
+// ── LOCAL FALLBACK DATA (Firestore boşsa gösterilir) ──
+window.EVENTS=[];
+window.CLUBS=[];
+window.RACES=[];
+window.BLOG_POSTS=[];
 window.FIRSATLAR=[
-  {id:'f1',baslik:'Koşucuya Özel %20 İndirim',marka:'Garmin',kategori:'Teknoloji',aciklama:'Garmin Forerunner serisinde koşuculara özel indirim. Tüm akıllı saatlerde geçerli.',indirim:'%20',kod:'RCT20GARMIN',link:'https://garmin.com',bitis:'2025-06-30',imgUrl:'',aktif:true,slug:'garmin-indirim'},
+  {id:'f1',baslik:'Koşucuya Özel %20 İndirim',marka:'Garmin',kategori:'Teknoloji',aciklama:'Garmin Forerunner serisinde koşuculara özel indirim.',indirim:'%20',kod:'RCT20GARMIN',link:'https://garmin.com',bitis:'2025-06-30',imgUrl:'',aktif:true,slug:'garmin-indirim'},
   {id:'f2',baslik:'Ücretsiz Enerji Jeli Paketi',marka:'GU Energy',kategori:'Beslenme',aciklama:'30 TL ve üzeri alışverişlerde ücretsiz enerji jeli paketi.',indirim:'Ücretsiz',kod:'RCGUFREE',link:'https://guenturkey.com',bitis:'2025-05-31',imgUrl:'',aktif:true,slug:'gu-energy-ucretsiz'},
   {id:'f3',baslik:'Trail Ayakkabıda %15 İndirim',marka:'Salomon',kategori:'Ekipman',aciklama:'Salomon trail ayakkabı serisinde koşucu indirimi.',indirim:'%15',kod:'RCTSALOMON',link:'https://salomon.com',bitis:'2025-07-15',imgUrl:'',aktif:true,slug:'salomon-trail-indirim'},
 ];
@@ -1518,10 +1553,10 @@ window.nav=id=>{
   if(id==='panel')loadGroupPanel();
   if(id==='profile')syncProfileUI&&syncProfileUI();
   if(['kvkk','gizlilik','kosullar','riza','cerez'].includes(id))renderLegalPage(id);
-  if(id==='events')renderEvts(window.EVENTS,'events-list');
-  if(id==='clubs')document.getElementById('clubs-list').innerHTML=window.CLUBS.map(clubCard).join('');
-  if(id==='races')renderRaceList();
-  if(id==='blog')renderBlogList();
+  if(id==='events'){loadEventsFromDB&&loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
+  else if(id==='clubs'){loadClubsFromDB&&loadClubsFromDB().then(()=>{const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=window.CLUBS.map(clubCard).join('');});}
+  else if(id==='races'){loadRacesFromDB&&loadRacesFromDB().then(()=>renderRaceList());}
+  else if(id==='blog'){loadBlogFromDB&&loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
   if(id==='home')renderHomeData();
 };
@@ -1889,7 +1924,7 @@ function renderAdminSection(sec){
     events:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><h2>📅 Etkinlikler</h2><button class="btn btn-or btn-sm" onclick="openAddEventModal()">+ Etkinlik Ekle</button></div>
       <table><thead><tr><th>Etkinlik</th><th>Tarih</th><th>Mesafe</th><th>Doluluk</th><th>İşlem</th></tr></thead>
       <tbody>${EVENTS.map(e=>`<tr><td>${e.emoji||'🏃'} ${e.title}</td><td>${e.date}</td><td>${e.dist}</td><td><div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:${Math.round((e.reg||0)/(e.cap||1)*100)}%"></div></div></td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteEvent('${e.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
-    approvals:`<h2 style="margin-bottom:18px">✅ Onay Bekleyen</h2><div class="card" style="padding:20px;text-align:center;color:var(--muted)">Şu an onay bekleyen etkinlik yok.</div>`,
+    approvals:`<h2 style="margin-bottom:18px">✅ Etkinlik Onayları</h2><div id="admin-approvals-list"><div class="spinner" style="margin:20px auto"></div></div>`,
     races:`<h2 style="margin-bottom:18px">🏆 Yarış Takvimi</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Yarış Ekle</h3>
@@ -1978,6 +2013,7 @@ function renderAdminSection(sec){
   if(sec==='users')setTimeout(()=>loadAdminUsers&&loadAdminUsers(),100);
   if(sec==='messages')setTimeout(()=>loadAdminMessages&&loadAdminMessages(),100);
   if(sec==='applications')setTimeout(()=>loadApplications&&loadApplications(),100);
+  if(sec==='approvals')setTimeout(()=>loadPendingEvents&&loadPendingEvents(),100);
   if(sec==='chat')setTimeout(()=>loadChatMessages&&loadChatMessages('admin'),100);
   if(sec==='groupadmins')setTimeout(()=>loadGroupAdmins&&loadGroupAdmins(),100);
   if(sec==='newsletter')setTimeout(()=>loadNewsletterList&&loadNewsletterList(),100);
@@ -1985,6 +2021,50 @@ function renderAdminSection(sec){
   if(sec==='sponsors')setTimeout(()=>renderAdminSponsors(),100);
 }
 window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);};
+
+// ── ETKİNLİK ONAYI (Grup Admin'den gelen pending etkinlikler) ──
+window.loadPendingEvents=async()=>{
+  const el=document.getElementById('admin-approvals-list');if(!el)return;
+  try{
+    const snap=await getDocs(query(collection(db,'events'),where('status','==','pending')));
+    if(snap.empty){
+      el.innerHTML='<div class="card" style="padding:20px;text-align:center;color:var(--muted)">✅ Onay bekleyen etkinlik yok.</div>';
+      return;
+    }
+    let html='<table><thead><tr><th>Etkinlik</th><th>Kulüp</th><th>Tarih</th><th>Şehir</th><th>İşlem</th></tr></thead><tbody>';
+    snap.forEach(d=>{
+      const e=d.data();
+      html+=`<tr>
+        <td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat} · ${e.dist}</span></td>
+        <td><span style="font-size:11px">${e.clubName||'—'}</span><br><span style="font-size:10px;color:var(--muted)">${e.groupAdminName||'—'}</span></td>
+        <td>${e.date||'—'}</td>
+        <td>${e.city||'—'}</td>
+        <td class="action-btns">
+          <button class="btn btn-green btn-sm" onclick="approveEvent('${d.id}')">✓ Onayla</button>
+          <button class="btn btn-red btn-sm" onclick="rejectEvent('${d.id}')">✗ Reddet</button>
+        </td>
+      </tr>`;
+    });
+    el.innerHTML=html+'</tbody></table>';
+  }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
+};
+window.approveEvent=async(id)=>{
+  try{
+    await setDoc(doc(db,'events',id),{status:'approved',approvedAt:serverTimestamp()},{merge:true});
+    toast('Etkinlik onaylandı ve yayınlandı ✓','ok');
+    // Local array'e ekle
+    await loadEventsFromDB();
+    renderEvts(EVENTS.slice(0,4),'home-events');
+    loadPendingEvents();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+window.rejectEvent=async(id)=>{
+  const reason=prompt('Red sebebi (opsiyonel):');
+  try{
+    await setDoc(doc(db,'events',id),{status:'rejected',rejectReason:reason||'',rejectedAt:serverTimestamp()},{merge:true});
+    toast('Etkinlik reddedildi','ok');loadPendingEvents();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
 
 // ── SEO ──
 window.updateSeoScore=()=>{
@@ -2041,21 +2121,93 @@ window.saveClubEdit=async()=>{
   let imgUrl=document.getElementById('edit-club-imgurl').value||'';
   if(!imgUrl&&imgInput?.files[0]&&window.handleImgUpload)imgUrl=await window.handleImgUpload(imgInput,'clubs')||'';
   const data={name:document.getElementById('edit-club-name').value,city:document.getElementById('edit-club-city').value,desc:document.getElementById('edit-club-desc').value,imgUrl,open:document.getElementById('edit-club-open').value==='true'};
-  if(id){const c=CLUBS.find(x=>x.id===id);if(c)Object.assign(c,data);}
-  else{CLUBS.push({id:'c'+Date.now(),...data,members:0,lat:39,lng:35});}
-  closeModal('edit-club-modal');toast('Kaydedildi ✓','ok');renderAdminSection('groups');
+  try{
+    if(id){
+      // Firestore'da clubs koleksiyonuna yaz
+      await setDoc(doc(db,'clubs',id),{...data,updatedAt:serverTimestamp()},{merge:true});
+      const c=CLUBS.find(x=>x.id===id);if(c)Object.assign(c,data);
+    }else{
+      const r=await addDoc(collection(db,'clubs'),{...data,members:0,createdAt:serverTimestamp()});
+      CLUBS.unshift({id:r.id,...data,members:0});
+    }
+    closeModal('edit-club-modal');toast('Kaydedildi ✓','ok');
+    renderAdminSection('groups');
+    // Kulüpler sayfasını güncelle
+    const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=CLUBS.map(clubCard).join('');
+    renderHomeData();
+  }catch(e){toast('Hata: '+e.message,'err');}
 };
-window.deleteClub=id=>{if(!confirm('Sil?'))return;const i=CLUBS.findIndex(x=>x.id===id);if(i>-1)CLUBS.splice(i,1);toast('Silindi','ok');renderAdminSection('groups');};
+window.deleteClub=async(id)=>{
+  if(!confirm('Sil?'))return;
+  try{
+    await deleteDoc(doc(db,'clubs',id));
+    const i=CLUBS.findIndex(x=>x.id===id);if(i>-1)CLUBS.splice(i,1);
+    toast('Silindi','ok');renderAdminSection('groups');
+    const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=CLUBS.map(clubCard).join('');
+  }catch(e){toast(e.message,'err');}
+};
 window.openAddEventModal=()=>{document.getElementById('edit-event-id').value='';document.getElementById('edit-event-title-label').textContent='Yeni Etkinlik';['edit-ev-name','edit-ev-dist','edit-ev-desc'].forEach(id=>document.getElementById(id).value='');openModal('edit-event-modal');};
 window.editEvent=id=>{const e=EVENTS.find(x=>x.id===id);if(!e)return;document.getElementById('edit-event-id').value=id;document.getElementById('edit-event-title-label').textContent='Etkinlik Düzenle';document.getElementById('edit-ev-name').value=e.title;document.getElementById('edit-ev-date').value=e.date;document.getElementById('edit-ev-dist').value=e.dist;document.getElementById('edit-ev-cap').value=e.cap;document.getElementById('edit-ev-fee').value=e.fee;document.getElementById('edit-ev-deadline').value=e.deadline||'';document.getElementById('edit-ev-desc').value=e.desc||'';openModal('edit-event-modal');};
-window.saveEventEdit=()=>{const id=document.getElementById('edit-event-id').value;const pace=[];document.querySelectorAll('#edit-ev-pace .pace-opt.on').forEach(b=>pace.push(b.textContent));const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};if(id){const e=EVENTS.find(x=>x.id===id);if(e)Object.assign(e,data);}else{EVENTS.unshift({id:'e'+Date.now(),reg:0,...data});}closeModal('edit-event-modal');toast('Kaydedildi ✓','ok');renderAdminSection('events');renderEvts(EVENTS.slice(0,4),'home-events');renderEvts(EVENTS,'events-list');};
-window.deleteEvent=id=>{if(!confirm('Sil?'))return;const i=EVENTS.findIndex(x=>x.id===id);if(i>-1)EVENTS.splice(i,1);toast('Silindi','ok');renderAdminSection('events');};
+window.saveEventEdit=async()=>{
+  const id=document.getElementById('edit-event-id').value;
+  const pace=[];document.querySelectorAll('#edit-ev-pace .pace-opt.on').forEach(b=>pace.push(b.textContent));
+  const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',status:'approved',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  try{
+    if(id){
+      await setDoc(doc(db,'events',id),{...data,updatedAt:serverTimestamp()},{merge:true});
+      const e=EVENTS.find(x=>x.id===id);if(e)Object.assign(e,data);
+    }else{
+      const r=await addDoc(collection(db,'events'),{...data,reg:0,createdAt:serverTimestamp()});
+      EVENTS.unshift({id:r.id,reg:0,...data});
+    }
+    closeModal('edit-event-modal');toast('Kaydedildi ✓','ok');
+    renderAdminSection('events');renderEvts(EVENTS.slice(0,4),'home-events');renderEvts(EVENTS,'events-list');
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+window.deleteEvent=async(id)=>{
+  if(!confirm('Sil?'))return;
+  try{
+    await deleteDoc(doc(db,'events',id));
+    const i=EVENTS.findIndex(x=>x.id===id);if(i>-1)EVENTS.splice(i,1);
+    toast('Silindi','ok');renderAdminSection('events');renderEvts(EVENTS,'events-list');renderHomeData();
+  }catch(e){toast(e.message,'err');}
+};
 window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;document.getElementById('edit-race-id').value=id;document.getElementById('edit-race-name').value=r.name;document.getElementById('edit-race-date').value=r.date||'';document.getElementById('edit-race-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
-window.saveRaceEdit=()=>{const id=document.getElementById('edit-race-id').value;const data={name:document.getElementById('edit-race-name').value,date:document.getElementById('edit-race-date').value,location:document.getElementById('edit-race-loc').value,about:document.getElementById('edit-race-about').value,phone:document.getElementById('edit-race-phone').value,email:document.getElementById('edit-race-email').value,website:document.getElementById('edit-race-web').value,mapUrl:document.getElementById('edit-race-map').value};const r=RACES.find(x=>x.id===id);if(r)Object.assign(r,data);closeModal('edit-race-modal');toast('Güncellendi ✓','ok');renderRaceList();renderRacePreview();renderAdminSection('races');};
-window.deleteRace=id=>{if(!confirm('Sil?'))return;const i=RACES.findIndex(x=>x.id===id);if(i>-1)RACES.splice(i,1);toast('Silindi','ok');renderRaceList();renderRacePreview();renderAdminSection('races');};
+window.saveRaceEdit=async()=>{
+  const id=document.getElementById('edit-race-id').value;
+  const data={name:document.getElementById('edit-race-name').value,date:document.getElementById('edit-race-date').value,location:document.getElementById('edit-race-loc').value,about:document.getElementById('edit-race-about').value,phone:document.getElementById('edit-race-phone').value,email:document.getElementById('edit-race-email').value,website:document.getElementById('edit-race-web').value,mapUrl:document.getElementById('edit-race-map').value};
+  try{
+    await setDoc(doc(db,'races',id),{...data,updatedAt:serverTimestamp()},{merge:true});
+    const r=RACES.find(x=>x.id===id);if(r)Object.assign(r,data);
+    closeModal('edit-race-modal');toast('Güncellendi ✓','ok');renderRaceList();renderRacePreview();renderAdminSection('races');
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+window.deleteRace=async(id)=>{
+  if(!confirm('Sil?'))return;
+  try{
+    await deleteDoc(doc(db,'races',id));
+    const i=RACES.findIndex(x=>x.id===id);if(i>-1)RACES.splice(i,1);
+    toast('Silindi','ok');renderRaceList();renderRacePreview();renderAdminSection('races');
+  }catch(e){toast(e.message,'err');}
+};
 window.editBlog=id=>{const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;document.getElementById('edit-blog-id').value=id;document.getElementById('edit-blog-title').value=p.title;document.getElementById('edit-blog-body').value=p.body;document.getElementById('edit-blog-tags').value=(p.tags||[]).join(', ');openModal('edit-blog-modal');};
-window.saveBlogEdit=()=>{const id=document.getElementById('edit-blog-id').value;const data={title:document.getElementById('edit-blog-title').value,body:document.getElementById('edit-blog-body').value,tags:document.getElementById('edit-blog-tags').value.split(',').map(t=>t.trim())};const p=BLOG_POSTS.find(x=>x.id===id);if(p)Object.assign(p,data);closeModal('edit-blog-modal');toast('Güncellendi ✓','ok');renderBlogList();renderBlogPreview();renderAdminSection('blog');};
-window.deleteBlogItem=id=>{if(!confirm('Sil?'))return;const i=BLOG_POSTS.findIndex(x=>x.id===id);if(i>-1)BLOG_POSTS.splice(i,1);toast('Silindi','ok');renderBlogList();renderBlogPreview();renderAdminSection('blog');};
+window.saveBlogEdit=async()=>{
+  const id=document.getElementById('edit-blog-id').value;
+  const data={title:document.getElementById('edit-blog-title').value,body:document.getElementById('edit-blog-body').value,tags:document.getElementById('edit-blog-tags').value.split(',').map(t=>t.trim())};
+  try{
+    await setDoc(doc(db,'blog',id),{...data,updatedAt:serverTimestamp()},{merge:true});
+    const p=BLOG_POSTS.find(x=>x.id===id);if(p)Object.assign(p,data);
+    closeModal('edit-blog-modal');toast('Güncellendi ✓','ok');renderBlogList();renderBlogPreview();renderAdminSection('blog');
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+window.deleteBlogItem=async(id)=>{
+  if(!confirm('Sil?'))return;
+  try{
+    await deleteDoc(doc(db,'blog',id));
+    const i=BLOG_POSTS.findIndex(x=>x.id===id);if(i>-1)BLOG_POSTS.splice(i,1);
+    toast('Silindi','ok');renderBlogList();renderBlogPreview();renderAdminSection('blog');
+  }catch(e){toast(e.message,'err');}
+};
 
 // ── GROUP PANEL ──
 // ── GROUP PANEL ──
@@ -2311,6 +2463,14 @@ window.gSaveSettings=async()=>{
     await fb.setDoc(fb.doc(fb.db,'users',CU.uid),data,{merge:true});
     Object.assign(CU,data);
     toast('Kulüp bilgileri güncellendi ✓','ok');
+    // Kulüpler listesini yenile — sitede anında görünsün
+    if(typeof loadClubsFromDB==='function'){
+      loadClubsFromDB().then(()=>{
+        const cl=document.getElementById('clubs-list');
+        if(cl)cl.innerHTML=window.CLUBS.map(clubCard).join('');
+        renderHomeData();
+      });
+    }
   }catch(e){toast('Hata: '+e.message,'err');}
 };
 
@@ -2445,11 +2605,8 @@ window.toast=(msg,type='')=>{const t=document.getElementById('toast');t.textCont
 window.showNotif=(ico,title,body)=>{document.getElementById('notif-ico2').textContent=ico;document.getElementById('notif-title2').textContent=title;document.getElementById('notif-body2').textContent=body;const p=document.getElementById('notif-pop');p.classList.add('on');setTimeout(()=>p.classList.remove('on'),6000);};
 
 // ── INIT ──
-renderHomeData();
-renderEvts(window.EVENTS,'events-list');
-document.getElementById('clubs-list').innerHTML=CLUBS.map(clubCard).join('');
-renderRaceList();renderBlogList();renderFirsatlar();renderSponsors();
 document.getElementById('pg-home').classList.add('on');
+loadAllFromDB(); // Firestore'dan events, clubs, races, blog yükle → render et
 </script>
 </body>
 </html>

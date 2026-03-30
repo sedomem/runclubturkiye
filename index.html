@@ -342,7 +342,7 @@ footer{border-top:1px solid var(--border);padding:44px 0 0;margin-top:64px}
     </div>
     <div id="nav-user" style="display:none;gap:5px" class="nav-right">
       <button class="btn btn-ghost btn-sm" id="nav-role-btn" onclick="goPanel()" style="display:none"></button>
-      <button class="btn btn-or btn-sm" onclick="nav('dashboard')">Dashboard</button>
+      <button class="btn btn-or btn-sm" id="nav-dashboard-btn" onclick="nav('dashboard')">Dashboard</button>
     </div>
   </div>
 </nav>
@@ -713,12 +713,16 @@ footer{border-top:1px solid var(--border);padding:44px 0 0;margin-top:64px}
 
 <!-- QR -->
 <div class="overlay" id="qr-modal">
-  <div class="modal" style="text-align:center;max-width:320px">
+  <div class="modal" style="text-align:center;max-width:360px">
     <button class="close-x" onclick="closeModal('qr-modal')">×</button>
-    <h2 style="margin-bottom:6px">QR Check-in</h2>
-    <canvas id="qr-canvas" width="200" height="200"></canvas>
-    <p style="color:var(--muted);font-size:12px" id="qr-event-name"></p>
-    <button class="btn btn-ghost btn-sm" style="margin-top:10px" onclick="closeModal('qr-modal')">Kapat</button>
+    <h2 style="margin-bottom:4px">📲 QR Check-in</h2>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:14px" id="qr-event-name"></p>
+    <div id="qr-container" style="display:inline-flex;justify-content:center;align-items:center;padding:14px;background:#fff;border-radius:12px;margin-bottom:12px;min-height:228px;min-width:228px"></div>
+    <p style="font-size:11px;color:var(--muted);margin-bottom:12px" id="qr-uid-label"></p>
+    <div style="display:flex;gap:8px;justify-content:center">
+      <button class="btn btn-or btn-sm" onclick="downloadQR()">⬇ İndir</button>
+      <button class="btn btn-ghost btn-sm" onclick="closeModal('qr-modal')">Kapat</button>
+    </div>
   </div>
 </div>
 
@@ -809,6 +813,7 @@ footer{border-top:1px solid var(--border);padding:44px 0 0;margin-top:64px}
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -854,10 +859,19 @@ setTimeout(()=>{
 },8000);
 
 function setupRoleBtn(){
-  const b=document.getElementById('nav-role-btn');if(!CU)return;
-  if(CU.role==='superadmin'){b.textContent='⭐ Admin';b.style.display='inline-flex';b.style.background='#4a1d96';b.style.color='#fff';}
-  else if(CU.role==='groupadmin'||CU.role==='subadmin'){b.textContent='🔑 Panel';b.style.display='inline-flex';b.style.background='#1A237E';}
-  else b.style.display='none';
+  const b=document.getElementById('nav-role-btn');
+  const dashBtn=document.getElementById('nav-dashboard-btn');
+  if(!CU)return;
+  if(CU.role==='superadmin'){
+    b.textContent='⭐ Admin';b.style.display='inline-flex';b.style.background='#4a1d96';b.style.color='#fff';
+    if(dashBtn)dashBtn.style.display='none';
+  } else if(CU.role==='groupadmin'||CU.role==='subadmin'){
+    b.textContent='🔑 Panel';b.style.display='inline-flex';b.style.background='#1A237E';b.style.color='#fff';
+    if(dashBtn)dashBtn.style.display='none';
+  } else {
+    b.style.display='none';
+    if(dashBtn)dashBtn.style.display='inline-flex';
+  }
 }
 window.goPanel=()=>{if(CU?.role==='superadmin')nav('admin');else nav('panel');};
 
@@ -1871,6 +1885,7 @@ function renderBlogPreview(){const el=document.getElementById('home-blog');if(el
 function blogCard(p){return`<div class="blog-card" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'📰'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">✍️ ${p.authorName||'Editör'}</div><div style="font-size:11px;color:var(--muted)">❤️ ${p.likes||0}</div></div></div></div>`;}
 window.openBlog=id=>{
   const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;
+  const liked=CU&&localStorage.getItem(`blog_like_${p.id}_${CU.uid}`);
   document.getElementById('blog-detail-content').innerHTML=`
     <div style="height:260px;border-radius:var(--r);overflow:hidden;margin-bottom:24px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;position:relative">${p.coverUrl?`<img src="${p.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="font-size:70px">${p.emoji||'📰'}</span>`}</div>
     <div style="display:flex;gap:6px;margin-bottom:10px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>
@@ -1878,11 +1893,41 @@ window.openBlog=id=>{
     <div style="font-size:12px;color:var(--muted);margin-bottom:20px">✍️ ${p.authorName||'Editör'} · ${p.publishedAt||''}</div>
     <div style="font-size:14px;line-height:1.8;color:var(--muted2);margin-bottom:24px">${p.body||''}</div>
     <div class="blog-social">
-      <button class="social-btn" onclick="shareBlogPost('${p.slug||''}','${p.title}')">📤 Paylaş</button>
+      <button class="social-btn ${liked?'liked':''}" id="like-btn-${p.id}" onclick="likeBlogPost('${p.id}',this)">
+        ${liked?'❤️':'🤍'} ${liked?'Beğenildi':'Beğen'} (<span id="like-count-${p.id}">${p.likes||0}</span>)
+      </button>
+      <button class="social-btn" onclick="copyBlogLink('${p.slug||''}')">🔗 Linki Kopyala</button>
     </div>`;
   nav('blog-detail');
 };
-window.shareBlogPost=(slug,title)=>{const url=`https://runclubturkiye.com/haber/${slug}`;if(navigator.share)navigator.share({title,url}).catch(()=>{});else{navigator.clipboard.writeText(url);toast('Link kopyalandı! 📋','ok');}};
+window.copyBlogLink=(slug)=>{
+  const url=`https://runclubturkiye.com/haber/${slug}`;
+  navigator.clipboard.writeText(url).then(()=>toast('Link kopyalandı! 🔗','ok')).catch(()=>toast('Kopyalanamadı','err'));
+};
+window.shareBlogPost=(slug,title)=>{
+  const url=`https://runclubturkiye.com/haber/${slug}`;
+  if(navigator.share)navigator.share({title,url}).catch(()=>{});
+  else{navigator.clipboard.writeText(url);toast('Link kopyalandı! 📋','ok');}
+};
+window.likeBlogPost=async(postId,btn)=>{
+  if(!CU){toast('Beğenmek için giriş yapın','err');return;}
+  const likeKey=`blog_like_${postId}_${CU.uid}`;
+  const liked=localStorage.getItem(likeKey);
+  const fb=window._fb;
+  try{
+    const delta=liked?-1:1;
+    await fb.setDoc(fb.doc(fb.db,'blog',postId),{likes:fb.increment(delta)},{merge:true});
+    const post=BLOG_POSTS.find(p=>p.id===postId);if(post)post.likes=(post.likes||0)+delta;
+    const countEl=document.getElementById('like-count-'+postId);
+    if(liked){
+      localStorage.removeItem(likeKey);btn.classList.remove('liked');
+      btn.innerHTML=`🤍 Beğen (<span id="like-count-${postId}">${post?.likes||0}</span>)`;
+    }else{
+      localStorage.setItem(likeKey,'1');btn.classList.add('liked');
+      btn.innerHTML=`❤️ Beğenildi (<span id="like-count-${postId}">${post?.likes||0}</span>)`;
+    }
+  }catch(e){toast(e.message,'err');}
+};
 
 // ── FIRSATLAR ──
 function renderFirsatlar(list){
@@ -1976,7 +2021,35 @@ function initMap(){
 }
 
 // ── QR ──
-window.showQR=(eid,ename)=>{document.getElementById('qr-event-name').textContent=ename||'';const canvas=document.getElementById('qr-canvas');const ctx=canvas.getContext('2d');ctx.fillStyle='#fff';ctx.fillRect(0,0,200,200);ctx.fillStyle='#111';const data=`RCT:${eid}:${CU?.uid||'guest'}`;const sz=8;for(let i=0;i<data.length&&i<400;i++){const x=(i%20)*sz+20,y=Math.floor(i/20)*sz+20;if(data.charCodeAt(i)%2===0)ctx.fillRect(x,y,sz,sz);}ctx.strokeStyle='#FF6B00';ctx.lineWidth=3;ctx.strokeRect(2,2,196,196);openModal('qr-modal');};
+window._lastQRData={};
+window.showQR=(eid,ename)=>{
+  document.getElementById('qr-event-name').textContent=ename||'';
+  document.getElementById('qr-uid-label').textContent=`Kullanıcı: ${CU?.name||'Misafir'}`;
+  const container=document.getElementById('qr-container');
+  container.innerHTML='';
+  const qrData=`RCT:${eid}:${CU?.uid||'guest'}:${Date.now()}`;
+  window._lastQRData={eid,ename,qrData};
+  if(typeof QRCode!=='undefined'){
+    new QRCode(container,{text:qrData,width:200,height:200,colorDark:'#1a1a1a',colorLight:'#ffffff',correctLevel:QRCode.CorrectLevel.M});
+  } else {
+    const img=document.createElement('img');
+    img.src=`https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(qrData)}&color=1a1a1a`;
+    img.style.cssText='width:200px;height:200px;border-radius:4px';
+    container.appendChild(img);
+  }
+  openModal('qr-modal');
+};
+window.downloadQR=()=>{
+  const container=document.getElementById('qr-container');
+  const canvas=container.querySelector('canvas');
+  const img=container.querySelector('img');
+  const a=document.createElement('a');
+  if(canvas){a.href=canvas.toDataURL('image/png');}
+  else if(img){a.href=img.src;}
+  else{toast('QR bulunamadı','err');return;}
+  a.download=`checkin-${window._lastQRData.eid||'event'}.png`;
+  a.click();toast('QR indirildi ✓','ok');
+};
 
 // ── DASHBOARD ──
 function buildDashboard(){
@@ -1990,8 +2063,8 @@ function buildDashboard(){
   const isAdmin=CU.role==='superadmin';const isGrp=CU.role==='groupadmin'||CU.role==='subadmin';
   document.getElementById('dash-role-badge').innerHTML=isAdmin?'<span class="tag tag-or">⭐ Süper Admin</span>':isGrp?'<span class="tag tag-bl">🔑 Grup Admin</span>':'<span class="tag tag-gr">👤 Üye</span>';
   document.getElementById('dash-nav').innerHTML=[
-    {id:'overview',ico:'🏠',l:'Genel'},{id:'my-events',ico:'📅',l:'Etkinliklerim'},{id:'my-clubs',ico:'🤝',l:'Kulüplerim'},{id:'my-km',ico:'🏃',l:'KM Takibi'},{id:'badges',ico:'🏅',l:'Rozetler'},{id:'profile-tab',ico:'⚙',l:'Profil'},
-  ].map((n,i)=>`<button class="${i===0?'on':''}" onclick="showDash('${n.id}',this)">${n.ico} ${n.l}</button>`).join('')+'<button onclick="logout()" style="margin-top:12px;color:#f87171">🚪 Çıkış</button>';
+    {id:'overview',ico:'🏠',l:'Genel'},{id:'notifications',ico:'🔔',l:'Bildirimler'},{id:'my-events',ico:'📅',l:'Etkinliklerim'},{id:'my-clubs',ico:'🤝',l:'Kulüplerim'},{id:'my-km',ico:'🏃',l:'KM Takibi'},{id:'badges',ico:'🏅',l:'Rozetler'},{id:'profile-tab',ico:'⚙',l:'Profil'},
+  ].map((n,i)=>`<button class="${i===0?'on':''}" id="dash-btn-${n.id}" onclick="showDash('${n.id}',this)">${n.ico} ${n.l}</button>`).join('')+'<button onclick="logout()" style="margin-top:12px;color:#f87171">🚪 Çıkış</button>';
   const myBadges=CU.badges||[];
   const earnedBadges=BADGE_RULES.filter(r=>myBadges.includes(r.id));
   document.getElementById('dash-panels').innerHTML=`
@@ -2000,9 +2073,17 @@ function buildDashboard(){
       <div class="stat-cards">
         <div class="s-card"><div class="n">${CU.eventCount||0}</div><div class="l">Etkinlik</div></div>
         <div class="s-card"><div class="n">${CU.clubCount||0}</div><div class="l">Kulüp</div></div>
-        <div class="s-card"><div class="n">${CU.totalKm||0}</div><div class="l">Toplam km</div></div>
+        <div class="s-card"><div class="n">${CU.totalKm||0} km</div><div class="l">Toplam KM</div></div>
         <div class="s-card"><div class="n">${earnedBadges.length}</div><div class="l">Rozet</div></div>
       </div>
+      <div id="overview-recent-events"></div>
+    </div>
+    <div class="dash-content" id="dp-notifications">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+        <h2>🔔 Bildirimler</h2>
+        <button class="btn btn-ghost btn-sm" onclick="markAllNotifsRead()">Tümünü Okundu İşaretle</button>
+      </div>
+      <div id="dash-notifications-list"><div class="spinner" style="margin:20px auto"></div></div>
     </div>
     <div class="dash-content" id="dp-my-events">
       <h2 style="margin-bottom:16px">Etkinliklerim</h2>
@@ -2014,20 +2095,33 @@ function buildDashboard(){
     </div>
     <div class="dash-content" id="dp-my-km">
       <h2 style="margin-bottom:16px">KM Takibi</h2>
-      <div class="card" style="padding:24px">
+      <div class="card" style="padding:24px;margin-bottom:14px">
         <div style="font-size:36px;font-weight:700;color:var(--or);margin-bottom:4px">${CU.totalKm||0} km</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:16px">Toplam koşulan mesafe</div>
-        <div style="display:flex;gap:10px"><input type="number" id="km-input" placeholder="km girin..." style="max-width:160px"/><button class="btn btn-or" onclick="addKm(document.getElementById('km-input').value)">Ekle</button></div>
+        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Toplam koşulan mesafe</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <input type="number" id="km-input" placeholder="km girin..." style="max-width:130px"/>
+          <button class="btn btn-or" onclick="addKm(document.getElementById('km-input').value)">Manuel Ekle</button>
+          ${CU.stravaLink?'<button class="btn btn-sm" style="background:#fc4c02;color:#fff;border:none;cursor:pointer" onclick="syncStravaData()">🟠 Strava Sync</button>':''}
+        </div>
+        ${!CU.stravaLink?'<p style="font-size:11px;color:var(--muted)">Strava senkronizasyonu için <a onclick="nav(\'profile\'" style="cursor:pointer;color:var(--or)">profiline</a> Strava linki ekle.</p>':''}
       </div>
+      <div id="km-events-list"></div>
     </div>
     <div class="dash-content" id="dp-badges"><h2 style="margin-bottom:16px">Rozetlerim</h2>
       <div class="badge-grid">${BADGE_RULES.map(b=>`<div class="badge-it ${myBadges.includes(b.id)?'earned':''}"><div class="bi">${myBadges.includes(b.id)?b.ico:'🔒'}</div><div class="bn">${b.name}</div><div class="bd">${b.desc}</div></div>`).join('')}</div>
     </div>
     <div class="dash-content" id="dp-profile-tab"><h2 style="margin-bottom:14px">Profil</h2><button class="btn btn-or btn-sm" onclick="nav('profile')">Profil Sayfasına Git →</button></div>`;
   // Kulüpleri ve etkinlikleri yükle
-  loadMyClubs();loadMyEvents();
+  loadMyClubs();loadMyEvents();loadMyNotifications();loadKmEvents();loadOverviewRecent();
 }
-window.showDash=(id,btn)=>{document.querySelectorAll('.dash-content').forEach(d=>d.classList.remove('on'));const el=document.getElementById('dp-'+id);if(el)el.classList.add('on');document.querySelectorAll('#dash-nav button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');};
+window.showDash=(id,btn)=>{
+  document.querySelectorAll('.dash-content').forEach(d=>d.classList.remove('on'));
+  const el=document.getElementById('dp-'+id);if(el)el.classList.add('on');
+  document.querySelectorAll('#dash-nav button').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  if(id==='notifications')loadMyNotifications();
+  if(id==='my-km')loadKmEvents();
+};
 
 // ── DASHBOARD: KULÜPLERİM ──
 async function loadMyClubs(){
@@ -2659,38 +2753,41 @@ window.gSaveEvent=async()=>{
 window.gSaveSettings=async()=>{
   const g=id=>document.getElementById(id)?.value?.trim()||'';
   const fb=window._fb;
-
-  // Logo upload
-  let clubImg=g('gs-img')||CU.clubImg||'';
+  // Logo upload - önce dosya yükle
+  let clubImg='';
   const logoFile=document.getElementById('gs-logo-file')?.files[0];
-  if(!clubImg&&logoFile){
+  if(logoFile){
     try{
+      toast('Logo yükleniyor...','ok');
       const r=fb.ref(fb.storage,`clubs/${CU.uid}_logo_${Date.now()}`);
       await fb.uploadBytes(r,logoFile);
       clubImg=await fb.getDownloadURL(r);
-      toast('Logo yükleniyor...','ok');
     }catch(e){toast('Logo yüklenemedi: '+e.message,'err');}
   }
-
+  // Eğer yeni dosya yoksa mevcut URL'yi ya da alanı kullan
+  if(!clubImg) clubImg=g('gs-img')||CU.clubImg||'';
   const data={
-    clubName:g('gs-name')||CU.clubName,
-    city:g('gs-city')||CU.city,
-    clubDesc:g('gs-desc'),
+    clubName:g('gs-name')||CU.clubName||'',
+    city:g('gs-city')||CU.city||'',
+    clubDesc:g('gs-desc')||'',
     clubImg,
     clubOpen:document.getElementById('gs-open')?.value==='true',
-    clubInsta:g('gs-insta'),
-    clubStrava:g('gs-strava')
+    clubInsta:g('gs-insta')||'',
+    clubStrava:g('gs-strava')||''
   };
   try{
     await fb.setDoc(fb.doc(fb.db,'users',CU.uid),data,{merge:true});
     Object.assign(CU,data);
     toast('Kulüp bilgileri güncellendi ✓','ok');
-    // Kulüpler listesini yenile — sitede anında görünsün
-    if(typeof loadClubsFromDB==='function'){
-      loadClubsFromDB().then(()=>{
+    // Logo preview güncelle
+    const prev=document.getElementById('gs-logo-preview');
+    if(prev&&clubImg)prev.innerHTML=`<img src="${clubImg}" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>`;
+    // Kulüpler listesini yenile
+    if(window.loadClubsFromDB){
+      window.loadClubsFromDB().then(()=>{
         const cl=document.getElementById('clubs-list');
-        if(cl)cl.innerHTML=window.CLUBS.map(clubCard).join('');
-        renderHomeData();
+        if(cl&&window.clubCard)cl.innerHTML=window.CLUBS.map(window.clubCard).join('');
+        if(window.renderHomeData)window.renderHomeData();
       });
     }
   }catch(e){toast('Hata: '+e.message,'err');}
@@ -2711,7 +2808,8 @@ async function gLoadEvents(){
     const badge=s=>s==='pending'?'<span class="pill pill-or">⏳ Onay Bekliyor</span>':s==='approved'||!s?'<span class="pill pill-gr">✓ Yayında</span>':'<span class="pill pill-re">✗ Reddedildi</span>';
     let html='<table><thead><tr><th>Etkinlik</th><th>Tarih</th><th>Şehir</th><th>Kapasite</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>';
     events.forEach(e=>{
-      html+=`<tr><td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat}</span></td><td>${e.date||'—'}</td><td>${e.city||'—'}</td><td>${e.cap||'—'}</td><td>${badge(e.status)}</td><td><button class="btn btn-red btn-sm" onclick="gDeleteEvent('${e.id}')">🗑</button></td></tr>`;
+      const titleSafe=e.title.replace(/'/g,"\'");
+      html+=`<tr><td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat}</span></td><td>${e.date||'—'}</td><td>${e.city||'—'}</td><td>${e.cap||'—'}</td><td>${badge(e.status)}</td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="gLoadEventAttendees('${e.id}','${titleSafe}')" title="Katılanları gör">👥</button><button class="btn btn-red btn-sm" onclick="gDeleteEvent('${e.id}')">🗑</button></td></tr>`;
     });
     el.innerHTML=html+'</tbody></table>';
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
@@ -2811,6 +2909,179 @@ window.gSendChat=async()=>{
   }catch(e){toast(e.message,'err');}
 };
 
+
+
+// ── BİLDİRİMLER ──
+async function loadMyNotifications(){
+  const el=document.getElementById('dash-notifications-list');if(!el||!CU)return;
+  try{
+    const fb=window._fb;
+    const memSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',CU.uid)));
+    const clubIds=[];memSnap.forEach(d=>clubIds.push(d.data().clubId));
+    if(!clubIds.length){
+      el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:36px">🔔</div><p>Katıldığın kulüpten henüz duyuru yok.</p></div>';
+      return;
+    }
+    let allAnns=[];
+    for(const clubId of clubIds.slice(0,10)){
+      const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'announcements'),fb.where('clubId','==',clubId)));
+      snap.forEach(d=>allAnns.push({id:d.id,...d.data()}));
+    }
+    allAnns.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    const hiddenSet=new Set(JSON.parse(localStorage.getItem('notif_hidden_'+CU.uid)||'[]'));
+    allAnns=allAnns.filter(a=>!hiddenSet.has(a.id));
+    if(!allAnns.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:36px">🔔</div><p>Henüz duyuru yok.</p></div>';return;}
+    const readSet=new Set(JSON.parse(localStorage.getItem('notif_read_'+CU.uid)||'[]'));
+    let unreadCount=0;
+    let html2='';
+    allAnns.forEach(a=>{
+      const isRead=readSet.has(a.id);
+      if(!isRead)unreadCount++;
+      const date=a.createdAt?.toDate?.()?.toLocaleDateString('tr')||'';
+      html2+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:3px solid ${isRead?'var(--border)':'var(--or)'}">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start">
+          <div style="flex:1">
+            ${!isRead?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--or);margin-right:6px;vertical-align:middle"></span>':''}
+            <b style="font-size:14px">${a.title}</b>
+            <span style="font-size:11px;color:var(--muted);margin-left:8px">${a.clubName||''}</span>
+            <p style="font-size:12px;color:var(--muted);margin-top:6px;line-height:1.5">${a.body||''}</p>
+            <div style="font-size:11px;color:var(--muted);margin-top:6px">📅 ${date}</div>
+          </div>
+          <button class="btn btn-red btn-sm" style="margin-left:8px;flex-shrink:0" onclick="deleteMyNotif('${a.id}',this)">🗑</button>
+        </div>
+      </div>`;
+      if(!isRead){readSet.add(a.id);}
+    });
+    localStorage.setItem('notif_read_'+CU.uid,JSON.stringify([...readSet]));
+    el.innerHTML=html2;
+    const notifBtn=document.getElementById('dash-btn-notifications');
+    if(notifBtn){notifBtn.innerHTML=unreadCount>0?`🔔 Bildirimler <span class="badge-notif">${unreadCount}</span>`:'🔔 Bildirimler';}
+  }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
+}
+window.deleteMyNotif=(id,btn)=>{
+  const hiddenSet=new Set(JSON.parse(localStorage.getItem('notif_hidden_'+CU.uid)||'[]'));
+  hiddenSet.add(id);
+  localStorage.setItem('notif_hidden_'+CU.uid,JSON.stringify([...hiddenSet]));
+  btn.closest('.card').remove();
+  toast('Bildirim silindi','ok');
+};
+window.markAllNotifsRead=()=>{
+  toast('Tümü okundu işaretlendi','ok');
+  const notifBtn=document.getElementById('dash-btn-notifications');
+  if(notifBtn)notifBtn.innerHTML='🔔 Bildirimler';
+};
+
+// ── GENEL SEKME gerçek veriler ──
+async function loadOverviewRecent(){
+  const el=document.getElementById('overview-recent-events');if(!el||!CU)return;
+  try{
+    const fb=window._fb;
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'),fb.where('userId','==',CU.uid)));
+    const eventIds=[];snap.forEach(d=>eventIds.push(d.data().eventId));
+    const myEvts=window.EVENTS.filter(e=>eventIds.includes(e.id)).slice(0,4);
+    if(!myEvts.length){
+      el.innerHTML='<p style="font-size:13px;color:var(--muted);margin-top:14px">Henüz etkinliğe katılmadın. <a onclick="nav(\'events\')" style="cursor:pointer;color:var(--or)">Etkinlikleri keşfet →</a></p>';
+      return;
+    }
+    const today=new Date().toISOString().split('T')[0];
+    let html2='<div style="margin-top:16px"><h3 style="font-size:14px;margin-bottom:10px;color:var(--muted2)">Kayıtlı Etkinliklerim</h3>';
+    myEvts.forEach(e=>{
+      const d=new Date(e.date);
+      const isPast=e.date<today;
+      html2+=`<div style="display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">
+        <div style="min-width:42px;text-align:center;background:rgba(255,107,0,.1);border-radius:6px;padding:5px">
+          <div style="font-size:15px;font-weight:700;color:var(--or);line-height:1">${d.getDate()}</div>
+          <div style="font-size:9px;color:var(--muted)">${MONTHS[d.getMonth()]||''}</div>
+        </div>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:500">${e.title}</div>
+          <div style="font-size:11px;color:var(--muted)">📍 ${e.city} · ${e.dist}</div>
+        </div>
+        <span class="pill ${isPast?'pill-gr':'pill-or'}">${isPast?'Tamamlandı':'Yaklaşan'}</span>
+      </div>`;
+    });
+    html2+='</div>';
+    el.innerHTML=html2;
+  }catch(e){el.innerHTML='';}
+}
+
+// ── KM TAKİBİ etkinlik bazlı ──
+async function loadKmEvents(){
+  const el=document.getElementById('km-events-list');if(!el||!CU)return;
+  try{
+    const fb=window._fb;
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'),fb.where('userId','==',CU.uid)));
+    const eventIds=[];snap.forEach(d=>eventIds.push(d.data().eventId));
+    const myEvts=window.EVENTS.filter(e=>eventIds.includes(e.id));
+    if(!myEvts.length){el.innerHTML='<p style="font-size:13px;color:var(--muted)">Katıldığın etkinlik yok.</p>';return;}
+    const today=new Date().toISOString().split('T')[0];
+    let html2='<h3 style="font-size:14px;margin-bottom:12px;color:var(--muted2)">Etkinlik Bazlı KM</h3>';
+    myEvts.forEach(e=>{
+      const d=new Date(e.date);
+      const isPast=e.date<today;
+      const savedKm=localStorage.getItem('event_km_'+e.id+'_'+CU.uid)||'';
+      const distNum=parseFloat(e.dist)||0;
+      html2+=`<div class="card" style="padding:14px;margin-bottom:8px">
+        <div style="display:flex;gap:10px;align-items:center">
+          <div style="min-width:42px;text-align:center;background:rgba(255,107,0,.1);border-radius:6px;padding:5px">
+            <div style="font-size:15px;font-weight:700;color:var(--or)">${d.getDate()}</div>
+            <div style="font-size:9px;color:var(--muted)">${MONTHS[d.getMonth()]||''}</div>
+          </div>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:600">${e.title}</div>
+            <div style="font-size:11px;color:var(--muted)">📏 ${e.dist||'—'} · 📍 ${e.city}</div>
+          </div>
+          ${isPast?`<div style="text-align:right">
+            <div style="font-size:10px;color:var(--muted);margin-bottom:4px">KM:</div>
+            <div style="display:flex;gap:5px;align-items:center">
+              <input type="number" id="ekm-${e.id}" value="${savedKm}" placeholder="${distNum||'?'}" style="width:65px;padding:3px 6px;font-size:12px" onchange="saveEventKm('${e.id}',this.value)"/>
+              ${distNum?`<button class="btn btn-ghost btn-sm" style="font-size:10px;padding:2px 6px" onclick="autoFillEventKm('${e.id}','${distNum}')">Doldur</button>`:''}
+            </div>
+          </div>`:`<span class="pill pill-bl" style="font-size:10px">Yaklaşan</span>`}
+        </div>
+      </div>`;
+    });
+    el.innerHTML=html2;
+  }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi</p>`;}
+}
+window.saveEventKm=(eventId,km)=>{
+  if(!CU)return;
+  localStorage.setItem('event_km_'+eventId+'_'+CU.uid,parseFloat(km)||0);
+};
+window.autoFillEventKm=(eventId,km)=>{
+  const input=document.getElementById('ekm-'+eventId);
+  if(input){input.value=km;saveEventKm(eventId,km);toast(km+' km kaydedildi ✓','ok');}
+};
+window.syncStravaData=()=>{
+  if(!CU?.stravaLink){toast('Strava linki profilinde tanımlı değil','err');return;}
+  toast('Strava OAuth entegrasyonu gerektirir. Şimdilik etkinlik KM\'lerini manuel ekleyebilirsin.','ok');
+};
+
+// ── MAD 10: Grup Admin etkinliğine katılanlar ──
+window.gLoadEventAttendees=async(eventId,eventTitle)=>{
+  const main=document.getElementById('panel-main');if(!main)return;
+  const fb=window._fb;
+  main.innerHTML=`<button class="btn btn-ghost btn-sm" style="margin-bottom:16px" onclick="renderGroupSection('events')">← Etkinliklere Dön</button>
+    <h2 style="margin-bottom:6px">📋 Katılımcılar</h2>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">${eventTitle}</p>
+    <div id="attendees-list"><div class="spinner" style="margin:20px auto"></div></div>`;
+  try{
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'),fb.where('eventId','==',eventId)));
+    if(snap.empty){document.getElementById('attendees-list').innerHTML='<p style="color:var(--muted);padding:20px 0">Henüz kimse kaydolmadı.</p>';return;}
+    const uids=[];snap.forEach(d=>uids.push(d.data().userId));
+    const userProms=uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)));
+    const users=await Promise.all(userProms);
+    let tbl=`<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Toplam <b style="color:var(--text)">${uids.length}</b> katılımcı</p>
+      <table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Pace</th></tr></thead><tbody>`;
+    users.forEach(s=>{
+      if(!s.exists())return;
+      const u=s.data();
+      tbl+=`<tr><td><b>${u.name||'—'}</b></td><td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td><td>${u.phone||'—'}</td><td>${(u.pace||[]).join(', ')||'—'}</td></tr>`;
+    });
+    tbl+='</tbody></table>';
+    document.getElementById('attendees-list').innerHTML=tbl;
+  }catch(e){document.getElementById('attendees-list').innerHTML=`<p style="color:var(--muted)">Hata: ${e.message}</p>`;}
+};
 
 // ── LEGAL ──
 const LEGAL={

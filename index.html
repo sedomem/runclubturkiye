@@ -542,40 +542,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <div style="text-align:center;padding:20px 14px"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px">🏅</div><h3 style="font-size:14px;margin-bottom:6px">Kazan</h3><p style="font-size:12px;color:var(--muted)">Rozet kazan, liderboardda yüksel.</p></div>
     </div>
   </div></div>
-  <div class="newsletter-wrap" style="background:linear-gradient(135deg,#2C1810,#1A0A04)"><div class="container" style="text-align:center">
-    <h2 style="color:#fff;font-size:22px;margin-bottom:6px">📬 Haberdar Ol!</h2>
-    <p style="color:rgba(255,255,255,.7);font-size:14px">Yeni etkinlikler ve duyurulardan ilk sen haberdar ol.</p>
-    <div class="newsletter-form">
-      <input type="email" id="nl-email" placeholder="E-posta adresin..."/>
-      <button class="btn btn-or" onclick="subscribeNewsletter()">Abone Ol</button>
-    </div>
-    <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.7);display:none"></p>
-  </div></div>
-  <footer><div class="container">
-    <div class="footer-grid">
-      <div class="footer-col"><svg width="240" height="56" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
-  <circle cx="54" cy="38" r="11" fill="#E8622A"/>
-  <ellipse cx="52" cy="58" rx="8" ry="16" fill="#E8622A" transform="rotate(-10 52 58)"/>
-  <path d="M49 48 L30 35" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M55 46 L73 54" stroke="#F5F0E8" stroke-width="5" stroke-linecap="round" fill="none"/>
-  <path d="M46 73 L28 88" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M56 74 L74 83" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M26 40 L14 40" stroke="#E8622A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
-  <path d="M23 50 L9 50" stroke="#E8622A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5"/>
-  <text x="100" y="68" font-family="Alatsi,serif" font-size="52" fill="#E8622A">Run</text>
-  <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#fff">Club</text>
-  <text x="100" y="92" font-family="Raleway,sans-serif" font-size="14" fill="#8A7060" letter-spacing="5">TÜRKİYE</text>
-</svg><p style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;margin-top:8px">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:rgba(255,255,255,.35);margin-top:6px">📧 runclubturkiye@gmail.com</p></div>
-      <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a></div>
-      <div class="footer-col"><h4>Yasal</h4><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
-      <div class="footer-col"><h4>Sosyal</h4><a>Instagram</a><a>Strava</a><a>YouTube</a></div>
-    </div>
-    <div class="footer-legal"><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
-    <div class="footer-bot"><span style="font-family:'Raleway',sans-serif;letter-spacing:.5px">© 2025 RunClub<b style="color:#E8622A">Türkiye</b></span><span>runclubturkiye.com</span></div>
-  </div></footer>
 </div>
 
-<!-- EVENTS -->
+<!-- GLOBAL FOOTER — tüm sayfalarda görünür -->
 <div class="pg" id="pg-events">
 <div id="pb-events" class="page-banner pb-events"></div>
 <div class="container sec">
@@ -976,6 +945,42 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 </div>
 <div id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 <div id="toast"></div>
+
+
+<!-- ── GLOBAL NEWSLETTER + FOOTER ── -->
+<div id="global-footer" style="display:none">
+  <div class="newsletter-wrap" style="background:linear-gradient(135deg,#2C1810,#1A0A04)"><div class="container" style="text-align:center">
+    <h2 style="color:#fff;font-size:22px;margin-bottom:6px;font-family:'Raleway',sans-serif">📬 Haberdar Ol!</h2>
+    <p style="color:rgba(255,255,255,.7);font-size:14px">Yeni etkinlikler ve duyurulardan ilk sen haberdar ol.</p>
+    <div class="newsletter-form">
+      <input type="email" id="nl-email" placeholder="E-posta adresin..."/>
+      <button class="btn btn-or" onclick="subscribeNewsletter()">Abone Ol</button>
+    </div>
+    <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.7);display:none"></p>
+  </div></div>
+  <footer><div class="container">
+    <div class="footer-grid">
+      <div class="footer-col"><svg width="240" height="56" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <circle cx="54" cy="38" r="11" fill="#E8622A"/>
+  <ellipse cx="52" cy="58" rx="8" ry="16" fill="#E8622A" transform="rotate(-10 52 58)"/>
+  <path d="M49 48 L30 35" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M55 46 L73 54" stroke="#F5F0E8" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M46 73 L28 88" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M56 74 L74 83" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M26 40 L14 40" stroke="#E8622A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M23 50 L9 50" stroke="#E8622A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5"/>
+  <text x="100" y="68" font-family="Alatsi,serif" font-size="52" fill="#E8622A">Run</text>
+  <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#fff">Club</text>
+  <text x="100" y="92" font-family="Raleway,sans-serif" font-size="14" fill="#8A7060" letter-spacing="5">TÜRKİYE</text>
+</svg><p style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;margin-top:8px">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:rgba(255,255,255,.35);margin-top:6px">📧 runclubturkiye@gmail.com</p></div>
+      <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a></div>
+      <div class="footer-col"><h4>Yasal</h4><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
+      <div class="footer-col"><h4>Sosyal</h4><a>Instagram</a><a>Strava</a><a>YouTube</a></div>
+    </div>
+    <div class="footer-legal"><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
+    <div class="footer-bot"><span style="font-family:'Raleway',sans-serif;letter-spacing:.5px">© 2025 RunClub<b style="color:#E8622A">Türkiye</b></span><span>runclubturkiye.com</span></div>
+  </div></footer>
+</div>
 
 <!-- KULÜP BAŞVURU FLOATING CTA -->
 <div id="club-cta-float" style="
@@ -1873,6 +1878,9 @@ window.nav=id=>{
   document.querySelectorAll('.nav-center button').forEach(b=>b.classList.remove('on'));
   const nb=document.getElementById('nb-'+id);if(nb)nb.classList.add('on');
   window.scrollTo(0,0);
+  // Global footer göster/gizle
+  const gf=document.getElementById('global-footer');
+  if(gf)gf.style.display=['admin','panel','dashboard','profile'].includes(id)?'none':'block';
   if((id==='dashboard'||id==='admin'||id==='panel')&&!window.CU){openAuth('login');return;}
   if(id==='map-view')setTimeout(initMap,100);
   if(id==='admin'&&CU?.role==='superadmin'){renderAdminSection('dashboard');loadAdminBadges&&loadAdminBadges();}
@@ -3603,6 +3611,9 @@ window.addEventListener('scroll',()=>{
 
 // ── INIT ──
 document.getElementById('pg-home').classList.add('on');
+// Global footer başlangıçta göster (ana sayfa)
+const _gf=document.getElementById('global-footer');
+if(_gf)_gf.style.display='block';
 // loadAllFromDB module script'te tanımlı — window üzerinden çağır
 // Module script yüklendikten sonra window.loadAllFromDB set edilir
 // Kısa gecikme ile bekle

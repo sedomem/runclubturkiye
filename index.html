@@ -2027,7 +2027,6 @@ function buildDashboard(){
   // Kulüpleri ve etkinlikleri yükle
   loadMyClubs();loadMyEvents();
 }
-}
 window.showDash=(id,btn)=>{document.querySelectorAll('.dash-content').forEach(d=>d.classList.remove('on'));const el=document.getElementById('dp-'+id);if(el)el.classList.add('on');document.querySelectorAll('#dash-nav button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');};
 
 // ── DASHBOARD: KULÜPLERİM ──

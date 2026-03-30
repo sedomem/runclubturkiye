@@ -903,17 +903,26 @@ function updateAdminSidebarBadges(msgCount,appCount){
   const msgBtn=document.getElementById('sb-messages-btn');
   const appBtn=document.getElementById('sb-applications-btn');
   if(msgBtn){
+    // Badge'i tamamen temizleyip yeniden yaz
+    msgBtn.innerHTML='';
+    const msgSpan=document.createTextNode('✉️ Mesajlar');
+    msgBtn.appendChild(msgSpan);
     if(msgCount>0){
-      msgBtn.innerHTML=`✉️ Mesajlar <span class="admin-notif-badge">${msgCount}</span>`;
-    }else{
-      msgBtn.innerHTML=`✉️ Mesajlar`;
+      const badge=document.createElement('span');
+      badge.className='admin-notif-badge';
+      badge.textContent=msgCount;
+      msgBtn.appendChild(badge);
     }
   }
   if(appBtn){
+    appBtn.innerHTML='';
+    const appSpan=document.createTextNode('📋 Başvurular');
+    appBtn.appendChild(appSpan);
     if(appCount>0){
-      appBtn.innerHTML=`📋 Başvurular <span class="admin-notif-badge">${appCount}</span>`;
-    }else{
-      appBtn.innerHTML=`📋 Başvurular`;
+      const badge=document.createElement('span');
+      badge.className='admin-notif-badge';
+      badge.textContent=appCount;
+      appBtn.appendChild(badge);
     }
   }
 }
@@ -1092,53 +1101,73 @@ window.saveRaceFromAdmin=async()=>{
 
 // ── ✅ AI BLOG ASSISTANT ──
 window.aiBlogAssist=async()=>{
-  const url=document.getElementById('ab-news-url')?.value?.trim();
+  const urlInput=document.getElementById('ab-news-url');
+  const url=urlInput?.value?.trim();
   if(!url){toast('Haber linki girin','err');return;}
   const statusEl=document.getElementById('ai-blog-status');
-  if(statusEl){statusEl.style.display='flex';statusEl.querySelector('span').textContent='Haber analiz ediliyor...';}
+  const btnEl=document.querySelector('[onclick="aiBlogAssist()"]');
+  if(statusEl)statusEl.style.display='flex';
+  if(btnEl){btnEl.disabled=true;btnEl.textContent='⏳ İşleniyor...';}
   try{
-    const prompt=`Sen RunClubTürkiye platformu için SEO odaklı içerik üretiyor bir editörsün. Türkiye'nin önde gelen koşu topluluğu platformu için içerik üretiyorsun.
+    const prompt=`Sen RunClubTürkiye platformu için SEO odaklı içerik üreten bir editörsün. Türkiye'nin önde gelen koşu topluluğu platformu için içerik üretiyorsun.
 
-Verilen haber linkini analiz et ve RunClubTürkiye'ye özgü, Türkçe koşu topluluğu için yeniden yazılmış bir blog yazısı hazırla.
+Kullanıcı aşağıdaki URL'yi paylaştı. Bu URL'deki haberi RunClubTürkiye okuyucuları için Türkçe olarak yeniden yaz.
 
-Haber kaynağı URL: ${url}
+URL: ${url}
 
-GÖREV: Bu haberi RunClubTürkiye okuyucuları için SEO uyumlu şekilde yeniden yaz.
+GÖREV: Bu haberi/konuyu RunClubTürkiye koşu topluluğu için ilgi çekici, motive edici ve SEO uyumlu şekilde yeniden yaz. URL'ye erişemesen bile konuyu tahmin edip içerik üret.
 
-ÇIKTI FORMAT (sadece JSON döndür, başka hiçbir şey ekleme):
-{
-  "baslik": "SEO uyumlu, koşu topluluğuna hitap eden başlık (max 65 karakter)",
-  "icerik": "Tam blog içeriği (en az 400 kelime). Haberi RunClubTürkiye'nin sesini kullanarak, koşucuları motive edecek şekilde yeniden yaz. HTML paragraf tagları kullan (<p>, <h2>, <ul>, <li>).",
-  "etiketler": ["etiket1","etiket2","etiket3"],
-  "meta_baslik": "Meta başlık (50-60 karakter, anahtar kelime içermeli)",
-  "meta_aciklama": "Meta açıklama (150-160 karakter, koşucu kitlesine hitap etmeli)",
-  "ozet": "2-3 cümle özet"
-}`;
+ZORUNLU: Sadece aşağıdaki JSON formatında yanıt ver, başka hiçbir şey yazma:
+{"baslik":"SEO uyumlu başlık (max 65 karakter)","icerik":"En az 300 kelime blog içeriği. RunClubTürkiye sesini kullan. Paragraflar halinde yaz.","etiketler":["etiket1","etiket2","etiket3"],"meta_baslik":"Meta başlık 50-60 karakter","meta_aciklama":"Meta açıklama 150-160 karakter","ozet":"2 cümle özet"}`;
+
     const resp=await fetch('https://api.anthropic.com/v1/messages',{
       method:'POST',
-      headers:{'Content-Type':'application/json'},
+      headers:{
+        'Content-Type':'application/json',
+        'anthropic-version':'2023-06-01',
+        'anthropic-dangerous-direct-browser-access':'true'
+      },
       body:JSON.stringify({
         model:'claude-sonnet-4-20250514',
-        max_tokens:1000,
+        max_tokens:1500,
         messages:[{role:'user',content:prompt}]
       })
     });
+
+    if(!resp.ok){
+      const errData=await resp.json().catch(()=>({}));
+      throw new Error(errData.error?.message||`HTTP ${resp.status}`);
+    }
+
     const data=await resp.json();
     const raw=data.content?.[0]?.text||'';
-    const clean=raw.replace(/```json|```/g,'').trim();
-    const parsed=JSON.parse(clean);
+    // JSON'u temizle (bazen ``` bloğu içinde gelir)
+    const clean=raw.replace(/^```json?\s*/,'').replace(/\s*```$/,'').trim();
+    let parsed;
+    try{parsed=JSON.parse(clean);}
+    catch(e){
+      // JSON parse başarısız, raw metin içinden JSON bul
+      const m=raw.match(/\{[\s\S]*\}/);
+      if(m)parsed=JSON.parse(m[0]);
+      else throw new Error('AI yanıtı parse edilemedi');
+    }
+
     // Formu doldur
-    const titleEl=document.getElementById('ab-title');if(titleEl)titleEl.value=parsed.baslik||'';
-    const bodyEl=document.getElementById('ab-body');if(bodyEl)bodyEl.value=(parsed.icerik||'').replace(/<[^>]+>/g,' ').trim();
-    const tagsEl=document.getElementById('ab-tags');if(tagsEl)tagsEl.value=(parsed.etiketler||[]).join(', ');
-    const metaTitleEl=document.getElementById('ab-meta-title');if(metaTitleEl)metaTitleEl.value=parsed.meta_baslik||'';
-    const metaDescEl=document.getElementById('ab-meta-desc');if(metaDescEl)metaDescEl.value=parsed.meta_aciklama||'';
-    if(statusEl){statusEl.style.display='none';}
+    const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+    set('ab-title',parsed.baslik);
+    set('ab-body',parsed.icerik);
+    set('ab-tags',(parsed.etiketler||[]).join(', '));
+    set('ab-meta-title',parsed.meta_baslik);
+    set('ab-meta-desc',parsed.meta_aciklama);
+
     updateSeoScore&&updateSeoScore();
     toast('Blog formu AI ile dolduruldu! ✓','ok');
   }catch(e){
-    if(statusEl){statusEl.style.display='none';}
     toast('AI hatası: '+e.message,'err');
+    console.error('AI Blog error:',e);
+  }finally{
+    if(statusEl)statusEl.style.display='none';
+    if(btnEl){btnEl.disabled=false;btnEl.textContent='🤖 AI ile Doldur';}
   }
 };
 
@@ -1205,11 +1234,28 @@ window.loadAdminUsers=async()=>{
   const el=document.getElementById('admin-users-content');if(!el)return;
   try{
     const snap=await getDocs(collection(db,'users'));
-    let html='<table><thead><tr><th>Ad</th><th>E-posta</th><th>Rol</th><th>km</th><th>Etkinlik</th><th>İşlem</th></tr></thead><tbody>';
     const users=[];snap.forEach(d=>{users.push({id:d.id,...d.data()});});
     window._adminUsers=users;
+    const roleLabel=r=>r==='superadmin'?'⭐ Süper Admin':r==='groupadmin'?'🔑 Grup Admin':r==='pending_groupadmin'?'⏳ Bekleyen':r==='subadmin'?'🔑 Sub Admin':'👤 Üye';
+    const rolePill=r=>r==='superadmin'?'pill-or':r==='groupadmin'||r==='subadmin'?'pill-bl':r==='pending_groupadmin'?'pill-re':'pill-gr';
+    let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <span style="font-size:13px;color:var(--muted)">${users.length} kullanıcı</span>
+      <button class="btn btn-green btn-sm" onclick="exportUsersExcel()">⬇ Excel İndir</button>
+    </div>
+    <table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Rol</th><th>km</th><th>Etkinlik</th><th>İşlem</th></tr></thead><tbody>`;
     users.forEach((u,i)=>{
-      html+=`<tr><td><b>${u.name||'—'}</b></td><td style="color:var(--muted)">${u.email||'—'}</td><td><select onchange="changeUserRole('${u.id}',this.value)" style="width:auto;padding:4px 8px;font-size:11px"><option ${u.role==='member'?'selected':''}>member</option><option ${u.role==='groupadmin'?'selected':''}>groupadmin</option><option ${u.role==='superadmin'?'selected':''}>superadmin</option></select></td><td>${u.totalKm||0}</td><td>${u.eventCount||0}</td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="showUserProfile(${i})">👁 Profil</button><button class="btn btn-ghost btn-sm" onclick="adminAddKm('${u.id}')">+km</button></td></tr>`;
+      html+=`<tr>
+        <td><b>${u.name||'—'}</b></td>
+        <td style="color:var(--muted);font-size:11px">${u.email||'—'}</td>
+        <td style="font-size:11px">${u.phone||'<span style="color:var(--muted)">—</span>'}</td>
+        <td><span class="pill ${rolePill(u.role)}" style="font-size:10px">${roleLabel(u.role)}</span></td>
+        <td>${u.totalKm||0}</td>
+        <td>${u.eventCount||0}</td>
+        <td class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="showUserProfile(${i})">👁</button>
+          <button class="btn btn-ghost btn-sm" onclick="adminAddKm('${u.id}')">+km</button>
+        </td>
+      </tr>`;
     });
     html+='</tbody></table>';el.innerHTML=html;
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
@@ -1233,6 +1279,24 @@ window.showUserProfile=i=>{
       <button class="btn btn-ghost btn-sm" onclick="closeModal('user-profile-modal')">Kapat</button>
     </div>`;
   openModal('user-profile-modal');
+};
+window.exportUsersExcel=()=>{
+  const data=window._adminUsers;
+  if(!data?.length){toast('Önce listeyi yükleyin','err');return;}
+  const roleLabel=r=>r==='superadmin'?'Süper Admin':r==='groupadmin'?'Grup Admin':r==='pending_groupadmin'?'Bekleyen GA':r==='subadmin'?'Sub Admin':'Üye';
+  const rows=[
+    ['#','Ad Soyad','E-posta','Telefon','Rol','Şehir','Toplam km','Etkinlik Sayısı','Kulüp Sayısı','Kayıt Tarihi'],
+    ...data.map((u,i)=>[
+      i+1,u.name||'',u.email||'',u.phone||'',roleLabel(u.role),
+      u.city||'',u.totalKm||0,u.eventCount||0,u.clubCount||0,
+      u.createdAt?.toDate?.().toLocaleDateString('tr')||''
+    ])
+  ];
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download='kullanicilar.csv';a.click();
+  URL.revokeObjectURL(url);toast('Excel indirildi ✓','ok');
 };
 window.deleteUser=async(uid)=>{if(!confirm('Kullanıcı silinsin mi?'))return;try{await deleteDoc(doc(db,'users',uid));closeModal('user-profile-modal');toast('Silindi','ok');loadAdminUsers();}catch(e){toast(e.message,'err');}};
 window.changeUserRole=async(uid,role)=>{await setDoc(doc(db,'users',uid),{role},{merge:true});toast('Rol güncellendi ✓','ok');};
@@ -1267,8 +1331,11 @@ window.loadAdminMessages=async()=>{
     // Okundu işaretle → badge sıfırla
     const unreadIds=[];
     snap.forEach(d=>{if(!d.data().read)unreadIds.push(d.id);});
-    for(const id of unreadIds){updateDoc(doc(db,'contactMessages',id),{read:true}).catch(()=>{});}
-    // Badge'i güncelle
+    if(unreadIds.length>0){
+      // Paralel güncelle
+      await Promise.allSettled(unreadIds.map(id=>updateDoc(doc(db,'contactMessages',id),{read:true})));
+    }
+    // Badge'i 0'a çek
     window._adminMsgCount=0;
     updateAdminSidebarBadges(0,window._adminAppCount||0);
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi</p>`;}
@@ -1284,17 +1351,49 @@ window.loadApplications=async()=>{
   try{
     const snap=await getDocs(query(collection(db,'applications'),orderBy('createdAt','desc')));
     let html='<table><thead><tr><th>Ad</th><th>Kulüp</th><th>Şehir</th><th>E-posta</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>';
-    snap.forEach(d=>{const a=d.data();html+=`<tr><td>${a.name}</td><td>${a.clubName}</td><td>${a.city}</td><td>${a.email}</td><td><span class="pill ${a.status==='approved'?'pill-gr':a.status==='rejected'?'pill-re':'pill-or'}">${a.status==='approved'?'Onaylandı':a.status==='rejected'?'Reddedildi':'Bekliyor'}</span></td><td class="action-btns"><button class="btn btn-green btn-sm" onclick="approveApplication('${d.id}','${a.uid}')">✓</button><button class="btn btn-red btn-sm" onclick="rejectApplication('${d.id}')">✗</button></td></tr>`;});
-    html+='</tbody></table>';el.innerHTML=html||'<p style="color:var(--muted)">Başvuru yok.</p>';
+    let pendingCount=0;
+    snap.forEach(d=>{
+      const a=d.data();
+      if(a.status==='pending')pendingCount++;
+      html+=`<tr>
+        <td>${a.name}</td><td>${a.clubName}</td><td>${a.city}</td><td style="font-size:11px">${a.email}</td>
+        <td><span class="pill ${a.status==='approved'?'pill-gr':a.status==='rejected'?'pill-re':'pill-or'}">${a.status==='approved'?'Onaylandı':a.status==='rejected'?'Reddedildi':'Bekliyor'}</span></td>
+        <td class="action-btns">
+          ${a.status==='pending'
+            ?`<button class="btn btn-green btn-sm" onclick="approveApplication('${d.id}','${a.uid}')">✓ Onayla</button><button class="btn btn-red btn-sm" onclick="rejectApplication('${d.id}')">✗ Reddet</button>`
+            :`<span style="color:var(--muted);font-size:11px">İşlendi</span>`}
+        </td></tr>`;
+    });
+    html+='</tbody></table>';
+    el.innerHTML=snap.empty?'<p style="color:var(--muted)">Başvuru yok.</p>':html;
+    // Badge'i gerçek bekleyen sayısına güncelle
+    window._adminAppCount=pendingCount;
+    updateAdminSidebarBadges(window._adminMsgCount||0,pendingCount);
   }catch(e){el.innerHTML='<p style="color:var(--muted)">Yüklenemedi</p>';}
 };
 window.approveApplication=async(appId,uid)=>{
-  await setDoc(doc(db,'users',uid),{role:'groupadmin'},{merge:true});
-  await updateDoc(doc(db,'applications',appId),{status:'approved'});
-  toast('Onaylandı ✓','ok');
-  // Bekleyen azaldı → badge güncelle
-  if(window._adminAppCount>0){window._adminAppCount--;updateAdminSidebarBadges(window._adminMsgCount||0,window._adminAppCount);}
-  loadApplications();
+  try{
+    // 1. Kullanıcı rolünü güncelle
+    await setDoc(doc(db,'users',uid),{role:'groupadmin'},{merge:true});
+    // 2. Başvuruyu onayla
+    await updateDoc(doc(db,'applications',appId),{status:'approved'});
+    // 3. Kullanıcı verisini çek, groups koleksiyonuna ekle
+    const userSnap=await getDoc(doc(db,'users',uid));
+    if(userSnap.exists()){
+      const u=userSnap.data();
+      await setDoc(doc(db,'groups',uid),{
+        name:u.clubName||'Yeni Grup',city:u.city||'',adminUid:uid,
+        adminName:u.name||'',adminEmail:u.email||'',
+        members:0,open:true,desc:'',imgUrl:'',
+        createdAt:serverTimestamp()
+      },{merge:true});
+    }
+    toast('Onaylandı ve grup oluşturuldu ✓','ok');
+    if(window._adminAppCount>0){window._adminAppCount--;updateAdminSidebarBadges(window._adminMsgCount||0,window._adminAppCount);}
+    loadApplications();
+    // Grup adminler listesini de güncelle
+    setTimeout(()=>loadGroupAdmins&&loadGroupAdmins(),300);
+  }catch(e){toast('Hata: '+e.message,'err');}
 };
 window.rejectApplication=async(appId)=>{
   await updateDoc(doc(db,'applications',appId),{status:'rejected'});

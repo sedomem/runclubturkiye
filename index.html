@@ -826,7 +826,7 @@ const SUPER_EMAIL='sedomem@gmail.com';
 window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
 
 onAuthStateChanged(auth,async user=>{
-  // Loading'i burada kapatmıyoruz — init bloğu veri yüklenince kapatır
+  // Auth state geldi — loading'i kapat (loadAllFromDB da kapatır ama güvenlik için)
   if(user){
     const snap=await getDoc(doc(db,'users',user.uid));
     const d=snap.exists()?snap.data():{};
@@ -843,6 +843,15 @@ onAuthStateChanged(auth,async user=>{
   }
   loadPopup();
 });
+
+// Güvenlik ağı: 8 saniye içinde loading kapanmazsa zorla kapat
+setTimeout(()=>{
+  const ld=document.getElementById('loading');
+  if(ld&&ld.style.display!=='none'){
+    ld.style.display='none';
+    console.warn('Loading forced closed after timeout');
+  }
+},8000);
 
 function setupRoleBtn(){
   const b=document.getElementById('nav-role-btn');if(!CU)return;
@@ -1558,11 +1567,14 @@ async function loadAllFromDB(){
   if(typeof window.renderBlogList==='function')window.renderBlogList();
   if(typeof window.renderFirsatlar==='function')window.renderFirsatlar();
   if(typeof window.renderSponsors==='function')window.renderSponsors();
+  // Loading spinner'ı kapat
+  const ld=document.getElementById('loading');if(ld)ld.style.display='none';
 }
 window.reloadSiteData=loadAllFromDB;
 window.loadAllFromDB=loadAllFromDB;
 
 loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
+window.loadBannersFromDB=loadBannersFromDB;
 </script>
 
 <script>
@@ -2823,18 +2835,17 @@ window.addEventListener('scroll',()=>{
 
 // ── INIT ──
 document.getElementById('pg-home').classList.add('on');
-// Loading spinner açık, veri gelince kapanır
-(async()=>{
-  await Promise.allSettled([
-    window.loadBannersFromDB?window.loadBannersFromDB():loadBannersFromDB(),
-    window.loadSponsorsFromDB?window.loadSponsorsFromDB():loadSponsorsFromDB(),
-    window.loadFirsatlarFromDB?window.loadFirsatlarFromDB():loadFirsatlarFromDB(),
-  ]);
-  // Ana veri
-  if(window.loadAllFromDB)await window.loadAllFromDB();
-  // Loading kapat
-  const ld=document.getElementById('loading');if(ld)ld.style.display='none';
-})();
+// loadAllFromDB module script'te tanımlı — window üzerinden çağır
+// Module script yüklendikten sonra window.loadAllFromDB set edilir
+// Kısa gecikme ile bekle
+setTimeout(()=>{
+  if(window.loadAllFromDB){
+    window.loadAllFromDB();
+  } else {
+    // Fallback: loading'i kapat
+    const ld=document.getElementById('loading');if(ld)ld.style.display='none';
+  }
+},300);
 </script>
 </body>
 </html>

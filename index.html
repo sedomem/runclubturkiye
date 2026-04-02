@@ -1924,7 +1924,12 @@ Object.defineProperty(window,'CU',{
   set(v){CU=v;},
   configurable:true
 });
-window.EVENTS=[];
+window.EVENTS=[
+  {id:"mock-e1",title:"Boğaz Köprüsü Koşusu",date:"2025-06-15",city:"İstanbul",dist:"10 km",cat:"10K",emoji:"🏃",fee:"150",cap:500,reg:312,status:"approved",desc:"İstanbul Boğazı'nda eşsiz bir koşu deneyimi.",imgUrl:"https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=600&q=80"},
+  {id:"mock-e2",title:"Ankara Maraton 2025",date:"2025-09-21",city:"Ankara",dist:"42 km",cat:"Maraton",emoji:"🏅",fee:"200",cap:1000,reg:756,status:"approved",desc:"Başkentin prestijli maraton etkinliği.",imgUrl:"https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&q=80"},
+  {id:"mock-e3",title:"İzmir Trail Run",date:"2025-07-06",city:"İzmir",dist:"21 km",cat:"Trail",emoji:"🌿",fee:"120",cap:200,reg:88,status:"approved",desc:"Ege'nin doğasında zorlu trail parkuru.",imgUrl:"https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600&q=80"},
+  {id:"mock-e4",title:"Antalya Gündoğumu Koşusu",date:"2025-08-10",city:"Antalya",dist:"5 km",cat:"5K/10K",emoji:"🌅",fee:"80",cap:300,reg:140,status:"approved",desc:"Güneş doğarken sahilde 5K koşusu.",imgUrl:"https://images.unsplash.com/photo-1502904550040-7534597429ae?w=600&q=80"},
+];
 
 // ── MOCK DATA — Firestore'dan gerçek veri gelene kadar gösterilir ──
 window.CLUBS=[
@@ -3773,32 +3778,28 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 
 // ── INIT ──
-document.getElementById('pg-home').classList.add('on');
-
-// Loading div'i HEMEN kaldır — içerikler mock data ile zaten dolu
-const _ld=document.getElementById('loading');
-if(_ld)_ld.style.display='none';
-
-// Global footer göster
-const _gf=document.getElementById('global-footer');
-if(_gf)_gf.style.display='block';
-
-// Mock data + banner'ı hemen render et
-try{
-  loadBannersFromSlots();   // Hero banner — default slide göster
-  renderHomeData();          // Kulüpler, Yarışlar, Blog — mock data ile doldur
-  initPageBanners();         // Sayfa bannerları
-}catch(e){console.warn('Init render:',e);}
-
-// Firebase hazır olunca gerçek veriyle güncelle
+try {
+  document.getElementById('pg-home').classList.add('on');
+  const _ld=document.getElementById('loading');
+  if(_ld)_ld.style.display='none';
+  const _gf=document.getElementById('global-footer');
+  if(_gf)_gf.style.display='block';
+  loadBannersFromSlots();
+  renderHomeData();
+  try{initPageBanners();}catch(e){}
+  try{startBannerTimer&&startBannerTimer();}catch(e){}
+} catch(initErr) {
+  console.error('Init error:', initErr);
+  try{document.getElementById('pg-home').classList.add('on');}catch(e){}
+  try{const l=document.getElementById('loading');if(l)l.style.display='none';}catch(e){}
+}
 (function waitForDB(attempt){
-  if(attempt>50)return;
-  if(typeof window.loadAllFromDB==='function' && window._fb){
-    window.loadAllFromDB();
-  } else {
-    setTimeout(()=>waitForDB(attempt+1), 200);
-  }
+  if(attempt>60)return;
+  if(typeof window.loadAllFromDB==='function'&&window._fb&&window._fb.db){
+    window.loadAllFromDB().then(()=>{try{renderHomeData();}catch(e){}}).catch(e=>console.warn('DB:',e));
+  } else { setTimeout(()=>waitForDB(attempt+1),150); }
 })(0);
+
 </script>
 </body>
 </html>

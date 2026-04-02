@@ -951,27 +951,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 <!-- __ GLOBAL NEWSLETTER + FOOTER __ -->
 <div id="global-footer" style="display:block">
-  <div style="background:var(--bg2);padding:18px 0 0"><div class="container">
-    <div style="background:linear-gradient(135deg,#E8622A 0%,#C94E1C 60%,#A83A10 100%);border-radius:16px;padding:18px 32px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(232,98,42,.25)">
-      <div style="position:absolute;top:-50px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none"></div>
-      <svg width="40" height="40" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
-        <defs><style>.nl-env{animation:nlEnvBounce 2s ease-in-out infinite}.nl-dot1{animation:nlPop 2s ease-in-out infinite 0s}.nl-dot2{animation:nlPop 2s ease-in-out infinite .3s}.nl-dot3{animation:nlPop 2s ease-in-out infinite .6s}@keyframes nlEnvBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes nlPop{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.4);opacity:1}}</style></defs>
-        <g class="nl-env"><rect x="8" y="20" width="56" height="38" rx="6" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.6)" stroke-width="2"/><path d="M8 26 L36 44 L64 26" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
-        <circle class="nl-dot1" cx="56" cy="16" r="5" fill="#fff"/><circle class="nl-dot2" cx="63" cy="10" r="3" fill="rgba(255,255,255,.7)"/><circle class="nl-dot3" cx="67" cy="19" r="2" fill="rgba(255,255,255,.5)"/>
-      </svg>
-      <div style="flex:1;min-width:0">
-        <div style="font-family:'Raleway',sans-serif;font-size:16px;font-weight:800;color:#fff;line-height:1">Gelismeleri Takip Et</div>
-        <div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:3px">Etkinlikler ve duyurulardan ilk sen haberdar ol.</div>
-      </div>
-      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
-        <input type="email" id="nl-email" placeholder="E-posta adresiniz..." style="background:rgba(255,255,255,.95);border:none;border-radius:8px;padding:10px 14px;font-size:13px;color:#2C1810;font-family:'Open Sans',sans-serif;outline:none;width:220px"/>
-        <button onclick="subscribeNewsletter()" style="background:#2C1810;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-family:'Raleway',sans-serif;font-weight:700;cursor:pointer;white-space:nowrap" onmouseover="this.style.background='#1A0A04'" onmouseout="this.style.background='#2C1810'">Abone Ol</button>
-      </div>
-      <p id="nl-msg" style="font-size:11px;color:rgba(255,255,255,.9);display:none;position:absolute;bottom:6px;right:32px"></p>
-    </div>
-  </div></div>
-<div class="newsletter-wrap" style="background:linear-gradient(135deg,#2C1810,#1A0A04)"><div class="container" style="text-align:center">
-    <h2 style="color:#fff;font-size:22px;margin-bottom:6px">📬 Haberdar Ol!</h2>
+  <div class="newsletter-wrap" style="background:linear-gradient(135deg,#2C1810,#1A0A04)"><div class="container" style="text-align:center">
+    <h2 style="color:#fff;font-size:22px;margin-bottom:6px;font-family:'Raleway',sans-serif">📬 Haberdar Ol!</h2>
     <p style="color:rgba(255,255,255,.7);font-size:14px">Yeni etkinlikler ve duyurulardan ilk sen haberdar ol.</p>
     <div class="newsletter-form">
       <input type="email" id="nl-email" placeholder="E-posta adresin..."/>
@@ -1036,7 +1017,9 @@ const SUPER_EMAIL='sedomem@gmail.com';
 window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
 
 onAuthStateChanged(auth,async user=>{
-  // Auth state geldi — loading'i kapat (loadAllFromDB da kapatır ama güvenlik için)
+  // Auth state geldi — loading'i HEMEN kapat
+  const _ldiv=document.getElementById('loading');
+  if(_ldiv)_ldiv.style.display='none';
   if(user){
     const snap=await getDoc(doc(db,'users',user.uid));
     const d=snap.exists()?snap.data():{};
@@ -1561,7 +1544,7 @@ window.sendContactMessage=async()=>{
 
 // ── NEWSLETTER ──
 window.subscribeNewsletter=async()=>{
-  const email=document.getElementById('nl-email').value.trim();const msg=document.getElementById('nl-msg');
+  const email=(document.getElementById('nl-email')?.value||'').trim();const msg=document.getElementById('nl-msg');
   if(!email||!email.includes('@')){toast('Geçerli e-posta girin','err');return;}
   try{await setDoc(doc(db,'newsletter',email.replace(/[@.]/g,'_')),{email,subscribedAt:serverTimestamp()});toast('Abone oldunuz! 📬','ok');document.getElementById('nl-email').value='';if(msg){msg.textContent='✓ Başarıyla abone oldunuz!';msg.style.display='block';setTimeout(()=>msg.style.display='none',4000);}}
   catch(e){toast('Teşekkürler! 📬','ok');document.getElementById('nl-email').value='';}
@@ -3616,7 +3599,9 @@ window.addEventListener('scroll',()=>{
 // ── INIT ──
 try {
   document.getElementById('pg-home').classList.add('on');
-  const _ld=document.getElementById('loading');if(_ld)_ld.style.display='none';
+  // Loading'i hemen kapat — Firebase yüklenmesini bekleme
+  const _ld=document.getElementById('loading');
+  if(_ld){_ld.style.display='none';_ld.style.visibility='hidden';}
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
   if(typeof loadBannersFromSlots==='function')loadBannersFromSlots();
   if(typeof renderHomeData==='function')renderHomeData();
@@ -3627,11 +3612,22 @@ try {
   try{document.getElementById('pg-home').classList.add('on');}catch(e){}
   try{const l=document.getElementById('loading');if(l)l.style.display='none';}catch(e){}
 }
+// Güvenlik ağı: 2 saniye sonra loading kesinlikle kapansın
+setTimeout(()=>{
+  const l=document.getElementById('loading');
+  if(l&&l.style.display!=='none'){
+    l.style.display='none';l.style.visibility='hidden';
+    try{document.getElementById('pg-home').classList.add('on');}catch(e){}
+    console.warn('Loading timeout — force closed');
+  }
+},2000);
+
 (function waitForDB(attempt){
   if(attempt>60)return;
   if(typeof window.loadAllFromDB==='function'&&window._fb&&window._fb.db){
     window.loadAllFromDB().then(()=>{try{renderHomeData();}catch(e){}}).catch(e=>console.warn('DB:',e));
   } else { setTimeout(()=>waitForDB(attempt+1),150); }
 })(0);
-
-ı
+</script>
+</body>
+</html>

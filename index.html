@@ -1850,7 +1850,8 @@ async function loadBlogFromDB(){
   try{
     const snap=await getDocs(query(collection(db,'blog'),orderBy('createdAt','desc')));
     const posts=[];snap.forEach(d=>posts.push({id:d.id,...d.data()}));
-    if(posts.length)window.BLOG_POSTS=posts;
+    // Mock data'yı override et — Firestore boşsa bile temiz başla
+    window.BLOG_POSTS=posts;
   }catch(e){console.warn('Blog load:',e.message);}
 }
 window.loadBlogFromDB=loadBlogFromDB;
@@ -2298,9 +2299,10 @@ window.loadBlogComments=async(postId)=>{
   const fb=window._fb;
   if(!fb){el.innerHTML='<p style="color:var(--muted);font-size:13px">Yorumlar yüklenemedi.</p>';return;}
   try{
-    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'blog_comments'),fb.where('postId','==',postId),fb.orderBy('createdAt','desc')));
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'blog_comments'),fb.where('postId','==',postId)));
     const comments=[];
     snap.forEach(d=>comments.push({id:d.id,...d.data()}));
+    comments.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     if(!comments.length){
       el.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px">Henüz yorum yok. İlk yorumu sen yap!</p>';
       return;
@@ -2963,8 +2965,10 @@ window.deleteEvent=async(id)=>{
   if(!confirm('Sil?'))return;
   try{
     await fb.deleteDoc(fb.doc(fb.db,'events',id));
-    const i=EVENTS.findIndex(x=>x.id===id);if(i>-1)EVENTS.splice(i,1);
-    toast('Silindi','ok');renderAdminSection('events');renderEvts(EVENTS,'events-list');renderHomeData();
+    const i=window.EVENTS.findIndex(x=>x.id===id);if(i>-1)window.EVENTS.splice(i,1);
+    toast('Silindi ✓','ok');
+    if(window.loadEventsFromDB)await window.loadEventsFromDB();
+    renderAdminSection('events');renderEvts(window.EVENTS,'events-list');renderHomeData();
   }catch(e){toast(e.message,'err');}
 };
 window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;document.getElementById('edit-race-id').value=id;document.getElementById('edit-race-name').value=r.name;document.getElementById('edit-race-date').value=r.date||'';document.getElementById('edit-race-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
@@ -3003,8 +3007,14 @@ window.deleteBlogItem=async(id)=>{
   if(!confirm('Sil?'))return;
   try{
     await fb.deleteDoc(fb.doc(fb.db,'blog',id));
-    const i=BLOG_POSTS.findIndex(x=>x.id===id);if(i>-1)BLOG_POSTS.splice(i,1);
-    toast('Silindi','ok');renderBlogList();renderBlogPreview();renderAdminSection('blog');
+    // Local array'den de çıkar
+    const i=window.BLOG_POSTS.findIndex(x=>x.id===id);if(i>-1)window.BLOG_POSTS.splice(i,1);
+    toast('Silindi ✓','ok');
+    // Firestore'dan taze yükle — mock data geri gelmesin
+    if(window.loadBlogFromDB){
+      await window.loadBlogFromDB();
+    }
+    renderBlogList();renderBlogPreview();renderAdminSection('blog');
   }catch(e){toast(e.message,'err');}
 };
 

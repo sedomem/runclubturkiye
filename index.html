@@ -1853,7 +1853,7 @@ async function loadEventsFromDB(){
     const snap=await getDocs(query(collection(db,'events'),orderBy('date','desc')));
     const evts=[];
     snap.forEach(d=>{const e={id:d.id,...d.data()};if(!e.status||e.status==='approved')evts.push(e);});
-    window.EVENTS=evts;
+    if(evts.length>0)window.EVENTS=evts;  // Sadece gerçek veri varsa üstüne yaz
   }catch(e){console.warn('Events load:',e.message);}
 }
 window.loadEventsFromDB=loadEventsFromDB;
@@ -1884,7 +1884,7 @@ async function loadClubsFromDB(){
         }
       });
     }catch(e1){console.warn('users/groupadmin (auth gerekebilir):',e1.message);}
-    window.CLUBS=clubs;
+    if(clubs.length>0)window.CLUBS=clubs;  // Gerçek veri varsa mock'un üstüne yaz
     console.log('[loadClubsFromDB] loaded:',clubs.length,'clubs');
   }catch(e){console.warn('Clubs load error:',e.message);}
 }
@@ -1893,7 +1893,7 @@ async function loadRacesFromDB(){
   try{
     const snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
     const races=[];snap.forEach(d=>races.push({id:d.id,...d.data()}));
-    if(races.length)window.RACES=races;
+    if(races.length>0)window.RACES=races;  // Gerçek veri varsa mock'un üstüne yaz
   }catch(e){console.warn('Races load:',e.message);}
 }
 window.loadRacesFromDB=loadRacesFromDB;
@@ -1902,18 +1902,21 @@ async function loadBlogFromDB(){
   try{
     const snap=await getDocs(query(collection(db,'blog'),orderBy('createdAt','desc')));
     const posts=[];snap.forEach(d=>posts.push({id:d.id,...d.data()}));
-    if(posts.length)window.BLOG_POSTS=posts;
+    if(posts.length>0)window.BLOG_POSTS=posts;  // Gerçek veri varsa mock'un üstüne yaz
   }catch(e){console.warn('Blog load:',e.message);}
 }
 window.loadBlogFromDB=loadBlogFromDB;
 async function loadAllFromDB(){
   try{
-    await Promise.allSettled([loadEventsFromDB(),loadClubsFromDB(),loadRacesFromDB(),loadBlogFromDB(),window.loadFirsatlarFromDB&&window.loadFirsatlarFromDB(),window.loadSponsorsFromDB&&window.loadSponsorsFromDB()].filter(Boolean));
+    await Promise.allSettled([loadEventsFromDB(),loadClubsFromDB(),loadRacesFromDB(),loadBlogFromDB()]);
+    // Fırsatlar ve sponsorlar ayrı — hata yutulsun
+    try{await window.loadFirsatlarFromDB();}catch(e){}
+    try{await window.loadSponsorsFromDB();}catch(e){}
   }catch(e){console.warn('loadAllFromDB error:',e);}
 
   // renderHomeData her zaman çağır — boş dizilerle de çalışır
   if(typeof window.renderHomeData==='function'){
-    window.renderHomeData();
+    window.renderHomeData();  // Gerçek Firestore verisiyle yeniden render
   }
   // Diğer sayfaları güncelle (açıksa)
   if(typeof window.renderEvts==='function'){
@@ -1950,11 +1953,33 @@ window.loadBannersFromDB=loadBannersFromDB;
 
 <script>
 // ── LOCAL DATA ──
-// ── LOCAL FALLBACK DATA (Firestore boşsa gösterilir) ──
+// window.CU proxy: module script'te set edilir, non-module erişimi için
+// "var CU" ile non-module scope'ta da erişilebilir hale getir
+var CU=null;
+// Module script window.CU'yu set ettiğinde bu da güncellenir (aynı window objesi)
+Object.defineProperty(window,'CU',{
+  get(){return CU;},
+  set(v){CU=v;},
+  configurable:true
+});
 window.EVENTS=[];
-window.CLUBS=[];
-window.RACES=[];
-window.BLOG_POSTS=[];
+
+// ── MOCK DATA — Firestore'dan gerçek veri gelene kadar gösterilir ──
+window.CLUBS=[
+  {id:"mock-c1",name:"Boğaz Koşucuları",city:"İstanbul",desc:"İstanbul koşu topluluğu. Her hafta sonu Boğaz parkurunda buluşuyoruz.",imgUrl:"https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=400&q=80",open:true,members:247,adminUid:""},
+  {id:"mock-c2",name:"Ankara Tempo",city:"Ankara",desc:"Başkentin hızlı koşuları. Trail ve yol koşularında aktifiz.",imgUrl:"https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=400&q=80",open:true,members:183,adminUid:""},
+  {id:"mock-c3",name:"İzmir Sahil Run",city:"İzmir",desc:"Kordon sahilinde her sabah buluşuyoruz. Tüm seviyeler bekliyoruz.",imgUrl:"https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=400&q=80",open:true,members:312,adminUid:""},
+];
+window.RACES=[
+  {id:"mock-r1",name:"İstanbul Maratonu 2025",location:"İstanbul",dist:"42K",date:"2025-11-02",status:"Kayıt Açık",emoji:"🏆",imgUrl:""},
+  {id:"mock-r2",name:"Ankara Gece Koşusu",location:"Ankara",dist:"10K",date:"2025-08-24",status:"Erken Kayıt",emoji:"🌙",imgUrl:""},
+  {id:"mock-r3",name:"Ege Kıyı Maratonu",location:"İzmir",dist:"21K",date:"2025-09-14",status:"Kayıt Açık",emoji:"🌊",imgUrl:""},
+];
+window.BLOG_POSTS=[
+  {id:"mock-b1",title:"Maratona Hazırlanırken Yapılan 5 Hata",metaDesc:"Antrenman sürecinizi mahvedebilecek yaygın hatalar ve nasıl kaçınacağınız.",tags:["Antrenman"],authorName:"Editör",coverUrl:"https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=400&q=80",publishedAt:"2025-04-01"},
+  {id:"mock-b2",title:"Doğru Koşu Ayakkabısı Nasıl Seçilir?",metaDesc:"Adım tipinize ve koşu yüzeyine göre en iyi ayakkabı seçim rehberi.",tags:["Ekipman"],authorName:"Uzman",coverUrl:"https://images.unsplash.com/photo-1542291026-7eec264c27ff?w=400&q=80",publishedAt:"2025-03-28"},
+  {id:"mock-b3",title:"Trail Koşusu Başlangıç Rehberi",metaDesc:"Doğa yollarında koşmaya yeni başlamak isteyenler için kapsamlı rehber.",tags:["Trail"],authorName:"Editör",coverUrl:"https://images.unsplash.com/photo-1502904550040-7534597429ae?w=400&q=80",publishedAt:"2025-03-20"},
+];
 window.FIRSATLAR=[
   {id:'f1',baslik:'Koşucuya Özel %20 İndirim',marka:'Garmin',kategori:'Teknoloji',aciklama:'Garmin Forerunner serisinde koşuculara özel indirim.',indirim:'%20',kod:'RCT20GARMIN',link:'https://garmin.com',bitis:'2025-06-30',imgUrl:'',aktif:true,slug:'garmin-indirim'},
   {id:'f2',baslik:'Ücretsiz Enerji Jeli Paketi',marka:'GU Energy',kategori:'Beslenme',aciklama:'30 TL ve üzeri alışverişlerde ücretsiz enerji jeli paketi.',indirim:'Ücretsiz',kod:'RCGUFREE',link:'https://guenturkey.com',bitis:'2025-05-31',imgUrl:'',aktif:true,slug:'gu-energy-ucretsiz'},
@@ -1980,14 +2005,23 @@ window.nav=id=>{
   // Global footer göster/gizle
   const gf=document.getElementById('global-footer');
   if(gf)gf.style.display=['admin','panel','dashboard','profile'].includes(id)?'none':'block';
-  if((id==='dashboard'||id==='admin'||id==='panel')&&!window.CU){openAuth('login');return;}
+  if((id==='dashboard'||id==='admin'||id==='panel')&&!CU){openAuth('login');return;}
   if(id==='map-view')setTimeout(initMap,100);
   if(id==='admin'&&CU?.role==='superadmin'){renderAdminSection('dashboard');loadAdminBadges&&loadAdminBadges();}
   if(id==='panel')loadGroupPanel();
   if(id==='profile')syncProfileUI&&syncProfileUI();
   if(['kvkk','gizlilik','kosullar','riza','cerez'].includes(id))renderLegalPage(id);
   if(id==='events'){if(window.renderPageBanner)window.renderPageBanner('events');if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
-  if(id==='clubs'){if(window.renderPageBanner)window.renderPageBanner('clubs');renderClubsPage();}
+  if(id==='clubs'){
+    if(window.renderPageBanner)window.renderPageBanner('clubs');
+    // Önce mevcut veriyi hemen göster
+    const _clEl=document.getElementById('clubs-list');
+    if(_clEl&&window.CLUBS&&window.CLUBS.length>0){
+      _clEl.innerHTML=window.CLUBS.map(clubCard).join('');
+    }
+    // Sonra Firestore'dan taze çek
+    if(window.renderClubsPage)window.renderClubsPage();
+  }
   if(id==='races'){if(window.renderPageBanner)window.renderPageBanner('races');if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
   if(id==='blog'){if(window.renderPageBanner)window.renderPageBanner('blog');if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
@@ -2073,24 +2107,25 @@ function renderSkeletons(containerId, count=3, height='180px'){
 }
 
 function renderHomeData(){
-  // Etkinlikler
+  // ── Etkinlikler ──
   const evEl=document.getElementById('home-events');
   if(evEl){
     if(window.EVENTS&&window.EVENTS.length>0){
       renderEvts(window.EVENTS.slice(0,4),'home-events');
     } else {
-      evEl.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0;grid-column:1/-1">Yükleniyor...</p>';
+      evEl.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">📅</div><p style="font-size:13px">Etkinlikler yükleniyor...</p></div>';
     }
   }
-  // Kulüpler
+  // ── Kulüpler ──
   const hc=document.getElementById('home-clubs');
   if(hc){
     if(window.CLUBS&&window.CLUBS.length>0){
       hc.innerHTML=window.CLUBS.slice(0,3).map(clubCard).join('');
     } else {
-      hc.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0;grid-column:1/-1">Kulüpler yükleniyor...</p>';
+      hc.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px 20px;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">🏃</div><p style="font-size:13px">Kulüpler yükleniyor...</p></div>';
     }
   }
+  // ── Yarışlar, Blog, Fırsatlar ──
   renderRacePreview();
   renderBlogPreview();
   renderHomeFirsatlar();
@@ -2182,7 +2217,7 @@ function renderCountdown(ds,id){const el=document.getElementById(id);if(!el)retu
 
 // ── CLUBS ──
 function clubCard(c){
-  const joined=isJoined(c.id);
+  const joined=!!(window.CU&&localStorage.getItem(`club_${c.id}_${window.CU.uid}`));
   return`<div class="card" onclick="openClub('${c.id}')">
     <div class="card-img" style="height:150px;background:linear-gradient(160deg,var(--dark2),var(--dark3))">
       ${c.imgUrl?`<img src="${c.imgUrl}" alt="${c.name}"/>`:`<span style="position:relative;z-index:1;font-size:44px">🏃</span>`}
@@ -2207,8 +2242,16 @@ window.renderClubsPage=async()=>{
   if(!el)return;
   el.innerHTML='<div class="spinner" style="margin:40px auto"></div>';
   try{
-    // Her zaman Firestore'dan taze çek
     const fb=window._fb;
+    if(!fb){
+      // _fb hazır değil, mevcut CLUBS'tan render et
+      if(window.CLUBS&&window.CLUBS.length>0){
+        el.innerHTML=window.CLUBS.map(clubCard).join('');
+      } else {
+        el.innerHTML='<div style="text-align:center;padding:40px;color:var(--muted)"><p>Veriler yükleniyor, lütfen bekleyin...</p></div>';
+      }
+      return;
+    }
     const allClubs=[];
     const seen=new Set();
     // 1. users/groupadmin — public read izni var
@@ -2241,10 +2284,16 @@ window.renderClubsPage=async()=>{
       el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">🏃</div><p style="font-size:14px">Henüz kulüp eklenmemiş.</p></div>';
       return;
     }
+    window.CLUBS=allClubs;  // global'i güncelle
     el.innerHTML=allClubs.map(clubCard).join('');
   }catch(e){
     console.error('[renderClubsPage] HATA:',e.message);
-    el.innerHTML='<p style="color:var(--muted);padding:20px">Kulüpler yüklenemedi: '+e.message+'</p>';
+    // Eğer Firestore sorgusu başarısız olursa mevcut CLUBS verisini göster
+    if(window.CLUBS&&window.CLUBS.length>0){
+      el.innerHTML=window.CLUBS.map(clubCard).join('');
+    } else {
+      el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:12px">⚠️</div><p style="font-size:14px">Kulüpler yüklenirken hata: '+e.message+'</p><button class="btn btn-or btn-sm" style="margin-top:16px" onclick="renderClubsPage()">Tekrar Dene</button></div>';
+    }
   }
 };
 window.openClub=async(id)=>{
@@ -3765,17 +3814,25 @@ document.getElementById('pg-home').classList.add('on');
 const _gf=document.getElementById('global-footer');
 if(_gf)_gf.style.display='block';
 
+// Mock data'yı hemen render et — Firestore beklemeden sayfa dolsun
+(function renderMockData(){
+  try{
+    if(typeof renderHomeData==='function') renderHomeData();
+    else if(typeof window.renderHomeData==='function') window.renderHomeData();
+  }catch(e){}
+})();
+
 // Module script hazır olana kadar polling ile bekle — 300ms timeout yeterli değil
 (function waitForDB(attempt){
-  if(attempt>20){
+  if(attempt>40){
     const ld=document.getElementById('loading');if(ld)ld.style.display='none';
-    console.warn('loadAllFromDB timeout — module script yüklenemedi');
+    console.warn('loadAllFromDB timeout — lütfen sayfayı yenileyin');
     return;
   }
-  if(typeof window.loadAllFromDB==='function'){
+  if(typeof window.loadAllFromDB==='function' && typeof window._fb!=='undefined'){
     window.loadAllFromDB();
   } else {
-    setTimeout(()=>waitForDB(attempt+1), 150);
+    setTimeout(()=>waitForDB(attempt+1), 200);
   }
 })(0);
 </script>

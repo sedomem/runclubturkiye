@@ -519,30 +519,30 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div id="banner-slides"></div>
   </div>
   <div class="sec"><div class="container">
-    <div class="sec-head"><h2>🏃 Öne Çıkan Etkinlikler</h2><button class="btn btn-ghost btn-sm" onclick="nav('events')">Tümünü Gör →</button></div>
+    <div class="sec-head"><h2>Öne Çıkan <span>Etkinlikler</span></h2><a class="see-all" onclick="nav('events')" style="cursor:pointer">Tümünü Gör →</a></div>
     <div class="grid g2" id="home-events"></div>
   </div></div>
   <div class="divider"></div>
   <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Popüler Kulüpler</h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
+    <div class="sec-head"><h2>Popüler <span>Kulüpler</span></h2><a class="see-all" onclick="nav('clubs')" style="cursor:pointer">Tümünü Gör →</a></div>
     <div class="grid g3" id="home-clubs"></div>
   </div></div>
   <div class="divider"></div>
   <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
-    <div class="grid g3" id="home-races"></div>
+    <div class="sec-head"><h2>Yaklaşan <span>Yarışlar</span></h2><a class="see-all" onclick="nav('races')" style="cursor:pointer">Tümünü Gör →</a></div>
+    <div style="display:flex;flex-direction:column;gap:12px" id="home-races"></div>
   </div></div>
   <div class="divider"></div>
   <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Son Haberler</h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
+    <div class="sec-head"><h2>Son <span>Haberler</span></h2><a class="see-all" onclick="nav('blog')" style="cursor:pointer">Tümünü Gör →</a></div>
     <div class="grid g3" id="home-blog"></div>
   </div></div>
   <div class="divider"></div>
   <!-- ✅ YENİ: Ana Sayfa Fırsatlar Bölümü -->
   <div class="sec" style="background:linear-gradient(135deg,rgba(255,107,0,.04),transparent)"><div class="container">
     <div class="sec-head">
-      <h2>🎁 Koşucuya Özel Fırsatlar</h2>
-      <button class="btn btn-ghost btn-sm" onclick="nav('firsatlar')">Tümünü Gör →</button>
+      <h2>Koşucuya Özel <span>Fırsatlar</span></h2>
+      <a class="see-all" onclick="nav('firsatlar')" style="cursor:pointer">Tümünü Gör →</a>
     </div>
     <div class="grid g3" id="home-firsatlar"></div>
   </div></div>
@@ -1907,14 +1907,31 @@ async function loadBlogFromDB(){
 }
 window.loadBlogFromDB=loadBlogFromDB;
 async function loadAllFromDB(){
-  await Promise.allSettled([loadEventsFromDB(),loadClubsFromDB(),loadRacesFromDB(),loadBlogFromDB()]);
-  // Non-module fonksiyonları window üzerinden çağır
-  if(typeof window.renderHomeData==='function')window.renderHomeData();
-  if(typeof window.renderEvts==='function')window.renderEvts(window.EVENTS,'events-list');
+  try{
+    await Promise.allSettled([loadEventsFromDB(),loadClubsFromDB(),loadRacesFromDB(),loadBlogFromDB(),window.loadFirsatlarFromDB&&window.loadFirsatlarFromDB(),window.loadSponsorsFromDB&&window.loadSponsorsFromDB()].filter(Boolean));
+  }catch(e){console.warn('loadAllFromDB error:',e);}
+
+  // renderHomeData her zaman çağır — boş dizilerle de çalışır
+  if(typeof window.renderHomeData==='function'){
+    window.renderHomeData();
+  }
+  // Diğer sayfaları güncelle (açıksa)
+  if(typeof window.renderEvts==='function'){
+    const el=document.getElementById('events-list');
+    if(el&&el.closest('#pg-events.on'))window.renderEvts(window.EVENTS,'events-list');
+  }
   const cl=document.getElementById('clubs-list');
-  if(cl&&typeof window.clubCard==='function')cl.innerHTML=window.CLUBS.map(window.clubCard).join('');
-  if(typeof window.renderRaceList==='function')window.renderRaceList();
-  if(typeof window.renderBlogList==='function')window.renderBlogList();
+  if(cl&&cl.closest('#pg-clubs.on')&&typeof window.clubCard==='function'){
+    cl.innerHTML=window.CLUBS.map(window.clubCard).join('');
+  }
+  if(typeof window.renderRaceList==='function'){
+    const rl=document.getElementById('races-list');
+    if(rl&&rl.closest('#pg-races.on'))window.renderRaceList();
+  }
+  if(typeof window.renderBlogList==='function'){
+    const bl=document.getElementById('blog-list');
+    if(bl&&bl.closest('#pg-blog.on'))window.renderBlogList();
+  }
   if(typeof window.renderFirsatlar==='function')window.renderFirsatlar();
   if(typeof window.renderSponsors==='function')window.renderSponsors();
   // Loading spinner'ı kapat
@@ -2056,23 +2073,27 @@ function renderSkeletons(containerId, count=3, height='180px'){
 }
 
 function renderHomeData(){
-  console.log('renderHomeData called — EVENTS:',window.EVENTS.length,'CLUBS:',window.CLUBS.length);
   // Etkinlikler
-  if(window.EVENTS&&window.EVENTS.length){
-    renderEvts(window.EVENTS.slice(0,4),'home-events');
-  } else {
-    renderSkeletons('home-events',4,'120px');
+  const evEl=document.getElementById('home-events');
+  if(evEl){
+    if(window.EVENTS&&window.EVENTS.length>0){
+      renderEvts(window.EVENTS.slice(0,4),'home-events');
+    } else {
+      evEl.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0;grid-column:1/-1">Yükleniyor...</p>';
+    }
   }
   // Kulüpler
   const hc=document.getElementById('home-clubs');
   if(hc){
-    if(window.CLUBS&&window.CLUBS.length){
+    if(window.CLUBS&&window.CLUBS.length>0){
       hc.innerHTML=window.CLUBS.slice(0,3).map(clubCard).join('');
     } else {
-      hc.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0">Henüz kulüp eklenmemiş.</p>';
+      hc.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0;grid-column:1/-1">Kulüpler yükleniyor...</p>';
     }
   }
-  renderRacePreview();renderBlogPreview();renderHomeFirsatlar();
+  renderRacePreview();
+  renderBlogPreview();
+  renderHomeFirsatlar();
 }
 
 // ── ✅ Ana Sayfa Fırsatlar ──
@@ -2096,16 +2117,26 @@ window.renderHomeFirsatlar=renderHomeFirsatlar;
 
 // ── EVENTS ──
 function evtCard(e){
-  const d=new Date(e.date);const pct=Math.round((e.reg||0)/(e.cap||1)*100);
+  // Timezone-safe date parse
+  const dp=e.date?e.date.split('-'):[];
+  const day=dp[2]?parseInt(dp[2]):'-';
+  const mon=dp[1]?MONTHS[parseInt(dp[1])-1]:'';
+  const pct=Math.round((e.reg||0)/(e.cap||1)*100);
   return`<div class="ev-card" onclick="openEvent('${e.id}')">
-    <div class="ev-date-box"><div class="day">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]}</div></div>
+    <div class="ev-date-box"><div class="day">${day}</div><div class="mon">${mon}</div></div>
     <div class="ev-info">
-      <span class="tag tag-or">${e.cat}</span>
-      <h3>${e.emoji||'🏃'} ${e.title}</h3>
-      <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span><span class="meta">👥 ${e.reg||0}/${e.cap}</span><span class="meta">💳 ${e.fee}</span></div>
-      ${e.pace?.length?`<div class="pace-chips">${e.pace.map(p=>`<span class="pace-chip">${p}</span>`).join('')}</div>`:''}
-      <div style="margin-top:6px"><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>
-      ${pct>=80?`<div style="font-size:10px;color:#f87171;margin-top:3px">🔥 Son ${(e.cap||0)-(e.reg||0)} yer!</div>`:''}
+      <div style="display:flex;align-items:center;gap:6px;margin-bottom:5px">
+        <span class="tag tag-or" style="margin:0">${e.cat||'Etkinlik'}</span>
+        <span style="font-size:11px;color:var(--muted)">📏 ${e.dist||'—'}</span>
+      </div>
+      <h3 style="font-size:15px;font-weight:800;margin-bottom:4px;font-family:var(--font-head);color:var(--dark2);letter-spacing:-.3px;line-height:1.2">${e.title}</h3>
+      <div class="ev-meta">
+        <span class="meta">📍 ${e.city||'—'}</span>
+        <span class="meta">💳 ${e.fee||'Ücretsiz'}</span>
+        <span class="meta">👥 ${e.reg||0}/${e.cap||'—'}</span>
+      </div>
+      ${e.pace?.length?`<div class="pace-chips" style="margin-top:6px">${e.pace.map(p=>`<span class="pace-chip">${p}</span>`).join('')}</div>`:''}
+      ${pct>=80?`<div style="font-size:10px;color:#dc2626;margin-top:6px;font-weight:700">🔥 Son ${(e.cap||0)-(e.reg||0)} yer kaldı!</div>`:''}
     </div>
   </div>`;
 }
@@ -2290,7 +2321,16 @@ window.openRace=id=>{
 
 // ── BLOG ──
 function renderBlogList(){const el=document.getElementById('blog-list');if(el)el.innerHTML=BLOG_POSTS.map(blogCard).join('')||'<p style="color:var(--muted)">Yazı yok.</p>';}
-function renderBlogPreview(){const el=document.getElementById('home-blog');if(el)el.innerHTML=BLOG_POSTS.slice(0,3).map(blogCard).join('');}
+function renderBlogPreview(){
+  const el=document.getElementById('home-blog');
+  if(!el)return;
+  const posts=window.BLOG_POSTS||[];
+  if(posts.length>0){
+    el.innerHTML=posts.slice(0,3).map(blogCard).join('');
+  } else {
+    el.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0;grid-column:1/-1">Haberler yükleniyor...</p>';
+  }
+}
 function blogCard(p){
   return`<div class="blog-card" onclick="openBlog('${p.id}')">
     <div class="blog-img">
@@ -3724,17 +3764,20 @@ document.getElementById('pg-home').classList.add('on');
 // Global footer başlangıçta göster (ana sayfa)
 const _gf=document.getElementById('global-footer');
 if(_gf)_gf.style.display='block';
-// loadAllFromDB module script'te tanımlı — window üzerinden çağır
-// Module script yüklendikten sonra window.loadAllFromDB set edilir
-// Kısa gecikme ile bekle
-setTimeout(()=>{
-  if(window.loadAllFromDB){
+
+// Module script hazır olana kadar polling ile bekle — 300ms timeout yeterli değil
+(function waitForDB(attempt){
+  if(attempt>20){
+    const ld=document.getElementById('loading');if(ld)ld.style.display='none';
+    console.warn('loadAllFromDB timeout — module script yüklenemedi');
+    return;
+  }
+  if(typeof window.loadAllFromDB==='function'){
     window.loadAllFromDB();
   } else {
-    // Fallback: loading'i kapat
-    const ld=document.getElementById('loading');if(ld)ld.style.display='none';
+    setTimeout(()=>waitForDB(attempt+1), 150);
   }
-},300);
+})(0);
 </script>
 </body>
 </html>

@@ -452,7 +452,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 </style>
 </head>
 <body>
-<div class="loading" id="loading" style="background:#F5F0E8"><svg width="90" height="90" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block">
+<div class="loading" id="loading" style="background:#F5F0E8;display:none"><svg width="90" height="90" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block">
   <rect x="0" y="0" width="200" height="200" rx="44" fill="#E8622A"/>
   <circle cx="112" cy="60" r="18" fill="#fff"/>
   <ellipse cx="104" cy="98" rx="12" ry="24" fill="#fff" transform="rotate(-12 104 98)"/>
@@ -1915,9 +1915,9 @@ async function loadAllFromDB(){
   }catch(e){console.warn('loadAllFromDB error:',e);}
 
   // renderHomeData her zaman çağır — boş dizilerle de çalışır
-  if(typeof window.renderHomeData==='function'){
-    window.renderHomeData();  // Gerçek Firestore verisiyle yeniden render
-  }
+  // Gerçek Firestore verisiyle yeniden render
+  if(typeof window.renderHomeData==='function') window.renderHomeData();
+  if(typeof window.loadBannersFromSlots==='function') window.loadBannersFromSlots();
   // Diğer sayfaları güncelle (açıksa)
   if(typeof window.renderEvts==='function'){
     const el=document.getElementById('events-list');
@@ -1944,8 +1944,9 @@ window.reloadSiteData=loadAllFromDB;
 window.loadAllFromDB=loadAllFromDB;
 
 loadBannersFromDB().then(()=>{
-  // Page bannerları Firestore yüklendikten sonra render et
   if(typeof window.initPageBanners==='function')window.initPageBanners();
+  if(typeof window.loadBannersFromSlots==='function')window.loadBannersFromSlots();
+  else loadBannersFromSlots();
 });
 loadSponsorsFromDB();loadFirsatlarFromDB();
 window.loadBannersFromDB=loadBannersFromDB;
@@ -2464,6 +2465,8 @@ window.filterFirsatlar=(kat,btn)=>{document.querySelectorAll('#firsat-filters .f
 
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)
 window.renderHomeData=renderHomeData;
+window.loadBannersFromSlots=loadBannersFromSlots;
+window.initPageBanners=initPageBanners;
 window.renderEvts=renderEvts;
 window.clubCard=clubCard;
 window.evtCard=evtCard;
@@ -3810,26 +3813,26 @@ window.addEventListener('scroll',()=>{
 
 // ── INIT ──
 document.getElementById('pg-home').classList.add('on');
-// Global footer başlangıçta göster (ana sayfa)
+
+// Loading div'i HEMEN kaldır — içerikler mock data ile zaten dolu
+const _ld=document.getElementById('loading');
+if(_ld)_ld.style.display='none';
+
+// Global footer göster
 const _gf=document.getElementById('global-footer');
 if(_gf)_gf.style.display='block';
 
-// Mock data'yı hemen render et — Firestore beklemeden sayfa dolsun
-(function renderMockData(){
-  try{
-    if(typeof renderHomeData==='function') renderHomeData();
-    else if(typeof window.renderHomeData==='function') window.renderHomeData();
-  }catch(e){}
-})();
+// Mock data + banner'ı hemen render et
+try{
+  loadBannersFromSlots();   // Hero banner — default slide göster
+  renderHomeData();          // Kulüpler, Yarışlar, Blog — mock data ile doldur
+  initPageBanners();         // Sayfa bannerları
+}catch(e){console.warn('Init render:',e);}
 
-// Module script hazır olana kadar polling ile bekle — 300ms timeout yeterli değil
+// Firebase hazır olunca gerçek veriyle güncelle
 (function waitForDB(attempt){
-  if(attempt>40){
-    const ld=document.getElementById('loading');if(ld)ld.style.display='none';
-    console.warn('loadAllFromDB timeout — lütfen sayfayı yenileyin');
-    return;
-  }
-  if(typeof window.loadAllFromDB==='function' && typeof window._fb!=='undefined'){
+  if(attempt>50)return;
+  if(typeof window.loadAllFromDB==='function' && window._fb){
     window.loadAllFromDB();
   } else {
     setTimeout(()=>waitForDB(attempt+1), 200);

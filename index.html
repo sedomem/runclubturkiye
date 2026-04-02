@@ -6,8 +6,10 @@
 <title>RunClubTürkiye — Türkiye'nin Koşu Topluluğu</title>
 <meta name="description" content="Türkiye genelinde koşu kulüpleri, etkinlikler ve yarış takvimi."/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23E8622A'/%3E%3Ccircle cx='112' cy='60' r='18' fill='%23fff'/%3E%3Cellipse cx='104' cy='98' rx='12' ry='24' fill='%23fff' transform='rotate(-12 104 98)'/%3E%3Cpath d='M98 82 L68 64' stroke='%23F5F0E8' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 80 L136 90' stroke='%23F5F0E8' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3Cpath d='M96 120 L74 144' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 122 L130 135' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"/>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Open+Sans:wght@300;400;500;600&family=Alatsi&display=swap">
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Open+Sans:wght@300;400;500;600&family=Alatsi&display=swap');
 /* ━━ ROOT TOKENS ━━ */
 *{box-sizing:border-box;margin:0;padding:0}
 :root{
@@ -394,6 +396,44 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   table{font-size:11px}
   th,td{padding:8px 9px}
 }
+
+/* ━━ PAGE BANNER ━━ */
+.page-banner{position:relative;overflow:hidden;height:320px;background:#1a0800}
+.page-banner.pb-events{background:linear-gradient(135deg,#0d1b2a,#1a3a5c)}
+.page-banner.pb-clubs{background:linear-gradient(135deg,#1a0d00,#3d1f00)}
+.page-banner.pb-races{background:linear-gradient(135deg,#0d1a0d,#1a3d1a)}
+.page-banner.pb-blog{background:linear-gradient(135deg,#1a0d1a,#3d1a3d)}
+.page-banner .pb-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 8s ease}
+.page-banner:hover .pb-bg{transform:scale(1.04)}
+.page-banner .pb-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.35) 100%)}
+.page-banner .pb-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 60px}
+.page-banner .pb-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(232,98,42,.18);border:1px solid rgba(232,98,42,.4);color:#E8622A;padding:5px 14px;border-radius:20px;font-size:12px;font-family:'Raleway',sans-serif;font-weight:700;margin-bottom:16px;width:fit-content;letter-spacing:.3px}
+.page-banner h1{font-family:'Raleway',sans-serif;font-size:clamp(26px,4vw,50px);font-weight:800;line-height:1.1;color:#fff;margin-bottom:10px}
+.page-banner h1 span{color:#E8622A}
+.page-banner .pb-sub{font-size:15px;color:rgba(255,255,255,.75);margin-bottom:22px;line-height:1.6;max-width:560px;font-family:'Open Sans',sans-serif}
+.page-banner .pb-cta{display:flex;gap:10px;flex-wrap:wrap}
+/* 3D Floating shapes */
+.pb-shapes{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
+.pb-shape{position:absolute;border-radius:50%;opacity:.08;animation:pbFloat 6s ease-in-out infinite}
+.pb-shape:nth-child(1){width:300px;height:300px;background:#E8622A;top:-80px;right:10%;animation-delay:0s;animation-duration:7s}
+.pb-shape:nth-child(2){width:180px;height:180px;background:#fff;bottom:-40px;right:25%;animation-delay:-2s;animation-duration:9s}
+.pb-shape:nth-child(3){width:120px;height:120px;background:#E8622A;top:30%;right:5%;animation-delay:-4s;animation-duration:6s}
+.pb-shape:nth-child(4){width:80px;height:80px;background:#fff;top:15%;right:40%;animation-delay:-1s;animation-duration:8s;opacity:.05}
+@keyframes pbFloat{0%,100%{transform:translateY(0) rotate(0deg) scale(1)}33%{transform:translateY(-20px) rotate(5deg) scale(1.05)}66%{transform:translateY(10px) rotate(-3deg) scale(.97)}}
+/* Özel sayfa şekilleri */
+.pb-runner-3d{position:absolute;right:8%;top:50%;transform:translateY(-50%);z-index:2;opacity:.18;animation:pbRunner 4s ease-in-out infinite}
+@keyframes pbRunner{0%,100%{transform:translateY(-50%) translateX(0)}50%{transform:translateY(-54%) translateX(8px)}}
+.pb-stat-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:6px 14px;border-radius:10px;font-size:12px;color:rgba(255,255,255,.8);font-family:'Raleway',sans-serif;font-weight:600;backdrop-filter:blur(8px)}
+.pb-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
+@media(max-width:768px){
+  .page-banner{height:240px}
+  .page-banner .pb-content{padding:0 20px}
+  .page-banner h1{font-size:22px}
+  .page-banner .pb-sub{font-size:13px}
+  .pb-runner-3d{display:none}
+}
+
+@keyframes ctaSlideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -506,41 +546,13 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <div style="text-align:center;padding:20px 14px"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px">🏅</div><h3 style="font-size:14px;margin-bottom:6px">Kazan</h3><p style="font-size:12px;color:var(--muted)">Rozet kazan, liderboardda yüksel.</p></div>
     </div>
   </div></div>
-  <div class="newsletter-wrap" style="background:linear-gradient(135deg,#2C1810,#1A0A04)"><div class="container" style="text-align:center">
-    <h2 style="color:#fff;font-size:22px;margin-bottom:6px">📬 Haberdar Ol!</h2>
-    <p style="color:rgba(255,255,255,.7);font-size:14px">Yeni etkinlikler ve duyurulardan ilk sen haberdar ol.</p>
-    <div class="newsletter-form">
-      <input type="email" id="nl-email" placeholder="E-posta adresin..."/>
-      <button class="btn btn-or" onclick="subscribeNewsletter()">Abone Ol</button>
-    </div>
-    <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.7);display:none"></p>
-  </div></div>
-  <footer><div class="container">
-    <div class="footer-grid">
-      <div class="footer-col"><svg width="240" height="56" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
-  <circle cx="54" cy="38" r="11" fill="#E8622A"/>
-  <ellipse cx="52" cy="58" rx="8" ry="16" fill="#E8622A" transform="rotate(-10 52 58)"/>
-  <path d="M49 48 L30 35" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M55 46 L73 54" stroke="#F5F0E8" stroke-width="5" stroke-linecap="round" fill="none"/>
-  <path d="M46 73 L28 88" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M56 74 L74 83" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M26 40 L14 40" stroke="#E8622A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
-  <path d="M23 50 L9 50" stroke="#E8622A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5"/>
-  <text x="100" y="68" font-family="Alatsi,serif" font-size="52" fill="#E8622A">Run</text>
-  <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#fff">Club</text>
-  <text x="100" y="92" font-family="Raleway,sans-serif" font-size="14" fill="#8A7060" letter-spacing="5">TÜRKİYE</text>
-</svg><p style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;margin-top:8px">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:rgba(255,255,255,.35);margin-top:6px">📧 runclubturkiye@gmail.com</p></div>
-      <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a></div>
-      <div class="footer-col"><h4>Yasal</h4><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
-      <div class="footer-col"><h4>Sosyal</h4><a>Instagram</a><a>Strava</a><a>YouTube</a></div>
-    </div>
-    <div class="footer-legal"><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
-    <div class="footer-bot"><span style="font-family:'Raleway',sans-serif;letter-spacing:.5px">© 2025 RunClub<b style="color:#E8622A">Türkiye</b></span><span>runclubturkiye.com</span></div>
-  </div></footer>
+  
 </div>
 
 <!-- EVENTS -->
-<div class="pg" id="pg-events"><div class="container sec">
+<div class="pg" id="pg-events">
+<div id="pb-events" class="page-banner pb-events"></div>
+<div class="container sec">
   <h2 style="margin-bottom:18px">Etkinlikler</h2>
   <div class="search-wrap"><input type="text" placeholder="Etkinlik ara..." oninput="filterEvts(this.value)"/></div>
   <div class="filter-strip">
@@ -556,7 +568,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div class="pg" id="pg-event-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('events')" style="margin-bottom:18px">← Geri</button><div id="event-detail-content"></div></div></div>
 
 <!-- CLUBS -->
-<div class="pg" id="pg-clubs"><div class="container sec">
+<div class="pg" id="pg-clubs">
+<div id="pb-clubs" class="page-banner pb-clubs"></div>
+<div class="container sec">
   <h2 style="margin-bottom:18px">Koşu Kulüpleri</h2>
   <div class="search-wrap"><input type="text" placeholder="Kulüp veya şehir ara..." oninput="filterClubs(this.value)"/></div>
   <div class="filter-strip">
@@ -570,7 +584,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div class="pg" id="pg-club-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('clubs')" style="margin-bottom:18px">← Geri</button><div id="club-detail-content"></div></div></div>
 
 <!-- RACES -->
-<div class="pg" id="pg-races"><div class="container sec">
+<div class="pg" id="pg-races">
+<div id="pb-races" class="page-banner pb-races"></div>
+<div class="container sec">
   <h2 style="margin-bottom:18px">🏆 Yarış Takvimi</h2>
   <div class="search-wrap"><input type="text" placeholder="Yarış ara..." oninput="filterRaces(this.value)"/></div>
   <div class="grid g3" id="races-list"></div>
@@ -607,7 +623,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 </div>
 
 <!-- BLOG -->
-<div class="pg" id="pg-blog"><div class="container sec">
+<div class="pg" id="pg-blog">
+<div id="pb-blog" class="page-banner pb-blog"></div>
+<div class="container sec">
   <h2 style="margin-bottom:18px">📰 Haberler & Blog</h2>
   <div class="grid g3" id="blog-list"></div>
 </div></div>
@@ -626,7 +644,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="form-grp"><label>Mesaj</label><textarea id="ct-message" rows="5"></textarea></div>
     <div class="chk-row"><input type="checkbox" id="ct-kvkk"/><span>KVKK Aydınlatma Metni'ni okudum ve kabul ediyorum.</span></div>
     <button class="btn btn-or btn-full" onclick="sendContactMessage()" style="margin-top:8px">Mesaj Gönder</button>
-    <p style="font-size:12px;color:var(--muted);margin-top:12px;text-align:center">📧 runclubturkiye@gmail.com</p>
+    <p style="font-size:12px;color:var(--muted);margin-top:12px;text-align:center">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="ec9e99828f80998e98999e87859589ac8b818d8580c28f8381">[email&#160;protected]</a></p>
   </div>
 </div></div>
 
@@ -930,11 +948,76 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <div style="font-weight:600;font-size:13px;margin-bottom:3px" id="notif-title2">Bildirim</div>
   <div style="font-size:12px;color:var(--muted)" id="notif-body2"></div>
 </div>
+
+<!-- __ GLOBAL NEWSLETTER + FOOTER __ -->
+<div id="global-footer" style="display:block">
+  <div style="background:var(--bg2);padding:18px 0 0"><div class="container">
+    <div style="background:linear-gradient(135deg,#E8622A 0%,#C94E1C 60%,#A83A10 100%);border-radius:16px;padding:18px 32px;display:flex;align-items:center;gap:24px;position:relative;overflow:hidden;box-shadow:0 8px 28px rgba(232,98,42,.25)">
+      <div style="position:absolute;top:-50px;right:-30px;width:160px;height:160px;border-radius:50%;background:rgba(255,255,255,.07);pointer-events:none"></div>
+      <svg width="40" height="40" viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" style="flex-shrink:0">
+        <defs><style>.nl-env{animation:nlEnvBounce 2s ease-in-out infinite}.nl-dot1{animation:nlPop 2s ease-in-out infinite 0s}.nl-dot2{animation:nlPop 2s ease-in-out infinite .3s}.nl-dot3{animation:nlPop 2s ease-in-out infinite .6s}@keyframes nlEnvBounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-4px)}}@keyframes nlPop{0%,100%{transform:scale(1);opacity:.7}50%{transform:scale(1.4);opacity:1}}</style></defs>
+        <g class="nl-env"><rect x="8" y="20" width="56" height="38" rx="6" fill="rgba(255,255,255,.2)" stroke="rgba(255,255,255,.6)" stroke-width="2"/><path d="M8 26 L36 44 L64 26" fill="none" stroke="rgba(255,255,255,.9)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></g>
+        <circle class="nl-dot1" cx="56" cy="16" r="5" fill="#fff"/><circle class="nl-dot2" cx="63" cy="10" r="3" fill="rgba(255,255,255,.7)"/><circle class="nl-dot3" cx="67" cy="19" r="2" fill="rgba(255,255,255,.5)"/>
+      </svg>
+      <div style="flex:1;min-width:0">
+        <div style="font-family:'Raleway',sans-serif;font-size:16px;font-weight:800;color:#fff;line-height:1">Gelismeleri Takip Et</div>
+        <div style="color:rgba(255,255,255,.7);font-size:12px;margin-top:3px">Etkinlikler ve duyurulardan ilk sen haberdar ol.</div>
+      </div>
+      <div style="display:flex;gap:8px;align-items:center;flex-shrink:0">
+        <input type="email" id="nl-email" placeholder="E-posta adresiniz..." style="background:rgba(255,255,255,.95);border:none;border-radius:8px;padding:10px 14px;font-size:13px;color:#2C1810;font-family:'Open Sans',sans-serif;outline:none;width:220px"/>
+        <button onclick="subscribeNewsletter()" style="background:#2C1810;color:#fff;border:none;padding:10px 18px;border-radius:8px;font-size:13px;font-family:'Raleway',sans-serif;font-weight:700;cursor:pointer;white-space:nowrap" onmouseover="this.style.background='#1A0A04'" onmouseout="this.style.background='#2C1810'">Abone Ol</button>
+      </div>
+      <p id="nl-msg" style="font-size:11px;color:rgba(255,255,255,.9);display:none;position:absolute;bottom:6px;right:32px"></p>
+    </div>
+  </div></div>
+<div class="newsletter-wrap" style="background:linear-gradient(135deg,#2C1810,#1A0A04)"><div class="container" style="text-align:center">
+    <h2 style="color:#fff;font-size:22px;margin-bottom:6px">📬 Haberdar Ol!</h2>
+    <p style="color:rgba(255,255,255,.7);font-size:14px">Yeni etkinlikler ve duyurulardan ilk sen haberdar ol.</p>
+    <div class="newsletter-form">
+      <input type="email" id="nl-email" placeholder="E-posta adresin..."/>
+      <button class="btn btn-or" onclick="subscribeNewsletter()">Abone Ol</button>
+    </div>
+    <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.7);display:none"></p>
+  </div></div>
+  <footer><div class="container">
+    <div class="footer-grid">
+      <div class="footer-col"><svg width="240" height="56" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
+  <circle cx="54" cy="38" r="11" fill="#E8622A"/>
+  <ellipse cx="52" cy="58" rx="8" ry="16" fill="#E8622A" transform="rotate(-10 52 58)"/>
+  <path d="M49 48 L30 35" stroke="#F5F0E8" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M55 46 L73 54" stroke="#F5F0E8" stroke-width="5" stroke-linecap="round" fill="none"/>
+  <path d="M46 73 L28 88" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M56 74 L74 83" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
+  <path d="M26 40 L14 40" stroke="#E8622A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.7"/>
+  <path d="M23 50 L9 50" stroke="#E8622A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.5"/>
+  <text x="100" y="68" font-family="Alatsi,serif" font-size="52" fill="#E8622A">Run</text>
+  <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#fff">Club</text>
+  <text x="100" y="92" font-family="Raleway,sans-serif" font-size="14" fill="#8A7060" letter-spacing="5">TÜRKİYE</text>
+</svg><p style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;margin-top:8px">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:rgba(255,255,255,.35);margin-top:6px">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4133342f222d34233534332a28382401262c20282d6f222e2c">[email&#160;protected]</a></p></div>
+      <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a></div>
+      <div class="footer-col"><h4>Yasal</h4><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
+      <div class="footer-col"><h4>Sosyal</h4><a>Instagram</a><a>Strava</a><a>YouTube</a></div>
+    </div>
+    <div class="footer-legal"><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
+    <div class="footer-bot"><span style="font-family:'Raleway',sans-serif;letter-spacing:.5px">© 2025 RunClub<b style="color:#E8622A">Türkiye</b></span><span>runclubturkiye.com</span></div>
+  </div></footer>
+</div>
+
+<!-- KULUP BASVURU FLOATING CTA -->
+<div id="club-cta-float" style="position:fixed;bottom:24px;left:24px;z-index:190;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 32px rgba(44,24,16,.18);border:1.5px solid #E0D8CC;display:flex;align-items:center;gap:14px;max-width:320px;animation:ctaSlideIn .5s cubic-bezier(.34,1.56,.64,1) .8s both;">
+  <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#E8622A,#c94e1c);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#127939;</div>
+  <div style="flex:1;min-width:0">
+    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulubuunuuz Burada Yok mu?</div>
+    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Klubunuzu hemen kaydedin</div>
+  </div>
+  <button onclick="openAuth('groupadmin')" style="background:#E8622A;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">Basvur</button>
+  <button onclick="document.getElementById('club-cta-float').style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#B09880;font-size:16px;cursor:pointer;line-height:1;padding:2px">x</button>
+</div>
 <div id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 <div id="toast"></div>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
-<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script type="module">
@@ -983,13 +1066,16 @@ setTimeout(()=>{
 function setupRoleBtn(){
   const b=document.getElementById('nav-role-btn');
   const dashBtn=document.getElementById('nav-dashboard-btn');
+  const cta=document.getElementById('club-cta-float');
   if(!CU)return;
   if(CU.role==='superadmin'){
     b.textContent='⭐ Admin';b.style.display='inline-flex';b.style.background='#4a1d96';b.style.color='#fff';
     if(dashBtn)dashBtn.style.display='none';
+    if(cta)cta.style.display='none';
   } else if(CU.role==='groupadmin'||CU.role==='subadmin'){
     b.textContent='🔑 Panel';b.style.display='inline-flex';b.style.background='#1A237E';b.style.color='#fff';
     if(dashBtn)dashBtn.style.display='none';
+    if(cta)cta.style.display='none';
   } else {
     b.style.display='none';
     if(dashBtn)dashBtn.style.display='inline-flex';
@@ -1004,8 +1090,15 @@ window.doLogin=async(type)=>{
   else if(type==='sa'){email=document.getElementById('sa-email').value.trim();pass=document.getElementById('sa-pass').value;}
   else{email=document.getElementById('l-email').value.trim();pass=document.getElementById('l-pass').value;}
   if(!email||!pass){toast('E-posta ve şifre gerekli','err');return;}
-  try{await signInWithEmailAndPassword(auth,email,pass);closeModal('auth-modal');toast('Hoş geldin! 🏃','ok');}
-  catch(e){const m={'auth/invalid-credential':'E-posta veya şifre hatalı'};toast(m[e.code]||e.message,'err');}
+  const fb=window._fb;
+  if(!fb||!fb.auth){toast('Bağlantı kuruluyor...','err');return;}
+  try{
+    await fb.signInWithEmailAndPassword(fb.auth,email,pass);
+    closeModal('auth-modal');toast('Hoş geldin! 🏃','ok');
+  }catch(e){
+    const msgs={'auth/invalid-credential':'E-posta veya şifre hatalı','auth/user-not-found':'Kullanıcı bulunamadı','auth/wrong-password':'Şifre hatalı','auth/too-many-requests':'Çok fazla deneme, bekleyin','auth/requests-from-referer-null-are-blocked':'Giriş sorunu, tekrar deneyin'};
+    toast(msgs[e.code]||'Hata: '+e.code,'err');
+  }
 };
 window.doRegister=async()=>{
   const name=document.getElementById('r-name').value.trim();const sname=document.getElementById('r-sname').value.trim();
@@ -1046,7 +1139,7 @@ window.submitGroupAdminApplication=async()=>{
     await signOut(auth);
   }catch(e){const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı'};toast(m[e.code]||e.message,'err');}
 };
-window.logout=async()=>{await signOut(auth);nav('home');toast('Çıkış yapıldı');};
+window.logout=async()=>{const fb=window._fb;try{if(fb&&fb.auth)await fb.signOut(fb.auth);}catch(e){}window.CU=null;nav('home');toast('Çıkış yapıldı');};
 
 // ── ✅ ADMIN BADGES — Bildirim Sayacı ──
 async function loadAdminBadges(){
@@ -1418,7 +1511,29 @@ window.saveBannerFromAdmin=async(slotIdx)=>{
   const data={imgUrl,title,subtitle:document.getElementById(`bs-sub-${slotIdx}`)?.value||'',ctaText:document.getElementById(`bs-cta-${slotIdx}`)?.value||'',ctaUrl:document.getElementById(`bs-url-${slotIdx}`)?.value||'',order:slotIdx,active:true};
   window.BANNER_SLOTS[slotIdx]=data;
   try{await setDoc(doc(db,'banners','slot'+slotIdx),{...data,updatedAt:serverTimestamp()});}catch(e){}
-  toast(`Banner ${slotIdx+1} kaydedildi ✓`,'ok');loadBannersFromSlots();renderBannerSlots();
+  toast(`Ana Sayfa Banner ${slotIdx+1} kaydedildi ✓`,'ok');loadBannersFromSlots();renderBannerSlots();
+};
+window.savePageBanner=async(page)=>{
+  const fb=window._fb;
+  const imgInput=document.getElementById(`pb-file-${page}`);
+  let imgUrl=document.getElementById(`pb-imgurl-${page}`)?.value||'';
+  if(!imgUrl&&imgInput?.files[0])imgUrl=await handleImgUpload(imgInput,'banners')||'';
+  const title=document.getElementById(`pb-title-${page}`)?.value||'';
+  const data={imgUrl,title,subtitle:document.getElementById(`pb-sub-${page}`)?.value||'',badge:document.getElementById(`pb-badge-${page}`)?.value||'',ctaText:document.getElementById(`pb-cta-${page}`)?.value||'',ctaUrl:document.getElementById(`pb-url-${page}`)?.value||'',active:true};
+  window.PAGE_BANNERS[page]=data;
+  try{await fb.setDoc(fb.doc(fb.db,'banners',page),{...data,updatedAt:fb.serverTimestamp()});}catch(e){toast('Hata: '+e.message,'err');return;}
+  toast(`${page} banner kaydedildi ✓`,'ok');
+  renderPageBanner(page);
+  renderPageBannerAdmin();
+};
+window.clearPageBanner=async(page)=>{
+  if(!confirm('Banner silinsin mi?'))return;
+  const fb=window._fb;
+  window.PAGE_BANNERS[page]=null;
+  try{await fb.deleteDoc(fb.doc(fb.db,'banners',page));}catch(e){}
+  toast(`${page} banner silindi`,'ok');
+  renderPageBanner(page);
+  renderPageBannerAdmin();
 };
 window.clearBannerSlot=async(i)=>{
   if(!confirm(`Banner ${i+1} silinsin mi?`))return;
@@ -1645,8 +1760,17 @@ async function loadPopup(){
 
 // ── BANNERS FROM DB ──
 async function loadBannersFromDB(){
-  try{const snap=await getDocs(collection(db,'banners'));snap.forEach(d=>{const idx=parseInt(d.id.replace('slot',''));if(!isNaN(idx)&&idx>=0&&idx<3)window.BANNER_SLOTS[idx]=d.data();});}catch(e){}
+  try{
+    const snap=await getDocs(collection(db,'banners'));
+    snap.forEach(d=>{
+      const id=d.id;
+      const idx=parseInt(id.replace('slot',''));
+      if(!isNaN(idx)&&idx>=0&&idx<3){window.BANNER_SLOTS[idx]=d.data();}
+      else if(['events','clubs','races','blog'].includes(id)){window.PAGE_BANNERS[id]=d.data();}
+    });
+  }catch(e){}
   loadBannersFromSlots();
+  if(typeof initPageBanners==='function')try{initPageBanners();}catch(e){}
 }
 
 // ── GROUP ADMINS ──
@@ -1735,7 +1859,12 @@ window.loadBannersFromDB=loadBannersFromDB;
 <script>
 // ── LOCAL DATA ──
 // ── LOCAL FALLBACK DATA (Firestore boşsa gösterilir) ──
-window.EVENTS=[];
+window.EVENTS=[
+  {id:"mock-e1",title:"Bogaz Koprusu Kosusu",date:"2025-06-15",city:"Istanbul",dist:"10 km",cat:"10K",emoji:"🏃",fee:"150",cap:500,reg:312,status:"approved",desc:"Istanbul Bogazi'nda esiz kosu deneyimi.",imgUrl:"https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=600&q=80"},
+  {id:"mock-e2",title:"Ankara Maraton 2025",date:"2025-09-21",city:"Ankara",dist:"42 km",cat:"Maraton",emoji:"🏅",fee:"200",cap:1000,reg:756,status:"approved",desc:"Baskentin prestijli maraton etkinligi.",imgUrl:"https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&q=80"},
+  {id:"mock-e3",title:"Izmir Trail Run",date:"2025-07-06",city:"Izmir",dist:"21 km",cat:"Trail",emoji:"🌿",fee:"120",cap:200,reg:88,status:"approved",desc:"Ege'nin dogasinda zorlu trail parkuru.",imgUrl:"https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600&q=80"},
+  {id:"mock-e4",title:"Antalya Gundogumu Kosusu",date:"2025-08-10",city:"Antalya",dist:"5 km",cat:"5K/10K",emoji:"🌅",fee:"80",cap:300,reg:140,status:"approved",desc:"Gunes dogarken sahilde 5K kosusu.",imgUrl:"https://images.unsplash.com/photo-1502904550040-7534597429ae?w=600&q=80"},
+];
 window.CLUBS=[];
 window.RACES=[];
 window.BLOG_POSTS=[];
@@ -1746,6 +1875,7 @@ window.FIRSATLAR=[
 ];
 window.SPONSORS_DATA=[];
 window.BANNER_SLOTS=[null,null,null];
+window.PAGE_BANNERS={events:null,clubs:null,races:null,blog:null};
 const MONTHS=['OCA','ŞUB','MAR','NİS','MAY','HAZ','TEM','AĞU','EYL','EKİ','KAS','ARA'];
 let bannerIdx=0,bannerTimer,mapInited=false;
 
@@ -1760,16 +1890,18 @@ window.nav=id=>{
   document.querySelectorAll('.nav-center button').forEach(b=>b.classList.remove('on'));
   const nb=document.getElementById('nb-'+id);if(nb)nb.classList.add('on');
   window.scrollTo(0,0);
+  const gf=document.getElementById('global-footer');
+  if(gf)gf.style.display=['admin','panel','dashboard','profile'].includes(id)?'none':'block';
   if((id==='dashboard'||id==='admin'||id==='panel')&&!window.CU){openAuth('login');return;}
   if(id==='map-view')setTimeout(initMap,100);
   if(id==='admin'&&CU?.role==='superadmin'){renderAdminSection('dashboard');loadAdminBadges&&loadAdminBadges();}
   if(id==='panel')loadGroupPanel();
   if(id==='profile')syncProfileUI&&syncProfileUI();
   if(['kvkk','gizlilik','kosullar','riza','cerez'].includes(id))renderLegalPage(id);
-  if(id==='events'){if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
-  if(id==='clubs'){renderClubsPage();}
-  if(id==='races'){if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
-  if(id==='blog'){if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
+  if(id==='events'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('events');}catch(e){}; if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
+  if(id==='clubs'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('clubs');}catch(e){}; renderClubsPage();}
+  if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
+  if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
   if(id==='home'){
     if(window.EVENTS.length||window.CLUBS.length||window.RACES.length||window.BLOG_POSTS.length){
@@ -2485,9 +2617,20 @@ function renderAdminSection(sec){
       </div>
       <table><thead><tr><th>Başlık</th><th>Marka</th><th>Kategori</th><th>Kod</th><th>Bitiş</th><th>İşlem</th></tr></thead>
       <tbody>${FIRSATLAR.map(f=>`<tr><td>${f.baslik}</td><td>${f.marka||'—'}</td><td>${f.kategori||'—'}</td><td style="font-family:monospace;font-weight:600;color:var(--or)">${f.kod||'—'}</td><td>${f.bitis||'—'}</td><td class="action-btns"><button class="btn btn-red btn-sm" onclick="deleteFirsat('${f.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
-    banners:`<h2 style="margin-bottom:8px">🖼 Banner Yönetimi</h2>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:18px">3 slot mevcut.</p>
-      <div id="banner-slots"></div>`,
+    banners:`<h2 style="margin-bottom:6px;font-family:'Raleway',sans-serif">🖼 Banner Yönetimi</h2>
+      <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Ana sayfa ve tüm sayfalar için banner yönetin.</p>
+      <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
+        <button class="filt on" id="btab-home" onclick="switchBannerTab('home',this)">🏠 Ana Sayfa</button>
+        <button class="filt" id="btab-events" onclick="switchBannerTab('events',this)">📅 Etkinlikler</button>
+        <button class="filt" id="btab-clubs" onclick="switchBannerTab('clubs',this)">🤝 Kulüpler</button>
+        <button class="filt" id="btab-races" onclick="switchBannerTab('races',this)">🏆 Yarış Takvimi</button>
+        <button class="filt" id="btab-blog" onclick="switchBannerTab('blog',this)">📰 Blog</button>
+      </div>
+      <div id="banner-tab-home"><h3 style="font-size:13px;margin-bottom:12px;color:var(--muted);font-family:'Raleway',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Ana Sayfa Slider</h3><div id="banner-slots"></div></div>
+      <div id="banner-tab-events" style="display:none"><div id="page-banner-slots-events"></div></div>
+      <div id="banner-tab-clubs" style="display:none"><div id="page-banner-slots-clubs"></div></div>
+      <div id="banner-tab-races" style="display:none"><div id="page-banner-slots-races"></div></div>
+      <div id="banner-tab-blog" style="display:none"><div id="page-banner-slots-blog"></div></div>`,
     popup:`<h2 style="margin-bottom:18px">💬 Popup</h2>
       <div class="card" style="padding:24px;max-width:520px">
         ${imgUploadHtml('apu-img-input','Popup Görseli','480×200px')}
@@ -2518,7 +2661,12 @@ function renderAdminSection(sec){
   if(sec==='chat')setTimeout(()=>loadChatMessages&&loadChatMessages('admin'),100);
   if(sec==='groupadmins')setTimeout(()=>loadGroupAdmins&&loadGroupAdmins(),100);
   if(sec==='newsletter')setTimeout(()=>loadNewsletterList&&loadNewsletterList(),100);
-  if(sec==='banners')setTimeout(renderBannerSlots,100);
+  if(sec==='banners')setTimeout(()=>{
+    renderBannerSlots();
+    ['events','clubs','races','blog'].forEach(t=>{const el=document.getElementById('banner-tab-'+t);if(el)el.style.display='none';});
+    const ht=document.getElementById('banner-tab-home');if(ht)ht.style.display='block';
+    const hb=document.getElementById('btab-home');if(hb){document.querySelectorAll('[id^="btab-"]').forEach(b=>b.classList.remove('on'));hb.classList.add('on');}
+  },100);
   if(sec==='sponsors')setTimeout(()=>renderAdminSponsors(),100);
 }
 window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);};
@@ -3284,6 +3432,167 @@ window.gLoadEventAttendees=async(eventId,eventTitle)=>{
   }catch(e){document.getElementById('attendees-list').innerHTML=`<p style="color:var(--muted)">Hata: ${e.message}</p>`;}
 };
 
+// ── PAGE BANNERS — Sayfa Bannerleri ──
+const PAGE_BANNER_DEFAULTS = {
+  events:{
+    badge:'📅 Etkinlikler',
+    title:'Koş, <span style="color:#E8622A">Keşfet</span>, Büyü',
+    subtitle:"Türkiye'nin dört bir yanından yüzlerce koşu etkinliği seni bekliyor.",
+    ctaText:'Etkinliğe Kaydol',
+    ctaAction:"register",
+    bg:'pb-events',
+    stats:[{ico:'📅',val:'200+',label:'Etkinlik'},{ico:'🏃',val:'50K+',label:'Katılımcı'},{ico:'📍',val:'81',label:'İl'}],
+    shapes:'<svg viewBox="0 0 400 400" width="400" height="400" xmlns="http://www.w3.org/2000/svg"><path d="M200 50 L340 340 L60 340 Z" fill="none" stroke="rgba(232,98,42,.15)" stroke-width="2"/><circle cx="200" cy="200" r="140" fill="none" stroke="rgba(255,255,255,.06)" stroke-width="40"/><path d="M80 200 Q140 100 200 200 Q260 300 320 200" fill="none" stroke="rgba(232,98,42,.2)" stroke-width="2"/></svg>'
+  },
+  clubs:{
+    badge:'🤝 Koşu Kulüpleri',
+    title:'Kulübünü <span style="color:#E8622A">Bul</span>, Topluluğuna Katıl',
+    subtitle:"Şehrindeki koşu kulübüyle antrenman yap, arkadaşlık kur, hedeflerine ulaş.",
+    ctaText:'Kulüp Ara',
+    ctaAction:"clubs",
+    bg:'pb-clubs',
+    stats:[{ico:'🏃',val:'150+',label:'Kulüp'},{ico:'👥',val:'25K+',label:'Üye'},{ico:'🌍',val:'40+',label:'Şehir'}],
+    shapes:'<svg viewBox="0 0 400 400" width="400" height="400" xmlns="http://www.w3.org/2000/svg"><circle cx="130" cy="130" r="80" fill="none" stroke="rgba(232,98,42,.12)" stroke-width="2"/><circle cx="270" cy="130" r="80" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="2"/><circle cx="200" cy="250" r="80" fill="none" stroke="rgba(232,98,42,.1)" stroke-width="2"/><circle cx="200" cy="180" r="30" fill="rgba(232,98,42,.12)"/></svg>'
+  },
+  races:{
+    badge:'🏆 Yarış Takvimi',
+    title:'Sınırlarını <span style="color:#E8622A">Zorla</span>, Zafer Kazan',
+    subtitle:"Yıl boyunca Türkiye'nin en prestijli maraton ve ultra maratonları.",
+    ctaText:'Yarışa Başvur',
+    ctaAction:"races",
+    bg:'pb-races',
+    stats:[{ico:'🏆',val:'80+',label:'Yarış'},{ico:'📏',val:'5K–100K',label:'Mesafe'},{ico:'🥇',val:'500+',label:'Kupa'}],
+    shapes:'<svg viewBox="0 0 400 400" width="400" height="400" xmlns="http://www.w3.org/2000/svg"><path d="M50 350 L350 350" stroke="rgba(46,125,50,.3)" stroke-width="3" stroke-dasharray="10,8"/><path d="M200 50 L230 150 L350 150 L260 210 L290 310 L200 250 L110 310 L140 210 L50 150 L170 150 Z" fill="none" stroke="rgba(232,98,42,.15)" stroke-width="1.5"/><circle cx="200" cy="200" r="100" fill="none" stroke="rgba(255,255,255,.05)" stroke-width="50"/></svg>'
+  },
+  blog:{
+    badge:'📰 Haberler & Blog',
+    title:'İlham Al, <span style="color:#E8622A">Öğren</span>, Koş',
+    subtitle:"Antrenman ipuçları, beslenme rehberleri ve koşu dünyasından son haberler.",
+    ctaText:'Haberleri Oku',
+    ctaAction:"blog",
+    bg:'pb-blog',
+    stats:[{ico:'📝',val:'500+',label:'Makale'},{ico:'👁',val:'1M+',label:'Okuma'},{ico:'✍️',val:'50+',label:'Yazar'}],
+    shapes:'<svg viewBox="0 0 400 400" width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect x="60" y="80" width="280" height="20" rx="4" fill="rgba(255,255,255,.07)"/><rect x="60" y="120" width="200" height="16" rx="4" fill="rgba(255,255,255,.05)"/><rect x="60" y="155" width="240" height="16" rx="4" fill="rgba(255,255,255,.05)"/><rect x="60" y="190" width="180" height="16" rx="4" fill="rgba(232,98,42,.12)"/><rect x="60" y="240" width="280" height="120" rx="10" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.08)" stroke-width="1"/></svg>'
+  }
+};
+
+function renderPageBanner(page){
+  const el=document.getElementById('pb-'+page);
+  if(!el)return;
+  const custom=window.PAGE_BANNERS&&window.PAGE_BANNERS[page];
+  const def=PAGE_BANNER_DEFAULTS[page];
+  const d=custom||def;
+  if(!d)return;
+  const bgStyle=d.imgUrl?`background-image:url('${d.imgUrl}')`:'';
+  const stats=(d.stats||def.stats||[]).map(s=>`<div class="pb-stat-chip">${s.ico} <b>${s.val}</b> ${s.label}</div>`).join('');
+  el.innerHTML=`
+    ${d.imgUrl?`<div class="pb-bg" style="${bgStyle}"></div>`:''}
+    <div class="pb-overlay"></div>
+    <div class="pb-shapes">
+      <div class="pb-shape"></div>
+      <div class="pb-shape"></div>
+      <div class="pb-shape"></div>
+      <div class="pb-shape"></div>
+      <div class="pb-runner-3d">${def.shapes||''}</div>
+    </div>
+    <div class="pb-content container">
+      ${d.badge||def.badge?`<div class="pb-badge">${d.badge||def.badge}</div>`:''}
+      <h1>${d.title||def.title}</h1>
+      <p class="pb-sub">${d.subtitle||def.subtitle||''}</p>
+      ${stats?`<div class="pb-stats">${stats}</div>`:''}
+      ${(d.ctaText||def.ctaText)?`<div class="pb-cta"><button class="btn btn-or" onclick="if(window._pbCtaUrl)window.open(window._pbCtaUrl)">${d.ctaText||def.ctaText}</button><button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="nav('home')">Ana Sayfa</button></div>`:''}
+    </div>`;
+  el.className=`page-banner ${custom?.bg||def.bg}`;
+}
+window.renderPageBanner=renderPageBanner;
+
+function initPageBanners(){
+  ['events','clubs','races','blog'].forEach(p=>renderPageBanner(p));
+}
+window.initPageBanners=initPageBanners;
+
+// Admin — Sayfa banner yönetim paneli
+function renderPageBannerAdmin(){
+  const el=document.getElementById('page-banner-slots');if(!el)return;
+  const pages={events:{label:'Etkinlikler',ico:'📅'},clubs:{label:'Kulüpler',ico:'🤝'},races:{label:'Yarış Takvimi',ico:'🏆'},blog:{label:'Blog & Haberler',ico:'📰'}};
+  el.innerHTML=Object.entries(pages).map(([page,info])=>{
+    const b=window.PAGE_BANNERS[page];
+    return`<div class="card" style="padding:20px;margin-bottom:14px;border-left:4px solid var(--or)">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div><h3 style="font-size:15px;font-family:'Raleway',sans-serif">${info.ico} ${info.label} Sayfası Banneri</h3>
+          ${b?'<span class="pill pill-gr" style="margin-top:4px">Özel Banner Aktif</span>':'<span class="pill pill-or" style="margin-top:4px">Varsayılan Gösteriliyor</span>'}
+        </div>
+        ${b?`<button class="btn btn-red btn-sm" onclick="clearPageBanner('${page}')">🗑 Sil</button>`:''}
+      </div>
+      <div class="img-upload-area" ondragover="event.preventDefault()" ondrop="handleDropGeneric(event,'pb-file-${page}','pb-prev-${page}')">
+        <input type="file" accept="image/*" id="pb-file-${page}" onchange="previewImg(this,'pb-prev-${page}')"/>
+        <div style="font-size:12px;color:var(--muted)">📁 Banner görseli yükle · Önerilen: 1440×320px</div>
+        <img class="img-preview" id="pb-prev-${page}" ${b?.imgUrl?`src="${b.imgUrl}" style="display:block"`:''}/>
+      </div>
+      <div class="form-grp" style="margin-top:10px"><label>Görsel URL</label><input type="text" id="pb-imgurl-${page}" value="${b?.imgUrl||''}" placeholder="https://..."/></div>
+      <div class="form-grp"><label>Rozet Metni</label><input type="text" id="pb-badge-${page}" value="${b?.badge||''}" placeholder="örn: 📅 Etkinlikler"/></div>
+      <div class="form-row">
+        <div class="form-grp"><label>Başlık (HTML destekler)</label><input type="text" id="pb-title-${page}" value="${b?.title||''}" placeholder="Başlık..."/></div>
+        <div class="form-grp"><label>Alt Başlık</label><input type="text" id="pb-sub-${page}" value="${b?.subtitle||''}" placeholder="Açıklama..."/></div>
+      </div>
+      <div class="form-row">
+        <div class="form-grp"><label>Buton Metni</label><input type="text" id="pb-cta-${page}" value="${b?.ctaText||''}" placeholder="örn: Etkinliğe Kaydol"/></div>
+        <div class="form-grp"><label>Buton URL</label><input type="text" id="pb-url-${page}" value="${b?.ctaUrl||''}" placeholder="https://..."/></div>
+      </div>
+      <button class="btn btn-or" onclick="savePageBanner('${page}')">💾 Kaydet</button>
+    </div>`;
+  }).join('');
+}
+window.renderPageBannerAdmin=renderPageBannerAdmin;
+window.switchBannerTab=(tab,btn)=>{
+  ['home','events','clubs','races','blog'].forEach(t=>{
+    const el=document.getElementById('banner-tab-'+t);
+    if(el)el.style.display=t===tab?'block':'none';
+  });
+  document.querySelectorAll('#banner-tab-btns .filt, [id^="btab-"]').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  const homeBtn=document.getElementById('btab-home');
+  if(homeBtn&&tab==='home')homeBtn.classList.add('on');
+  if(tab!=='home')renderSinglePageBannerAdmin(tab);
+};
+
+function renderSinglePageBannerAdmin(page){
+  const el=document.getElementById('page-banner-slots-'+page);if(!el)return;
+  const labels={events:{label:'Etkinlikler',ico:'📅'},clubs:{label:'Kulüpler',ico:'🤝'},races:{label:'Yarış Takvimi',ico:'🏆'},blog:{label:'Blog & Haberler',ico:'📰'}};
+  const info=labels[page];
+  const b=window.PAGE_BANNERS&&window.PAGE_BANNERS[page];
+  el.innerHTML=`<div class="card" style="padding:22px;border-left:4px solid var(--or)">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <div><h3 style="font-size:15px;font-family:'Raleway',sans-serif;font-weight:700">${info.ico} ${info.label} Sayfası Banneri</h3>
+        <p style="font-size:12px;color:var(--muted);margin-top:3px">${b?'Özel banner aktif — sayfada görüntüleniyor':'Varsayılan banner gösteriliyor (özelleştirilmedi)'}</p>
+      </div>
+      ${b?`<button class="btn btn-red btn-sm" onclick="clearPageBanner('${page}')">🗑 Sil</button>`:''}
+    </div>
+    ${b?.imgUrl?`<div style="height:120px;border-radius:10px;overflow:hidden;margin-bottom:14px;position:relative"><img src="${b.imgUrl}" style="width:100%;height:100%;object-fit:cover"/><div style="position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:12px;font-family:'Raleway',sans-serif">Mevcut Banner Görseli</span></div></div>`:''}
+    <div class="img-upload-area" ondragover="event.preventDefault()" ondrop="handleDropGeneric(event,'pb-file-${page}','pb-prev-${page}')">
+      <input type="file" accept="image/*" id="pb-file-${page}" onchange="previewImg(this,'pb-prev-${page}')"/>
+      <div style="font-size:12px;color:var(--muted)">📁 Banner görseli yükle · Önerilen: 1440×320px</div>
+      <img class="img-preview" id="pb-prev-${page}"/>
+    </div>
+    <div class="form-grp" style="margin-top:10px"><label>Görsel URL</label><input type="text" id="pb-imgurl-${page}" value="${b?.imgUrl||''}" placeholder="https://..."/></div>
+    <div class="form-grp"><label>Rozet Metni</label><input type="text" id="pb-badge-${page}" value="${b?.badge||''}" placeholder="örn: 📅 Etkinlikler"/></div>
+    <div class="form-row">
+      <div class="form-grp"><label>Ana Başlık (HTML destekler)</label><input type="text" id="pb-title-${page}" value="${b?.title||''}" placeholder='örn: Koş, &lt;span style="color:#E8622A"&gt;Keşfet&lt;/span&gt;'/></div>
+      <div class="form-grp"><label>Alt Başlık</label><input type="text" id="pb-sub-${page}" value="${b?.subtitle||''}" placeholder="Kısa açıklama..."/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-grp"><label>Buton Metni</label><input type="text" id="pb-cta-${page}" value="${b?.ctaText||''}" placeholder="örn: Etkinliğe Kaydol"/></div>
+      <div class="form-grp"><label>Buton URL (opsiyonel)</label><input type="text" id="pb-url-${page}" value="${b?.ctaUrl||''}" placeholder="https://..."/></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:4px">
+      <button class="btn btn-or" onclick="savePageBanner('${page}')">💾 Kaydet</button>
+      <button class="btn btn-ghost btn-sm" onclick="renderPageBanner('${page}');toast('Önizleme güncellendi','ok')">👁 Önizle</button>
+    </div>
+  </div>`;
+}
+window.renderSinglePageBannerAdmin=renderSinglePageBannerAdmin;
+
+
 // ── LEGAL ──
 const LEGAL={
   kvkk:{title:'KVKK Aydınlatma Metni',content:`<h2>1. Veri Sorumlusu</h2><p>RunClubTürkiye (runclubturkiye@gmail.com), 6698 sayılı KVKK kapsamında veri sorumlusudur.</p><h2>2. İşlenen Veriler</h2><p>Ad, soyad, e-posta, telefon, şehir, koşu verileri, profil fotoğrafı.</p><h2>3. Haklarınız</h2><p>Erişim, düzeltme, silme haklarınız için: runclubturkiye@gmail.com</p>`},
@@ -3305,18 +3614,24 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 
 // ── INIT ──
-document.getElementById('pg-home').classList.add('on');
-// loadAllFromDB module script'te tanımlı — window üzerinden çağır
-// Module script yüklendikten sonra window.loadAllFromDB set edilir
-// Kısa gecikme ile bekle
-setTimeout(()=>{
-  if(window.loadAllFromDB){
-    window.loadAllFromDB();
-  } else {
-    // Fallback: loading'i kapat
-    const ld=document.getElementById('loading');if(ld)ld.style.display='none';
-  }
-},300);
-</script>
-</body>
-</html>
+try {
+  document.getElementById('pg-home').classList.add('on');
+  const _ld=document.getElementById('loading');if(_ld)_ld.style.display='none';
+  const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
+  if(typeof loadBannersFromSlots==='function')loadBannersFromSlots();
+  if(typeof renderHomeData==='function')renderHomeData();
+  try{if(typeof initPageBanners==='function')initPageBanners();}catch(e){}
+  try{const cnt=document.querySelectorAll('.banner-slide').length;if(typeof startBannerAuto==='function'&&cnt>1)startBannerAuto(cnt);}catch(e){}
+} catch(initErr) {
+  console.error('Init error:',initErr);
+  try{document.getElementById('pg-home').classList.add('on');}catch(e){}
+  try{const l=document.getElementById('loading');if(l)l.style.display='none';}catch(e){}
+}
+(function waitForDB(attempt){
+  if(attempt>60)return;
+  if(typeof window.loadAllFromDB==='function'&&window._fb&&window._fb.db){
+    window.loadAllFromDB().then(()=>{try{renderHomeData();}catch(e){}}).catch(e=>console.warn('DB:',e));
+  } else { setTimeout(()=>waitForDB(attempt+1),150); }
+})(0);
+
+ı

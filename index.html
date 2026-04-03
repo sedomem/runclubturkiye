@@ -1390,7 +1390,7 @@ window.loadFirsatlarFromDB=async()=>{
       snap.forEach(d=>{const {id:_,...rest}=d.data();window.FIRSATLAR.push({id:d.id,...rest});});
       window.FIRSATLAR.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     }
-  }catch(e){console.warn('Firsatlar:',e.message);}catch(e){}
+  }catch(e){console.warn('Firsatlar:',e.message);}
   renderFirsatlar();renderHomeFirsatlar();
 };
 

@@ -1365,10 +1365,15 @@ window.saveFirsatFromAdmin=async()=>{
     imgUrl,aktif:true,
     id:'f'+Date.now(),slug:baslik.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
   };
-  window.FIRSATLAR.unshift(data);
-  renderFirsatlar();renderHomeFirsatlar();toast('Fırsat eklendi ✓','ok');
-  try{const r=await addDoc(collection(db,'firsatlar'),{...data,createdAt:serverTimestamp()});window.FIRSATLAR[0].id=r.id;}catch(e){}
-  renderAdminSection('firsatlar');
+  toast('Kaydediliyor...','ok');
+  try{
+    const {id:_,...dataNoId}=data;
+    const r=await addDoc(collection(db,'firsatlar'),{...dataNoId,createdAt:serverTimestamp()});
+    data.id=r.id;
+    window.FIRSATLAR.unshift(data);
+    toast('Fırsat eklendi ✓','ok');
+    renderFirsatlar();renderHomeFirsatlar();renderAdminSection('firsatlar');
+  }catch(e){toast('Kaydedilemedi: '+e.message,'err');}
 };
 window.deleteFirsat=async(id)=>{
   if(!confirm('Sil?'))return;
@@ -1378,7 +1383,14 @@ window.deleteFirsat=async(id)=>{
   renderAdminSection('firsatlar');
 };
 window.loadFirsatlarFromDB=async()=>{
-  try{const snap=await getDocs(query(collection(db,'firsatlar'),orderBy('createdAt','desc')));if(!snap.empty){window.FIRSATLAR=[];snap.forEach(d=>window.FIRSATLAR.push({id:d.id,...d.data()}));}}catch(e){}
+  try{
+    const snap=await getDocs(collection(db,'firsatlar'));
+    if(!snap.empty){
+      window.FIRSATLAR=[];
+      snap.forEach(d=>{const {id:_,...rest}=d.data();window.FIRSATLAR.push({id:d.id,...rest});});
+      window.FIRSATLAR.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+    }
+  }catch(e){console.warn('Firsatlar:',e.message);}catch(e){}
   renderFirsatlar();renderHomeFirsatlar();
 };
 

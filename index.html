@@ -3,6 +3,10 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1"/>
+<meta property="og:type" content="website"/>
+<meta property="og:url" content="https://www.runclubturkiye.com/"/>
+<meta property="og:image" content="https://www.runclubturkiye.com/og-image.png"/>
+<meta name="twitter:card" content="summary_large_image"/>
 <title>RunClubTürkiye — Türkiye'nin Koşu Topluluğu</title>
 <meta name="description" content="Türkiye genelinde koşu kulüpleri, etkinlikler ve yarış takvimi."/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23E8622A'/%3E%3Ccircle cx='112' cy='60' r='18' fill='%23fff'/%3E%3Cellipse cx='104' cy='98' rx='12' ry='24' fill='%23fff' transform='rotate(-12 104 98)'/%3E%3Cpath d='M98 82 L68 64' stroke='%23F5F0E8' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 80 L136 90' stroke='%23F5F0E8' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3Cpath d='M96 120 L74 144' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 122 L130 135' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"/>
@@ -2706,6 +2710,8 @@ window.nav=id=>{
   document.querySelectorAll('.nav-center button').forEach(b=>b.classList.remove('on'));
   const nb=document.getElementById('nb-'+id);if(nb)nb.classList.add('on');
   window.scrollTo(0,0);
+  // URL güncelle
+  if(typeof routerPush==='function')routerPush(id);
   const gf=document.getElementById('global-footer');
   if(gf)gf.style.display=['admin','panel','dashboard','profile'].includes(id)?'none':'block';
   if((id==='dashboard'||id==='admin'||id==='panel')&&!window.CU){openAuth('login');return;}
@@ -2962,7 +2968,7 @@ window.openEvent=id=>{
     </div>`;
   fomoRenderCountdown(e.date,'ev-cd');
   nav('event-detail');
-  // Katılımcıları yükle + real-time dinle
+  if(typeof routerPush==='function')routerPush('event-detail', e.slug||e.id, e.title+' — RunClubTürkiye', e.desc||'');
   setTimeout(()=>fomoLoadParticipants(e.id),100);
   fomoStartRealtime(e.id);
 };
@@ -3183,6 +3189,114 @@ window.tkDelete=async function(id){
     toast('Silindi ✓','ok');
   }catch(e){toast('Hata: '+e.message,'err');}
 };
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// CLIENT-SIDE ROUTER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+const ROUTES = {
+  "home":          {path:"/",                   title:"RunClubTürkiye — Koşu Topluluğu",              desc:"Türkiye genelindeki koşu kulüplerini keşfet, etkinliklere katıl, yarış takvimini takip et."},
+  "events":        {path:"/etkinlikler",         title:"Etkinlikler — RunClubTürkiye",                 desc:"Yaklaşan koşu etkinlikleri ve maratonlar. Hemen kaydol."},
+  "clubs":         {path:"/kulupler",            title:"Koşu Kulüpleri — RunClubTürkiye",              desc:"Türkiye koşu kulüplerini keşfet, katıl veya kendi kulübünü kur."},
+  "races":         {path:"/yaris-takvimi",       title:"Yarış Takvimi — RunClubTürkiye",               desc:"Türkiye maraton, trail ve ultra yarışları. Tüm yarış takvimi."},
+  "blog":          {path:"/haberler",            title:"Koşu Haberleri — RunClubTürkiye",              desc:"Koşu haberleri, antrenman ipuçları ve yarış rehberleri."},
+  "firsatlar":     {path:"/firsatlar",           title:"Fırsatlar — RunClubTürkiye",                   desc:"Koşu ekipmanı ve beslenme markalarından özel indirimler."},
+  "contact":       {path:"/iletisim",            title:"İletişim — RunClubTürkiye",                    desc:"RunClubTürkiye ile iletişime geç."},
+  "sss":           {path:"/sss",                 title:"SSS — RunClubTürkiye",                         desc:"Sıkça sorulan sorular ve cevapları."},
+  "kvkk":          {path:"/kvkk",                title:"KVKK — RunClubTürkiye",                        desc:"KVKK kapsamında bilgilendirme metni."},
+  "gizlilik":      {path:"/gizlilik",            title:"Gizlilik Politikası — RunClubTürkiye",         desc:"Gizlilik politikası ve kişisel veri işleme."},
+  "kosullar":      {path:"/kullanim-kosullari",  title:"Kullanım Koşulları — RunClubTürkiye",          desc:"Kullanım koşulları ve şartları."},
+  "riza":          {path:"/acik-riza",           title:"Açık Rıza Metni — RunClubTürkiye",             desc:"Açık rıza metni ve onay."},
+  "cerez":         {path:"/cerez-politikasi",    title:"Çerez Politikası — RunClubTürkiye",            desc:"Çerez politikası."},
+  "event-detail":  {path:"/etkinlik",            title:"Etkinlik — RunClubTürkiye",                    desc:"Etkinlik bilgileri ve kayıt."},
+  "blog-detail":   {path:"/haber",               title:"Haber — RunClubTürkiye",                       desc:"Haber detayı."},
+  "race-detail":   {path:"/yaris",               title:"Yarış — RunClubTürkiye",                       desc:"Yarış bilgileri."},
+  "club-detail":   {path:"/kulup",               title:"Kulüp — RunClubTürkiye",                       desc:"Koşu kulübü profili."},
+  "firsat-detail": {path:"/firsat",              title:"Fırsat — RunClubTürkiye",                      desc:"Koşuculara özel fırsat."},
+};
+
+// Ters harita: path → id
+const PATH_TO_ID = {};
+Object.entries(ROUTES).forEach(([id,r])=>{PATH_TO_ID[r.path]=id;});
+
+// SEO meta güncelle
+function routerUpdateMeta(pageId, dynamicTitle, dynamicDesc){
+  const route=ROUTES[pageId];
+  const title=dynamicTitle||(route?.title)||"RunClubTürkiye";
+  const desc=dynamicDesc||(route?.desc)||"Kosu toplulugu platformu.";
+  document.title=title;
+  let metaDesc=document.querySelector('meta[name="description"]');
+  if(!metaDesc){metaDesc=document.createElement('meta');metaDesc.name='description';document.head.appendChild(metaDesc);}
+  metaDesc.content=desc;
+  // OG tags
+  let ogTitle=document.querySelector('meta[property="og:title"]');
+  if(!ogTitle){ogTitle=document.createElement('meta');ogTitle.setAttribute('property','og:title');document.head.appendChild(ogTitle);}
+  ogTitle.content=title;
+  let ogDesc=document.querySelector('meta[property="og:description"]');
+  if(!ogDesc){ogDesc=document.createElement('meta');ogDesc.setAttribute('property','og:description');document.head.appendChild(ogDesc);}
+  ogDesc.content=desc;
+}
+
+// URL push
+function routerPush(pageId, dynamicSlug, dynamicTitle, dynamicDesc){
+  const route=ROUTES[pageId];
+  if(!route)return;
+  let path=route.path;
+  if(dynamicSlug)path=path+'/'+dynamicSlug;
+  if(window.location.pathname!==path){
+    window.history.pushState({pageId,dynamicSlug},'',path);
+  }
+  routerUpdateMeta(pageId, dynamicTitle, dynamicDesc);
+}
+
+// Sayfa yüklenince URL'yi oku ve yönlendir
+function routerInit(){
+  const path=window.location.pathname;
+  if(path==='/'||path===''){
+    routerUpdateMeta('home');
+    return; // home zaten default
+  }
+  // Tam eşleşme
+  const exactId=PATH_TO_ID[path];
+  if(exactId){
+    // Admin/panel/dashboard sayfaları URL ile açılmamalı
+    if(['admin','panel','dashboard','profile'].includes(exactId))return;
+    window.nav(exactId);
+    return;
+  }
+  // Prefix eşleşme (detay sayfaları)
+  const prefixMap=[
+    {prefix:'/etkinlik/',  nav:'events'},
+    {prefix:'/haber/',     nav:'blog'},
+    {prefix:'/yaris/',     nav:'races'},
+    {prefix:'/kulup/',     nav:'clubs'},
+    {prefix:'/firsat/',    nav:'firsatlar'},
+  ];
+  for(const {prefix,nav} of prefixMap){
+    if(path.startsWith(prefix)){
+      window.nav(nav);
+      return;
+    }
+  }
+  // 404 — ana sayfaya git, title sıfırla
+  window.history.replaceState({},'','/');
+  routerUpdateMeta('home');
+}
+
+// Browser back/forward butonu desteği
+window.addEventListener('popstate', e=>{
+  if(e.state?.pageId){
+    window.nav(e.state.pageId);
+  } else {
+    const path=window.location.pathname;
+    const exactId=PATH_TO_ID[path];
+    if(exactId)window.nav(exactId);
+    else window.nav('home');
+  }
+});
+window.routerPush=routerPush;
+window.routerInit=routerInit;
+window.routerUpdateMeta=routerUpdateMeta;
 
 window.toggleSss=function(btn){
   const item=btn.closest('.sss-item');
@@ -3470,6 +3584,7 @@ window.openClub=async(id)=>{
       </div>
     </div>`;
   nav('club-detail');
+  if(typeof routerPush==='function')routerPush('club-detail', c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
 };
 
 // ── RACES ──
@@ -3541,6 +3656,7 @@ window.openRace=id=>{
       </div>
     </div>`;
   nav('race-detail');
+  if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'');
 };
 
 // ── BLOG ──
@@ -3578,7 +3694,7 @@ window.openBlog=id=>{
       </div>
     </div>`;
   nav('blog-detail');
-  // Yorumları yükle
+  if(typeof routerPush==='function')routerPush('blog-detail', p.slug||p.id, p.title+' — RunClubTürkiye', (p.body||'').substring(0,150));
   setTimeout(()=>loadBlogComments(p.id), 100);
 };
 window.copyBlogLink=(slug)=>{
@@ -5471,6 +5587,8 @@ try {
   try{document.getElementById('pg-home').classList.add('on');}catch(e){}
   try{const l=document.getElementById('loading');if(l)l.style.display='none';}catch(e){}
 }
+// URL routing — sayfa yüklenince mevcut URL'yi kontrol et
+setTimeout(()=>{try{if(typeof routerInit==='function')routerInit();}catch(e){}},300);
 // Güvenlik ağı: 2 saniye sonra loading kesinlikle kapansın
 setTimeout(()=>{
   const l=document.getElementById('loading');

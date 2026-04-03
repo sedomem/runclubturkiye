@@ -1993,7 +1993,7 @@ function renderBanners(banners){
   const cont=document.getElementById('banner-slides');const dots=document.getElementById('banner-dots');if(!cont)return;
   cont.innerHTML=banners.map((b,i)=>`
     <div class="banner-slide ${i===0?'on':''}">
-      ${b.imgUrl?`<div class="banner-bg-img" style="background-image:url('${b.imgUrl}')"></div><div class="banner-overlay"></div>`:`<div style="position:absolute;inset:0;background:${b.bg||'linear-gradient(135deg,#0a0000,#1a0800)'}"></div>`}
+      ${b.imgUrl?`<img src="${b.imgUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0"/><div class="banner-overlay"></div>`:`<div style="position:absolute;inset:0;background:${b.bg||'linear-gradient(135deg,#0a0000,#1a0800)'}"></div>`}
       <div class="banner-content">
         ${b.badge?`<div class="banner-badge">${b.badge}</div>`:''}
         <h1>${b.title||''}</h1>
@@ -2008,7 +2008,10 @@ function renderBanners(banners){
   startBannerAuto(banners.length);
 }
 function loadBannersFromSlots(){
-  const active=window.BANNER_SLOTS.filter(b=>b&&(b.imgUrl||b.title));
+  // Sıra korunarak aktif slotları al
+  const active=window.BANNER_SLOTS
+    .map((b,i)=>b&&(b.imgUrl||b.title)?b:null)
+    .filter(Boolean);
   renderBanners(active.length?active:[{title:'Koş, Buluş, <span style="color:var(--or)">Birlikte Güçlen</span>',subtitle:'Türkiye genelinde yüzlerce koşu kulübü ve etkinlik',badge:'Türkiye\'nin #1 Koşu Platformu',ctaText:'Hemen Başla →',ctaAction:'register',bg:'linear-gradient(135deg,#0a0000,#1a0800)'}]);
 }
 window.bannerGo=i=>{const s=document.querySelectorAll('.banner-slide');const d=document.querySelectorAll('.bdot');s.forEach((x,j)=>x.classList.toggle('on',j===i));d.forEach((x,j)=>x.classList.toggle('on',j===i));bannerIdx=i;};
@@ -2024,9 +2027,10 @@ function startBannerAuto(count){
 
 // ── SPONSORS ──
 function renderSponsors(){
-  const el=document.getElementById('sponsors-strip');if(!el)return;
-  const html=(window.SPONSORS_DATA||[]).map(s=>`<div class="sponsor-logo-item">${s.imgUrl?`<img src="${s.imgUrl}" alt="${s.name}"/>`:`<span>${s.name}</span>`}</div>`).join('');
-  allStrips.forEach(strip=>strip.innerHTML=html);
+  const allStrips=document.querySelectorAll('.sponsor-strip-inline');
+  if(!allStrips.length)return;
+  const content=(window.SPONSORS_DATA||[]).map(s=>`<div class="sponsor-logo-item">${s.imgUrl?`<img src="${s.imgUrl}" alt="${s.name}"/>`:`<span>${s.name}</span>`}</div>`).join('');
+  allStrips.forEach(strip=>{strip.innerHTML=content;});
 }
 function renderAdminSponsors(){
   const el=document.getElementById('admin-sponsor-list');if(!el)return;

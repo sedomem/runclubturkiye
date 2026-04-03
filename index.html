@@ -543,21 +543,37 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="grid g2" id="home-events"></div>
   </div></div>
   <div class="divider"></div>
+  <div class="sec-sm sponsor-section"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip sponsor-strip-inline"></div>
+  </div></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Popüler Kulüpler</h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
     <div class="grid g3" id="home-clubs"></div>
   </div></div>
   <div class="divider"></div>
+  <div class="sec-sm sponsor-section"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip sponsor-strip-inline"></div>
+  </div></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
     <div class="grid g3" id="home-races"></div>
   </div></div>
   <div class="divider"></div>
+  <div class="sec-sm sponsor-section"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip sponsor-strip-inline"></div>
+  </div></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Son Haberler</h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
     <div class="grid g3" id="home-blog"></div>
   </div></div>
   <div class="divider"></div>
+  <div class="sec-sm sponsor-section"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip sponsor-strip-inline"></div>
+  </div></div>
   <!-- ✅ YENİ: Ana Sayfa Fırsatlar Bölümü -->
   <div class="sec" style="background:linear-gradient(135deg,rgba(255,107,0,.04),transparent)"><div class="container">
     <div class="sec-head">
@@ -567,11 +583,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="grid g3" id="home-firsatlar"></div>
   </div></div>
   <div class="divider"></div>
-  <div class="sec-sm"><div class="container">
-    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:20px;text-transform:uppercase">Sponsorlarımız</p>
-    <div class="sponsor-strip" id="sponsors-strip"></div>
-  </div></div>
-  <div class="divider"></div>
+    <div class="divider"></div>
   <div class="sec" style="background:var(--bg2)"><div class="container">
     <h2 style="text-align:center;margin-bottom:36px;font-size:20px">Nasıl Çalışır?</h2>
     <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:20px">
@@ -2013,7 +2025,8 @@ function startBannerAuto(count){
 // ── SPONSORS ──
 function renderSponsors(){
   const el=document.getElementById('sponsors-strip');if(!el)return;
-  el.innerHTML=(window.SPONSORS_DATA||[]).map(s=>`<div class="sponsor-logo-item">${s.imgUrl?`<img src="${s.imgUrl}" alt="${s.name}"/>`:`<span>${s.name}</span>`}</div>`).join('');
+  const html=(window.SPONSORS_DATA||[]).map(s=>`<div class="sponsor-logo-item">${s.imgUrl?`<img src="${s.imgUrl}" alt="${s.name}"/>`:`<span>${s.name}</span>`}</div>`).join('');
+  allStrips.forEach(strip=>strip.innerHTML=html);
 }
 function renderAdminSponsors(){
   const el=document.getElementById('admin-sponsor-list');if(!el)return;

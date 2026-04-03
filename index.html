@@ -469,6 +469,34 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .comment-input-wrap{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
 .comment-input-wrap textarea{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;resize:none;font-family:var(--font-body);background:var(--bg);color:var(--text);transition:border .2s}
 .comment-input-wrap textarea:focus{outline:none;border-color:var(--or)}
+
+/* ━━ FOMO SİSTEMİ ━━ */
+.fomo-bar{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin:6px 0}
+.fomo-bar-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
+.fomo-bar-fill.normal{background:var(--muted)}
+.fomo-bar-fill.warning{background:var(--or)}
+.fomo-bar-fill.danger{background:#f87171}
+.fomo-avatars{display:flex;align-items:center;gap:-4px;margin:6px 0}
+.fomo-avatar{width:24px;height:24px;border-radius:50%;background:var(--or);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--card);margin-left:-6px;flex-shrink:0}
+.fomo-avatar:first-child{margin-left:0}
+.fomo-avatar-more{background:var(--bg3);color:var(--muted);font-size:9px}
+.fomo-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:4px}
+.fomo-tag.scarcity{background:rgba(248,113,113,.12);color:#f87171}
+.fomo-tag.activity{background:rgba(232,98,42,.12);color:var(--or)}
+.fomo-tag.full{background:rgba(248,113,113,.2);color:#f87171}
+@keyframes fomoSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.fomo-tag{animation:fomoSlideIn .3s ease}
+.fomo-participants{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
+.fomo-participant-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2);font-size:13px}
+.fomo-participant-row:last-child{border-bottom:none}
+.fomo-participant-row.latest{background:linear-gradient(90deg,rgba(232,98,42,.06),transparent);border-radius:8px;padding:8px 10px;margin:0 -10px}
+.fomo-participant-row.latest .fomo-avatar{background:var(--or);box-shadow:0 0 0 3px rgba(232,98,42,.2)}
+.fomo-realtime-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark2);color:#fff;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:8px;white-space:nowrap}
+.fomo-realtime-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.fomo-countdown-wrap{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
+.fomo-cd-unit{text-align:center;background:var(--bg2);border-radius:10px;padding:8px 12px;min-width:52px}
+.fomo-cd-n{font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--or);line-height:1}
+.fomo-cd-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
 </style>
 </head>
 <body>
@@ -1251,18 +1279,41 @@ window.handlePhotoUpload=async(input)=>{
 window.rsvpEvent=async(eventId,fee)=>{
   if(!CU){openAuth('login');return;}
   try{
-    await setDoc(doc(db,'rsvps',eventId+'_'+CU.uid),{eventId,userId:CU.uid,joinedAt:serverTimestamp()});
+    // RSVP kaydet — userName ve zaman ile
+    await setDoc(doc(db,'rsvps',eventId+'_'+CU.uid),{
+      eventId,userId:CU.uid,userName:CU.name||'Koşucu',
+      userEmail:CU.email||'',joinedAt:serverTimestamp()
+    });
+    // events/reg sayacını artır
+    await setDoc(doc(db,'events',eventId),{reg:increment(1)},{merge:true});
+    // user eventCount artır
     await setDoc(doc(db,'users',CU.uid),{eventCount:increment(1)},{merge:true});
     CU.eventCount=(CU.eventCount||0)+1;
+    // Local state güncelle
+    const ev=window.EVENTS.find(e=>e.id===eventId);if(ev)ev.reg=(ev.reg||0)+1;
     localStorage.setItem(`rsvp_${eventId}_${CU.uid}`,'1');
     toast('Etkinliğe kaydoldun! 🎉','ok');
-    const btn=document.getElementById('rsvp-btn');if(btn){btn.textContent='✓ Kaydolundu';btn.disabled=true;}
+    const btn=document.getElementById('rsvp-btn');if(btn){btn.textContent='✓ Kaydolundu';btn.disabled=true;btn.onclick=()=>leaveEvent(eventId);}
+    // FOMO UI güncelle
+    fomoUpdateCard(eventId);
+    fomoUpdateDetail(eventId);
     await checkAndAwardBadges();
   }catch(e){toast(e.message,'err');}
 };
 window.leaveEvent=async(eventId)=>{
   if(!CU)return;
-  try{await deleteDoc(doc(db,'rsvps',eventId+'_'+CU.uid));if(CU.eventCount>0){await setDoc(doc(db,'users',CU.uid),{eventCount:increment(-1)},{merge:true});CU.eventCount--;}localStorage.removeItem(`rsvp_${eventId}_${CU.uid}`);toast('Etkinlikten ayrıldın','ok');buildDashboard();}catch(e){toast(e.message,'err');}
+  try{
+    await deleteDoc(doc(db,'rsvps',eventId+'_'+CU.uid));
+    // reg sayacını düş
+    await setDoc(doc(db,'events',eventId),{reg:increment(-1)},{merge:true});
+    const ev=window.EVENTS.find(e=>e.id===eventId);if(ev&&ev.reg>0)ev.reg--;
+    if(CU.eventCount>0){await setDoc(doc(db,'users',CU.uid),{eventCount:increment(-1)},{merge:true});CU.eventCount--;}
+    localStorage.removeItem(`rsvp_${eventId}_${CU.uid}`);
+    toast('Etkinlikten ayrıldın','ok');
+    fomoUpdateCard(eventId);
+    fomoUpdateDetail(eventId);
+    buildDashboard();
+  }catch(e){toast(e.message,'err');}
 };
 window.joinClub=async(clubId)=>{
   if(!CU){openAuth('login');return;}
@@ -2101,16 +2152,47 @@ window.renderHomeFirsatlar=renderHomeFirsatlar;
 
 // ── EVENTS ──
 function evtCard(e){
-  const d=new Date(e.date);const pct=Math.round((e.reg||0)/(e.cap||1)*100);
-  return`<div class="ev-card" onclick="openEvent('${e.id}')">
+  const d=new Date(e.date);
+  const reg=e.reg||0; const cap=e.cap||100;
+  const pct=Math.round(reg/cap*100);
+  const remaining=cap-reg;
+  const isFull=remaining<=0;
+  const isAlmostFull=remaining>0&&remaining<=5;
+  // Doluluk barı rengi
+  const barColor=isFull?'danger':isAlmostFull?'warning':'normal';
+  // FOMO etiketleri
+  let fomoTags='';
+  if(isFull) fomoTags+=`<span class="fomo-tag full">🔴 Dolu</span>`;
+  else if(isAlmostFull) fomoTags+=`<span class="fomo-tag scarcity">🔥 Son ${remaining} yer!</span>`;
+  // Son 10dk aktivite
+  const recentKey=`fomo_recent_${e.id}`;
+  const recentData=JSON.parse(localStorage.getItem(recentKey)||'null');
+  const tenMinAgo=Date.now()-10*60*1000;
+  if(recentData&&recentData.ts>tenMinAgo){
+    fomoTags+=`<span class="fomo-tag activity">⚡ Az önce ${recentData.count} kişi katıldı</span>`;
+  }
+  // Avatar stack (ilk katılanlar — localStorage'dan)
+  const avatarKey=`fomo_avatars_${e.id}`;
+  const avatarData=JSON.parse(localStorage.getItem(avatarKey)||'[]');
+  const avatarHtml=avatarData.length?`
+    <div class="fomo-avatars" style="margin-top:6px">
+      ${avatarData.slice(0,5).map(a=>`<div class="fomo-avatar" title="${a}">${a.charAt(0).toUpperCase()}</div>`).join('')}
+      ${reg>5?`<div class="fomo-avatar fomo-avatar-more">+${reg-5}</div>`:''}
+      <span style="font-size:11px;color:var(--muted);margin-left:8px">${reg} katılımcı</span>
+    </div>`:'<div style="font-size:11px;color:var(--muted);margin-top:4px">👥 '+reg+' katılımcı</div>';
+  return`<div class="ev-card" id="evcard-${e.id}" onclick="openEvent('${e.id}')">
     <div class="ev-date-box"><div class="day">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]}</div></div>
     <div class="ev-info">
       <span class="tag tag-or">${e.cat}</span>
       <h3>${e.emoji||'🏃'} ${e.title}</h3>
-      <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span><span class="meta">👥 ${e.reg||0}/${e.cap}</span><span class="meta">💳 ${e.fee}</span></div>
+      <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span><span class="meta">💳 ${e.fee}</span></div>
       ${e.pace?.length?`<div class="pace-chips">${e.pace.map(p=>`<span class="pace-chip">${p}</span>`).join('')}</div>`:''}
-      <div style="margin-top:6px"><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>
-      ${pct>=80?`<div style="font-size:10px;color:#f87171;margin-top:3px">🔥 Son ${(e.cap||0)-(e.reg||0)} yer!</div>`:''}
+      ${avatarHtml}
+      <div class="fomo-bar" style="margin-top:6px"><div class="fomo-bar-fill ${barColor}" style="width:${Math.min(pct,100)}%"></div></div>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
+        <div>${fomoTags}</div>
+        <span style="font-size:10px;color:var(--muted)">${isFull?'Kapasite Doldu':`${reg}/${cap}`}</span>
+      </div>
     </div>
   </div>`;
 }
@@ -2119,7 +2201,12 @@ window.filterEvts=q=>renderEvts(EVENTS.filter(e=>e.title.toLowerCase().includes(
 window.filterEvtCat=(cat,btn)=>{document.querySelectorAll('#pg-events .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderEvts(cat==='tüm'?EVENTS:EVENTS.filter(e=>e.cat===cat),'events-list');};
 window.openEvent=id=>{
   const e=EVENTS.find(x=>x.id===id);if(!e)return;
-  const pct=Math.round((e.reg||0)/(e.cap||1)*100);
+  const reg=e.reg||0; const cap=e.cap||100;
+  const pct=Math.round(reg/cap*100);
+  const remaining=cap-reg;
+  const isFull=remaining<=0;
+  const isAlmostFull=remaining>0&&remaining<=5;
+  const barColor=isFull?'#f87171':isAlmostFull?'var(--or)':'var(--or-light)';
   const isRsvped=CU&&localStorage.getItem(`rsvp_${e.id}_${CU.uid}`);
   document.getElementById('event-detail-content').innerHTML=`
     <div style="background:linear-gradient(135deg,#1a0a00,#0a0a0a);border-radius:var(--r);padding:36px;margin-bottom:20px;position:relative;overflow:hidden">
@@ -2127,7 +2214,7 @@ window.openEvent=id=>{
       <span class="tag tag-or">${e.cat}</span>
       <h1 style="font-size:26px;margin:8px 0;color:#fff">${e.emoji||'🏃'} ${e.title}</h1>
       <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
-      <div class="countdown" id="ev-cd"></div>
+      <div class="fomo-countdown-wrap" id="ev-cd"></div>
     </div>
     <div style="display:grid;grid-template-columns:1fr 280px;gap:18px">
       <div>
@@ -2136,22 +2223,224 @@ window.openEvent=id=>{
           <p style="color:var(--muted);line-height:1.7;font-size:13px">${e.desc||''}</p>
           ${e.pace?.length?`<div style="margin-top:14px"><div style="font-size:13px;font-weight:600;margin-bottom:8px">Pace Grupları</div><div class="pace-chips">${e.pace.map(p=>`<span class="pace-chip" style="font-size:12px;padding:3px 10px">${p}</span>`).join('')}</div></div>`:''}
         </div>
+        <!-- Katılımcılar -->
+        <div class="card" style="padding:20px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+            <h3 style="font-size:15px">👥 Katılımcılar</h3>
+            <span style="font-size:12px;color:var(--muted)" id="fomo-p-count">${reg} kişi</span>
+          </div>
+          <div id="fomo-participants-list"><div class="spinner" style="margin:10px auto"></div></div>
+        </div>
       </div>
       <div>
-        <div class="card" style="padding:18px">
-          <div style="margin-bottom:14px"><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px"><span style="color:var(--muted)">Kapasite</span><span>${pct}%</span></div><div class="prog-bar"><div class="prog-fill" style="width:${pct}%"></div></div></div>
+        <div class="card" style="padding:18px" id="fomo-detail-card">
+          <!-- Doluluk -->
+          <div style="margin-bottom:14px">
+            <div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px">
+              <span style="color:var(--muted)">Doluluk</span>
+              <span style="font-weight:700;color:${barColor}">${pct}%</span>
+            </div>
+            <div class="fomo-bar"><div class="fomo-bar-fill ${isFull?'danger':isAlmostFull?'warning':'normal'}" id="fomo-detail-bar" style="width:${Math.min(pct,100)}%"></div></div>
+            <div style="display:flex;justify-content:space-between;font-size:11px;margin-top:4px;color:var(--muted)">
+              <span>${reg} katılımcı</span>
+              <span>${isFull?'<span style="color:#f87171;font-weight:700">Kapasite Dolu</span>':isAlmostFull?`<span style="color:var(--or);font-weight:700">Son ${remaining} yer!</span>`:remaining+' yer kaldı'}</span>
+            </div>
+          </div>
+          <!-- Detaylar -->
           <div style="font-size:12px;margin-bottom:14px">
             <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Ücret</span><span style="font-weight:600">${e.fee}</span></div>
+            <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Kapasite</span><span>${reg}/${cap}</span></div>
             <div style="display:flex;justify-content:space-between;padding:7px 0"><span style="color:var(--muted)">Son Kayıt</span><span>${e.deadline||'—'}</span></div>
           </div>
-          ${isRsvped?`<button class="btn btn-ghost btn-full" onclick="leaveEvent('${e.id}')">✗ Etkinlikten Ayrıl</button>`:`<button class="btn btn-or btn-full" id="rsvp-btn" onclick="rsvpEvent('${e.id}','${e.fee}')">Etkinliğe Kaydol</button>`}
+          ${isFull
+            ?`<button class="btn btn-full" style="background:#f87171;color:#fff;cursor:not-allowed;opacity:.8" disabled>Kapasite Dolu</button>`
+            :isRsvped
+              ?`<button class="btn btn-ghost btn-full" onclick="leaveEvent('${e.id}')">✗ Etkinlikten Ayrıl</button>`
+              :`<button class="btn btn-or btn-full" id="rsvp-btn" onclick="rsvpEvent('${e.id}','${e.fee}')">🏃 Etkinliğe Kaydol</button>`
+          }
           ${e.qr?`<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showQR('${e.id}','${e.title}')">📲 QR Check-in</button>`:''}
         </div>
       </div>
     </div>`;
-  renderCountdown(e.date,'ev-cd');
+  fomoRenderCountdown(e.date,'ev-cd');
   nav('event-detail');
+  // Katılımcıları yükle + real-time dinle
+  setTimeout(()=>fomoLoadParticipants(e.id),100);
+  fomoStartRealtime(e.id);
 };
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FOMO SİSTEMİ
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Countdown — FOMO stili
+function fomoRenderCountdown(ds,id){
+  const el=document.getElementById(id);if(!el)return;
+  function u(){
+    const diff=new Date(ds)-new Date();
+    if(diff<0){el.innerHTML='<span style="color:var(--muted);font-size:12px">Etkinlik sona erdi</span>';return;}
+    const days=Math.floor(diff/864e5);
+    const hrs=Math.floor((diff%864e5)/36e5);
+    const min=Math.floor((diff%36e5)/6e4);
+    const sec=Math.floor((diff%6e4)/1e3);
+    el.innerHTML=[['Gün',days],['Saat',hrs],['Dk',min],['Sn',sec]]
+      .map(([l,n])=>`<div class="fomo-cd-unit"><div class="fomo-cd-n">${String(n).padStart(2,'0')}</div><div class="fomo-cd-l">${l}</div></div>`)
+      .join('');
+  }
+  u();
+  const timer=setInterval(u,1000);
+  // Sayfa değiştiğinde temizle
+  window._fomoCountdownTimer=timer;
+}
+
+// Katılımcı listesini yükle
+window.fomoLoadParticipants=async(eventId)=>{
+  const el=document.getElementById('fomo-participants-list');
+  const countEl=document.getElementById('fomo-p-count');
+  if(!el)return;
+  const fb=window._fb;if(!fb)return;
+  try{
+    const snap=await fb.getDocs(fb.query(
+      fb.collection(fb.db,'rsvps'),
+      fb.where('eventId','==',eventId)
+    ));
+    const participants=[];
+    snap.forEach(d=>{const {id:_,...rest}=d.data();participants.push({id:d.id,...rest});});
+    // Tarihe göre sırala — en son en üstte
+    participants.sort((a,b)=>(b.joinedAt?.seconds||0)-(a.joinedAt?.seconds||0));
+
+    // Avatar listesi local cache
+    const names=participants.map(p=>p.userName||'Koşucu');
+    localStorage.setItem(`fomo_avatars_${eventId}`,JSON.stringify(names));
+
+    if(countEl)countEl.textContent=`${participants.length} kişi`;
+
+    if(!participants.length){
+      el.innerHTML=`<div style="text-align:center;padding:16px;color:var(--muted);font-size:13px">Henüz katılan yok — ilk sen ol! 🏃</div>`;
+      return;
+    }
+
+    el.innerHTML=participants.map((p,i)=>{
+      const name=p.userName||'Koşucu';
+      const isLatest=i===0;
+      const timeAgo=fomoTimeAgo(p.joinedAt?.seconds);
+      return`<div class="fomo-participant-row${isLatest?' latest':''}">
+        <div class="fomo-avatar">${name.charAt(0).toUpperCase()}</div>
+        <div style="flex:1">
+          <div style="font-weight:600;font-size:13px">${name}${isLatest?'<span style="font-size:10px;background:var(--or);color:#fff;padding:1px 6px;border-radius:10px;margin-left:6px">En Son</span>':''}</div>
+          <div style="font-size:11px;color:var(--muted)">${timeAgo}</div>
+        </div>
+      </div>`;
+    }).join('');
+  }catch(e){
+    el.innerHTML=`<p style="color:var(--muted);font-size:13px">Yüklenemedi</p>`;
+  }
+};
+
+// Zaman önce hesapla
+function fomoTimeAgo(seconds){
+  if(!seconds)return'Az önce';
+  const diff=Math.floor(Date.now()/1000)-seconds;
+  if(diff<60)return`${diff}sn önce`;
+  if(diff<3600)return`${Math.floor(diff/60)}dk önce`;
+  if(diff<86400)return`${Math.floor(diff/3600)}sa önce`;
+  return`${Math.floor(diff/86400)} gün önce`;
+}
+
+// Real-time dinleyici (onSnapshot)
+window._fomoUnsubscribe=null;
+window.fomoStartRealtime=async(eventId)=>{
+  // Önceki listener'ı temizle
+  if(window._fomoUnsubscribe){window._fomoUnsubscribe();window._fomoUnsubscribe=null;}
+  const fb=window._fb;if(!fb||!fb.db)return;
+  try{
+    // Firestore onSnapshot import gerekiyor — module script'ten window._fb üzerinden erişemeyiz
+    // Alternatif: 5 saniyede bir polling yap
+    window._fomoPollingTimer=setInterval(async()=>{
+      const evEl=document.getElementById('fomo-participants-list');
+      if(!evEl){clearInterval(window._fomoPollingTimer);return;} // Sayfa kapandı
+      try{
+        const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'events'),fb.where(fb.doc?.__proto__?.__proto__?'id':'__name__','==',eventId)));
+        // event'in reg sayısını kontrol et
+        const evSnap=await fb.getDoc(fb.doc(fb.db,'events',eventId));
+        if(!evSnap.exists())return;
+        const evData=evSnap.data();
+        const newReg=evData.reg||0;
+        const ev=window.EVENTS.find(e=>e.id===eventId);
+        if(ev&&ev.reg!==newReg){
+          const diff=newReg-ev.reg;
+          ev.reg=newReg;
+          // Yeni katılım var
+          if(diff>0){
+            fomoLoadParticipants(eventId);
+            fomoUpdateDetailBar(eventId,newReg,ev.cap||100);
+            fomoUpdateCard(eventId);
+          }
+        }
+      }catch(e){}
+    },8000); // 8 saniyede bir
+  }catch(e){}
+};
+
+// Detay sayfasındaki doluluk barını güncelle
+function fomoUpdateDetailBar(eventId,reg,cap){
+  const bar=document.getElementById('fomo-detail-bar');if(!bar)return;
+  const pct=Math.round(reg/cap*100);
+  const remaining=cap-reg;
+  bar.style.width=Math.min(pct,100)+'%';
+  bar.className='fomo-bar-fill '+(remaining<=0?'danger':remaining<=5?'warning':'normal');
+}
+
+// Kart FOMO UI güncelle
+window.fomoUpdateCard=function(eventId){
+  const cardEl=document.getElementById('evcard-'+eventId);if(!cardEl)return;
+  const ev=window.EVENTS.find(e=>e.id===eventId);if(!ev)return;
+  // Kartı yeniden render et
+  cardEl.outerHTML=evtCard(ev);
+};
+
+// Detay sayfası FOMO güncelle
+window.fomoUpdateDetail=function(eventId){
+  const detailEl=document.getElementById('fomo-detail-card');if(!detailEl)return;
+  const ev=window.EVENTS.find(e=>e.id===eventId);if(!ev)return;
+  const reg=ev.reg||0; const cap=ev.cap||100;
+  const remaining=cap-reg;
+  const isFull=remaining<=0;
+  const isAlmostFull=remaining>0&&remaining<=5;
+  const barColor=isFull?'#f87171':isAlmostFull?'var(--or)':'var(--or-light)';
+  fomoUpdateDetailBar(eventId,reg,cap);
+  // Sayac güncelle
+  const countEl=document.getElementById('fomo-p-count');
+  if(countEl)countEl.textContent=reg+' kişi';
+  // Kart güncelle
+  fomoUpdateCard(eventId);
+};
+
+// Real-time toast bildirimi
+window.fomoToast=function(msg){
+  let el=document.getElementById('fomo-rt-toast');
+  if(!el){
+    el=document.createElement('div');
+    el.id='fomo-rt-toast';
+    el.className='fomo-realtime-toast';
+    document.body.appendChild(el);
+  }
+  el.textContent='🏃 '+msg;
+  el.classList.add('show');
+  clearTimeout(window._fomoToastTimer);
+  window._fomoToastTimer=setTimeout(()=>el.classList.remove('show'),3500);
+};
+
+// Sayfa değişiminde timer'ları temizle
+const _origNav=window.nav;
+window.nav=function(id){
+  if(id!=='event-detail'){
+    if(window._fomoPollingTimer){clearInterval(window._fomoPollingTimer);window._fomoPollingTimer=null;}
+    if(window._fomoCountdownTimer){clearInterval(window._fomoCountdownTimer);window._fomoCountdownTimer=null;}
+  }
+  if(_origNav)_origNav(id);
+};
+
 function renderCountdown(ds,id){const el=document.getElementById(id);if(!el)return;function u(){const diff=new Date(ds)-new Date();if(diff<0){el.innerHTML='<span style="color:var(--muted);font-size:12px">Geçti</span>';return;}const d=Math.floor(diff/864e5),h=Math.floor((diff%864e5)/36e5),m=Math.floor((diff%36e5)/6e4),s=Math.floor((diff%6e4)/1e3);el.innerHTML=[['Gün',d],['Saat',h],['Dk',m],['Sn',s]].map(([l,n])=>`<div class="cd-unit"><div class="cd-n">${String(n).padStart(2,'0')}</div><div class="cd-l">${l}</div></div>`).join('');}u();setInterval(u,1000);}
 
 // ── CLUBS ──

@@ -1517,7 +1517,7 @@ window.saveBlogFromAdmin=async()=>{
   toast('Kaydediliyor...','ok');
   try{
     // Önce Firestore'a kaydet — gerçek ID'yi al
-    const r=await addDoc(collection(db,'blog'),{...data,createdAt:serverTimestamp()});
+    const {id:_fbId,...dataNoId}=data;const r=await addDoc(collection(db,'blog'),{...dataNoId,createdAt:serverTimestamp()});
     data.id=r.id;  // Gerçek Firestore ID
     window.BLOG_POSTS.unshift(data);
     toast('Yazı yayınlandı ✓','ok');
@@ -1810,7 +1810,7 @@ async function loadEventsFromDB(){
   try{
     const snap=await getDocs(collection(db,'events'));
     const evts=[];
-    snap.forEach(d=>{const e={id:d.id,...d.data()};if(!e.status||e.status==='approved')evts.push(e);});
+    snap.forEach(d=>{const {id:_,...rest}=d.data();const e={id:d.id,...rest};if(!e.status||e.status==='approved')evts.push(e);});
     evts.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
     window.EVENTS=evts;
   }catch(e){console.warn('Events load:',e.message);}
@@ -1851,7 +1851,7 @@ window.loadClubsFromDB=loadClubsFromDB;
 async function loadRacesFromDB(){
   try{
     const snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
-    const races=[];snap.forEach(d=>races.push({id:d.id,...d.data()}));
+    const races=[];snap.forEach(d=>{const {id:_,...rest}=d.data();races.push({id:d.id,...rest});});
     if(races.length)window.RACES=races;
   }catch(e){console.warn('Races load:',e.message);}
 }
@@ -1860,7 +1860,7 @@ window.loadRacesFromDB=loadRacesFromDB;
 async function loadBlogFromDB(){
   try{
     const snap=await getDocs(query(collection(db,'blog')));
-    const posts=[];snap.forEach(d=>posts.push({id:d.id,...d.data()}));
+    const posts=[];snap.forEach(d=>{const {id:_,...rest}=d.data();posts.push({id:d.id,...rest});});
     posts.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     // Mock data'yı override et — Firestore boşsa bile temiz başla
     window.BLOG_POSTS=posts;
@@ -2313,7 +2313,7 @@ window.loadBlogComments=async(postId)=>{
   try{
     const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'blog_comments'),fb.where('postId','==',postId)));
     const comments=[];
-    snap.forEach(d=>comments.push({id:d.id,...d.data()}));
+    snap.forEach(d=>{const {id:_,...rest}=d.data();comments.push({id:d.id,...rest});});
     comments.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     if(!comments.length){
       el.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px">Henüz yorum yok. İlk yorumu sen yap!</p>';
@@ -2965,7 +2965,7 @@ window.saveEventEdit=async()=>{
       await fb.setDoc(fb.doc(fb.db,'events',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
       const e=EVENTS.find(x=>x.id===id);if(e)Object.assign(e,data);
     }else{
-      const r=await fb.addDoc(fb.collection(fb.db,'events'),{...data,reg:0,createdAt:fb.serverTimestamp()});
+      const {id:_eid,...dataNoId}=data;const r=await fb.addDoc(fb.collection(fb.db,'events'),{...dataNoId,reg:0,createdAt:fb.serverTimestamp()});
       EVENTS.unshift({id:r.id,reg:0,...data});
     }
     closeModal('edit-event-modal');toast('Kaydedildi ✓','ok');
@@ -2974,14 +2974,14 @@ window.saveEventEdit=async()=>{
 };
 window.deleteEvent=async(id)=>{
   const fb=window._fb;
-  if(!confirm('Sil?'))return;
+  if(!confirm('Bu etkinlik kalıcı olarak silinecek. Emin misin?'))return;
   try{
     await fb.deleteDoc(fb.doc(fb.db,'events',id));
     const i=window.EVENTS.findIndex(x=>x.id===id);if(i>-1)window.EVENTS.splice(i,1);
     toast('Silindi ✓','ok');
-    try{if(window.loadEventsFromDB)await window.loadEventsFromDB();}catch(e2){console.warn('reload:',e2);}
+    if(window.loadEventsFromDB)await window.loadEventsFromDB();
     renderAdminSection('events');renderEvts(window.EVENTS,'events-list');renderHomeData();
-  }catch(e){toast(e.message,'err');}
+  }catch(e){console.error('deleteEvent:',e);toast('Silinemedi: '+e.message,'err');}
 };
 window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;document.getElementById('edit-race-id').value=id;document.getElementById('edit-race-name').value=r.name;document.getElementById('edit-race-date').value=r.date||'';document.getElementById('edit-race-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
 window.saveRaceEdit=async()=>{
@@ -3016,19 +3016,21 @@ window.saveBlogEdit=async()=>{
 };
 window.deleteBlogItem=async(id)=>{
   const fb=window._fb;
-  if(!confirm('Sil?'))return;
+  if(!confirm('Bu blog yazısı kalıcı olarak silinecek. Emin misin?'))return;
   try{
+    // Direkt Firestore doc ID ile sil
     await fb.deleteDoc(fb.doc(fb.db,'blog',id));
-    // Local array'den çıkar
+    // Local array'den çıkar (id veya data.id ile eşleş)
     const i=window.BLOG_POSTS.findIndex(x=>x.id===id);
     if(i>-1)window.BLOG_POSTS.splice(i,1);
     toast('Silindi ✓','ok');
-    // Firestore'dan taze yükle (hata olursa local hali korunur)
-    try{if(window.loadBlogFromDB)await window.loadBlogFromDB();}catch(e2){console.warn('reload:',e2.message);}
-    renderBlogList();
-    renderBlogPreview();
-    renderAdminSection('blog');
-  }catch(e){toast('Silinemedi: '+e.message,'err');}
+    // Firestore'dan taze yükle — gerçek ID'lerle
+    if(window.loadBlogFromDB)await window.loadBlogFromDB();
+    renderBlogList();renderBlogPreview();renderAdminSection('blog');
+  }catch(e){
+    console.error('deleteBlogItem error:',e);
+    toast('Silinemedi: '+e.message,'err');
+  }
 };
 
 // ── GROUP PANEL ──
@@ -3244,7 +3246,7 @@ window.gSaveEvent=async()=>{
     slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
   };
   try{
-    await fb.addDoc(fb.collection(fb.db,'events'),data);
+    const {id:_geid,...dataNoId2}=data;await fb.addDoc(fb.collection(fb.db,'events'),dataNoId2);
     toast('Etkinlik onaya gönderildi ✓','ok');
     document.getElementById('g-add-event-form').style.display='none';
     ['ge-title','ge-dist','ge-fee','ge-desc','ge-img-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});

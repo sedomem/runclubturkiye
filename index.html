@@ -531,6 +531,16 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .sss-a ul{margin:8px 0 8px 20px;display:flex;flex-direction:column;gap:4px}
 .sss-a li{list-style:none;padding:2px 0}
 @keyframes sssOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
+
+/* ━━ KAYAN YAZI ŞERİDİ ━━ */
+#ticker-wrap{background:var(--dark2);overflow:hidden;padding:0;height:42px;display:flex;align-items:center;position:relative;border-top:2px solid rgba(232,98,42,.3);border-bottom:2px solid rgba(232,98,42,.3)}
+#ticker-wrap.hidden{display:none}
+.ticker-track{display:flex;align-items:center;gap:0;white-space:nowrap;animation:tickerScroll 30s linear infinite}
+.ticker-track:hover{animation-play-state:paused}
+@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+.ticker-item{display:inline-flex;align-items:center;gap:6px;padding:0 28px;font-size:13px;font-weight:600;font-family:var(--font-head);color:#fff;letter-spacing:.3px;border-right:1px solid rgba(255,255,255,.12);cursor:default}
+.ticker-item:last-child{border-right:none}
+.ticker-sep{color:var(--or);font-size:16px;padding:0 4px}
 </style>
 </head>
 <body>
@@ -599,6 +609,10 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button class="banner-nav next" onclick="bannerNext()">›</button>
     <div class="banner-dots" id="banner-dots"></div>
     <div id="banner-slides"></div>
+  </div>
+  <!-- KAYAN YAZI ŞERİDİ -->
+  <div id="ticker-wrap">
+    <div class="ticker-track" id="ticker-track"></div>
   </div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>🏃 Öne Çıkan Etkinlikler</h2><button class="btn btn-ghost btn-sm" onclick="nav('events')">Tümünü Gör →</button></div>
@@ -1327,6 +1341,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="aNav('banners',this)">🖼 Bannerlar</button>
     <button onclick="aNav('popup',this)">💬 Popup</button>
     <button onclick="aNav('sponsors',this)">💼 Sponsorlar</button>
+    <button onclick="aNav('ticker',this)">📢 Kayan Yazı</button>
     <button onclick="aNav('users',this)">👥 Kullanıcılar</button>
     <button onclick="aNav('newsletter',this)">📬 Haberdar Ol</button>
     <button id="sb-messages-btn" onclick="aNav('messages',this)">✉️ Mesajlar</button>
@@ -2489,7 +2504,7 @@ async function loadBlogFromDB(){
 }
 window.loadBlogFromDB=loadBlogFromDB;
 async function loadAllFromDB(){
-  await Promise.allSettled([loadEventsFromDB(),loadClubsFromDB(),loadRacesFromDB(),loadBlogFromDB()]);
+  await Promise.allSettled([loadEventsFromDB(),loadClubsFromDB(),loadRacesFromDB(),loadBlogFromDB(),loadTickerFromDB()]);
   // Non-module fonksiyonları window üzerinden çağır
   if(typeof window.renderHomeData==='function')window.renderHomeData();
   if(typeof window.renderEvts==='function')window.renderEvts(window.EVENTS,'events-list');
@@ -2802,6 +2817,223 @@ window.openEvent=id=>{
   // Katılımcıları yükle + real-time dinle
   setTimeout(()=>fomoLoadParticipants(e.id),100);
   fomoStartRealtime(e.id);
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// KAYAN YAZI (TICKER) SİSTEMİ
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+// Varsayılan öğeler
+const TICKER_DEFAULTS = [
+  {text:'Kulüp Bul & Katıl', emoji:'🤝', color:'#ffffff', active:true, order:0},
+  {text:'Etkinliklere Kaydol', emoji:'📅', color:'#E8622A', active:true, order:1},
+  {text:'Yarış Takvimi', emoji:'🏆', color:'#ffffff', active:true, order:2},
+  {text:'Koşu Haberleri & Blog', emoji:'📰', color:'#fbbf24', active:true, order:3},
+  {text:'Koşuculara Özel Fırsatlar', emoji:'🎁', color:'#4ade80', active:true, order:4},
+  {text:'Kendi Kulübünü Kur', emoji:'🏃', color:'#ffffff', active:true, order:5},
+];
+
+// Ticker render
+window.renderTicker=function(items){
+  const wrap=document.getElementById('ticker-wrap');
+  const track=document.getElementById('ticker-track');
+  if(!wrap||!track)return;
+  const active=(items||[]).filter(i=>i.active!==false);
+  if(!active.length){wrap.classList.add('hidden');return;}
+  wrap.classList.remove('hidden');
+  // İki kopya — sonsuz döngü için
+  const html=active.map(i=>
+    `<span class="ticker-item" style="color:${i.color||'#fff'}">
+      ${i.emoji?`<span>${i.emoji}</span>`:''}
+      <span>${i.text||''}</span>
+    </span>
+    <span class="ticker-sep">✦</span>`
+  ).join('');
+  track.innerHTML=html+html; // çift kopya
+  // Hızı içerik uzunluğuna göre ayarla
+  const totalWidth=track.scrollWidth/2;
+  const speed=Math.max(20, Math.min(50, totalWidth/20));
+  track.style.animationDuration=speed+'s';
+};
+
+// Firestore'dan ticker yükle
+window.loadTickerFromDB=async function(){
+  const fb=window._fb;
+  if(!fb){renderTicker(TICKER_DEFAULTS);return;}
+  try{
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'ticker'),fb.orderBy('order','asc')));
+    const items=[];
+    snap.forEach(d=>{const {id:_,...rest}=d.data();items.push({id:d.id,...rest});});
+    if(items.length){
+      window.TICKER_ITEMS=items;
+      renderTicker(items);
+    } else {
+      // İlk kez — default'ları Firestore'a yaz
+      window.TICKER_ITEMS=TICKER_DEFAULTS;
+      renderTicker(TICKER_DEFAULTS);
+      // Default'ları Firestore'a kaydet
+      for(const item of TICKER_DEFAULTS){
+        const {id:_,...dataNoId}=item;
+        await fb.addDoc(fb.collection(fb.db,'ticker'),{...dataNoId,createdAt:fb.serverTimestamp()}).catch(()=>{});
+      }
+    }
+  }catch(e){
+    window.TICKER_ITEMS=TICKER_DEFAULTS;
+    renderTicker(TICKER_DEFAULTS);
+  }
+};
+window.TICKER_ITEMS=[];
+
+// Admin — ticker listesini yükle
+window.loadTickerAdmin=async function(){
+  const el=document.getElementById('tk-list');if(!el)return;
+  const fb=window._fb;if(!fb)return;
+  try{
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'ticker'),fb.orderBy('order','asc')));
+    const items=[];
+    snap.forEach(d=>{const {id:_,...rest}=d.data();items.push({id:d.id,...rest});});
+    if(!items.length){
+      el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Henüz öğe yok. Yukarıdan ekle.</p>';
+      return;
+    }
+    el.innerHTML=`<table>
+      <thead><tr><th>Sıra</th><th>Emoji</th><th>Metin</th><th>Renk</th><th>Durum</th><th>İşlem</th></tr></thead>
+      <tbody>
+        ${items.map((item,i)=>`<tr id="tk-row-${item.id}">
+          <td style="color:var(--muted);font-size:12px">${i+1}</td>
+          <td style="font-size:20px;text-align:center">${item.emoji||'—'}</td>
+          <td style="font-weight:600">${item.text||''}</td>
+          <td><div style="width:24px;height:24px;border-radius:6px;background:${item.color||'#fff'};border:1.5px solid var(--border);margin:0 auto"></div></td>
+          <td>${item.active!==false
+            ?'<span class="pill pill-gr">Aktif</span>'
+            :'<span class="pill pill-or">Pasif</span>'}</td>
+          <td class="action-btns">
+            <button class="btn btn-ghost btn-sm" onclick="tkEdit('${item.id}','${(item.text||'').replace(/'/g,'\x27')}','${item.emoji||''}','${item.color||'#ffffff'}')" title="Düzenle">✏️</button>
+            <button class="btn btn-ghost btn-sm" onclick="tkToggle('${item.id}',${item.active!==false})" title="${item.active!==false?'Pasife Al':'Aktif Et'}">${item.active!==false?'⏸':'▶'}</button>
+            <button class="btn btn-red btn-sm" onclick="tkDelete('${item.id}')" title="Sil">🗑</button>
+          </td>
+        </tr>`).join('')}
+      </tbody>
+    </table>`;
+  }catch(e){el.innerHTML=`<p style="color:var(--muted);padding:10px">Yüklenemedi: ${e.message}</p>`;}
+};
+
+// Önizle
+window.tkPreview=function(){
+  const text=document.getElementById('tk-text')?.value||'Örnek Yazı';
+  const emoji=document.getElementById('tk-emoji')?.value||'🏃';
+  const color=document.getElementById('tk-color')?.value||'#ffffff';
+  const prev=document.getElementById('tk-preview');
+  if(prev)prev.innerHTML=`<span style="color:${color}">${emoji} ${text}</span>`;
+};
+
+// Kaydet
+window.tkSave=async function(){
+  const text=(document.getElementById('tk-text')?.value||'').trim();
+  if(!text){toast('Metin boş olamaz','err');return;}
+  const emoji=document.getElementById('tk-emoji')?.value||'';
+  const color=document.getElementById('tk-color')?.value||'#ffffff';
+  const fb=window._fb;if(!fb)return;
+  // Mevcut max order'ı bul
+  const currentMax=window.TICKER_ITEMS.length?Math.max(...window.TICKER_ITEMS.map(i=>i.order||0)):0;
+  try{
+    const data={text,emoji,color,active:true,order:currentMax+1,createdAt:fb.serverTimestamp()};
+    const r=await fb.addDoc(fb.collection(fb.db,'ticker'),data);
+    const {id:_,...dataNoId}=data;
+    window.TICKER_ITEMS.push({id:r.id,...dataNoId});
+    toast('Öğe eklendi ✓','ok');
+    // Formu temizle
+    document.getElementById('tk-text').value='';
+    document.getElementById('tk-emoji').value='';
+    document.getElementById('tk-color').value='#ffffff';
+    document.getElementById('tk-preview').innerHTML='🏃 Örnek Yazı';
+    renderTicker(window.TICKER_ITEMS);
+    loadTickerAdmin();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+
+// Düzenle
+window.tkEdit=function(id,text,emoji,color){
+  // Formu doldur
+  const tf=document.getElementById('tk-text');
+  const ef=document.getElementById('tk-emoji');
+  const cf=document.getElementById('tk-color');
+  if(tf)tf.value=decodeURIComponent(text);
+  if(ef)ef.value=emoji;
+  if(cf)cf.value=color;
+  tkPreview();
+  // Kaydet butonunu güncelleme moduna al
+  const saveBtn=document.querySelector('#admin-main button[onclick="tkSave()"]');
+  if(saveBtn){
+    saveBtn.textContent='Güncelle';
+    saveBtn.setAttribute('onclick',`tkUpdate('${id}')`);
+  }
+  document.querySelector('#admin-main .card')?.scrollIntoView({behavior:'smooth'});
+  toast('Düzenleme modunda','ok');
+};
+
+// Güncelle
+window.tkUpdate=async function(id){
+  const text=(document.getElementById('tk-text')?.value||'').trim();
+  if(!text){toast('Metin boş olamaz','err');return;}
+  const emoji=document.getElementById('tk-emoji')?.value||'';
+  const color=document.getElementById('tk-color')?.value||'#ffffff';
+  const fb=window._fb;if(!fb)return;
+  try{
+    await fb.setDoc(fb.doc(fb.db,'ticker',id),{text,emoji,color,updatedAt:fb.serverTimestamp()},{merge:true});
+    const item=window.TICKER_ITEMS.find(i=>i.id===id);
+    if(item)Object.assign(item,{text,emoji,color});
+    toast('Güncellendi ✓','ok');
+    document.getElementById('tk-text').value='';
+    document.getElementById('tk-emoji').value='';
+    document.getElementById('tk-color').value='#ffffff';
+    const saveBtn=document.querySelector('#admin-main button[onclick*="tkUpdate"]');
+    if(saveBtn){saveBtn.textContent='Ekle';saveBtn.setAttribute('onclick','tkSave()');}
+    renderTicker(window.TICKER_ITEMS.filter(i=>i.active!==false));
+    loadTickerAdmin();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+
+// Aktif/pasif toggle
+window.tkToggle=async function(id,isActive){
+  const fb=window._fb;if(!fb)return;
+  try{
+    await fb.setDoc(fb.doc(fb.db,'ticker',id),{active:!isActive},{merge:true});
+    const item=window.TICKER_ITEMS.find(i=>i.id===id);
+    if(item)item.active=!isActive;
+    renderTicker(window.TICKER_ITEMS.filter(i=>i.active!==false));
+    loadTickerAdmin();
+    toast((!isActive?'Aktif edildi':'Pasife alındı')+' ✓','ok');
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+
+// Tümünü aç/kapat
+window.tkToggleAll=async function(){
+  const fb=window._fb;if(!fb)return;
+  const hasActive=window.TICKER_ITEMS.some(i=>i.active!==false);
+  const newState=!hasActive;
+  try{
+    await Promise.all(window.TICKER_ITEMS.map(i=>
+      fb.setDoc(fb.doc(fb.db,'ticker',i.id),{active:newState},{merge:true})
+    ));
+    window.TICKER_ITEMS.forEach(i=>i.active=newState);
+    renderTicker(newState?window.TICKER_ITEMS:[]);
+    loadTickerAdmin();
+    toast((newState?'Tümü aktif':'Tümü pasif')+' edildi ✓','ok');
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+
+// Sil
+window.tkDelete=async function(id){
+  if(!confirm('Bu öğe silinsin mi?'))return;
+  const fb=window._fb;if(!fb)return;
+  try{
+    await fb.deleteDoc(fb.doc(fb.db,'ticker',id));
+    window.TICKER_ITEMS=window.TICKER_ITEMS.filter(i=>i.id!==id);
+    renderTicker(window.TICKER_ITEMS.filter(i=>i.active!==false));
+    loadTickerAdmin();
+    toast('Silindi ✓','ok');
+  }catch(e){toast('Hata: '+e.message,'err');}
 };
 
 window.toggleSss=function(btn){
@@ -3761,7 +3993,51 @@ function renderAdminSection(sec){
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:14px"><input type="checkbox" id="apu-active" checked style="width:18px;height:18px;accent-color:var(--or)"/><label style="display:inline;color:var(--text);font-size:13px">Popup Aktif</label></div>
         <div style="display:flex;gap:8px"><button class="btn btn-or" onclick="savePopupFromAdmin()">Kaydet</button><button class="btn btn-ghost" onclick="openModal('popup-modal')">Önizle</button></div>
       </div>`,
-    sponsors:`<h2 style="margin-bottom:18px">💼 Sponsorlar</h2>
+    ticker:`<h2 style="margin-bottom:6px">📢 Kayan Yazı Yönetimi</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:20px">Banner altında dönen kayan yazı şeridini yönet. Emoji, renk ve metin ekleyebilirsin.</p>
+      <!-- Yeni Öğe Ekle -->
+      <div class="card" style="padding:20px;margin-bottom:20px">
+        <h3 style="margin-bottom:14px;font-size:14px">➕ Yeni Öğe Ekle</h3>
+        <div class="form-row">
+          <div class="form-grp" style="flex:2"><label>Metin</label><input id="tk-text" placeholder="Örn: Kulüp Bul &amp; Katıl" /></div>
+          <div class="form-grp" style="flex:0 0 80px"><label>Emoji</label><input id="tk-emoji" placeholder="🏃" maxlength="4" style="font-size:20px;text-align:center"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-grp"><label>Metin Rengi</label>
+            <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+              <input type="color" id="tk-color" value="#ffffff" style="width:44px;height:36px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;background:none"/>
+              <div style="display:flex;gap:6px;flex-wrap:wrap">
+                <button class="tk-preset" onclick="document.getElementById('tk-color').value='#ffffff'" style="background:#ffffff;width:28px;height:28px;border-radius:6px;border:1.5px solid var(--border);cursor:pointer" title="Beyaz"></button>
+                <button class="tk-preset" onclick="document.getElementById('tk-color').value='#E8622A'" style="background:#E8622A;width:28px;height:28px;border-radius:6px;border:none;cursor:pointer" title="Turuncu"></button>
+                <button class="tk-preset" onclick="document.getElementById('tk-color').value='#4ade80'" style="background:#4ade80;width:28px;height:28px;border-radius:6px;border:none;cursor:pointer" title="Yeşil"></button>
+                <button class="tk-preset" onclick="document.getElementById('tk-color').value='#fbbf24'" style="background:#fbbf24;width:28px;height:28px;border-radius:6px;border:none;cursor:pointer" title="Sarı"></button>
+                <button class="tk-preset" onclick="document.getElementById('tk-color').value='#60a5fa'" style="background:#60a5fa;width:28px;height:28px;border-radius:6px;border:none;cursor:pointer" title="Mavi"></button>
+              </div>
+            </div>
+          </div>
+          <div class="form-grp" style="flex:0 0 180px">
+            <label>Önizleme</label>
+            <div style="background:var(--dark2);border-radius:8px;padding:8px 14px;font-size:13px;font-weight:600;font-family:var(--font-head)" id="tk-preview">🏃 Örnek Yazı</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;margin-top:4px">
+          <button class="btn btn-or" onclick="tkSave()">Ekle</button>
+          <button class="btn btn-ghost" onclick="tkPreview()">Önizle</button>
+        </div>
+      </div>
+      <!-- Mevcut öğeler -->
+      <div class="card" style="padding:20px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+          <h3 style="font-size:14px">Mevcut Öğeler</h3>
+          <div style="display:flex;gap:8px">
+            <button class="btn btn-ghost btn-sm" onclick="tkToggleAll()">Tümünü Aç/Kapat</button>
+            <button class="btn btn-ghost btn-sm" onclick="loadTickerAdmin()">🔄</button>
+          </div>
+        </div>
+        <div id="tk-list"><div class="spinner" style="margin:20px auto"></div></div>
+      </div>\`,
+
+    sponsors:\`<h2 style="margin-bottom:18px">💼 Sponsorlar</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
         ${imgUploadHtml('sp-img-input','Sponsor Logo','200×80px · Şeffaf PNG')}
         <div class="form-row"><div class="form-grp"><label>Sponsor Adı</label><input id="sp-name"/></div><div class="form-grp"><label>Web Sitesi</label><input id="sp-url"/></div></div>
@@ -3792,6 +4068,7 @@ function renderAdminSection(sec){
     const hb=document.getElementById('btab-home');if(hb){document.querySelectorAll('[id^="btab-"]').forEach(b=>b.classList.remove('on'));hb.classList.add('on');}
   },100);
   if(sec==='sponsors')setTimeout(()=>renderAdminSponsors(),100);
+  if(sec==='ticker')setTimeout(()=>loadTickerAdmin(),100);
 }
 window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);};
 
@@ -5037,6 +5314,7 @@ try {
   if(_ld){_ld.style.display='none';_ld.style.visibility='hidden';}
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
   if(typeof loadBannersFromSlots==='function')loadBannersFromSlots();
+  if(typeof window.loadTickerFromDB==='function')window.loadTickerFromDB().catch(()=>{if(typeof renderTicker==='function')renderTicker(TICKER_DEFAULTS);});
   if(typeof renderHomeData==='function')renderHomeData();
   try{if(typeof initPageBanners==='function')initPageBanners();}catch(e){}
   try{const cnt=document.querySelectorAll('.banner-slide').length;if(typeof startBannerAuto==='function'&&cnt>1)startBannerAuto(cnt);}catch(e){}

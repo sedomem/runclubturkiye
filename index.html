@@ -1389,11 +1389,17 @@ window.saveRaceFromAdmin=async()=>{
   if(!imgUrl&&imgInput?.files[0])imgUrl=await handleImgUpload(imgInput,'races')||'';
   const name=document.getElementById('ar-name').value.trim();
   if(!name){toast('Yarış adı gerekli','err');return;}
-  const data={id:'r'+Date.now(),name,date:document.getElementById('ar-date').value||'',location:document.getElementById('ar-loc').value||'',about:document.getElementById('ar-about').value||'',contact:document.getElementById('ar-contact').value||'',mapUrl:document.getElementById('ar-map').value||'',website:document.getElementById('ar-web').value||'',phone:document.getElementById('ar-phone').value||'',email:document.getElementById('ar-email').value||'',imgUrl,emoji:'🏆',slug:name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
-  window.RACES.unshift(data);renderRaceList();renderRacePreview();
-  toast('Yarış eklendi ✓','ok');
-  try{const r=await addDoc(collection(db,'races'),{...data,createdAt:serverTimestamp()});window.RACES[0].id=r.id;}catch(e){}
-  renderAdminSection('races');
+  const aboutVal=(window._quillRaceEditor?window._quillRaceEditor.root.innerHTML:document.getElementById('ar-about').value)||'';
+  const data={name,date:document.getElementById('ar-date').value||'',location:document.getElementById('ar-loc').value||'',about:aboutVal,contact:document.getElementById('ar-contact').value||'',mapUrl:document.getElementById('ar-map').value||'',website:document.getElementById('ar-web').value||'',phone:document.getElementById('ar-phone').value||'',email:document.getElementById('ar-email').value||'',imgUrl,emoji:'🏆',likes:0,slug:name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  toast('Kaydediliyor...','ok');
+  try{
+    const {id:_,...dataNoId}=data;
+    const r=await addDoc(collection(db,'races'),{...dataNoId,createdAt:serverTimestamp()});
+    data.id=r.id;
+    window.RACES.unshift(data);
+    toast('Yarış eklendi ✓','ok');
+    renderRaceList();renderRacePreview();renderAdminSection('races');
+  }catch(e){toast('Kaydedilemedi: '+e.message,'err');}
 };
 
 // ── ✅ AI BLOG ASSISTANT ──
@@ -2214,23 +2220,69 @@ window.openClub=async(id)=>{
 };
 
 // ── RACES ──
+function raceCard(r){
+  return`<div class="race-card">
+    <div class="race-img">${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
+      <div class="race-date-badge">${r.date||''}</div>
+    </div>
+    <div class="card-body">
+      <h3>${r.name}</h3>
+      <p>📍 ${r.location||'—'}</p>
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
+        <div style="display:flex;gap:8px">
+          <button class="social-btn" onclick="likeRace('${r.id}',this)" style="font-size:12px;padding:4px 10px">
+            🤍 ${r.likes||0}
+          </button>
+          <button class="social-btn" onclick="shareRace('${r.id}','${(r.name||'').replace(/'/g,'\x27')}')" style="font-size:12px;padding:4px 10px">🔗</button>
+        </div>
+        <button class="btn btn-or btn-sm" onclick="openRace('${r.id}')" style="font-size:12px;padding:5px 14px;border-radius:20px">Detaylar →</button>
+      </div>
+    </div>
+  </div>`;
+}
+window.raceCard=raceCard;
 function renderRaceList(){
-  const html=window.RACES.map(r=>`<div class="race-card" onclick="openRace('${r.id}')"><div class="race-img">${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}<div class="race-date-badge">${r.date||''}</div></div><div class="card-body"><h3>${r.name}</h3><p>📍 ${r.location||'—'}</p></div></div>`).join('');
+  const html=window.RACES.map(raceCard).join('');
   const rl=document.getElementById('races-list');if(rl)rl.innerHTML=html||'<p style="color:var(--muted)">Yarış bulunamadı.</p>';
 }
-function renderRacePreview(){const hr=document.getElementById('home-races');if(hr)hr.innerHTML=window.RACES.slice(0,3).map(r=>`<div class="race-card" onclick="openRace('${r.id}')"><div class="race-img">${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}<div class="race-date-badge">${r.date||''}</div></div><div class="card-body"><h3>${r.name}</h3><p>📍 ${r.location||'—'}</p></div></div>`).join('');}
-window.filterRaces=q=>{const el=document.getElementById('races-list');if(el)el.innerHTML=RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())).map(r=>`<div class="race-card" onclick="openRace('${r.id}')"><div class="race-img">${r.emoji||'🏆'}</div><div class="card-body"><h3>${r.name}</h3><p>📍 ${r.location||'—'}</p></div></div>`).join('');};
+function renderRacePreview(){const hr=document.getElementById('home-races');if(hr)hr.innerHTML=window.RACES.slice(0,3).map(raceCard).join('');}
+window.filterRaces=q=>{const el=document.getElementById('races-list');if(el)el.innerHTML=RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())).map(raceCard).join('');};
 window.openRace=id=>{
   const r=RACES.find(x=>x.id===id);if(!r)return;
+  const liked=window.CU&&localStorage.getItem('rlk_'+r.id+'_'+(window.CU?.uid||''));
   document.getElementById('race-detail-content').innerHTML=`
     <div class="card" style="overflow:hidden;margin-bottom:20px">
-      <div style="height:200px;background:linear-gradient(135deg,var(--navy),#2a3a8a);display:flex;align-items:center;justify-content:center;font-size:70px;position:relative;overflow:hidden">${r.imgUrl?`<img src="${r.imgUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="position:relative">${r.emoji||'🏆'}</span>`}</div>
-      <div style="padding:24px">
-        <h1 style="font-size:24px;margin-bottom:8px">${r.name}</h1>
-        <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${r.date}</span><span class="meta">📍 ${r.location}</span></div>
-        <p style="color:var(--muted);line-height:1.7;margin-bottom:16px">${r.about||''}</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          <button class="btn btn-ghost" onclick="window.open('https://www.openstreetmap.org/search?query=${encodeURIComponent(r.location||'')}','_blank')">🗺 Haritada Gör</button>
+      <div style="width:100%;padding-top:52.5%;background:linear-gradient(135deg,#0d1a0d,#1a3d1a);position:relative;overflow:hidden">
+        ${r.imgUrl?`<img src="${r.imgUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px">${r.emoji||'🏆'}</span>`}
+      </div>
+      <div style="padding:28px">
+        <h1 style="font-size:26px;margin-bottom:10px;font-family:var(--font-head)">${r.name}</h1>
+        <div class="ev-meta" style="margin-bottom:16px">
+          <span class="meta">📅 ${r.date||'—'}</span>
+          <span class="meta">📍 ${r.location||'—'}</span>
+        </div>
+        ${r.about?`<div class="blog-body-content" style="font-size:15px;line-height:1.85;color:var(--text);margin-bottom:20px">${r.about}</div>`:''}
+        <!-- İletişim & Link Bilgileri -->
+        ${(r.website||r.email||r.phone||r.contact)?`
+        <div style="background:var(--bg2);border-radius:12px;padding:16px 20px;margin-bottom:20px;border:1px solid var(--border)">
+          <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--dark2);text-transform:uppercase;letter-spacing:.5px">📋 İletişim & Bilgi</h3>
+          <div style="display:flex;flex-direction:column;gap:10px">
+            ${r.website?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="color:var(--or);font-size:16px">🌐</span><a href="${r.website.startsWith('http')?r.website:'https://'+r.website}" target="_blank" style="color:var(--or);font-weight:600;text-decoration:none">${r.website}</a></div>`:''}
+            ${r.email?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="font-size:16px">📧</span><a href="mailto:${r.email}" style="color:var(--text)">${r.email}</a></div>`:''}
+            ${r.phone?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="font-size:16px">📞</span><a href="tel:${r.phone}" style="color:var(--text)">${r.phone}</a></div>`:''}
+            ${r.contact?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="font-size:16px">ℹ️</span><span style="color:var(--muted2)">${r.contact}</span></div>`:''}
+          </div>
+        </div>`:''}
+        <!-- Butonlar -->
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+          ${r.mapUrl?`<button class="btn btn-ghost" onclick="window.open('${r.mapUrl}','_blank')">🗺 Haritada Gör</button>`:`<button class="btn btn-ghost" onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(r.location||'')}','_blank')">🗺 Haritada Gör</button>`}
+          ${r.website?`<button class="btn btn-or" onclick="window.open('${r.website.startsWith('http')?r.website:'https://'+r.website}','_blank')">🔗 Web Sitesi</button>`:''}
+          <div style="margin-left:auto;display:flex;gap:8px">
+            <button class="social-btn${liked?' liked':''}" id="race-like-btn-${r.id}" onclick="likeRace('${r.id}',this)" style="font-size:13px">
+              ${liked?'❤️':'🤍'} Beğen (${r.likes||0})
+            </button>
+            <button class="social-btn" onclick="shareRace('${r.id}','${(r.name||'').replace(/'/g,'&#39;')}')" style="font-size:13px">🔗 Paylaş</button>
+          </div>
         </div>
       </div>
     </div>`;
@@ -2400,6 +2452,40 @@ window.likeComment=async(commentId,btn)=>{
     if(liked){localStorage.removeItem(likeKey);btn.classList.remove('liked');btn.innerHTML='🤍 '+(parseInt(btn.textContent.replace(/[^0-9]/g,''))+delta);}
     else{localStorage.setItem(likeKey,'1');btn.classList.add('liked');btn.innerHTML='❤️ '+(parseInt(btn.textContent.replace(/[^0-9]/g,''))+delta);}
   }catch(e){toast(e.message,'err');}
+};
+
+// ── YARIŞLAR SOSYAL ──
+window.likeRace=async(raceId,btn)=>{
+  if(!window.CU){toast('Beğenmek için giriş yapın','err');return;}
+  const likeKey='rlk_'+raceId+'_'+window.CU.uid;
+  const liked=localStorage.getItem(likeKey);
+  const fb=window._fb;
+  try{
+    const delta=liked?-1:1;
+    await fb.setDoc(fb.doc(fb.db,'races',raceId),{likes:fb.increment(delta)},{merge:true});
+    const race=window.RACES.find(r=>r.id===raceId);if(race)race.likes=(race.likes||0)+delta;
+    if(liked){
+      localStorage.removeItem(likeKey);
+      btn.classList.remove('liked');
+      btn.innerHTML='🤍 '+(race?race.likes:0);
+    }else{
+      localStorage.setItem(likeKey,'1');
+      btn.classList.add('liked');
+      btn.innerHTML='❤️ '+(race?race.likes:0);
+    }
+    // Detay sayfasındaki butonu da güncelle
+    const detailBtn=document.getElementById('race-like-btn-'+raceId);
+    if(detailBtn&&detailBtn!==btn){
+      if(liked){detailBtn.classList.remove('liked');detailBtn.innerHTML=`🤍 Beğen (${race?race.likes:0})`;}
+      else{detailBtn.classList.add('liked');detailBtn.innerHTML=`❤️ Beğenildi (${race?race.likes:0})`;}
+    }
+  }catch(e){toast(e.message,'err');}
+};
+window.shareRace=(raceId,raceName)=>{
+  const url=`${window.location.origin||'https://runclubturkiye.com'}/#races/${raceId}`;
+  const text=`${raceName} - RunClubTürkiye`;
+  if(navigator.share){navigator.share({title:text,url}).catch(()=>{});}
+  else{navigator.clipboard.writeText(url).then(()=>toast('Link kopyalandı! 🔗','ok')).catch(()=>toast('Kopyalanamadı','err'));}
 };
 
 // ── FIRSATLAR ──
@@ -2711,7 +2797,11 @@ function renderAdminSection(sec){
         ${imgUploadHtml('ar-img-input','Yarış Görseli','800×500px')}
         <div class="form-row"><div class="form-grp"><label>Yarış Adı</label><input id="ar-name"/></div><div class="form-grp"><label>Tarih</label><input id="ar-date" type="date"/></div></div>
         <div class="form-grp"><label>Konum</label><input id="ar-loc"/></div>
-        <div class="form-grp"><label>Hakkında</label><textarea id="ar-about" rows="3"></textarea></div>
+        <div class="form-grp">
+          <label>Hakkında</label>
+          <div id="ar-about-editor" style="height:200px;background:var(--bg);border-radius:8px;font-size:14px"></div>
+          <textarea id="ar-about" style="display:none"></textarea>
+        </div>
         <div class="form-row"><div class="form-grp"><label>Telefon</label><input id="ar-phone"/></div><div class="form-grp"><label>E-posta</label><input id="ar-email"/></div></div>
         <div class="form-row"><div class="form-grp"><label>Web Sitesi</label><input id="ar-web"/></div><div class="form-grp"><label>Google Maps Embed URL</label><input id="ar-map"/></div></div>
         <div class="form-grp"><label>İletişim</label><input id="ar-contact"/></div>
@@ -2815,6 +2905,7 @@ function renderAdminSection(sec){
   if(sec==='groupadmins')setTimeout(()=>loadGroupAdmins&&loadGroupAdmins(),100);
   if(sec==='newsletter')setTimeout(()=>loadNewsletterList&&loadNewsletterList(),100);
   if(sec==='blog')setTimeout(initQuillEditor,200);
+  if(sec==='races')setTimeout(initQuillRaceEditor,200);
   if(sec==='banners')setTimeout(()=>{
     renderBannerSlots();
     ['events','clubs','races','blog'].forEach(t=>{const el=document.getElementById('banner-tab-'+t);if(el)el.style.display='none';});
@@ -3796,6 +3887,19 @@ function initQuillEditor(){
   });
 }
 window.initQuillEditor=initQuillEditor;
+
+function initQuillRaceEditor(){
+  if(typeof Quill==='undefined')return;
+  if(window._quillRaceEditor)return;
+  const el=document.getElementById('ar-about-editor');
+  if(!el)return;
+  window._quillRaceEditor=new Quill('#ar-about-editor',{
+    theme:'snow',
+    modules:{toolbar:[[{header:[1,2,3,false]}],['bold','italic','underline'],['link'],['clean']]},
+    placeholder:'Yarış hakkında açıklama girin...'
+  });
+}
+window.initQuillRaceEditor=initQuillRaceEditor;
 
 // ── LEGAL ──
 const LEGAL={

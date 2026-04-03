@@ -784,6 +784,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="sb-title">🔑 Grup Paneli</div>
     <button class="on" onclick="gNav('events',this)">📅 Etkinlikler</button>
     <button onclick="gNav('members',this)">👥 Üyeler</button>
+    <button onclick="gNav('applications',this)" id="g-app-btn">📋 Başvurular<span id="g-app-badge" style="display:none;background:var(--or);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:6px">0</span></button>
     <button onclick="gNav('announcements',this)">📢 Duyurular</button>
     <button onclick="gNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
@@ -1271,7 +1272,9 @@ window.joinClub=async(clubId)=>{
     const club=window.CLUBS.find(c=>c.id===clubId)||{name:'Kulüp',adminUid:clubId};
     await setDoc(doc(db,'memberships',clubId+'_'+CU.uid),{
       clubId,userId:CU.uid,clubName:club.name||'',
+      userName:CU.name||'',userEmail:CU.email||'',
       clubAdminUid:club.adminUid||club.id||clubId,
+      status:club.open===false?'pending':'approved',
       joinedAt:serverTimestamp()
     });
     await setDoc(doc(db,'users',CU.uid),{clubCount:increment(1)},{merge:true});
@@ -2938,6 +2941,7 @@ function renderAdminSection(sec){
   };
   main.innerHTML=sections[sec]||sections['dashboard'];
   if(sec==='users')setTimeout(()=>loadAdminUsers&&loadAdminUsers(),100);
+  if(sec==='dashboard')setTimeout(()=>updatePendingBadge&&updatePendingBadge(),300);
   if(sec==='messages')setTimeout(()=>loadAdminMessages&&loadAdminMessages(),100);
   if(sec==='applications')setTimeout(()=>loadApplications&&loadApplications(),100);
   if(sec==='approvals')setTimeout(()=>loadPendingEvents&&loadPendingEvents(),100);
@@ -2966,12 +2970,13 @@ window.loadPendingEvents=async()=>{
       el.innerHTML='<div class="card" style="padding:20px;text-align:center;color:var(--muted)">✅ Onay bekleyen etkinlik yok.</div>';
       return;
     }
-    let html='<table><thead><tr><th>Etkinlik</th><th>Kulüp</th><th>Tarih</th><th>Şehir</th><th>İşlem</th></tr></thead><tbody>';
+    let html='<table><thead><tr><th>Görsel</th><th>Etkinlik</th><th>Kulüp</th><th>Tarih</th><th>Şehir</th><th>İşlem</th></tr></thead><tbody>';
     snap.forEach(d=>{
-      const e=d.data();
+      const {id:_,...e}=d.data();
       html+=`<tr>
-        <td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat||''} · ${e.dist||''}</span></td>
-        <td><span style="font-size:11px">${e.clubName||'—'}</span><br><span style="font-size:10px;color:var(--muted)">${e.groupAdminName||'—'}</span></td>
+        <td style="width:60px">${e.imgUrl?`<img src="${e.imgUrl}" style="width:56px;height:40px;object-fit:cover;border-radius:6px"/>`:'<div style="width:56px;height:40px;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px">'+(e.emoji||'🏃')+'</div>'}</td>
+        <td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat||''} · ${e.dist||''}</span>${e.desc?`<br><span style="font-size:10px;color:var(--muted)">${(e.desc||'').substring(0,60)}${e.desc.length>60?'...':''}</span>`:''}</td>
+        <td><span style="font-size:11px;font-weight:600">${e.clubName||'—'}</span><br><span style="font-size:10px;color:var(--muted)">${e.groupAdminName||'—'}</span></td>
         <td>${e.date||'—'}</td>
         <td>${e.city||'—'}</td>
         <td class="action-btns">
@@ -2993,6 +2998,16 @@ window.approveEvent=async(id)=>{
     loadPendingEvents();
   }catch(e){toast('Hata: '+e.message,'err');}
 };
+// Pending sayısını badge'e yaz
+async function updatePendingBadge(){
+  try{
+    const fb=window._fb;if(!fb)return;
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'events'),fb.where('status','==','pending')));
+    const badge=document.getElementById('sa-pending-badge');
+    if(badge){if(snap.size>0){badge.textContent=snap.size;badge.style.display='inline';}else{badge.style.display='none';}}
+  }catch(e){}
+}
+window.updatePendingBadge=updatePendingBadge;
 window.rejectEvent=async(id)=>{
   const reason=prompt('Red sebebi (opsiyonel):');
   const fb=window._fb;
@@ -3169,6 +3184,16 @@ function loadGroupPanel(){
   if(!CU)return;
   const active=window._gpActiveSection||'events';
   renderGroupSection(active);
+  // Bekleyen başvuru sayısını badge'e yaz
+  setTimeout(async()=>{
+    try{
+      const fb=window._fb;if(!fb)return;
+      const clubId=CU.clubId||CU.uid;
+      const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('clubId','==',clubId),fb.where('status','==','pending')));
+      const badge=document.getElementById('g-app-badge');
+      if(badge&&!snap.empty){badge.textContent=snap.size;badge.style.display='inline';}
+    }catch(e){}
+  },500);
 }
 
 function renderGroupSection(sec){
@@ -3240,6 +3265,11 @@ function renderGroupSection(sec){
       </div>
       <div id="g-announcements-list"><div class="spinner" style="margin:20px auto"></div></div>`,
 
+    applications:`
+      <h2 style="margin-bottom:18px">📋 Üyelik Başvuruları</h2>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Kulübüne katılmak isteyen üyelerin başvuruları. Onayladığında üye listesine eklenir.</p>
+      <div id="g-applications-list"><div class="spinner" style="margin:20px auto"></div></div>`,
+
     chat:`
       <h2 style="margin-bottom:18px">💬 Kulüp Sohbeti</h2>
       <div style="display:flex;flex-direction:column;height:460px">
@@ -3290,6 +3320,7 @@ function renderGroupSection(sec){
   if(sec==='members')setTimeout(gLoadMembers,100);
   if(sec==='announcements')setTimeout(gLoadAnnouncements,100);
   if(sec==='chat')setTimeout(gLoadChat,200);
+  if(sec==='applications')setTimeout(gLoadApplications,100);
   if(sec==='settings'){
     // Ayarlar formunu doldur
     const s=id=>document.getElementById(id);
@@ -3454,7 +3485,7 @@ async function gLoadEvents(){
     let html='<table><thead><tr><th>Etkinlik</th><th>Tarih</th><th>Şehir</th><th>Kapasite</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>';
     events.forEach(e=>{
       const titleSafe=e.title.replace(/'/g,"\'");
-      html+=`<tr><td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat}</span></td><td>${e.date||'—'}</td><td>${e.city||'—'}</td><td>${e.cap||'—'}</td><td>${badge(e.status)}</td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="gLoadEventAttendees('${e.id}','${titleSafe}')" title="Katılanları gör">👥</button><button class="btn btn-red btn-sm" onclick="gDeleteEvent('${e.id}')">🗑</button></td></tr>`;
+      html+=`<tr><td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat}</span></td><td>${e.date||'—'}</td><td>${e.city||'—'}</td><td>${e.cap||'—'}</td><td>${badge(e.status)}</td><td class="action-btns">${e.status==='pending'||e.status==='rejected'?`<button class="btn btn-ghost btn-sm" onclick="gEditEvent('${e.id}')" title="Düzenle">✏️</button>`:''}<button class="btn btn-ghost btn-sm" onclick="gLoadEventAttendees('${e.id}','${titleSafe}')" title="Katılanları gör">👥</button><button class="btn btn-red btn-sm" onclick="gDeleteEvent('${e.id}')">🗑</button></td></tr>`;
     });
     el.innerHTML=html+'</tbody></table>';
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
@@ -3501,6 +3532,191 @@ window.gSaveAnnouncement=async()=>{
     gLoadAnnouncements();
   }catch(e){toast('Hata: '+e.message,'err');}
 };
+// ── GRUP ADMİN: BAŞVURU YÖNETİMİ ──
+window.gLoadApplications=async()=>{
+  const el=document.getElementById('g-applications-list');if(!el)return;
+  try{
+    const fb=window._fb;
+    const clubId=CU.clubId||CU.uid;
+    // Tüm başvuruları çek, client-side filtrele
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('clubId','==',clubId)));
+    const apps=[];snap.forEach(d=>{const {id:_,...rest}=d.data();apps.push({id:d.id,...rest});});
+    apps.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
+
+    const pending=apps.filter(a=>a.status==='pending');
+    const approved=apps.filter(a=>a.status==='approved');
+    const rejected=apps.filter(a=>a.status==='rejected');
+
+    if(!apps.length){
+      el.innerHTML=`<div class="card" style="padding:24px;text-align:center;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">📋</div><p>Henüz başvuru yok.</p></div>`;
+      return;
+    }
+
+    const statusBadge=s=>s==='pending'?'<span class="pill pill-or">⏳ Bekliyor</span>':s==='approved'?'<span class="pill pill-gr">✓ Onaylı</span>':'<span class="pill pill-re">✗ Reddedildi</span>';
+
+    let out=`<div style="display:flex;gap:12px;margin-bottom:16px;flex-wrap:wrap">
+      <div class="card" style="padding:12px 20px;flex:1;min-width:100px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--or)">${pending.length}</div><div style="font-size:11px;color:var(--muted)">Bekleyen</div></div>
+      <div class="card" style="padding:12px 20px;flex:1;min-width:100px;text-align:center"><div style="font-size:22px;font-weight:700;color:#4ade80">${approved.length}</div><div style="font-size:11px;color:var(--muted)">Onaylı</div></div>
+      <div class="card" style="padding:12px 20px;flex:1;min-width:100px;text-align:center"><div style="font-size:22px;font-weight:700;color:var(--muted)">${rejected.length}</div><div style="font-size:11px;color:var(--muted)">Reddedildi</div></div>
+    </div>`;
+
+    // Önce bekleyenler
+    if(pending.length){
+      out+=`<h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--or)">⏳ Onay Bekleyenler</h3>`;
+      out+=`<table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Başvuru Tarihi</th><th>İşlem</th></tr></thead><tbody>`;
+      pending.forEach(a=>{
+        const dateStr=a.createdAt?.toDate?new Date(a.createdAt.toDate()).toLocaleDateString('tr-TR'):(a.createdAt||'');
+        out+=`<tr>
+          <td><b>${a.userName||'—'}</b></td>
+          <td style="font-size:11px;color:var(--muted)">${a.userEmail||'—'}</td>
+          <td style="font-size:11px">${dateStr}</td>
+          <td class="action-btns">
+            <button class="btn btn-green btn-sm" onclick="gApproveApp('${a.id}','${(a.userId||'').replace(/'/g,'\x27')}')">✓ Onayla</button>
+            <button class="btn btn-red btn-sm" onclick="gRejectApp('${a.id}')">✗ Reddet</button>
+          </td>
+        </tr>`;
+      });
+      out+=`</tbody></table><div style="margin-bottom:20px"></div>`;
+    }
+
+    // Sonra onaylananlar (compacted)
+    if(approved.length){
+      out+=`<h3 style="font-size:13px;font-weight:700;margin-bottom:10px;color:var(--text)">✅ Onaylı Üyeler (${approved.length})</h3>`;
+      out+=`<table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Onay Tarihi</th><th>İşlem</th></tr></thead><tbody>`;
+      approved.forEach(a=>{
+        const dateStr=a.approvedAt?.toDate?new Date(a.approvedAt.toDate()).toLocaleDateString('tr-TR'):'';
+        out+=`<tr>
+          <td>${a.userName||'—'}</td>
+          <td style="font-size:11px;color:var(--muted)">${a.userEmail||'—'}</td>
+          <td style="font-size:11px">${dateStr}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="gRejectApp('${a.id}')">Üyeliği Kaldır</button></td>
+        </tr>`;
+      });
+      out+=`</tbody></table>`;
+    }
+
+    el.innerHTML=out;
+  }catch(e){
+    el.innerHTML=`<p style="color:var(--muted);padding:20px">Yüklenemedi: ${e.message}</p>`;
+    console.error('gLoadApplications:',e);
+  }
+};
+
+window.gApproveApp=async(membershipId,userId)=>{
+  const fb=window._fb;
+  try{
+    // Membership'i onayla
+    await fb.setDoc(fb.doc(fb.db,'memberships',membershipId),{
+      status:'approved',
+      approvedAt:fb.serverTimestamp(),
+      approvedBy:CU.uid
+    },{merge:true});
+    toast('Üye onaylandı ✓','ok');
+    // Badge güncelle
+    const badge=document.getElementById('g-app-badge');
+    if(badge){const c=parseInt(badge.textContent||'1')-1;badge.textContent=c;if(c<=0)badge.style.display='none';}
+    gLoadApplications();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+
+window.gRejectApp=async(membershipId)=>{
+  if(!confirm('Bu üyelik başvurusu reddedilsin mi?'))return;
+  const fb=window._fb;
+  try{
+    await fb.setDoc(fb.doc(fb.db,'memberships',membershipId),{
+      status:'rejected',
+      rejectedAt:fb.serverTimestamp()
+    },{merge:true});
+    toast('Başvuru reddedildi','ok');
+    gLoadApplications();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+
+// ── GRUP ADMİN: ETKİNLİK DÜZENLE ──
+window.gEditEvent=async(id)=>{
+  const fb=window._fb;
+  try{
+    const snap=await fb.getDoc(fb.doc(fb.db,'events',id));
+    if(!snap.exists())return;
+    const e=snap.data();
+    // Form alanlarını doldur
+    const form=document.getElementById('g-add-event-form');
+    if(!form)return;
+    form.style.display='block';
+    form.dataset.editId=id;
+    const s=field=>document.getElementById(field);
+    if(s('ge-title'))s('ge-title').value=e.title||'';
+    if(s('ge-cat'))s('ge-cat').value=e.cat||'Maraton';
+    if(s('ge-date'))s('ge-date').value=e.date||'';
+    if(s('ge-city'))s('ge-city').value=e.city||'';
+    if(s('ge-dist'))s('ge-dist').value=e.dist||'';
+    if(s('ge-cap'))s('ge-cap').value=e.cap||100;
+    if(s('ge-fee'))s('ge-fee').value=e.fee||'';
+    if(s('ge-deadline'))s('ge-deadline').value=e.deadline||'';
+    if(s('ge-desc'))s('ge-desc').value=e.desc||'';
+    if(s('ge-img-url'))s('ge-img-url').value=e.imgUrl||'';
+    // Pace seçenekleri
+    document.querySelectorAll('#g-add-event-form .pace-opt').forEach(b=>{
+      b.classList.toggle('on',(e.pace||[]).includes(b.textContent.trim()));
+    });
+    // Buton metnini güncelle
+    const saveBtn=form.querySelector('button[onclick="gSaveEvent()"]');
+    if(saveBtn)saveBtn.textContent='Güncelle';
+    // Görsel önizle
+    if(e.imgUrl){gPreviewEventUrl(e.imgUrl);}
+    form.scrollIntoView({behavior:'smooth',block:'start'});
+    toast('Düzenleme modunda — değişiklikler onaya gönderilecek','ok');
+  }catch(e){toast('Yüklenemedi: '+e.message,'err');}
+};
+
+// gSaveEvent'i edit modunu destekleyecek şekilde güncelle
+const _origGSaveEvent=window.gSaveEvent;
+window.gSaveEvent=async()=>{
+  const form=document.getElementById('g-add-event-form');
+  const editId=form?.dataset?.editId;
+  if(editId){
+    // Düzenleme modu — pending olarak tekrar gönder
+    delete form.dataset.editId;
+    const saveBtn=form.querySelector('button');
+    if(saveBtn)saveBtn.textContent='Onaya Gönder';
+    // Mevcut belgeyi güncelle
+    const fb=window._fb;
+    const title=document.getElementById('ge-title')?.value?.trim();
+    if(!title){toast('Etkinlik adı gerekli','err');return;}
+    const pace=[];
+    document.querySelectorAll('#g-add-event-form .pace-opt.on').forEach(b=>pace.push(b.textContent.trim()));
+    let imgUrl=document.getElementById('ge-img-url')?.value?.trim()||'';
+    const imgFile=document.getElementById('ge-img-file')?.files[0];
+    if(!imgFile&&!imgUrl){const prev=document.getElementById('ge-img-preview');if(prev&&prev.src)imgUrl=prev.src;}
+    if(!imgUrl&&imgFile){
+      try{const r=fb.ref(fb.storage,`events/${Date.now()}_${imgFile.name}`);await fb.uploadBytes(r,imgFile);imgUrl=await fb.getDownloadURL(r);}catch(e){}
+    }
+    const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',city:document.getElementById('ge-city')?.value||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,status:'pending',updatedAt:fb.serverTimestamp()};
+    try{
+      await fb.setDoc(fb.doc(fb.db,'events',editId),data,{merge:true});
+      toast('Etkinlik güncellendi, onay bekliyor ✓','ok');
+      form.style.display='none';
+      ['ge-title','ge-dist','ge-fee','ge-desc','ge-img-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+      gLoadEvents();
+    }catch(e){toast('Güncelleme hatası: '+e.message,'err');}
+  } else {
+    // Yeni ekleme modu
+    if(_origGSaveEvent)await _origGSaveEvent();
+    else {
+      // Fallback — orijinal gSaveEvent mantığı
+      const fb=window._fb;
+      const title=document.getElementById('ge-title')?.value?.trim();
+      if(!title){toast('Etkinlik adı gerekli','err');return;}
+      const pace=[];document.querySelectorAll('#g-add-event-form .pace-opt.on').forEach(b=>pace.push(b.textContent.trim()));
+      let imgUrl=document.getElementById('ge-img-url')?.value?.trim()||'';
+      const imgFile=document.getElementById('ge-img-file')?.files[0];
+      if(!imgUrl&&imgFile){try{const r=fb.ref(fb.storage,`events/${Date.now()}_${imgFile.name}`);await fb.uploadBytes(r,imgFile);imgUrl=await fb.getDownloadURL(r);}catch(e){}}
+      const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',city:document.getElementById('ge-city')?.value||CU.city||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,emoji:'🏃',status:'pending',groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',reg:0,createdAt:fb.serverTimestamp(),slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+      try{await fb.addDoc(fb.collection(fb.db,'events'),data);toast('Etkinlik onaya gönderildi ✓','ok');document.getElementById('g-add-event-form').style.display='none';['ge-title','ge-dist','ge-fee','ge-desc','ge-img-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});gLoadEvents();}catch(e){toast('Hata: '+e.message,'err');}
+    }
+  }
+};
+
 
 async function gLoadAnnouncements(){
   const el=document.getElementById('g-announcements-list');if(!el)return;

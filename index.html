@@ -77,7 +77,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 
 /* BANNER */
 #hero-banner{position:relative;overflow:hidden;height:460px}
-.banner-slide{position:absolute;inset:0;opacity:0;transition:opacity .7s;display:flex;align-items:center}
+.banner-slide{position:absolute;inset:0;opacity:0;transition:opacity .7s;display:flex;align-items:center;overflow:hidden}
 .banner-slide.on{opacity:1}
 .banner-bg-img{position:absolute;inset:0;background-size:cover;background-position:center}
 .banner-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55)}
@@ -87,6 +87,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .banner-content h1 span{color:var(--or)}
 .banner-content p{font-size:15px;color:rgba(255,255,255,.8);margin-bottom:22px;line-height:1.6}
 .banner-cta{display:flex;gap:10px;flex-wrap:wrap}
+.ev-detail-grid{display:grid;grid-template-columns:1fr 280px;gap:18px}
 .banner-dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10}
 .bdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:.2s}
 .bdot.on{background:var(--or);width:22px;border-radius:4px}
@@ -541,6 +542,162 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .ticker-item{display:inline-flex;align-items:center;gap:6px;padding:0 28px;font-size:13px;font-weight:600;font-family:var(--font-head);color:#fff;letter-spacing:.3px;border-right:1px solid rgba(255,255,255,.12);cursor:default}
 .ticker-item:last-child{border-right:none}
 .ticker-sep{color:var(--or);font-size:16px;padding:0 4px}
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   MOBİL RESPONSIVE — 480px ve altı
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+@media(max-width:480px){
+
+  /* ── CONTAINER ── */
+  .container{padding:0 14px}
+  .sec{padding:28px 0}
+  .sec-sm{padding:16px 0}
+
+  /* ── NAV ── */
+  #nav-guest{gap:4px}
+  #nav-guest .btn{font-size:11px;padding:6px 10px}
+  #nav-user{gap:4px}
+  #nav-user button{font-size:11px;padding:6px 10px}
+
+  /* ── HERO BANNER ── */
+  #hero-banner{height:280px}
+  .banner-content{padding:0 18px;max-width:100%}
+  .banner-content h1{font-size:20px;line-height:1.2}
+  .banner-content p{font-size:12px}
+  .banner-cta{gap:8px}
+  .banner-cta .btn{font-size:12px;padding:8px 14px}
+  .banner-nav{width:28px;height:28px;font-size:14px}
+  .fomo-countdown-wrap{gap:4px}
+  .fomo-cd-unit{padding:6px 8px;min-width:42px}
+  .fomo-cd-n{font-size:18px}
+
+  /* ── ETKİNLİK KARTI ── */
+  .ev-date-box{min-width:48px;max-width:48px;padding:8px 4px}
+  .ev-date-box .day{font-size:22px}
+  .ev-date-box .mon{font-size:9px}
+  .ev-info h3{font-size:13px}
+  .ev-meta{flex-wrap:wrap;gap:4px}
+  .ev-meta .meta{font-size:10px}
+  .pace-chips{flex-wrap:wrap;gap:4px}
+  .pace-chip{font-size:10px;padding:2px 7px}
+  .fomo-avatars{margin-top:4px}
+
+  /* ── ETKİNLİK DETAY ── */
+  #event-detail-content [style*="grid-template-columns:1fr 280px"]{
+    grid-template-columns:1fr !important
+  }
+
+  /* ── KART GRİD ── */
+  .g2{grid-template-columns:1fr}
+  .g3{grid-template-columns:1fr}
+
+  /* ── RACE CARD ── */
+  .race-card{min-width:0}
+  .race-img{height:160px}
+
+  /* ── BLOG KARTI ── */
+  .blog-img{height:140px}
+  .blog-card .card-body h3{font-size:13px}
+
+  /* ── MODAL ── */
+  .modal{padding:20px 16px;border-radius:16px;max-width:calc(100vw - 24px)}
+  .modal-lg{max-width:calc(100vw - 24px)}
+  .overlay{padding:10px}
+  .form-row{flex-direction:column;gap:0}
+
+  /* ── AUTH MODAL ── */
+  #auth-modal .modal{padding:18px 14px}
+  .auth-tabs{gap:4px}
+
+  /* ── ADMIN PANELİ ── */
+  .admin-sb{padding:4px;gap:4px}
+  .admin-sb button{font-size:11px;padding:7px 10px;white-space:nowrap}
+  #admin-main{padding:14px}
+
+  /* ── GRUP PANEL ── */
+  .admin-sb .sb-title{display:none}
+
+  /* ── FOOTER ── */
+  .footer-grid{grid-template-columns:1fr 1fr;gap:20px}
+  .footer-col:first-child{grid-column:1/-1}
+  .footer-legal{gap:8px;flex-wrap:wrap;justify-content:center}
+  .footer-bot{flex-direction:column;gap:4px;text-align:center}
+
+  /* ── TABLO MOBİL ── */
+  table{font-size:11px}
+  table th,table td{padding:6px 8px}
+  .action-btns{flex-direction:column;gap:4px}
+  .action-btns .btn{padding:4px 8px;font-size:11px}
+
+  /* ── FOMO ── */
+  .fomo-realtime-toast{font-size:11px;padding:8px 14px;max-width:calc(100vw - 40px)}
+
+  /* ── YARIŞ DETAY BUTONLAR ── */
+  #race-detail-content [style*="margin-left:auto"]{
+    margin-left:0 !important;flex-wrap:wrap
+  }
+
+  /* ── SSS ── */
+  .sss-q{font-size:13px;padding:14px 14px}
+  .sss-a{padding:0 14px 14px;font-size:12px}
+
+  /* ── KAYAN YAZI ── */
+  #ticker-wrap{height:36px}
+  .ticker-item{font-size:12px;padding:0 18px}
+
+  /* ── PROFIL SAYFASI ── */
+  .dash-grid{grid-template-columns:1fr}
+  .dash-stat-row{flex-direction:column;gap:8px}
+
+  /* ── FIRSATLAR ── */
+  .firsat-card{grid-column:1/-1}
+  #firsatlar-list{grid-template-columns:1fr}
+  /* Fırsat detay inline grid'ler */
+  [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
+
+  /* ── KULüP KART ── */
+  #clubs-list .card [style*="height:150px"]{height:120px}
+
+  /* ── SEC-HEAD ── */
+  .sec-head{flex-wrap:wrap;gap:8px}
+  .sec-head h2{font-size:16px}
+  .sec-head .btn{font-size:11px;padding:5px 10px}
+
+  /* ── PACE SEÇİCİ ── */
+  .pace-selector{gap:5px}
+  .pace-opt{font-size:11px;padding:5px 9px}
+
+  /* ── FORM GRP ── */
+  .form-grp label{font-size:12px}
+  .form-grp input,.form-grp textarea,.form-grp select{font-size:13px}
+
+}
+
+/* ── 768px — TABLET ── */
+@media(max-width:768px){
+
+  /* Etkinlik detay grid → tek sütun */
+  #event-detail-content [style*="grid-template-columns:1fr 280px"]{
+    grid-template-columns:1fr !important
+  }
+  .ev-detail-grid{grid-template-columns:1fr !important}
+
+  /* Banner içerik */
+  .banner-content{padding:0 28px}
+  .banner-content h1{font-size:24px}
+  #hero-banner{height:340px}
+
+  /* Fırsatlar grid */
+  #firsatlar-list{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
+
+  /* Footer */
+  .footer-grid{grid-template-columns:1fr 1fr;gap:24px}
+
+  /* Admin tablo scroll */
+  #admin-main{overflow-x:auto}
+  .admin-wrap{min-height:auto}
+
+}
 </style>
 </head>
 <body>
@@ -2762,11 +2919,11 @@ window.openEvent=id=>{
     <div style="background:linear-gradient(135deg,#1a0a00,#0a0a0a);border-radius:var(--r);padding:36px;margin-bottom:20px;position:relative;overflow:hidden">
       <div style="position:absolute;right:30px;top:50%;transform:translateY(-50%);font-size:70px;opacity:.1">${e.emoji||'🏃'}</div>
       <span class="tag tag-or">${e.cat}</span>
-      <h1 style="font-size:26px;margin:8px 0;color:#fff">${e.emoji||'🏃'} ${e.title}</h1>
+      <h1 style="font-size:clamp(18px,4vw,26px);margin:8px 0;color:#fff;line-height:1.2">${e.emoji||'🏃'} ${e.title}</h1>
       <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
       <div class="fomo-countdown-wrap" id="ev-cd"></div>
     </div>
-    <div style="display:grid;grid-template-columns:1fr 280px;gap:18px">
+    <div style="" class="ev-detail-grid">
       <div>
         <div class="card" style="padding:20px;margin-bottom:14px">
           <h3 style="margin-bottom:10px;font-size:15px">Hakkında</h3>
@@ -3380,7 +3537,7 @@ window.openRace=id=>{
           </div>
         </div>`:''}
         <!-- Butonlar -->
-        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+        <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:4px">
           ${r.mapUrl?`<button class="btn btn-ghost" onclick="window.open('${r.mapUrl}','_blank')">🗺 Haritada Gör</button>`:`<button class="btn btn-ghost" onclick="window.open('https://www.google.com/maps/search/${encodeURIComponent(r.location||'')}','_blank')">🗺 Haritada Gör</button>`}
           ${r.website?`<button class="btn btn-or" onclick="window.open('${r.website.startsWith('http')?r.website:'https://'+r.website}','_blank')">🔗 Web Sitesi</button>`:''}
           <div style="margin-left:auto;display:flex;gap:8px">

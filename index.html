@@ -263,7 +263,7 @@ tr:hover td{background:var(--or-soft)}
 /* ━━ RACE CARD ━━ */
 .race-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .race-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.race-img{height:180px;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
+.race-img{height:180px;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:48px;position:relative;overflow:hidden}
 .race-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s}
 .race-card:hover .race-img img{transform:scale(1.04)}
 .race-date-badge{position:absolute;top:10px;right:10px;background:var(--or);color:#fff;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-head);box-shadow:0 2px 8px rgba(232,98,42,.3)}
@@ -1830,7 +1830,7 @@ async function loadEventsFromDB(){
     const evts=[];
     snap.forEach(d=>{const {id:_,...rest}=d.data();const e={id:d.id,...rest};if(!e.status||e.status==='approved')evts.push(e);});
     evts.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
-    window.EVENTS=evts;
+    if(evts.length>0)window.EVENTS=evts;
   }catch(e){console.warn('Events load:',e.message);}
 }
 window.loadEventsFromDB=loadEventsFromDB;
@@ -1880,8 +1880,8 @@ async function loadBlogFromDB(){
     const snap=await getDocs(query(collection(db,'blog')));
     const posts=[];snap.forEach(d=>{const {id:_,...rest}=d.data();posts.push({id:d.id,...rest});});
     posts.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
-    // Mock data'yı override et — Firestore boşsa bile temiz başla
-    window.BLOG_POSTS=posts;
+    // Sadece Firestore'dan gerçek veri geldiyse override et
+    if(posts.length>0)window.BLOG_POSTS=posts;
   }catch(e){console.warn('Blog load:',e.message);}
 }
 window.loadBlogFromDB=loadBlogFromDB;
@@ -2233,21 +2233,22 @@ window.openClub=async(id)=>{
 
 // ── RACES ──
 function raceCard(r){
+  const liked=window.CU&&localStorage.getItem('rlk_'+r.id+'_'+(window.CU?.uid||''));
   return`<div class="race-card">
-    <div class="race-img">${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
+    <div class="race-img" style="position:relative">
+      ${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
       <div class="race-date-badge">${r.date||''}</div>
+      <!-- Detaylar butonu: görsel üstünde sağ alt köşe -->
+      <button onclick="openRace('${r.id}')" style="position:absolute;bottom:10px;right:10px;z-index:3;background:var(--or);color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-head);box-shadow:0 2px 8px rgba(0,0,0,.3);transition:.2s" onmouseover="this.style.background='#c94e1c'" onmouseout="this.style.background='var(--or)'">Detaylar →</button>
     </div>
     <div class="card-body">
-      <h3>${r.name}</h3>
-      <p>📍 ${r.location||'—'}</p>
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-top:10px">
-        <div style="display:flex;gap:8px">
-          <button class="social-btn" onclick="likeRace('${r.id}',this)" style="font-size:12px;padding:4px 10px">
-            🤍 ${r.likes||0}
-          </button>
-          <button class="social-btn" onclick="shareRace('${r.id}','${(r.name||'').replace(/'/g,'\x27')}')" style="font-size:12px;padding:4px 10px">🔗</button>
-        </div>
-        <button class="btn btn-or btn-sm" onclick="openRace('${r.id}')" style="font-size:12px;padding:5px 14px;border-radius:20px">Detaylar →</button>
+      <h3 style="margin-bottom:4px">${r.name}</h3>
+      <p style="font-size:12px;color:var(--muted)">📍 ${r.location||'—'}</p>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="social-btn${liked?' liked':''}" id="rlk-${r.id}" onclick="likeRace('${r.id}',this)" style="font-size:12px;padding:4px 10px;flex:1;justify-content:center">
+          ${liked?'❤️':'🤍'} Beğen <span id="rlkc-${r.id}">${r.likes||0}</span>
+        </button>
+        <button class="social-btn" onclick="shareRace('${r.id}','${(r.name||'').replace(/'/g,'\x27')}')" style="font-size:12px;padding:4px 10px;flex:1;justify-content:center">🔗 Paylaş</button>
       </div>
     </div>
   </div>`;
@@ -2476,20 +2477,24 @@ window.likeRace=async(raceId,btn)=>{
     const delta=liked?-1:1;
     await fb.setDoc(fb.doc(fb.db,'races',raceId),{likes:fb.increment(delta)},{merge:true});
     const race=window.RACES.find(r=>r.id===raceId);if(race)race.likes=(race.likes||0)+delta;
+    const newLikes=race?race.likes:0;
     if(liked){
       localStorage.removeItem(likeKey);
       btn.classList.remove('liked');
-      btn.innerHTML='🤍 '+(race?race.likes:0);
+      btn.innerHTML=`🤍 Beğen <span id="rlkc-${raceId}">${newLikes}</span>`;
     }else{
       localStorage.setItem(likeKey,'1');
       btn.classList.add('liked');
-      btn.innerHTML='❤️ '+(race?race.likes:0);
+      btn.innerHTML=`❤️ Beğen <span id="rlkc-${raceId}">${newLikes}</span>`;
     }
+    // Kart sayacını güncelle
+    const cntEl=document.getElementById('rlkc-'+raceId);
+    if(cntEl&&cntEl!==btn.querySelector('span'))cntEl.textContent=newLikes;
     // Detay sayfasındaki butonu da güncelle
     const detailBtn=document.getElementById('race-like-btn-'+raceId);
     if(detailBtn&&detailBtn!==btn){
-      if(liked){detailBtn.classList.remove('liked');detailBtn.innerHTML=`🤍 Beğen (${race?race.likes:0})`;}
-      else{detailBtn.classList.add('liked');detailBtn.innerHTML=`❤️ Beğenildi (${race?race.likes:0})`;}
+      if(liked){detailBtn.classList.remove('liked');detailBtn.innerHTML=`🤍 Beğen (${newLikes})`;}
+      else{detailBtn.classList.add('liked');detailBtn.innerHTML=`❤️ Beğenildi (${newLikes})`;}
     }
   }catch(e){toast(e.message,'err');}
 };

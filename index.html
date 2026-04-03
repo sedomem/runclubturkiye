@@ -543,37 +543,21 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="grid g2" id="home-events"></div>
   </div></div>
   <div class="divider"></div>
-  <div class="sec-sm sponsor-section"><div class="container">
-    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
-    <div class="sponsor-strip sponsor-strip-inline"></div>
-  </div></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Popüler Kulüpler</h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
     <div class="grid g3" id="home-clubs"></div>
   </div></div>
   <div class="divider"></div>
-  <div class="sec-sm sponsor-section"><div class="container">
-    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
-    <div class="sponsor-strip sponsor-strip-inline"></div>
-  </div></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
     <div class="grid g3" id="home-races"></div>
   </div></div>
   <div class="divider"></div>
-  <div class="sec-sm sponsor-section"><div class="container">
-    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
-    <div class="sponsor-strip sponsor-strip-inline"></div>
-  </div></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Son Haberler</h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
     <div class="grid g3" id="home-blog"></div>
   </div></div>
   <div class="divider"></div>
-  <div class="sec-sm sponsor-section"><div class="container">
-    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
-    <div class="sponsor-strip sponsor-strip-inline"></div>
-  </div></div>
   <!-- ✅ YENİ: Ana Sayfa Fırsatlar Bölümü -->
   <div class="sec" style="background:linear-gradient(135deg,rgba(255,107,0,.04),transparent)"><div class="container">
     <div class="sec-head">
@@ -581,6 +565,10 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <button class="btn btn-ghost btn-sm" onclick="nav('firsatlar')">Tümünü Gör →</button>
     </div>
     <div class="grid g3" id="home-firsatlar"></div>
+  </div></div>
+  <div class="sec-sm"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:20px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip" id="sponsors-strip"></div>
   </div></div>
   <div class="divider"></div>
     <div class="divider"></div>
@@ -612,7 +600,11 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <div id="events-list"></div>
 </div></div>
 
-<div class="pg" id="pg-event-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('events')" style="margin-bottom:18px">← Geri</button><div id="event-detail-content"></div></div></div>
+<div class="pg" id="pg-event-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('events')" style="margin-bottom:18px">← Geri</button><div id="event-detail-content"></div></div>  <div class="sec-sm" style="padding:24px 0 16px"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip sponsor-strip-inline"></div>
+  </div></div>
+</div>
 
 <!-- CLUBS -->
 <div class="pg" id="pg-clubs">
@@ -628,7 +620,11 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   </div>
   <div class="grid g3" id="clubs-list"></div>
 </div></div>
-<div class="pg" id="pg-club-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('clubs')" style="margin-bottom:18px">← Geri</button><div id="club-detail-content"></div></div></div>
+<div class="pg" id="pg-club-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('clubs')" style="margin-bottom:18px">← Geri</button><div id="club-detail-content"></div></div>  <div class="sec-sm" style="padding:24px 0 16px"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip sponsor-strip-inline"></div>
+  </div></div>
+</div>
 
 <!-- RACES -->
 <div class="pg" id="pg-races">
@@ -667,6 +663,10 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button class="btn btn-ghost btn-sm" onclick="nav('firsatlar')" style="margin-bottom:18px">← Tüm Fırsatlar</button>
     <div id="firsat-detail-content"></div>
   </div>
+  <div class="sec-sm" style="padding:24px 0 16px"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip sponsor-strip-inline"></div>
+  </div></div>
 </div>
 
 <!-- BLOG -->
@@ -675,7 +675,11 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div class="container sec">
   <h2 style="margin-bottom:18px">📰 Haberler & Blog</h2>
   <div class="grid g3" id="blog-list"></div>
-</div></div>
+</div>  <div class="sec-sm" style="padding:24px 0 16px"><div class="container">
+    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
+    <div class="sponsor-strip sponsor-strip-inline"></div>
+  </div></div>
+</div>
 <div class="pg" id="pg-blog-detail"><div class="container sec" style="max-width:820px"><button class="btn btn-ghost btn-sm" onclick="nav('blog')" style="margin-bottom:18px">← Geri</button><div id="blog-detail-content"></div></div></div>
 
 <!-- CONTACT -->
@@ -2027,10 +2031,12 @@ function startBannerAuto(count){
 
 // ── SPONSORS ──
 function renderSponsors(){
-  const allStrips=document.querySelectorAll('.sponsor-strip-inline');
-  if(!allStrips.length)return;
   const content=(window.SPONSORS_DATA||[]).map(s=>`<div class="sponsor-logo-item">${s.imgUrl?`<img src="${s.imgUrl}" alt="${s.name}"/>`:`<span>${s.name}</span>`}</div>`).join('');
-  allStrips.forEach(strip=>{strip.innerHTML=content;});
+  // Ana sayfa şeridi
+  const main=document.getElementById('sponsors-strip');
+  if(main)main.innerHTML=content;
+  // Sayfa şeritleri
+  document.querySelectorAll('.sponsor-strip-inline').forEach(el=>el.innerHTML=content);
 }
 function renderAdminSponsors(){
   const el=document.getElementById('admin-sponsor-list');if(!el)return;

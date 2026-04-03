@@ -31,7 +31,7 @@
   --transition:.25s cubic-bezier(.4,0,.2,1);
 }
 /* ━━ BODY ━━ */
-html{scroll-behavior:smooth}
+html{scroll-behavior:smooth;overflow-x:hidden;max-width:100%}
 body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;transition:background var(--transition),color var(--transition)}
 button{cursor:pointer;font-family:var(--font);transition:all var(--transition)}
 input,select,textarea{font-family:var(--font);background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:11px 15px;width:100%;font-size:14px;outline:none;transition:all var(--transition)}
@@ -45,7 +45,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 @keyframes fadeIn{from{opacity:0}to{opacity:1}}
 @keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
 @keyframes slideRight{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
-.pg{display:none}.pg.on{display:block;animation:fadeUp .35s var(--transition)}
+.pg{display:none;max-width:100%;overflow-x:hidden}.pg.on{display:block;animation:fadeUp .35s var(--transition)}
 
 /* ━━ BUTTONS ━━ */
 .btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;transition:all var(--transition);cursor:pointer;white-space:nowrap;font-family:var(--font-head);letter-spacing:.2px}
@@ -64,7 +64,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .sec{padding:60px 0}.sec-sm{padding:36px 0}
 
 /* ━━ NAV ━━ */
-#topnav{position:sticky;top:0;z-index:200;background:rgba(253,250,246,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--border);height:64px;display:flex;align-items:center;padding:0 20px;gap:14px;box-shadow:var(--shadow-sm)}
+#topnav{position:sticky;top:0;z-index:200;background:rgba(253,250,246,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--border);height:64px;display:flex;align-items:center;padding:0 20px;gap:8px;box-shadow:var(--shadow-sm);overflow:hidden;max-width:100%}
 .logo{cursor:pointer;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;line-height:1}
 .logo span{color:var(--or)}
 .logo b{color:var(--dark2);font-family:var(--font-head);font-weight:700}
@@ -76,7 +76,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .theme-btn{background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;padding:6px 11px;font-size:15px;color:var(--text);transition:all var(--transition)}.theme-btn:hover{border-color:var(--or);background:var(--or-soft)}
 
 /* BANNER */
-#hero-banner{position:relative;overflow:hidden;height:460px}
+#hero-banner{position:relative;overflow:hidden;height:460px;width:100%;max-width:100%}
 .banner-slide{position:absolute;inset:0;opacity:0;transition:opacity .7s;display:flex;align-items:center;overflow:hidden}
 .banner-slide.on{opacity:1}
 .banner-bg-img{position:absolute;inset:0;background-size:cover;background-position:center}
@@ -534,7 +534,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 @keyframes sssOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 
 /* ━━ KAYAN YAZI ŞERİDİ ━━ */
-#ticker-wrap{background:var(--dark2);overflow:hidden;padding:0;height:42px;display:flex;align-items:center;position:relative;border-top:2px solid rgba(232,98,42,.3);border-bottom:2px solid rgba(232,98,42,.3)}
+#ticker-wrap{background:var(--dark2);overflow:hidden;padding:0;height:42px;display:flex;align-items:center;position:relative;border-top:2px solid rgba(232,98,42,.3);border-bottom:2px solid rgba(232,98,42,.3);max-width:100%;width:100%}
 #ticker-wrap.hidden{display:none}
 .ticker-track{display:flex;align-items:center;gap:0;white-space:nowrap;animation:tickerScroll 30s linear infinite}
 .ticker-track:hover{animation-play-state:paused}
@@ -554,10 +554,12 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .sec-sm{padding:16px 0}
 
   /* ── NAV ── */
-  #nav-guest{gap:4px}
-  #nav-guest .btn{font-size:11px;padding:6px 10px}
-  #nav-user{gap:4px}
-  #nav-user button{font-size:11px;padding:6px 10px}
+  nav{gap:4px;padding:0 10px}
+  #nav-guest{gap:3px;flex-shrink:1;min-width:0}
+  #nav-guest .btn{font-size:10px;padding:5px 8px;white-space:nowrap}
+  #nav-user{gap:3px;flex-shrink:1}
+  #nav-user button{font-size:10px;padding:5px 8px}
+  nav a,nav .logo-wrap{flex-shrink:0}
 
   /* ── HERO BANNER ── */
   #hero-banner{height:280px}
@@ -582,10 +584,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .pace-chip{font-size:10px;padding:2px 7px}
   .fomo-avatars{margin-top:4px}
 
-  /* ── ETKİNLİK DETAY ── */
-  #event-detail-content [style*="grid-template-columns:1fr 280px"]{
-    grid-template-columns:1fr !important
-  }
+
 
   /* ── KART GRİD ── */
   .g2{grid-template-columns:1fr}
@@ -632,10 +631,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   /* ── FOMO ── */
   .fomo-realtime-toast{font-size:11px;padding:8px 14px;max-width:calc(100vw - 40px)}
 
-  /* ── YARIŞ DETAY BUTONLAR ── */
-  #race-detail-content [style*="margin-left:auto"]{
-    margin-left:0 !important;flex-wrap:wrap
-  }
+
 
   /* ── SSS ── */
   .sss-q{font-size:13px;padding:14px 14px}
@@ -652,8 +648,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   /* ── FIRSATLAR ── */
   .firsat-card{grid-column:1/-1}
   #firsatlar-list{grid-template-columns:1fr}
-  /* Fırsat detay inline grid'ler */
-  [style*="grid-template-columns:1fr 1fr"]{grid-template-columns:1fr !important}
+
 
   /* ── KULüP KART ── */
   #clubs-list .card [style*="height:150px"]{height:120px}
@@ -676,10 +671,6 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 /* ── 768px — TABLET ── */
 @media(max-width:768px){
 
-  /* Etkinlik detay grid → tek sütun */
-  #event-detail-content [style*="grid-template-columns:1fr 280px"]{
-    grid-template-columns:1fr !important
-  }
   .ev-detail-grid{grid-template-columns:1fr !important}
 
   /* Banner içerik */

@@ -497,6 +497,40 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .fomo-cd-unit{text-align:center;background:var(--bg2);border-radius:10px;padding:8px 12px;min-width:52px}
 .fomo-cd-n{font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--or);line-height:1}
 .fomo-cd-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
+
+/* ━━ SSS SAYFASI ━━ */
+.sss-section{margin-bottom:36px}
+.sss-cat-title{font-size:16px;font-weight:700;font-family:var(--font-head);color:var(--or);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
+.sss-item{border:1.5px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .2s}
+.sss-item:hover{border-color:var(--or-light)}
+.sss-q{width:100%;background:none;border:none;padding:16px 20px;text-align:left;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--font-body);line-height:1.4}
+.sss-q:hover{background:var(--bg2)}
+.sss-q.open{color:var(--or);background:var(--bg2)}
+.sss-arrow{font-size:16px;color:var(--muted);transition:transform .2s;flex-shrink:0}
+.sss-q.open .sss-arrow{transform:rotate(180deg);color:var(--or)}
+.sss-a{display:none;padding:0 20px 16px;font-size:13px;color:var(--muted2);line-height:1.75;border-top:1px solid var(--border)}
+.sss-a p{margin:0}
+.sss-a ul{color:var(--muted2)}
+.sss-a a{color:var(--or)}
+.sss-item.open .sss-a{display:block}
+
+/* ━━ SSS ━━ */
+.sss-section{margin-bottom:36px}
+.sss-cat{font-size:16px;font-weight:700;font-family:var(--font-head);color:var(--or);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
+.sss-item{border:1.5px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .2s}
+.sss-item:hover{border-color:var(--or-light)}
+.sss-q{width:100%;background:var(--card);border:none;padding:16px 20px;text-align:left;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--font-body);transition:background .2s}
+.sss-q:hover{background:var(--bg2)}
+.sss-q.open{background:var(--bg2);color:var(--or)}
+.sss-icon{font-size:20px;font-weight:300;color:var(--muted);transition:transform .25s;flex-shrink:0;line-height:1}
+.sss-q.open .sss-icon{transform:rotate(45deg);color:var(--or)}
+.sss-a{display:none;padding:0 20px 18px;background:var(--bg2);font-size:13px;color:var(--muted2);line-height:1.75}
+.sss-a.open{display:block;animation:sssOpen .2s ease}
+.sss-a p{margin-bottom:8px}
+.sss-a p:last-child{margin-bottom:0}
+.sss-a ul{margin:8px 0 8px 20px;display:flex;flex-direction:column;gap:4px}
+.sss-a li{list-style:none;padding:2px 0}
+@keyframes sssOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
 </style>
 </head>
 <body>
@@ -708,7 +742,505 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="sponsor-strip sponsor-strip-inline"></div>
   </div></div>
 </div>
+
+<!-- SSS -->
+<div class="pg" id="pg-sss">
+  <div id="pb-sss" class="page-banner pb-sss"></div>
+  <div class="container sec" style="max-width:860px">
+    <div style="text-align:center;margin-bottom:48px">
+      <h1 style="font-size:32px;font-family:var(--font-head);margin-bottom:10px">Sık Sorulan Sorular</h1>
+      <p style="color:var(--muted);font-size:15px;max-width:540px;margin:0 auto">RunClubTürkiye hakkında merak ettiğin her şeyin cevabı burada.</p>
+    </div>
+
+    <!-- Bölüm 1: Genel -->
+    <div class="sss-section">
+      <h2 class="sss-cat">🏃 Genel</h2>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          RunClubTürkiye nedir?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>RunClubTürkiye, Türkiye genelindeki koşu kulüplerini, etkinlikleri ve koşuculara özel fırsatları tek bir çatı altında toplayan dijital bir topluluk platformudur.</p>
+          <p>Amacımız; yalnız koşan koşucuları doğru kulüplerle, etkinliklerle ve diğer koşucularla buluşturmak, Türkiye'de koşu kültürünü güçlendirmektir. İster başlangıç seviyesinde bir koşucu ol, ister maratonu tamamlamış deneyimli bir atlet — RunClubTürkiye sana uygun bir yer bulur.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Platforma üyelik ücretli mi?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Hayır. RunClubTürkiye'ye üye olmak tamamen <strong>ücretsizdir</strong>. Platformdaki etkinlikleri keşfetmek, kulüpleri incelemek, blog yazılarını okumak ve yarış takvimine bakmak için herhangi bir ücret ödemezsin.</p>
+          <p>Bazı etkinliklerin katılım ücreti organizatör tarafından belirlenmiş olabilir; bu bilgi her etkinlik kartında açıkça gösterilir.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Hangi şehirlerde aktif?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Şu an İstanbul, Ankara, İzmir, Antalya, Bursa, Eskişehir, Adana başta olmak üzere Türkiye'nin dört bir yanından kulüpler ve etkinlikler platforma ekleniyor. Hedefimiz 81 ilde aktif olmak.</p>
+          <p>Bulunduğun şehirde henüz kulüp yoksa "Kulüp Kur" başvurusu yapabilir, bölgendeki koşucuları bir araya getirebilirsin.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Mobil uygulama var mı?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Henüz ayrı bir mobil uygulamamız yok ancak web sitemiz tam olarak mobil uyumludur. Telefonunun tarayıcısından <strong>runclubturkiye.com</strong> adresine girdiğinde uygulama deneyimiyle karşılaşırsın.</p>
+          <p>Android ve iOS uygulamaları yakında yayınlanacak. Haberdar olmak için bültenimize abone olabilirsin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bölüm 2: Kulüpler -->
+    <div class="sss-section">
+      <h2 class="sss-cat">🤝 Kulüpler</h2>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Bir kulübe nasıl katılabilirim?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Üst menüden <strong>Kulüpler</strong> sayfasına git, şehrine göre filtrele ve beğendiğin kulübü seç. Kulüp detay sayfasında <em>"Kulübe Katıl"</em> butonuna tıkla.</p>
+          <p><strong>Açık kulüplerde</strong> katılım anında onaylanır. <strong>Kodlu/kapalı kulüplerde</strong> kulüp admini başvurunu inceleyerek onaylar. Onaylandığında bildirim alırsın.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Kendi kulübümü nasıl oluştururum?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Ana sayfanın sol alt köşesindeki <em>"Kulübünüz Burada Yok mu?"</em> butonuna tıkla. Açılan formda kulübün adını, şehrini, açıklamasını ve iletişim bilgilerini doldurup gönder.</p>
+          <p>Başvurun platform yöneticisi tarafından incelenir (genellikle 24-48 saat). Onaylandıktan sonra Grup Admin panelinize erişim sağlanır ve kulübünüz platforma eklenir.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Grup Admin olarak neler yapabilirim?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Grup Admin panelinde şunları yapabilirsin:</p>
+          <ul>
+            <li>📅 <strong>Etkinlik Yönetimi:</strong> Kulübün adına etkinlik ekle, düzenle (Süper Admin onayından sonra yayınlanır)</li>
+            <li>👥 <strong>Üye Yönetimi:</strong> Üyelik başvurularını onayla veya reddet, mevcut üyeleri görüntüle</li>
+            <li>📢 <strong>Duyurular:</strong> Kulüp üyelerine duyuru yayınla</li>
+            <li>💬 <strong>Sohbet:</strong> Üyelerle kulüp içi mesajlaşma kanalı</li>
+            <li>⚙️ <strong>Kulüp Ayarları:</strong> Logo, açıklama, Instagram, Strava linki güncelle</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Birden fazla kulübe üye olabilir miyim?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Evet! Birden fazla kulübe üye olabilirsin. Her kulübün etkinliklerini takip edebilir, duyurularını alabilirsin. Üye olduğun kulüpler profil sayfanda listelenir.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bölüm 3: Etkinlikler -->
+    <div class="sss-section">
+      <h2 class="sss-cat">📅 Etkinlikler</h2>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Bir etkinliğe nasıl kaydolabilirim?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p><strong>Etkinlikler</strong> sayfasına git veya ana sayfadaki "Öne Çıkan Etkinlikler" bölümünden seç. Etkinlik kartına tıkla, detay sayfasında <em>"Etkinliğe Kaydol"</em> butonunu kullan.</p>
+          <p>Kayıt işlemi için giriş yapmış olman gerekir. Kapasite dolmadan kayıt yaptırmak için erken davranmanı öneririz — "Son X yer kaldı" uyarısı çıktığında kontenjan dolmak üzere demektir.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Etkinliğe katılamayacak olursam ne yapmalıyım?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Etkinlik detay sayfasına tekrar gir ve <em>"Etkinlikten Ayrıl"</em> butonuna bas. Kaydın iptal edilir ve kontenjan diğer katılımcılar için açılır. Organizatörün ek bir iptal politikası olabilir; ücretli etkinliklerde iade koşulları için organizatörle iletişime geç.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          QR Check-in ne işe yarıyor?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>QR Check-in, etkinlik günü fiziksel katılımını doğrulamak için kullanılan bir sistemdir. Etkinlik detay sayfasındaki <em>"QR Check-in"</em> butonuyla kişisel QR kodunu oluştur ve etkinlik görevlisine göster.</p>
+          <p>Bu özellik organizatör tarafından etkinleştirilmiş etkinliklerde görünür.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Kendi etkinliğimi platforma ekleyebilir miyim?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Evet, iki yol var:</p>
+          <ul>
+            <li><strong>Grup Admin iseniz:</strong> Panel üzerinden doğrudan etkinlik ekleyebilirsiniz. Etkinlik Süper Admin onayından sonra yayınlanır.</li>
+            <li><strong>Bireysel kullanıcıysanız:</strong> İletişim formu üzerinden talebinizi iletebilirsiniz.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bölüm 4: Yarış Takvimi -->
+    <div class="sss-section">
+      <h2 class="sss-cat">🏆 Yarış Takvimi</h2>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Yarış takvimi ile etkinlikler arasındaki fark nedir?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p><strong>Etkinlikler</strong> bölümü; kulüp koşuları, antrenmanlar ve grup buluşmaları gibi topluluk odaklı aktiviteleri içerir. Kayıt ve katılım platform üzerinden yönetilir.</p>
+          <p><strong>Yarış Takvimi</strong> ise resmi koşu yarışlarını (maraton, trail, ultra vb.) listeler. Kayıt genellikle organizatörün kendi sitesinden yapılır; yarış kartındaki "Web Sitesi" linkine tıklayarak resmi sayfaya ulaşabilirsin.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Bir yarışı platforma nasıl ekletirim?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Organize ettiğin veya duyurmak istediğin bir yarış varsa İletişim sayfamız üzerinden bize bildir. Yarış adı, tarihi, mesafesi, konumu ve kayıt linki ile birlikte göndermen yeterli. Platform editörleri inceleyip yayınlar.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bölüm 5: Hesap & Profil -->
+    <div class="sss-section">
+      <h2 class="sss-cat">👤 Hesap & Profil</h2>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Profil bilgilerimi nasıl güncellerim?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Giriş yaptıktan sonra üst sağdaki profil ikonuna ya da navigasyon menüsüne tıkla. <strong>Profilim</strong> sayfasında ad, telefon, şehir, fotoğraf ve diğer bilgilerini güncelleyebilirsin. Değişiklikler kaydedilince anında güncellenir.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Şifremi unuttum, ne yapmalıyım?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Giriş ekranında <em>"Şifremi Unuttum"</em> seçeneğine tıkla, kayıtlı e-posta adresini gir. Firebase üzerinden şifre sıfırlama e-postası gelecektir. Spam klasörünü de kontrol etmeyi unutma.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          KM takibim nasıl çalışıyor?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Etkinliklere kayıt olup katılımını tamamladıkça profil sayfanda <strong>Toplam KM</strong> ve <strong>Etkinlik Sayısı</strong> istatistiklerin güncellenir. Bu veriler aynı zamanda kulüp liderboard'larında da görünür.</p>
+          <p>Strava entegrasyonu yakında geliyor — koşularını otomatik senkronize edebileceksin.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Rozetler nasıl kazanılıyor?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Platform üzerinde belirli başarıları tamamladığında otomatik rozet kazanırsın. Örneğin:</p>
+          <ul>
+            <li>🥇 <strong>İlk Adım:</strong> İlk etkinliğe kayıt</li>
+            <li>🤝 <strong>Takım Oyuncusu:</strong> İlk kulübe katılım</li>
+            <li>🏃 <strong>Seri Koşucu:</strong> Art arda etkinliklere katılım</li>
+            <li>📰 <strong>Blog Okuyucu:</strong> İçerik etkileşimi</li>
+          </ul>
+          <p>Kazandığın rozetler profil sayfanda sergilenir.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Bölüm 6: Teknik -->
+    <div class="sss-section">
+      <h2 class="sss-cat">⚙️ Teknik & Diğer</h2>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Verilerim güvende mi?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Evet. Tüm veriler Google Firebase altyapısında şifreli olarak saklanır. Kişisel bilgilerin üçüncü şahıslarla paylaşılmaz. KVKK uyumlu gizlilik politikamız için <a onclick="nav('gizlilik')" style="color:var(--or);cursor:pointer">Gizlilik Politikası</a> sayfamızı inceleyebilirsin.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Platforma nasıl sponsor olabilirim?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Koşucu kitlesine ulaşmak isteyen markalar için sponsorluk ve reklam çözümleri sunuyoruz. Ana sayfada ve etkinlik sayfalarında marka görünürlüğü, özel fırsat duyuruları ve çok daha fazlası için iletişim formumuzdan ulaşın.</p>
+        </div>
+      </div>
+
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSSS(this)">
+          Bir sorun yaşıyorum, nasıl bildiririm?
+          <span class="sss-icon">+</span>
+        </button>
+        <div class="sss-a">
+          <p>Platform üzerindeki <strong>İletişim</strong> formu veya <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">info@runclubturkiye.com</a> adresi üzerinden bize ulaşabilirsin. Geri bildirimlerini değerlendiriyor, platformu sürekli iyileştiriyoruz.</p>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-top:56px;padding:36px;background:linear-gradient(135deg,var(--or),#c94e1c);border-radius:var(--r)">
+      <h2 style="color:#fff;font-size:22px;margin-bottom:8px;font-family:var(--font-head)">Hâlâ sorun mu var?</h2>
+      <p style="color:rgba(255,255,255,.8);margin-bottom:20px;font-size:14px">İletişim formumuzu doldur, en kısa sürede geri dönelim.</p>
+      <button class="btn" style="background:#fff;color:var(--or);font-weight:700;padding:12px 28px" onclick="nav('contact')">İletişime Geç →</button>
+    </div>
+
+  </div>
+</div>
 <div class="pg" id="pg-blog-detail"><div class="container sec" style="max-width:820px"><button class="btn btn-ghost btn-sm" onclick="nav('blog')" style="margin-bottom:18px">← Geri</button><div id="blog-detail-content"></div></div></div>
+
+<!-- SSS -->
+<div class="pg" id="pg-sss">
+  <div class="container sec" style="max-width:820px">
+    <button class="btn btn-ghost btn-sm" onclick="nav('home')" style="margin-bottom:24px">← Ana Sayfa</button>
+    <div style="text-align:center;margin-bottom:40px">
+      <span class="tag tag-or" style="margin-bottom:12px;display:inline-block">Yardım Merkezi</span>
+      <h1 style="font-size:30px;font-family:var(--font-head);margin-bottom:10px">Sıkça Sorulan Sorular</h1>
+      <p style="color:var(--muted);font-size:14px;max-width:520px;margin:0 auto">RunClubTürkiye hakkında merak ettiğin her şey burada. Bulamadığın bir cevap varsa <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">bize yaz</a>.</p>
+    </div>
+
+    <!-- Platform nedir -->
+    <div class="sss-section">
+      <h2 class="sss-cat-title">🏃 Platform Hakkında</h2>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">RunClubTürkiye nedir?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>RunClubTürkiye, Türkiye genelindeki koşucuları bir araya getiren dijital bir koşu topluluğu platformudur. Koşu kulüplerini ve koşucuları keşfedebilir, etkinliklere katılabilir, yarış takvimini takip edebilir ve koşu dünyasının güncel haberlerini okuyabilirsin.</p>
+          <p style="margin-top:8px">Platform tamamen ücretsizdir. Üye olman yeterli — koşu ayakkabını giy, topluluğa katıl.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Platforma kimler katılabilir?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Her seviyeden koşucu platforma katılabilir. Yeni başlayanlar için de, deneyimli maratoncular için de içerik ve etkinlik mevcuttur. Hız, mesafe veya yaş fark etmez — önemli olan koşmayı sevmek.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Üyelik ücretli mi?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Hayır. RunClubTürkiye'ye üyelik tamamen ücretsizdir. Etkinlik listelerini görmek, kulüpleri keşfetmek ve blog içeriklerini okumak için üyelik de gerekmez. Etkinliğe kaydolmak, kulübe katılmak veya yorum yapmak için ücretsiz hesap oluşturman yeterli.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Türkiye'nin hangi şehirlerinde aktif?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Platform 81 ile hitap etmektedir. İstanbul, Ankara, İzmir, Antalya, Bursa başta olmak üzere tüm büyük şehirlerde kulüpler ve etkinlikler listelenmektedir. Şehrinde aktif bir kulüp veya etkinlik yoksa, kendi kulübünü kurabilir ve platforma ekleyebilirsin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Etkinlikler -->
+    <div class="sss-section">
+      <h2 class="sss-cat-title">📅 Etkinlikler</h2>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Etkinliklere nasıl kaydolurum?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Etkinlikler sayfasına git → ilgili etkinliği bul → "Etkinliğe Kaydol" butonuna tıkla. Hesabın varsa anında kaydolursun. Hesabın yoksa kısa bir kayıt formuyla oluşturabilirsin.</p>
+          <p style="margin-top:8px">Kapasite dolu etkinliklere kayıt yapılamaz. Doluluk durumunu etkinlik kartındaki doluluk barından anlık olarak takip edebilirsin.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Etkinlik ücretleri platformdan mı ödeniyor?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Hayır. RunClubTürkiye bir kayıt ve keşif platformudur, ödeme aracı değildir. Ücretli etkinliklerde ödeme organizatörün belirlediği kanal (banka havalesi, kapıda ödeme, online sistem vb.) üzerinden gerçekleşir. Etkinlik detayında organizatörün iletişim bilgileri yer alır.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Bir etkinliğe katıldıktan sonra vazgeçebilir miyim?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Evet. Etkinlik detay sayfasında "Etkinlikten Ayrıl" butonuna tıklayarak kaydını iptal edebilirsin. Bu işlem platformdaki kaydını siler; etkinlik ücret iadesi varsa doğrudan organizatörle iletişime geçmen gerekir.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Kendi etkinliğimi nasıl eklerim?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Etkinlik eklemek için iki yol var:</p>
+          <p style="margin-top:6px"><b>Kulüp admini iseniz:</b> Grup Paneli → Etkinlikler → Yeni Etkinlik Ekle adımlarını izle. Eklediğin etkinlik Süper Admin onayından sonra platformda yayınlanır.</p>
+          <p style="margin-top:6px"><b>Kulüp admini değilseniz:</b> Önce kulüp kurucu başvurusu yapabilirsin. Başvuru onaylandığında etkinlik ekleme yetkisi otomatik tanımlanır.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Etkinliklerde QR check-in nedir?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>QR check-in özelliği olan etkinliklerde katılımcılar etkinlik günü QR kodlarını organizatöre okutarak dijital check-in yapabilir. Bu özellik organizatörler için katılım takibini kolaylaştırır, kağıt liste tutma ihtiyacını ortadan kaldırır.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Kulüpler -->
+    <div class="sss-section">
+      <h2 class="sss-cat-title">🤝 Kulüpler</h2>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Kulübe nasıl katılırım?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Kulüpler sayfasına git → ilgilendiğin kulübü bul → "Kulübe Katıl" butonuna tıkla. Açık kulüplere anında üye olursun. Kapalı (davetli) kulüplerde başvurun kulüp adminine iletilir ve admin onayından sonra üyeliğin aktif olur.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Birden fazla kulübe üye olabilir miyim?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Evet, istediğin kadar kulübe üye olabilirsin. Her kulübün etkinliklerini ve duyurularını ayrı ayrı takip edebilirsin.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Kendi koşu kulübümü nasıl kurarım?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Ana sayfanın sol alt köşesindeki "Kulübünüz Burada Yok mu?" butonuna tıkla veya giriş ekranından "Grup Admin" seçeneğini seç. Kulüp bilgilerini ve kendi iletişim bilgilerini doldur, başvurunu gönder.</p>
+          <p style="margin-top:8px">Başvuru Süper Admin tarafından incelenir, onaylandığında Grup Admin paneliniz aktif olur. Buradan kulüp bilgilerini düzenleyebilir, etkinlik ekleyebilir, üye başvurularını yönetebilir ve duyuru yapabilirsin.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Kulüp admini olarak ne yapabilirim?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Grup Admin panelinden şunları yapabilirsin:</p>
+          <ul style="margin-top:8px;padding-left:18px;line-height:2">
+            <li>Kulüp profili ve görselini düzenle</li>
+            <li>Etkinlik oluştur ve yönet (Süper Admin onayıyla yayınlanır)</li>
+            <li>Üye başvurularını onayla veya reddet</li>
+            <li>Üyelere duyuru yap</li>
+            <li>Kulüp sohbet kanalını kullan</li>
+            <li>Üye listesini ve istatistiklerini gör</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <!-- Yarış Takvimi -->
+    <div class="sss-section">
+      <h2 class="sss-cat-title">🏆 Yarış Takvimi</h2>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Yarış takvimi ile etkinlikler arasındaki fark nedir?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p><b>Etkinlikler:</b> Kulüplerin düzenlediği antrenman koşuları, buluşmalar, parkur gezileri gibi periyodik aktivitelerdir. Platformda doğrudan kayıt yapılabilir.</p>
+          <p style="margin-top:8px"><b>Yarış Takvimi:</b> Federasyonlar, markalar veya bağımsız organizatörler tarafından düzenlenen resmi yarışlardır (maraton, trail, triathlon vb.). Kayıt genellikle organizatörün kendi sitesinde gerçekleşir; platformda yarışın bilgileri ve web sitesi linki paylaşılır.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Bir yarışı takvime nasıl ekletirim?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Organize ettiğin veya haberdar olduğun bir yarışın takvime eklenmesini istiyorsan <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">info@runclubturkiye.com</a> adresine yarış bilgilerini gönder. Editöryal ekibimiz inceler ve uygun gördüğü durumlarda ekler.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hesap & Üyelik -->
+    <div class="sss-section">
+      <h2 class="sss-cat-title">👤 Hesap & Üyelik</h2>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Şifremi unuttum, ne yapmalıyım?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Giriş ekranında "Şifremi Unuttum" seçeneğine tıkla. Kayıtlı e-posta adresine şifre sıfırlama bağlantısı gönderilir. Bağlantı 24 saat geçerlidir.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Profil bilgilerimi nasıl güncellerim?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Sağ üstteki profil simgesine tıkla → "Profilim" sayfasına git → bilgilerini düzenle → kaydet. Ad, soyad, telefon, şehir, profil fotoğrafı ve koşu bilgilerini güncelleyebilirsin.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">KM takibim nasıl çalışıyor?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Platforma manuel olarak koşu verisi girebilirsin. Profilinde toplam km, etkinlik katılım sayısı ve kazandığın rozetler görünür. İleride Strava entegrasyonu ile otomatik senkronizasyon da planlanmaktadır.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Rozetler nasıl kazanılır?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Platformda çeşitli başarı rozetleri mevcuttur. İlk etkinliğe katılmak, belirli km eşiklerini aşmak, kulübe üye olmak gibi aksiyonlar rozet kazandırır. Kazandığın rozetler profilinde sergilenir.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Hesabımı nasıl silebilirim?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Hesap silme işlemi için <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">info@runclubturkiye.com</a> adresine kayıtlı e-posta adresinizden talep gönderebilirsiniz. KVKK kapsamındaki kişisel verilerinizin silinmesini de aynı adres üzerinden talep edebilirsiniz.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Teknik -->
+    <div class="sss-section">
+      <h2 class="sss-cat-title">⚙️ Teknik & Uygulama</h2>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Mobil uygulama var mı?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Şu an için web uygulaması olarak hizmet vermekteyiz. Mobil cihazlarda tarayıcıdan tam ekran ve kullanışlı bir deneyim sunulmaktadır. Android ve iOS uygulamaları yakın dönemde yayına girecektir.</p>
+          <p style="margin-top:8px">Bildirim almak için siteyi telefonuna "Ana Ekrana Ekle" (Add to Home Screen) seçeneğiyle kısayol olarak ekleyebilirsin.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Bildirimler nasıl çalışıyor?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Üye olduğun kulüplerden gelen duyurular ve kayıtlı olduğun etkinliklere ait hatırlatmalar e-posta veya uygulama bildirimi olarak iletilir. Bildirim tercihlerini profil ayarlarından yönetebilirsin.</p>
+        </div>
+      </div>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Verilerim güvende mi?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Evet. Tüm veriler Google Firebase altyapısında, Avrupa (Frankfurt) bölgesindeki sunucularda saklanmaktadır. Veri güvenliği için endüstri standardı şifreleme kullanılmaktadır. Detaylar için <a onclick="nav('gizlilik')" style="color:var(--or);cursor:pointer">Gizlilik Politikamızı</a> inceleyebilirsin.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- İletişim -->
+    <div class="sss-section" style="margin-bottom:0">
+      <h2 class="sss-cat-title">📬 İletişim</h2>
+      <div class="sss-item">
+        <button class="sss-q" onclick="toggleSss(this)">Sorunum burada yok, nasıl iletişime geçebilirim?<span class="sss-arrow">▾</span></button>
+        <div class="sss-a">
+          <p>Her türlü soru, öneri ve geri bildirim için:</p>
+          <p style="margin-top:8px">📧 <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">info@runclubturkiye.com</a></p>
+          <p style="margin-top:4px">📸 Instagram: <a href="https://instagram.com/runclubturkiye" target="_blank" style="color:var(--or)">@runclubturkiye</a></p>
+          <p style="margin-top:8px;color:var(--muted);font-size:12px">Mesajlara genellikle 1–2 iş günü içinde dönüş yapılmaktadır.</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
 
 <!-- CONTACT -->
 <div class="pg" id="pg-contact"><div class="container sec" style="max-width:700px">
@@ -1055,11 +1587,12 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#fff">Club</text>
   <text x="100" y="92" font-family="Raleway,sans-serif" font-size="14" fill="#8A7060" letter-spacing="5">TÜRKİYE</text>
 </svg><p style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;margin-top:8px">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:rgba(255,255,255,.35);margin-top:6px">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4133342f222d34233534332a28382401262c20282d6f222e2c">[email&#160;protected]</a></p></div>
-      <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a></div>
+      <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a><a onclick="nav('sss')" style="color:var(--or)">SSS</a></div>
+      <div class="footer-col"><h4>Yardım</h4><a onclick="nav('sss')">SSS</a><a onclick="nav('contact')">İletişim</a></div>
       <div class="footer-col"><h4>Yasal</h4><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
       <div class="footer-col"><h4>Sosyal</h4><a>Instagram</a><a>Strava</a><a>YouTube</a></div>
     </div>
-    <div class="footer-legal"><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
+    <div class="footer-legal"><a onclick="nav('sss')">SSS</a><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
     <div class="footer-bot"><span style="font-family:'Raleway',sans-serif;letter-spacing:.5px">© 2025 RunClub<b style="color:#E8622A">Türkiye</b></span><span>runclubturkiye.com</span></div>
   </div></footer>
 </div>
@@ -2018,11 +2551,13 @@ window.nav=id=>{
   if(id==='panel')loadGroupPanel();
   if(id==='profile')syncProfileUI&&syncProfileUI();
   if(['kvkk','gizlilik','kosullar','riza','cerez'].includes(id))renderLegalPage(id);
+  if(id==='sss'){const pg=document.getElementById('pg-sss');if(pg&&!pg.classList.contains('on')){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));pg.classList.add('on');}}
   if(id==='events'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('events');}catch(e){}; if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
   if(id==='clubs'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('clubs');}catch(e){}; renderClubsPage();}
   if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
   if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
+  if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
   if(id==='home'){
     if(window.EVENTS.length||window.CLUBS.length||window.RACES.length||window.BLOG_POSTS.length){
       renderHomeData();
@@ -2267,6 +2802,17 @@ window.openEvent=id=>{
   // Katılımcıları yükle + real-time dinle
   setTimeout(()=>fomoLoadParticipants(e.id),100);
   fomoStartRealtime(e.id);
+};
+
+window.toggleSss=function(btn){
+  const item=btn.closest('.sss-item');
+  const isOpen=item.classList.contains('open');
+  // Aynı section'daki diğerlerini kapat
+  item.closest('.sss-section')?.querySelectorAll('.sss-item.open').forEach(i=>{
+    if(i!==item){i.classList.remove('open');i.querySelector('.sss-q')?.classList.remove('open');}
+  });
+  item.classList.toggle('open',!isOpen);
+  btn.classList.toggle('open',!isOpen);
 };
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
@@ -4445,6 +4991,23 @@ function initQuillRaceEditor(){
   });
 }
 window.initQuillRaceEditor=initQuillRaceEditor;
+
+// ── SSS ──
+window.toggleSSS=function(btn){
+  const item=btn.closest('.sss-item');
+  const answer=item.querySelector('.sss-a');
+  const isOpen=btn.classList.contains('open');
+  // Tüm açıkları kapat
+  document.querySelectorAll('.sss-q.open').forEach(q=>{
+    q.classList.remove('open');
+    q.closest('.sss-item').querySelector('.sss-a').classList.remove('open');
+  });
+  // Eğer kapalıysa aç
+  if(!isOpen){
+    btn.classList.add('open');
+    answer.classList.add('open');
+  }
+};
 
 // ── LEGAL ──
 const LEGAL={

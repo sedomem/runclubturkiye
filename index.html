@@ -1514,10 +1514,20 @@ window.saveBlogFromAdmin=async()=>{
   const title=document.getElementById('ab-title').value.trim();
   if(!title){toast('Başlık gerekli','err');return;}
   const data={id:'b'+Date.now(),title,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:CU?.name||'RunClub Editör',status:'published',likes:0,publishedAt:new Date().toISOString().split('T')[0],slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
-  window.BLOG_POSTS.unshift(data);renderBlogList();renderBlogPreview();
-  toast('Yazı yayınlandı ✓','ok');
-  try{const r=await addDoc(collection(db,'blog'),{...data,createdAt:serverTimestamp()});window.BLOG_POSTS[0].id=r.id;}catch(e){}
-  renderAdminSection('blog');
+  toast('Kaydediliyor...','ok');
+  try{
+    // Önce Firestore'a kaydet — gerçek ID'yi al
+    const r=await addDoc(collection(db,'blog'),{...data,createdAt:serverTimestamp()});
+    data.id=r.id;  // Gerçek Firestore ID
+    window.BLOG_POSTS.unshift(data);
+    toast('Yazı yayınlandı ✓','ok');
+    renderBlogList();renderBlogPreview();renderAdminSection('blog');
+  }catch(e){
+    // Firestore'a yazılamazsa geçici ID ile göster
+    window.BLOG_POSTS.unshift(data);
+    toast('Yazı kaydedildi (çevrimdışı)','ok');
+    renderBlogList();renderBlogPreview();renderAdminSection('blog');
+  }
 };
 
 // ── BANNERS ──

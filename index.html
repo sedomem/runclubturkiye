@@ -387,7 +387,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .admin-sb button{white-space:nowrap;font-size:11px;padding:7px 11px}
   .admin-sb .sb-title{display:none}
   .nav-center{display:none !important}
-  #hamburger{display:flex !important}
+  #hamburger{display:flex !important;flex-direction:column;gap:5px;cursor:pointer;padding:8px 6px;border-radius:8px;background:none;border:none;margin-left:4px}
   .form-row{grid-template-columns:1fr}
   .banner-content{padding:0 22px}
   .banner-content h1{font-size:22px}
@@ -733,8 +733,6 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .how-steps{gap:8px}
   .how-step{width:calc(50% - 20px);min-width:140px}
   .how-arrow{display:none}
-  .nav-center{display:none !important}
-  #hamburger{display:flex}
 }
 </style>
 </head>
@@ -5836,10 +5834,15 @@ window.addEventListener('scroll',()=>{
 try {
   document.getElementById('pg-home').classList.add('on');
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
-  // Veri yükle — önce hızlı UI, sonra Firebase'den data çek
-  if(typeof window.loadAllFromDB==='function'){
-    window.loadAllFromDB().catch(e=>console.warn('loadAllFromDB:',e));
-  }
+  // Loading'i güvenlik ağı ile kapat
+  const _ld=document.getElementById('loading');
+  if(_ld){_ld.style.display='none';}
+  // Veri yükle — module script yüklendikten sonra çağır
+  setTimeout(function(){
+    if(typeof window.loadAllFromDB==='function'){
+      window.loadAllFromDB().catch(function(e){console.warn('loadAllFromDB:',e);});
+    }
+  }, 100);
   if(typeof loadBannersFromSlots==='function')loadBannersFromSlots();
   if(typeof window.loadTickerFromDB==='function'){
     window.loadTickerFromDB().catch(()=>{});

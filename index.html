@@ -5837,12 +5837,14 @@ try {
   // Loading'i güvenlik ağı ile kapat
   const _ld=document.getElementById('loading');
   if(_ld){_ld.style.display='none';}
-  // Veri yükle — module script yüklendikten sonra çağır
-  setTimeout(function(){
+  // Veri yükle — module script hazır olana kadar bekle (polling)
+  (function waitAndLoad(){
     if(typeof window.loadAllFromDB==='function'){
       window.loadAllFromDB().catch(function(e){console.warn('loadAllFromDB:',e);});
+    } else {
+      setTimeout(waitAndLoad, 150);
     }
-  }, 100);
+  })();
   if(typeof loadBannersFromSlots==='function')loadBannersFromSlots();
   if(typeof window.loadTickerFromDB==='function'){
     window.loadTickerFromDB().catch(()=>{});

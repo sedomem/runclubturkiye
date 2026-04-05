@@ -2191,6 +2191,152 @@ window.saveRaceFromAdmin=async()=>{
 // Worker URL'si tanımlı değilse metin tabanlı yardım moduna geçer.
 const CF_WORKER_URL = ''; // Cloudflare Worker URL'si varsa buraya yaz (örn: https://rct-ai.sedomem.workers.dev)
 
+// ── AI YARIŞ ASSİSTANI ──
+window.aiRaceAssist=async()=>{
+  const raceUrl=(document.getElementById('ar-race-url')?.value||'').trim();
+  const raceText=(document.getElementById('ar-race-text')?.value||'').trim();
+
+  if(!raceUrl&&!raceText){
+    toast('URL veya yarış metni girin','err');
+    return;
+  }
+
+  const statusEl=document.getElementById('ai-race-status');
+  const btnEl=document.getElementById('ai-race-doldur-btn');
+  if(statusEl)statusEl.style.display='flex';
+  if(btnEl){btnEl.disabled=true;btnEl.textContent='⏳ Analiz ediliyor...';}
+
+  const prompt=`Sen bir Türk koşu platformu (RunClubTürkiye) için yarış bilgilerini çıkaran bir asistandasın.
+
+${raceUrl?`Yarış URL: ${raceUrl}`:''}
+${raceText?`Yarış sayfasının içeriği:
+${raceText.substring(0,4000)}`:''}
+
+Yukarıdaki bilgilerden yarış verilerini çıkar. Tarih formatı YYYY-MM-DD olmalı.
+Mesafe bilgisini "42 km", "21.1 km", "10 km" formatında ver.
+Konum şehir ve/veya mekan adı olsun.
+Web sitesi tam URL olsun (https:// ile başlasın).
+Görsel URL: sayfada geçen en büyük yarış görseli URL'si varsa ver, yoksa boş bırak.
+
+SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma, açıklama ekleme:
+{
+  "yaris_adi": "Yarışın tam adı",
+  "tarih": "YYYY-MM-DD",
+  "konum": "Şehir / Mekan",
+  "mesafe": "42 km",
+  "hakkinda": "Yarış hakkında 3-5 cümle açıklama. Türkçe olsun.",
+  "web_sitesi": "https://...",
+  "telefon": "",
+  "email": "",
+  "iletisim": "Kayıt ve bilgi için iletişim bilgisi",
+  "gorsel_url": ""
+}`;
+
+  try{
+    let raw='';
+    const workerUrl=typeof CF_WORKER_URL!=='undefined'?CF_WORKER_URL:'';
+
+    if(workerUrl){
+      // Cloudflare Worker proxy
+      const resp=await fetch(workerUrl,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prompt,model:'claude-haiku-4-5-20251001',max_tokens:1000})
+      });
+      if(!resp.ok)throw new Error(`Worker HTTP ${resp.status}`);
+      const data=await resp.json();
+      raw=data.content?.[0]?.text||data.response||data.text||'';
+    } else {
+      // Direkt Anthropic API (Claude.ai artifact ortamında çalışır)
+      const resp=await fetch('https://api.anthropic.com/v1/messages',{
+        method:'POST',
+        headers:{
+          'Content-Type':'application/json',
+          'anthropic-version':'2023-06-01',
+          'anthropic-dangerous-direct-browser-access':'true'
+        },
+        body:JSON.stringify({
+          model:'claude-haiku-4-5-20251001',
+          max_tokens:1000,
+          messages:[{role:'user',content:prompt}]
+        })
+      });
+      if(!resp.ok){
+        const err=await resp.json().catch(()=>({}));
+        throw new Error(err.error?.message||`HTTP ${resp.status}`);
+      }
+      const data=await resp.json();
+      raw=data.content?.[0]?.text||'';
+    }
+
+    // JSON parse — kod bloğu varsa temizle
+    const clean=raw.replace(/^```json?\s*/,'').replace(/\s*```$/,'').trim();
+    let parsed;
+    try{parsed=JSON.parse(clean);}
+    catch{
+      const m=raw.match(/\{[\s\S]*\}/);
+      if(m)parsed=JSON.parse(m[0]);
+      else throw new Error('AI yanıtı JSON formatında değil: '+raw.substring(0,100));
+    }
+
+    // Form alanlarını doldur
+    const set=(id,val)=>{const el=document.getElementById(id);if(el&&val)el.value=val;};
+    set('ar-name', parsed.yaris_adi);
+    set('ar-date', parsed.tarih);
+    set('ar-loc',  parsed.konum);
+    set('ar-web',  parsed.web_sitesi);
+    set('ar-phone',parsed.telefon);
+    set('ar-email',parsed.email);
+    set('ar-contact',parsed.iletisim);
+
+    // Mesafe ve hakkında — ar-contact alanı
+    if(parsed.mesafe&&document.getElementById('ar-loc')){
+      // Konuma mesafe ekle
+      const locEl=document.getElementById('ar-loc');
+      if(locEl&&parsed.mesafe&&!locEl.value.includes(parsed.mesafe)){
+        // Mesafe için ayrı alan yok, contact'a ekle
+      }
+    }
+
+    // Hakkında — Quill editor veya textarea
+    if(parsed.hakkinda){
+      if(window._quillRaceEditor){
+        window._quillRaceEditor.root.innerHTML='<p>'+parsed.hakkinda+'</p>';
+      } else {
+        const el=document.getElementById('ar-about');
+        if(el)el.value=parsed.hakkinda;
+      }
+    }
+
+    // Görsel URL'si varsa — önizle
+    if(parsed.gorsel_url){
+      const urlEl=document.getElementById('ar-img-url');
+      if(urlEl){
+        urlEl.value=parsed.gorsel_url;
+        // Önizleme
+        const prev=document.getElementById('ar-img-input-preview');
+        if(prev){prev.src=parsed.gorsel_url;prev.style.display='block';}
+      }
+    }
+
+    // Temizle
+    document.getElementById('ar-race-url').value='';
+    document.getElementById('ar-race-text').value='';
+
+    toast('✅ Yarış bilgileri AI tarafından dolduruldu! Kontrol et ve kaydet.','ok');
+
+    // Forma scroll
+    document.getElementById('ar-name')?.scrollIntoView({behavior:'smooth',block:'center'});
+
+  }catch(e){
+    console.error('AI Race error:',e);
+    toast('AI hatası: '+e.message,'err');
+  }finally{
+    if(statusEl)statusEl.style.display='none';
+    if(btnEl){btnEl.disabled=false;btnEl.textContent='🤖 AI ile Doldur';}
+  }
+};
+
 window.aiBlogAssist=async()=>{
   const newsUrl=document.getElementById('ab-news-url')?.value?.trim()||'';
   const newsText=document.getElementById('ab-news-text')?.value?.trim()||'';
@@ -4168,6 +4314,22 @@ function renderAdminSection(sec){
     races:`<h2 style="margin-bottom:18px">🏆 Yarış Takvimi</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Yarış Ekle</h3>
+
+        <!-- ✅ AI YARIŞ ASSİSTANI -->
+        <div class="ai-assistant-box" style="margin-bottom:18px">
+          <h3>🤖 AI Yarış Asistanı</h3>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Yarış linkini <b>ve/veya</b> yarış sayfasının metnini yapıştır → AI formu otomatik doldursun.</p>
+          <div style="display:flex;gap:8px;margin-bottom:8px">
+            <input type="text" id="ar-race-url" placeholder="https://apphurra.com/etkinlik/... (opsiyonel — site izin veriyorsa)" style="flex:1;font-size:12px"/>
+          </div>
+          <div class="form-grp">
+            <label>Yarış Sayfası Metni (sayfadan kopyalayıp yapıştır — gerekli)</label>
+            <textarea id="ar-race-text" rows="4" placeholder="Yarış sayfasındaki tüm metni buraya yapıştır. Tarih, konum, mesafe, kayıt bilgileri, iletişim vb. içeren metni kopyala..."></textarea>
+          </div>
+          <button class="btn btn-or" id="ai-race-doldur-btn" onclick="aiRaceAssist()" style="white-space:nowrap">🤖 AI ile Doldur</button>
+          <div class="ai-loading" id="ai-race-status" style="display:none"><div class="spinner"></div><span>AI yarış bilgilerini çözümlüyor...</span></div>
+        </div>
+
         ${imgUploadHtml('ar-img-input','Yarış Görseli','800×500px')}
         <div class="form-row"><div class="form-grp"><label>Yarış Adı</label><input id="ar-name"/></div><div class="form-grp"><label>Tarih</label><input id="ar-date" type="date"/></div></div>
         <div class="form-grp"><label>Konum</label><input id="ar-loc"/></div>

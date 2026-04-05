@@ -102,6 +102,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .grid{display:grid;gap:20px}
 .g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
 .card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
 .card-img{height:160px;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
@@ -773,17 +774,17 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <div class="divider"></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Popüler Kulüpler</h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
-    <div class="grid g3" id="home-clubs"></div>
+    <div class="grid g4" id="home-clubs"></div>
   </div></div>
   <div class="divider"></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
-    <div class="grid g3" id="home-races"></div>
+    <div class="grid g4" id="home-races"></div>
   </div></div>
   <div class="divider"></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Son Haberler</h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
-    <div class="grid g3" id="home-blog"></div>
+    <div class="grid g4" id="home-blog"></div>
   </div></div>
   <div class="divider"></div>
   <!-- ✅ YENİ: Ana Sayfa Fırsatlar Bölümü -->
@@ -800,13 +801,75 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   </div></div>
   <div class="divider"></div>
     <div class="divider"></div>
-  <div class="sec" style="background:var(--bg2)"><div class="container">
-    <h2 style="text-align:center;margin-bottom:36px;font-size:20px">Nasıl Çalışır?</h2>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:20px">
-      <div style="text-align:center;padding:20px 14px"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px">📝</div><h3 style="font-size:14px;margin-bottom:6px">Üye Ol</h3><p style="font-size:12px;color:var(--muted)">Hızlı kayıt, profil oluştur.</p></div>
-      <div style="text-align:center;padding:20px 14px"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px">🔍</div><h3 style="font-size:14px;margin-bottom:6px">Keşfet</h3><p style="font-size:12px;color:var(--muted)">Kulüp, etkinlik, yarış bul.</p></div>
-      <div style="text-align:center;padding:20px 14px"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px">🤝</div><h3 style="font-size:14px;margin-bottom:6px">Katıl</h3><p style="font-size:12px;color:var(--muted)">Gruba gir, etkinliğe kayıt ol.</p></div>
-      <div style="text-align:center;padding:20px 14px"><div style="width:56px;height:56px;border-radius:50%;background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);display:flex;align-items:center;justify-content:center;font-size:24px;margin:0 auto 14px">🏅</div><h3 style="font-size:14px;margin-bottom:6px">Kazan</h3><p style="font-size:12px;color:var(--muted)">Rozet kazan, liderboardda yüksel.</p></div>
+  <div class="sec" style="background:var(--bg2);padding:28px 0"><div class="container">
+    <h2 style="text-align:center;margin-bottom:8px;font-size:20px;font-family:var(--font-head)">Nasıl Çalışır?</h2>
+    <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px">Dakikalar içinde koşu topluluğuna katıl</p>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0;position:relative">
+      <!-- Bağlantı çizgisi (masaüstü) -->
+      <div style="position:absolute;top:28px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--or),rgba(232,98,42,.1));z-index:0;display:none" class="how-line"></div>
+
+      <!-- Adım 1 -->
+      <div style="text-align:center;padding:14px 12px;position:relative;z-index:1">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(232,98,42,.15),rgba(232,98,42,.05));border:2px solid var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;position:relative">
+          📝
+          <span style="position:absolute;top:-6px;right:-6px;background:var(--or);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)">1</span>
+        </div>
+        <h3 style="font-size:13px;font-weight:700;margin-bottom:5px;font-family:var(--font-head)">Üye Ol</h3>
+        <p style="font-size:11px;color:var(--muted);line-height:1.5">E-posta ile saniyeler içinde kaydol. Profilini oluştur, şehrini ve koşu seviyeni belirt.</p>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--or);padding-top:14px">→</div>
+
+      <!-- Adım 2 -->
+      <div style="text-align:center;padding:14px 12px;position:relative;z-index:1">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(232,98,42,.15),rgba(232,98,42,.05));border:2px solid var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;position:relative">
+          🔍
+          <span style="position:absolute;top:-6px;right:-6px;background:var(--or);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)">2</span>
+        </div>
+        <h3 style="font-size:13px;font-weight:700;margin-bottom:5px;font-family:var(--font-head)">Keşfet</h3>
+        <p style="font-size:11px;color:var(--muted);line-height:1.5">Şehrindeki kulüpleri, yaklaşan etkinlikleri ve yarış takvimini tek yerden incele.</p>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--or);padding-top:14px">→</div>
+
+      <!-- Adım 3 -->
+      <div style="text-align:center;padding:14px 12px;position:relative;z-index:1">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(232,98,42,.15),rgba(232,98,42,.05));border:2px solid var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;position:relative">
+          🤝
+          <span style="position:absolute;top:-6px;right:-6px;background:var(--or);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)">3</span>
+        </div>
+        <h3 style="font-size:13px;font-weight:700;margin-bottom:5px;font-family:var(--font-head)">Katıl</h3>
+        <p style="font-size:11px;color:var(--muted);line-height:1.5">Kulübüne üye ol, etkinliğe anında kaydol. İlk 5 katılımcıdan biri ol, yer bulmadan yetiş!</p>
+      </div>
+      <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--or);padding-top:14px">→</div>
+
+      <!-- Adım 4 -->
+      <div style="text-align:center;padding:14px 12px;position:relative;z-index:1">
+        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(232,98,42,.15),rgba(232,98,42,.05));border:2px solid var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;position:relative">
+          🏅
+          <span style="position:absolute;top:-6px;right:-6px;background:var(--or);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)">4</span>
+        </div>
+        <h3 style="font-size:13px;font-weight:700;margin-bottom:5px;font-family:var(--font-head)">Kazan</h3>
+        <p style="font-size:11px;color:var(--muted);line-height:1.5">Etkinliklere katıldıkça rozet kazan, liderboardda yüksel. Topluluğun parçası ol.</p>
+      </div>
+    </div>
+
+    <!-- Alt istatistikler -->
+    <div style="display:flex;justify-content:center;gap:32px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap">
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--or);font-family:var(--font-head)">81</div>
+        <div style="font-size:11px;color:var(--muted)">İl</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--or);font-family:var(--font-head)">100%</div>
+        <div style="font-size:11px;color:var(--muted)">Ücretsiz</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--or);font-family:var(--font-head)">∞</div>
+        <div style="font-size:11px;color:var(--muted)">Etkinlik</div>
+      </div>
+      <div style="text-align:center">
+        <div style="font-size:20px;font-weight:800;color:var(--or);font-family:var(--font-head)">🏃</div>
+        <div style="font-size:11px;color:var(--muted)">Koşucular</div>
+      </div>
     </div>
   </div></div>
   
@@ -2969,7 +3032,7 @@ function renderHomeData(){
   const hc=document.getElementById('home-clubs');
   if(hc){
     if(window.CLUBS&&window.CLUBS.length){
-      hc.innerHTML=window.CLUBS.slice(0,3).map(clubCard).join('');
+      hc.innerHTML=window.CLUBS.slice(0,4).map(clubCard).join('');
     } else {
       hc.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0">Henüz kulüp eklenmemiş.</p>';
     }
@@ -3756,7 +3819,7 @@ function renderRaceList(){
   const html=window.RACES.map(raceCard).join('');
   const rl=document.getElementById('races-list');if(rl)rl.innerHTML=html||'<p style="color:var(--muted)">Yarış bulunamadı.</p>';
 }
-function renderRacePreview(){const hr=document.getElementById('home-races');if(hr)hr.innerHTML=window.RACES.slice(0,3).map(raceCard).join('');}
+function renderRacePreview(){const hr=document.getElementById('home-races');if(hr)hr.innerHTML=window.RACES.slice(0,4).map(raceCard).join('');}
 window.filterRaces=q=>{const el=document.getElementById('races-list');if(el)el.innerHTML=RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())).map(raceCard).join('');};
 window.openRace=id=>{
   const r=RACES.find(x=>x.id===id);if(!r)return;
@@ -3803,7 +3866,7 @@ window.openRace=id=>{
 
 // ── BLOG ──
 function renderBlogList(){const el=document.getElementById('blog-list');if(el)el.innerHTML=BLOG_POSTS.map(blogCard).join('')||'<p style="color:var(--muted)">Yazı yok.</p>';}
-function renderBlogPreview(){const el=document.getElementById('home-blog');if(el)el.innerHTML=BLOG_POSTS.slice(0,3).map(blogCard).join('');}
+function renderBlogPreview(){const el=document.getElementById('home-blog');if(el)el.innerHTML=BLOG_POSTS.slice(0,4).map(blogCard).join('');}
 function blogCard(p){return`<div class="blog-card" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'📰'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">✍️ ${p.authorName||'Editör'}</div><div style="font-size:11px;color:var(--muted)">❤️ ${p.likes||0}</div></div></div></div>`;}
 window.openBlog=id=>{
   const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;

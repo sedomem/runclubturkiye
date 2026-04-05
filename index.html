@@ -2888,6 +2888,9 @@ window.loadAllFromDB=loadAllFromDB;
 
 loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
 window.loadBannersFromDB=loadBannersFromDB;
+
+// Sayfa yüklenince verileri çek
+loadAllFromDB();
 </script>
 
 <script>
@@ -2897,7 +2900,11 @@ window.EVENTS=[];
 window.CLUBS=[];
 window.RACES=[];
 window.BLOG_POSTS=[];
-window.FIRSATLAR=[];
+window.FIRSATLAR=[
+  {id:'f1',baslik:'Koşucuya Özel %20 İndirim',marka:'Garmin',kategori:'Teknoloji',aciklama:'Garmin Forerunner serisinde koşuculara özel indirim.',indirim:'%20',kod:'RCT20GARMIN',link:'https://garmin.com',bitis:'2025-06-30',imgUrl:'',aktif:true,slug:'garmin-indirim'},
+  {id:'f2',baslik:'Ücretsiz Enerji Jeli Paketi',marka:'GU Energy',kategori:'Beslenme',aciklama:'30 TL ve üzeri alışverişlerde ücretsiz enerji jeli paketi.',indirim:'Ücretsiz',kod:'RCGUFREE',link:'https://guenturkey.com',bitis:'2025-05-31',imgUrl:'',aktif:true,slug:'gu-energy-ucretsiz'},
+  {id:'f3',baslik:'Trail Ayakkabıda %15 İndirim',marka:'Salomon',kategori:'Ekipman',aciklama:'Salomon trail ayakkabı serisinde koşucu indirimi.',indirim:'%15',kod:'RCTSALOMON',link:'https://salomon.com',bitis:'2025-07-15',imgUrl:'',aktif:true,slug:'salomon-trail-indirim'},
+];
 window.SPONSORS_DATA=[];
 window.BANNER_SLOTS=[null,null,null];
 window.PAGE_BANNERS={events:null,clubs:null,races:null,blog:null};
@@ -5827,10 +5834,8 @@ window.addEventListener('scroll',()=>{
 try {
   document.getElementById('pg-home').classList.add('on');
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
-  // Veri yükle — önce hızlı UI, sonra Firebase'den data çek
-  if(typeof window.loadAllFromDB==='function'){
-    window.loadAllFromDB().catch(e=>console.warn('loadAllFromDB:',e));
-  }
+  // Veriler module script tarafından otomatik yükleniyor
+  // INIT sadece UI'ı hazırlar
   if(typeof loadBannersFromSlots==='function')loadBannersFromSlots();
   if(typeof window.loadTickerFromDB==='function'){
     window.loadTickerFromDB().catch(()=>{});

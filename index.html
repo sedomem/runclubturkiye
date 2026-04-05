@@ -5853,5 +5853,150 @@ try {
 // URL routing — sayfa yüklenince mevcut URL'yi kontrol et
 setTimeout(()=>{try{if(typeof routerInit==='function')routerInit();}catch(e){}},300);
 </script>
+<script>
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🔥 GLOBAL ERROR HANDLER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+window.addEventListener("error", (e) => {
+  console.error("GLOBAL ERROR:", e.message);
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🔥 NAV PATCH (boş sayfa fix)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const originalNav = window.nav;
+
+window.nav = function(id){
+  console.log("PAGE:", id);
+
+  try{
+    originalNav(id);
+  }catch(e){
+    console.error("NAV ERROR:", e);
+  }
+
+  // ── ADMIN FIX ──
+  if(id === 'admin'){
+    console.log("ADMIN PAGE OPEN");
+
+    const el = document.getElementById('admin-main');
+
+    if(!window.CU){
+      console.log("USER YOK");
+      if(el) el.innerHTML = "<div style='padding:20px'>Giriş yapmanız gerekiyor</div>";
+      return;
+    }
+
+    if(window.CU.role !== 'superadmin'){
+      console.log("YETKİ YOK");
+      if(el) el.innerHTML = "<div style='padding:20px'>Yetkisiz erişim</div>";
+      return;
+    }
+
+    console.log("ADMIN RENDER BAŞLADI");
+
+    setTimeout(()=>{
+      try{
+        if(typeof renderAdminSection === 'function'){
+          renderAdminSection('dashboard');
+        } else {
+          el.innerHTML = "<div style='padding:20px'>Admin yüklenemedi</div>";
+        }
+      }catch(err){
+        console.error(err);
+        el.innerHTML = "<div style='padding:20px'>Admin hata verdi</div>";
+      }
+    },100);
+  }
+
+  // ── EVENTS FIX ──
+  if(id === 'events'){
+    const el = document.getElementById('events-list');
+    if(el) el.innerHTML = "Yükleniyor...";
+
+    if(window.loadEventsFromDB){
+      window.loadEventsFromDB()
+        .then(()=>{
+          if(!window.EVENTS || !window.EVENTS.length){
+            el.innerHTML = "<div>Etkinlik bulunamadı</div>";
+          }else{
+            renderEvts(window.EVENTS,'events-list');
+          }
+        })
+        .catch(()=>{
+          el.innerHTML = "<div>Hata oluştu</div>";
+        });
+    }
+  }
+
+  // ── RACES FIX ──
+  if(id === 'races'){
+    const el = document.getElementById('races-list');
+    if(el) el.innerHTML = "Yükleniyor...";
+
+    if(window.loadRacesFromDB){
+      window.loadRacesFromDB()
+        .then(()=>{
+          if(!window.RACES || !window.RACES.length){
+            el.innerHTML = "<div>Yarış bulunamadı</div>";
+          }else{
+            renderRaceList();
+          }
+        })
+        .catch(()=>{
+          el.innerHTML = "<div>Hata oluştu</div>";
+        });
+    }
+  }
+
+  // ── BLOG FIX ──
+  if(id === 'blog'){
+    const el = document.getElementById('blog-list');
+    if(el) el.innerHTML = "Yükleniyor...";
+
+    if(window.loadBlogFromDB){
+      window.loadBlogFromDB()
+        .then(()=>{
+          if(!window.BLOG_POSTS || !window.BLOG_POSTS.length){
+            el.innerHTML = "<div>Blog içeriği yok</div>";
+          }else{
+            renderBlogList();
+          }
+        })
+        .catch(()=>{
+          el.innerHTML = "<div>Hata oluştu</div>";
+        });
+    }
+  }
+
+  // ── CLUBS FIX ──
+  if(id === 'clubs'){
+    const el = document.getElementById('clubs-list');
+    if(el) el.innerHTML = "Yükleniyor...";
+
+    setTimeout(()=>{
+      try{
+        renderClubsPage();
+      }catch(e){
+        el.innerHTML = "<div>Kulüpler yüklenemedi</div>";
+      }
+    },100);
+  }
+};
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// 🔥 INIT FIX (data loading)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+(async function(){
+  try{
+    if(typeof loadAllFromDB === 'function'){
+      await loadAllFromDB();
+      console.log("DATA LOADED");
+    }
+  }catch(e){
+    console.error("DATA LOAD ERROR:", e);
+  }
+})();
+</script>
 </body>
 </html>

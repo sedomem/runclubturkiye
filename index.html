@@ -3205,7 +3205,18 @@ function evtCard(e){
     </div>
   </div>`;
 }
-function renderEvts(list,cid){const el=document.getElementById(cid);if(el)el.innerHTML=list.map(evtCard).join('')||'<p style="color:var(--muted)">Etkinlik bulunamadı.</p>';}
+function renderEvts(list,cid){
+  const el=document.getElementById(cid);
+  if(!el){console.warn('[RCT] renderEvts: element bulunamadı:',cid);return;}
+  if(!list||!list.length){el.innerHTML='<p style="color:var(--muted);padding:20px">Etkinlik bulunamadı.</p>';return;}
+  try{
+    const html=list.map(e=>{try{return evtCard(e);}catch(err){console.error('[RCT] evtCard hata:',err,e);return '';}}).join('');
+    el.innerHTML=html||'<p style="color:var(--muted);padding:20px">Etkinlik yüklenemedi.</p>';
+  }catch(err){
+    console.error('[RCT] renderEvts hata:',err);
+    el.innerHTML='<p style="color:red;padding:20px">Hata: '+err.message+'</p>';
+  }
+}
 window.filterEvts=q=>renderEvts(EVENTS.filter(e=>e.title.toLowerCase().includes(q.toLowerCase())||e.city.toLowerCase().includes(q.toLowerCase())),'events-list');
 window.filterEvtCat=(cat,btn)=>{document.querySelectorAll('#pg-events .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderEvts(cat==='tüm'?EVENTS:EVENTS.filter(e=>e.cat===cat),'events-list');};
 window.openEvent=id=>{
@@ -3934,8 +3945,12 @@ function raceCard(r){
 }
 window.raceCard=raceCard;
 function renderRaceList(){
-  const html=window.RACES.map(raceCard).join('');
-  const rl=document.getElementById('races-list');if(rl)rl.innerHTML=html||'<p style="color:var(--muted)">Yarış bulunamadı.</p>';
+  const rl=document.getElementById('races-list');
+  if(!rl){console.warn('[RCT] races-list bulunamadı');return;}
+  if(!window.RACES||!window.RACES.length){rl.innerHTML='<p style="color:var(--muted);padding:20px">Yarış bulunamadı.</p>';return;}
+  try{
+    rl.innerHTML=window.RACES.map(r=>{try{return raceCard(r);}catch(e){console.error('[RCT] raceCard hata:',e);return '';}}).join('')||'<p style="color:var(--muted);padding:20px">Yarış yüklenemedi.</p>';
+  }catch(e){console.error('[RCT] renderRaceList hata:',e);rl.innerHTML='<p style="color:red">Hata: '+e.message+'</p>';}
 }
 function renderRacePreview(){const hr=document.getElementById('home-races');if(hr)hr.innerHTML=window.RACES.slice(0,4).map(raceCard).join('');}
 window.filterRaces=q=>{const el=document.getElementById('races-list');if(el)el.innerHTML=RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())).map(raceCard).join('');};
@@ -3983,7 +3998,14 @@ window.openRace=id=>{
 };
 
 // ── BLOG ──
-function renderBlogList(){const el=document.getElementById('blog-list');if(el)el.innerHTML=BLOG_POSTS.map(blogCard).join('')||'<p style="color:var(--muted)">Yazı yok.</p>';}
+function renderBlogList(){
+  const el=document.getElementById('blog-list');
+  if(!el){console.warn('[RCT] blog-list bulunamadı');return;}
+  if(!window.BLOG_POSTS||!window.BLOG_POSTS.length){el.innerHTML='<p style="color:var(--muted);padding:20px">Yazı bulunamadı.</p>';return;}
+  try{
+    el.innerHTML=window.BLOG_POSTS.map(p=>{try{return blogCard(p);}catch(e){console.error('[RCT] blogCard hata:',e);return '';}}).join('')||'<p style="color:var(--muted)">Yazı yüklenemedi.</p>';
+  }catch(e){console.error('[RCT] renderBlogList hata:',e);}
+}
 function renderBlogPreview(){const el=document.getElementById('home-blog');if(el)el.innerHTML=BLOG_POSTS.slice(0,4).map(blogCard).join('');}
 function blogCard(p){return`<div class="blog-card" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'📰'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">✍️ ${p.authorName||'Editör'}</div><div style="font-size:11px;color:var(--muted)">❤️ ${p.likes||0}</div></div></div></div>`;}
 window.openBlog=id=>{

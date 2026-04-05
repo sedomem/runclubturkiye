@@ -2894,15 +2894,19 @@ async function loadAllFromDB(){
   console.log('[RCT] loadAllFromDB başladı...');
   const _ticker=typeof window.loadTickerFromDB==='function'?window.loadTickerFromDB():Promise.resolve();
   await Promise.allSettled([loadEventsFromDB(),loadClubsFromDB(),loadRacesFromDB(),loadBlogFromDB(),_ticker]);
-  // Non-module fonksiyonları window üzerinden çağır
+  // Ana sayfayı render et
   if(typeof window.renderHomeData==='function')window.renderHomeData();
-  if(typeof window.renderEvts==='function')window.renderEvts(window.EVENTS,'events-list');
-  const cl=document.getElementById('clubs-list');
-  if(cl&&typeof window.clubCard==='function')cl.innerHTML=window.CLUBS.map(window.clubCard).join('');
-  if(typeof window.renderRaceList==='function')window.renderRaceList();
-  if(typeof window.renderBlogList==='function')window.renderBlogList();
   if(typeof window.renderFirsatlar==='function')window.renderFirsatlar();
   if(typeof window.renderSponsors==='function')window.renderSponsors();
+  // Aktif sayfayı güncelle (kullanıcı events/clubs sayfasındaysa)
+  const _activePg=document.querySelector('.pg.on');
+  if(_activePg){
+    const _pid=_activePg.id;
+    if(_pid==='pg-events'){const el=document.getElementById('events-list');if(el&&window.EVENTS)el.innerHTML=window.EVENTS.map(window.evtCard||function(e){return '';}).join('')||'<p style="color:var(--muted)">Etkinlik yok.</p>';}
+    if(_pid==='pg-clubs'){const el=document.getElementById('clubs-list');if(el&&window.CLUBS&&window.clubCard)el.innerHTML=window.CLUBS.map(window.clubCard).join('');}
+    if(_pid==='pg-races'){if(typeof window.renderRaceList==='function')window.renderRaceList();}
+    if(_pid==='pg-blog'){if(typeof window.renderBlogList==='function')window.renderBlogList();}
+  }
   // Loading spinner'ı kapat
   console.log('[RCT] Yükleme tamamlandı — EVENTS:',window.EVENTS?.length,'CLUBS:',window.CLUBS?.length,'RACES:',window.RACES?.length,'BLOG:',window.BLOG_POSTS?.length);
   const ld=document.getElementById('loading');if(ld)ld.style.display='none';
@@ -2968,34 +2972,62 @@ window.nav=id=>{
   if(id==='sss'){const pg=document.getElementById('pg-sss');if(pg&&!pg.classList.contains('on')){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));pg.classList.add('on');}}
   if(id==='events'){
     try{if(typeof renderPageBanner==='function')renderPageBanner('events');}catch(e){}
-    // Mevcut data varsa anında göster, sonra refresh
-    if(window.EVENTS&&window.EVENTS.length){
-      renderEvts(window.EVENTS,'events-list');
-    }
-    // Her durumda Firebase'den taze çek
-    if(window.loadEventsFromDB){
-      window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list')).catch(e=>console.warn('events:',e));
+    const evEl=document.getElementById('events-list');
+    if(evEl){
+      if(window.EVENTS&&window.EVENTS.length){
+        renderEvts(window.EVENTS,'events-list');
+      } else {
+        evEl.innerHTML='<div class="spinner" style="margin:40px auto"></div>';
+        if(window.loadEventsFromDB){
+          window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list')).catch(e=>console.warn('events:',e));
+        }
+      }
     }
   }
   if(id==='clubs'){
     try{if(typeof renderPageBanner==='function')renderPageBanner('clubs');}catch(e){}
-    if(window.CLUBS&&window.CLUBS.length) renderClubsPage();
-    if(window.loadClubsFromDB){
-      window.loadClubsFromDB().then(()=>renderClubsPage()).catch(e=>console.warn('clubs:',e));
+    const clEl=document.getElementById('clubs-list');
+    if(clEl){
+      if(window.CLUBS&&window.CLUBS.length){
+        // Veri hazır — anında göster, Firebase'e gitme
+        clEl.innerHTML=window.CLUBS.map(clubCard).join('');
+      } else {
+        // Veri yok — Firebase'den çek
+        clEl.innerHTML='<div class="spinner" style="margin:40px auto"></div>';
+        if(window.loadClubsFromDB){
+          window.loadClubsFromDB().then(()=>{
+            clEl.innerHTML=window.CLUBS.map(clubCard).join('');
+          }).catch(e=>console.warn('clubs:',e));
+        }
+      }
     }
   }
   if(id==='races'){
     try{if(typeof renderPageBanner==='function')renderPageBanner('races');}catch(e){}
-    if(window.RACES&&window.RACES.length) renderRaceList();
-    if(window.loadRacesFromDB){
-      window.loadRacesFromDB().then(()=>renderRaceList()).catch(e=>console.warn('races:',e));
+    const rcEl=document.getElementById('races-list');
+    if(rcEl){
+      if(window.RACES&&window.RACES.length){
+        renderRaceList();
+      } else {
+        rcEl.innerHTML='<div class="spinner" style="margin:40px auto"></div>';
+        if(window.loadRacesFromDB){
+          window.loadRacesFromDB().then(()=>renderRaceList()).catch(e=>console.warn('races:',e));
+        }
+      }
     }
   }
   if(id==='blog'){
     try{if(typeof renderPageBanner==='function')renderPageBanner('blog');}catch(e){}
-    if(window.BLOG_POSTS&&window.BLOG_POSTS.length) renderBlogList();
-    if(window.loadBlogFromDB){
-      window.loadBlogFromDB().then(()=>renderBlogList()).catch(e=>console.warn('blog:',e));
+    const blEl=document.getElementById('blog-list');
+    if(blEl){
+      if(window.BLOG_POSTS&&window.BLOG_POSTS.length){
+        renderBlogList();
+      } else {
+        blEl.innerHTML='<div class="spinner" style="margin:40px auto"></div>';
+        if(window.loadBlogFromDB){
+          window.loadBlogFromDB().then(()=>renderBlogList()).catch(e=>console.warn('blog:',e));
+        }
+      }
     }
   }
   if(id==='firsatlar')renderFirsatlar();

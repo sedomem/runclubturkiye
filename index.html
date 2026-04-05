@@ -387,7 +387,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .admin-sb button{white-space:nowrap;font-size:11px;padding:7px 11px}
   .admin-sb .sb-title{display:none}
   .nav-center{display:none !important}
-  #hamburger{display:flex !important;flex-direction:column;gap:5px;cursor:pointer;padding:8px 6px;border-radius:8px;background:none;border:none;margin-left:4px}
+  #hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:8px 6px;border-radius:8px;background:none;border:none;margin-left:4px}
   .form-row{grid-template-columns:1fr}
   .banner-content{padding:0 22px}
   .banner-content h1{font-size:22px}
@@ -733,6 +733,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .how-steps{gap:8px}
   .how-step{width:calc(50% - 20px);min-width:140px}
   .how-arrow{display:none}
+  .nav-center{display:none !important}
+  #hamburger{display:flex !important;flex-direction:column;gap:5px;cursor:pointer;padding:8px 6px;border-radius:8px;background:none;border:none;margin-left:4px}
 }
 </style>
 </head>
@@ -2891,20 +2893,11 @@ window.loadBannersFromDB=loadBannersFromDB;
 <script>
 // ── LOCAL DATA ──
 // ── LOCAL FALLBACK DATA (Firestore boşsa gösterilir) ──
-window.EVENTS=[
-  {id:"mock-e1",title:"Bogaz Koprusu Kosusu",date:"2025-06-15",city:"Istanbul",dist:"10 km",cat:"10K",emoji:"🏃",fee:"150",cap:500,reg:312,status:"approved",desc:"Istanbul Bogazi'nda esiz kosu deneyimi.",imgUrl:"https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=600&q=80"},
-  {id:"mock-e2",title:"Ankara Maraton 2025",date:"2025-09-21",city:"Ankara",dist:"42 km",cat:"Maraton",emoji:"🏅",fee:"200",cap:1000,reg:756,status:"approved",desc:"Baskentin prestijli maraton etkinligi.",imgUrl:"https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&q=80"},
-  {id:"mock-e3",title:"Izmir Trail Run",date:"2025-07-06",city:"Izmir",dist:"21 km",cat:"Trail",emoji:"🌿",fee:"120",cap:200,reg:88,status:"approved",desc:"Ege'nin dogasinda zorlu trail parkuru.",imgUrl:"https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600&q=80"},
-  {id:"mock-e4",title:"Antalya Gundogumu Kosusu",date:"2025-08-10",city:"Antalya",dist:"5 km",cat:"5K/10K",emoji:"🌅",fee:"80",cap:300,reg:140,status:"approved",desc:"Gunes dogarken sahilde 5K kosusu.",imgUrl:"https://images.unsplash.com/photo-1502904550040-7534597429ae?w=600&q=80"},
-];
+window.EVENTS=[];
 window.CLUBS=[];
 window.RACES=[];
 window.BLOG_POSTS=[];
-window.FIRSATLAR=[
-  {id:'f1',baslik:'Koşucuya Özel %20 İndirim',marka:'Garmin',kategori:'Teknoloji',aciklama:'Garmin Forerunner serisinde koşuculara özel indirim.',indirim:'%20',kod:'RCT20GARMIN',link:'https://garmin.com',bitis:'2025-06-30',imgUrl:'',aktif:true,slug:'garmin-indirim'},
-  {id:'f2',baslik:'Ücretsiz Enerji Jeli Paketi',marka:'GU Energy',kategori:'Beslenme',aciklama:'30 TL ve üzeri alışverişlerde ücretsiz enerji jeli paketi.',indirim:'Ücretsiz',kod:'RCGUFREE',link:'https://guenturkey.com',bitis:'2025-05-31',imgUrl:'',aktif:true,slug:'gu-energy-ucretsiz'},
-  {id:'f3',baslik:'Trail Ayakkabıda %15 İndirim',marka:'Salomon',kategori:'Ekipman',aciklama:'Salomon trail ayakkabı serisinde koşucu indirimi.',indirim:'%15',kod:'RCTSALOMON',link:'https://salomon.com',bitis:'2025-07-15',imgUrl:'',aktif:true,slug:'salomon-trail-indirim'},
-];
+window.FIRSATLAR=[];
 window.SPONSORS_DATA=[];
 window.BANNER_SLOTS=[null,null,null];
 window.PAGE_BANNERS={events:null,clubs:null,races:null,blog:null};
@@ -5834,17 +5827,10 @@ window.addEventListener('scroll',()=>{
 try {
   document.getElementById('pg-home').classList.add('on');
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
-  // Loading'i güvenlik ağı ile kapat
-  const _ld=document.getElementById('loading');
-  if(_ld){_ld.style.display='none';}
-  // Veri yükle — module script hazır olana kadar bekle (polling)
-  (function waitAndLoad(){
-    if(typeof window.loadAllFromDB==='function'){
-      window.loadAllFromDB().catch(function(e){console.warn('loadAllFromDB:',e);});
-    } else {
-      setTimeout(waitAndLoad, 150);
-    }
-  })();
+  // Veri yükle — önce hızlı UI, sonra Firebase'den data çek
+  if(typeof window.loadAllFromDB==='function'){
+    window.loadAllFromDB().catch(e=>console.warn('loadAllFromDB:',e));
+  }
   if(typeof loadBannersFromSlots==='function')loadBannersFromSlots();
   if(typeof window.loadTickerFromDB==='function'){
     window.loadTickerFromDB().catch(()=>{});

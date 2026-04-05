@@ -2189,7 +2189,7 @@ window.saveRaceFromAdmin=async()=>{
 // Çözüm: Kullanıcı haber metnini yapıştırır, biz URL'yi meta olarak ekleriz,
 // sonra Cloudflare Worker proxy üzerinden API'ye gideriz.
 // Worker URL'si tanımlı değilse metin tabanlı yardım moduna geçer.
-const CF_WORKER_URL = ''; // Cloudflare Worker URL'si varsa buraya yaz (örn: https://rct-ai.sedomem.workers.dev)
+const CF_WORKER_URL = 'https://otoskor-proxy.sedomem.workers.dev';
 
 // ── AI YARIŞ ASSİSTANI ──
 window.aiRaceAssist=async()=>{
@@ -2234,10 +2234,13 @@ SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma, açıklama ek
 
   try{
     let raw='';
+    // API key — önce input'tan, sonra sessionStorage'dan al
+    const apiKey=document.getElementById('ai-api-key')?.value?.trim()||
+                 sessionStorage.getItem('rct_api_key')||'';
     const workerUrl=typeof CF_WORKER_URL!=='undefined'?CF_WORKER_URL:'';
 
-    if(workerUrl){
-      // Cloudflare Worker proxy
+    if(workerUrl && !apiKey){
+      // Cloudflare Worker proxy (key gerektirmez)
       const resp=await fetch(workerUrl,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -2246,13 +2249,14 @@ SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma, açıklama ek
       if(!resp.ok)throw new Error(`Worker HTTP ${resp.status}`);
       const data=await resp.json();
       raw=data.content?.[0]?.text||data.response||data.text||'';
-    } else {
-      // Direkt Anthropic API (Claude.ai artifact ortamında çalışır)
+    } else if(apiKey){
+      // Direkt Anthropic API — kullanıcının key'i ile
       const resp=await fetch('https://api.anthropic.com/v1/messages',{
         method:'POST',
         headers:{
           'Content-Type':'application/json',
           'anthropic-version':'2023-06-01',
+          'x-api-key':apiKey,
           'anthropic-dangerous-direct-browser-access':'true'
         },
         body:JSON.stringify({
@@ -2267,6 +2271,8 @@ SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma, açıklama ek
       }
       const data=await resp.json();
       raw=data.content?.[0]?.text||'';
+    } else {
+      throw new Error('API Key gerekli. Yukarıdaki alana Anthropic API key girin (sk-ant-...)');
     }
 
     // JSON parse — kod bloğu varsa temizle
@@ -2364,7 +2370,8 @@ SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma:
   try{
     let raw='';
 
-    if(CF_WORKER_URL){
+    const apiKey=sessionStorage.getItem('rct_api_key')||'';
+    if(CF_WORKER_URL && !apiKey){
       // Cloudflare Worker proxy varsa kullan
       const resp=await fetch(CF_WORKER_URL,{
         method:'POST',
@@ -2375,27 +2382,16 @@ SADECE şu JSON formatında yanıt ver, başka hiçbir şey yazma:
       const data=await resp.json();
       raw=data.content?.[0]?.text||data.response||data.text||'';
     } else {
-      // Worker yok → direkt API dene (Claude.ai artifact ortamında çalışır)
+      // Direkt API — key varsa kullan
+      const headers={'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'};
+      if(apiKey)headers['x-api-key']=apiKey;
       const resp=await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{
-          'Content-Type':'application/json',
-          'anthropic-version':'2023-06-01',
-          'anthropic-dangerous-direct-browser-access':'true'
-        },
-        body:JSON.stringify({
-          model:'claude-haiku-4-5-20251001',
-          max_tokens:1500,
-          messages:[{role:'user',content:prompt}]
-        })
+        method:'POST',headers,
+        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1500,messages:[{role:'user',content:prompt}]})
       });
       if(!resp.ok){
         const err=await resp.json().catch(()=>({}));
-        // API key hatası → kullanıcıya bilgi ver
-        if(resp.status===401||err.error?.message?.includes('api-key')){
-          showAiBlogManualMode();
-          return;
-        }
+        if(resp.status===401||err.error?.message?.includes('api-key')){showAiBlogManualMode();return;}
         throw new Error(err.error?.message||`HTTP ${resp.status}`);
       }
       const data=await resp.json();
@@ -4319,6 +4315,11 @@ function renderAdminSection(sec){
         <div class="ai-assistant-box" style="margin-bottom:18px">
           <h3>🤖 AI Yarış Asistanı</h3>
           <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Yarış linkini <b>ve/veya</b> yarış sayfasının metnini yapıştır → AI formu otomatik doldursun.</p>
+          <div style="background:rgba(232,98,42,.08);border:1px solid rgba(232,98,42,.2);border-radius:8px;padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px">
+            <span style="font-size:13px;color:var(--muted);white-space:nowrap">🔑 API Key:</span>
+            <input type="password" id="ai-api-key" placeholder="sk-ant-..." style="flex:1;font-size:12px;font-family:monospace" oninput="sessionStorage.setItem('rct_api_key',this.value)"/>
+            <span style="font-size:10px;color:var(--muted);white-space:nowrap">Sayfa kapanınca silinir</span>
+          </div>
           <div style="display:flex;gap:8px;margin-bottom:8px">
             <input type="text" id="ar-race-url" placeholder="https://apphurra.com/etkinlik/... (opsiyonel — site izin veriyorsa)" style="flex:1;font-size:12px"/>
           </div>

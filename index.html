@@ -560,924 +560,6 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
   /* ── NAV ── */
   nav{gap:4px;padding:0 10px}
-  #nav-guest{display:none !important}
-  #nav-user{gap:3px}
-  #nav-user button{font-size:10px;padding:5px 8px}
-  nav a,nav .logo-wrap{flex-shrink:0}
-
-  /* ── HERO BANNER ── */
-  #hero-banner{height:280px}
-  .banner-content{padding:0 18px;max-width:100%}
-  .banner-content h1{font-size:20px;line-height:1.2}
-  .banner-content p{font-size:12px}
-  .banner-cta{gap:8px}
-  .banner-cta .btn{font-size:12px;padding:8px 14px}
-  .banner-nav{width:28px;height:28px;font-size:14px}
-  .fomo-countdown-wrap{gap:4px}
-  .fomo-cd-unit{padding:6px 8px;min-width:42px}
-  .fomo-cd-n{font-size:18px}
-
-  /* ── ETKİNLİK KARTI ── */
-  .ev-date-box{min-width:48px;max-width:48px;padding:8px 4px}
-  .ev-date-box .day{font-size:22px}
-  .ev-date-box .mon{font-size:9px}
-  .ev-info h3{font-size:13px}
-  .ev-meta{flex-wrap:wrap;gap:4px}
-  .ev-meta .meta{font-size:10px}
-  .pace-chips{flex-wrap:wrap;gap:4px}
-  .pace-chip{font-size:10px;padding:2px 7px}
-  .fomo-avatars{margin-top:4px}
-
-
-
-  /* ── KART GRİD ── */
-  .g2{grid-template-columns:1fr}
-  .g3{grid-template-columns:1fr}
-
-  /* ── RACE CARD ── */
-  .race-card{min-width:0}
-  .race-img{height:160px}
-
-  /* ── BLOG KARTI ── */
-  .blog-img{height:140px}
-  .blog-card .card-body h3{font-size:13px}
-
-  /* ── MODAL ── */
-  .modal{padding:20px 16px;border-radius:16px;max-width:calc(100vw - 24px)}
-  .modal-lg{max-width:calc(100vw - 24px)}
-  .overlay{padding:10px}
-  .form-row{flex-direction:column;gap:0}
-
-  /* ── AUTH MODAL ── */
-  #auth-modal .modal{padding:18px 14px}
-  .auth-tabs{gap:4px}
-
-  /* ── ADMIN PANELİ ── */
-  .admin-sb{padding:4px;gap:4px}
-  .admin-sb button{font-size:11px;padding:7px 10px;white-space:nowrap}
-  #admin-main{padding:14px}
-
-  /* ── GRUP PANEL ── */
-  .admin-sb .sb-title{display:none}
-
-  /* ── FOOTER ── */
-  .footer-grid{grid-template-columns:1fr 1fr;gap:20px}
-  .footer-col:first-child{grid-column:1/-1}
-  .footer-legal{gap:8px;flex-wrap:wrap;justify-content:center}
-  .footer-bot{flex-direction:column;gap:4px;text-align:center}
-
-  /* ── TABLO MOBİL ── */
-  table{font-size:11px}
-  table th,table td{padding:6px 8px}
-  .action-btns{flex-direction:column;gap:4px}
-  .action-btns .btn{padding:4px 8px;font-size:11px}
-
-  /* ── FOMO ── */
-  .fomo-realtime-toast{font-size:11px;padding:8px 14px;max-width:calc(100vw - 40px)}
-
-
-
-  /* ── SSS ── */
-  .sss-q{font-size:13px;padding:14px 14px}
-  .sss-a{padding:0 14px 14px;font-size:12px}
-
-  /* ── KAYAN YAZI ── */
-  #ticker-wrap{height:36px}
-  .ticker-item{font-size:12px;padding:0 18px}
-
-  /* ── PROFIL SAYFASI ── */
-  .dash-grid{grid-template-columns:1fr}
-  .dash-stat-row{flex-direction:column;gap:8px}
-
-  /* ── FIRSATLAR ── */
-  .firsat-card{grid-column:1/-1}
-  #firsatlar-list{grid-template-columns:1fr}
-
-
-  /* ── KULüP KART ── */
-  #clubs-list .card [style*="height:150px"]{height:120px}
-
-  /* ── SEC-HEAD ── */
-  .sec-head{flex-wrap:wrap;gap:8px}
-  .sec-head h2{font-size:16px}
-  .sec-head .btn{font-size:11px;padding:5px 10px}
-
-  /* ── PACE SEÇİCİ ── */
-  .pace-selector{gap:5px}
-  .pace-opt{font-size:11px;padding:5px 9px}
-
-  /* ── FORM GRP ── */
-  .form-grp label{font-size:12px}
-  .form-grp input,.form-grp textarea,.form-grp select{font-size:13px}
-
-}
-
-/* ── 768px — TABLET ── */
-@media(max-width:768px){
-
-  .ev-detail-grid{grid-template-columns:1fr !important}
-
-  /* Banner içerik */
-  .banner-content{padding:0 28px}
-  .banner-content h1{font-size:24px}
-  #hero-banner{height:340px}
-
-  /* Fırsatlar grid */
-  #firsatlar-list{grid-template-columns:repeat(auto-fill,minmax(260px,1fr))}
-
-  /* Footer */
-  .footer-grid{grid-template-columns:1fr 1fr;gap:24px}
-
-  /* Admin tablo scroll */
-  #admin-main{overflow-x:auto}
-  .admin-wrap{min-height:auto}
-
-}
-
-/* ━━ NASIL ÇALIŞIR ━━ */
-.how-section{background:var(--bg2);padding:20px 0 16px}
-.how-header{text-align:center;margin-bottom:16px}
-.how-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--or);background:rgba(232,98,42,.1);padding:3px 10px;border-radius:20px;margin-bottom:6px}
-.how-title{font-size:18px;font-family:var(--font-head);margin:4px 0;color:var(--dark2)}
-.how-sub{font-size:12px;color:var(--muted);margin:0}
-.how-steps{display:flex;align-items:flex-start;justify-content:center;gap:0;flex-wrap:wrap}
-.how-step{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:12px;background:var(--card);border:1.5px solid var(--border);width:170px;flex-shrink:0;transition:all .25s;cursor:default}
-.how-step:hover{border-color:var(--or);transform:translateY(-3px);box-shadow:0 8px 24px rgba(232,98,42,.12)}
-.how-step:hover .how-icon{transform:scale(1.15)}
-.how-icon-wrap{position:relative;flex-shrink:0}
-.how-icon{width:40px;height:40px;border-radius:50%;background:rgba(232,98,42,.1);border:1.5px solid rgba(232,98,42,.25);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform .25s}
-.how-num{position:absolute;top:-4px;right:-4px;background:var(--or);color:#fff;width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)}
-.how-text h3{font-size:12px;font-weight:700;margin:0 0 3px;font-family:var(--font-head);color:var(--dark2)}
-.how-text p{font-size:11px;color:var(--muted);line-height:1.45;margin:0}
-.how-arrow{display:flex;align-items:center;color:var(--or);font-size:16px;padding:0 4px;padding-top:18px;opacity:.5}
-.how-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap}
-.how-stat{display:flex;flex-direction:column;align-items:center;padding:6px 20px;gap:2px}
-.how-stat-n{font-size:18px;font-weight:800;color:var(--or);font-family:var(--font-head);line-height:1}
-.how-stat-l{font-size:10px;color:var(--muted);letter-spacing:.3px}
-.how-stat-div{width:1px;height:28px;background:var(--border)}
-
-/* ━━ HAMBURGER MENÜ ━━ */
-#hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border-radius:8px;background:none;border:none}
-#hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all .3s}
-#hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
-#hamburger.open span:nth-child(2){opacity:0}
-#hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
-#mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--card);border-bottom:1.5px solid var(--border);z-index:199;padding:12px 20px;flex-direction:column;gap:4px;box-shadow:var(--shadow-md)}
-#mobile-menu.open{display:flex}
-#mobile-menu button{text-align:left;background:none;border:none;padding:10px 4px;font-size:14px;color:var(--text);border-bottom:1px solid var(--border2);cursor:pointer;font-family:var(--font-body)}
-#mobile-menu button:last-child{border-bottom:none}
-#mobile-menu button:hover{color:var(--or)}
-
-@media(max-width:768px){
-  .how-steps{gap:8px}
-  .how-step{width:calc(50% - 20px);min-width:140px}
-  .how-arrow{display:none}
-  .nav-center{display:none !important}
-  #hamburger{display:flex}
-}
-@media(max-width:480px){
-  .how-step{width:100%;flex-direction:row}
-  .how-stats{gap:0}
-  .how-stat{padding:6px 12px}
-}
-</style>
-</head>
-<body>
-<div class="loading" id="loading" style="background:#F5F0E8"><svg width="90" height="90" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block">
-  <rect x="0" y="0" width="200" height="200" rx="44" fill="#E8622A"/>
-  <circle cx="112" cy="60" r="18" fill="#fff"/>
-  <ellipse cx="104" cy="98" rx="12" ry="24" fill="#fff" transform="rotate(-12 104 98)"/>
-  <path d="M98 82 L68 64" stroke="#F5F0E8" stroke-width="9" stroke-linecap="round" fill="none"/>
-  <path d="M108 80 L136 90" stroke="#F5F0E8" stroke-width="8" stroke-linecap="round" fill="none"/>
-  <path d="M96 120 L74 144" stroke="#fff" stroke-width="9" stroke-linecap="round" fill="none"/>
-  <path d="M108 122 L130 135" stroke="#fff" stroke-width="9" stroke-linecap="round" fill="none"/>
-  <path d="M62 68 L46 68" stroke="#F5F0E8" stroke-width="5" stroke-linecap="round" fill="none" opacity="0.7"/>
-  <path d="M58 80 L40 80" stroke="#F5F0E8" stroke-width="3.5" stroke-linecap="round" fill="none" opacity="0.5"/>
-  <text x="100" y="180" text-anchor="middle" font-family="Raleway,sans-serif" font-weight="800" font-size="22" fill="#fff" letter-spacing="2" opacity="0.9">RC</text>
-</svg><div style="font-family:'Raleway',sans-serif;font-size:20px;font-weight:700;color:#2C1810;margin-top:14px">RunClub<span style="color:#E8622A">Türkiye</span></div><div class="spinner" style="margin-top:12px;border-top-color:#E8622A;border-color:#E0D8CC"></div></div>
-
-<nav id="topnav">
-  <div class="logo" onclick="nav('home')" style="display:flex;align-items:center;cursor:pointer"><svg width="180" height="48" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
-  <circle cx="54" cy="38" r="11" fill="#2C1810"/>
-  <ellipse cx="52" cy="58" rx="8" ry="16" fill="#2C1810" transform="rotate(-10 52 58)"/>
-  <path d="M49 48 L30 35" stroke="#E8622A" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M55 46 L73 54" stroke="#E8622A" stroke-width="5" stroke-linecap="round" fill="none"/>
-  <path d="M46 73 L28 88" stroke="#2C1810" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M56 74 L74 83" stroke="#2C1810" stroke-width="6" stroke-linecap="round" fill="none"/>
-  <path d="M26 40 L14 40" stroke="#E8622A" stroke-width="3" stroke-linecap="round" fill="none" opacity="0.6"/>
-  <path d="M23 50 L9 50" stroke="#E8622A" stroke-width="2" stroke-linecap="round" fill="none" opacity="0.4"/>
-  <text x="100" y="68" font-family="Alatsi,serif" font-size="52" fill="#E8622A">Run</text>
-  <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#2C1810">Club</text>
-</svg></div>
-  <div class="nav-center">
-    <button onclick="nav('home')" id="nb-home">Ana Sayfa</button>
-    <button onclick="nav('events')" id="nb-events">Etkinlikler</button>
-    <button onclick="nav('clubs')" id="nb-clubs">Kulüpler</button>
-    <button onclick="nav('races')" id="nb-races">Yarış Takvimi</button>
-    <button onclick="nav('firsatlar')" id="nb-firsatlar">🎁 Fırsatlar</button>
-    <button onclick="nav('blog')" id="nb-blog">Blog</button>
-    <button onclick="nav('contact')" id="nb-contact">İletişim</button>
-  </div>
-  <!-- Hamburger -->
-  <button id="hamburger" onclick="toggleMobileMenu()" aria-label="Menü">
-    <span></span><span></span><span></span>
-  </button>
-  <div class="nav-right">
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
-    <div id="nav-guest" style="display:flex;gap:5px">
-      <button class="btn btn-ghost" onclick="openAuth('login')">Giriş</button>
-      <button class="btn btn-or" onclick="openAuth('register')">Üye Ol</button>
-      <button class="btn btn-navy" onclick="openAuth('groupadmin')">Grup Admin</button>
-      <button class="btn" style="background:#4a1d96;color:#fff" onclick="openAuth('superadmin')">⭐ Admin</button>
-    </div>
-    <div id="nav-user" style="display:none;gap:5px" class="nav-right">
-      <button class="btn btn-ghost btn-sm" id="nav-role-btn" onclick="goPanel()" style="display:none"></button>
-      <button class="btn btn-or btn-sm" id="nav-dashboard-btn" onclick="nav('dashboard')">Dashboard</button>
-    </div>
-  </div>
-</nav>
-<!-- Mobil Menü -->
-<div id="mobile-menu">
-  <button onclick="nav('home');toggleMobileMenu()">🏠 Ana Sayfa</button>
-  <button onclick="nav('events');toggleMobileMenu()">📅 Etkinlikler</button>
-  <button onclick="nav('clubs');toggleMobileMenu()">🤝 Kulüpler</button>
-  <button onclick="nav('races');toggleMobileMenu()">🏆 Yarış Takvimi</button>
-  <button onclick="nav('firsatlar');toggleMobileMenu()">🎁 Fırsatlar</button>
-  <button onclick="nav('blog');toggleMobileMenu()">📰 Blog</button>
-  <button onclick="nav('contact');toggleMobileMenu()">📧 İletişim</button>
-  <button onclick="nav('sss');toggleMobileMenu()">❓ SSS</button>
-  <div style="height:1px;background:var(--border);margin:4px 0"></div>
-  <button onclick="openAuth('login');toggleMobileMenu()">Giriş Yap</button>
-  <button onclick="openAuth('register');toggleMobileMenu()" style="color:var(--or);font-weight:600">✨ Üye Ol (Ücretsiz)</button>
-</div>
-
-<div id="bottom-nav">
-  <button class="bn-item on" onclick="nav('home')"><div class="bi">🏠</div><span>Ana</span></button>
-  <button class="bn-item" onclick="nav('events')"><div class="bi">📅</div><span>Etkinlik</span></button>
-  <button class="bn-item" onclick="nav('firsatlar')"><div class="bi">🎁</div><span>Fırsatlar</span></button>
-  <button class="bn-item" onclick="nav('races')"><div class="bi">🏆</div><span>Yarış</span></button>
-  <button class="bn-item" onclick="nav('dashboard')"><div class="bi">👤</div><span>Profil</span></button>
-</div>
-
-<!-- HOME -->
-<div class="pg" id="pg-home">
-  <div id="hero-banner">
-    <button class="banner-nav prev" onclick="bannerPrev()">‹</button>
-    <button class="banner-nav next" onclick="bannerNext()">›</button>
-    <div class="banner-dots" id="banner-dots"></div>
-    <div id="banner-slides"></div>
-  </div>
-  <!-- KAYAN YAZI ŞERİDİ -->
-  <div id="ticker-wrap">
-    <div class="ticker-track" id="ticker-track"></div>
-  </div>
-  <div class="sec"><div class="container">
-    <div class="sec-head"><h2>🏃 Öne Çıkan Etkinlikler</h2><button class="btn btn-ghost btn-sm" onclick="nav('events')">Tümünü Gör →</button></div>
-    <div class="grid g2" id="home-events"></div>
-  </div></div>
-  <div class="divider"></div>
-  <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Popüler Kulüpler</h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
-    <div class="grid g4" id="home-clubs"></div>
-  </div></div>
-  <div class="divider"></div>
-  <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
-    <div class="grid g4" id="home-races"></div>
-  </div></div>
-  <div class="divider"></div>
-  <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Son Haberler</h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
-    <div class="grid g4" id="home-blog"></div>
-  </div></div>
-  <div class="divider"></div>
-  <!-- ✅ YENİ: Ana Sayfa Fırsatlar Bölümü -->
-  <div class="sec" style="background:linear-gradient(135deg,rgba(255,107,0,.04),transparent)"><div class="container">
-    <div class="sec-head">
-      <h2>🎁 Koşucuya Özel Fırsatlar</h2>
-      <button class="btn btn-ghost btn-sm" onclick="nav('firsatlar')">Tümünü Gör →</button>
-    </div>
-    <div class="grid g3" id="home-firsatlar"></div>
-  </div></div>
-  <div class="sec-sm"><div class="container">
-    <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:20px;text-transform:uppercase">Sponsorlarımız</p>
-    <div class="sponsor-strip" id="sponsors-strip"></div>
-  </div></div>
-  <div class="divider"></div>
-    <div class="divider"></div>
-  <div class="how-section"><div class="container">
-    <div class="how-header">
-      <span class="how-tag">Platform</span>
-      <h2 class="how-title">Nasıl Çalışır?</h2>
-      <p class="how-sub">Dakikalar içinde Türkiye'nin koşu topluluğuna katıl</p>
-    </div>
-    <div class="how-steps">
-      <div class="how-step" data-step="1">
-        <div class="how-icon-wrap"><span class="how-num">1</span><div class="how-icon">📝</div></div>
-        <div class="how-text">
-          <h3>Üye Ol</h3>
-          <p>E-posta ile saniyeler içinde kaydol. Profilini oluştur, şehrini ve koşu seviyeni belirt.</p>
-        </div>
-      </div>
-      <div class="how-arrow">→</div>
-      <div class="how-step" data-step="2">
-        <div class="how-icon-wrap"><span class="how-num">2</span><div class="how-icon">🔍</div></div>
-        <div class="how-text">
-          <h3>Keşfet</h3>
-          <p>Şehrindeki kulüpleri, yaklaşan etkinlikleri ve yarış takvimini tek yerden incele.</p>
-        </div>
-      </div>
-      <div class="how-arrow">→</div>
-      <div class="how-step" data-step="3">
-        <div class="how-icon-wrap"><span class="how-num">3</span><div class="how-icon">🤝</div></div>
-        <div class="how-text">
-          <h3>Katıl & Grupla</h3>
-          <p>Kulübüne üye ol, etkinliğe kaydol. Kendi grubunu kur, koşucuları davet et.</p>
-        </div>
-      </div>
-      <div class="how-arrow">→</div>
-      <div class="how-step" data-step="4">
-        <div class="how-icon-wrap"><span class="how-num">4</span><div class="how-icon">🏅</div></div>
-        <div class="how-text">
-          <h3>Kazan</h3>
-          <p>Etkinliklere katıldıkça rozet kazan, liderboardda yüksel. Topluluğun parçası ol.</p>
-        </div>
-      </div>
-    </div>
-    <div class="how-stats">
-      <div class="how-stat"><span class="how-stat-n">81</span><span class="how-stat-l">İl</span></div>
-      <div class="how-stat-div"></div>
-      <div class="how-stat"><span class="how-stat-n">%100</span><span class="how-stat-l">Ücretsiz</span></div>
-      <div class="how-stat-div"></div>
-      <div class="how-stat"><span class="how-stat-n">∞</span><span class="how-stat-l">Etkinlik</span></div>
-      <div class="how-stat-div"></div>
-      <div class="how-stat" onclick="openAuth('groupadmin')" style="cursor:pointer">
-        <span class="how-stat-n">🏃</span>
-        <span class="how-stat-l" style="color:var(--or);font-weight:600">Grup Kur →</span>
-      </div>
-    </div>
-  </div></div>l>
-<html lang="tr">
-<head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width,initial-scale=1"/>
-<meta property="og:type" content="website"/>
-<meta property="og:url" content="https://www.runclubturkiye.com/"/>
-<meta property="og:image" content="https://www.runclubturkiye.com/og-image.png"/>
-<meta name="twitter:card" content="summary_large_image"/>
-<title>RunClubTürkiye — Türkiye'nin Koşu Topluluğu</title>
-<meta name="description" content="Türkiye genelinde koşu kulüpleri, etkinlikler ve yarış takvimi."/>
-<link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23E8622A'/%3E%3Ccircle cx='112' cy='60' r='18' fill='%23fff'/%3E%3Cellipse cx='104' cy='98' rx='12' ry='24' fill='%23fff' transform='rotate(-12 104 98)'/%3E%3Cpath d='M98 82 L68 64' stroke='%23F5F0E8' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 80 L136 90' stroke='%23F5F0E8' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3Cpath d='M96 120 L74 144' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 122 L130 135' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"/>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css"/>
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Open+Sans:wght@300;400;500;600&family=Alatsi&display=swap">
-<style>
-/* ━━ ROOT TOKENS ━━ */
-*{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --or:#E8622A;--or2:#c94e1c;--or-light:#F0A070;--or-soft:rgba(232,98,42,.12);
-  --cream:#F5F0E8;--cream2:#EDE8DF;--cream3:#E0D8CC;
-  --dark:#1A1A1A;--dark2:#2C1810;--dark3:#111;
-  --text:#2C1810;--text2:#4A3728;--muted:#8A7060;--muted2:#6A5548;
-  --card:#FFFFFF;--border:#E0D8CC;--border2:#D0C8BC;
-  --bg:#F5F0E8;--bg2:#FDFAF6;--bg3:#EDE8DF;--bg4:#E0D8CC;
-  --navy:#2C3E50;--green:#2E7D32;
-  --r:14px;--r2:20px;
-  --font:'Open Sans',system-ui,sans-serif;
-  --font-head:'Raleway',system-ui,sans-serif;
-  --font-display:'Alatsi','Raleway',system-ui,sans-serif;
-  --shadow-sm:0 2px 8px rgba(44,24,16,.08);
-  --shadow-md:0 6px 24px rgba(44,24,16,.12);
-  --shadow-lg:0 16px 48px rgba(44,24,16,.16);
-  --transition:.25s cubic-bezier(.4,0,.2,1);
-}
-/* ━━ BODY ━━ */
-html{scroll-behavior:smooth;overflow-x:hidden;max-width:100%}
-body{background:var(--bg);color:var(--text);font-family:var(--font);min-height:100vh;overflow-x:hidden;transition:background var(--transition),color var(--transition)}
-button{cursor:pointer;font-family:var(--font);transition:all var(--transition)}
-input,select,textarea{font-family:var(--font);background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:11px 15px;width:100%;font-size:14px;outline:none;transition:all var(--transition)}
-input:focus,select:focus,textarea:focus{border-color:var(--or);box-shadow:0 0 0 4px var(--or-soft)}
-label{display:block;font-size:12px;color:var(--muted);margin-bottom:6px;font-weight:600;letter-spacing:.3px;text-transform:uppercase}
-a{color:var(--or);text-decoration:none;transition:color var(--transition)}
-h1,h2,h3,h4{font-family:var(--font-head)}
-
-/* ━━ PAGE TRANSITION ━━ */
-@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
-@keyframes fadeIn{from{opacity:0}to{opacity:1}}
-@keyframes scaleIn{from{opacity:0;transform:scale(.95)}to{opacity:1;transform:scale(1)}}
-@keyframes slideRight{from{opacity:0;transform:translateX(-20px)}to{opacity:1;transform:translateX(0)}}
-.pg{display:none;max-width:100%;overflow-x:hidden}.pg.on{display:block;animation:fadeUp .35s var(--transition)}
-
-/* ━━ BUTTONS ━━ */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:9px 18px;border-radius:10px;font-size:13px;font-weight:600;border:none;transition:all var(--transition);cursor:pointer;white-space:nowrap;font-family:var(--font-head);letter-spacing:.2px}
-.btn:active{transform:scale(.97)}
-.btn-or{background:var(--or);color:#fff;box-shadow:0 4px 12px rgba(232,98,42,.3)}
-.btn-or:hover{background:var(--or2);transform:translateY(-1px);box-shadow:0 6px 20px rgba(232,98,42,.4)}
-.btn-navy{background:var(--dark2);color:#fff}.btn-navy:hover{opacity:.88;transform:translateY(-1px)}
-.btn-green{background:#2E7D32;color:#fff}.btn-green:hover{opacity:.88;transform:translateY(-1px)}
-.btn-ghost{background:transparent;color:var(--muted);border:1.5px solid var(--border)}.btn-ghost:hover{color:var(--text);border-color:var(--or-light);background:var(--or-soft)}
-.btn-red{background:#c0392b;color:#fff}.btn-red:hover{background:#a93226;transform:translateY(-1px)}
-.btn-sm{padding:6px 13px;font-size:12px;border-radius:8px}
-.btn-full{width:100%;justify-content:center}
-
-/* ━━ CONTAINER ━━ */
-.container{max-width:1120px;margin:0 auto;padding:0 22px}
-.sec{padding:60px 0}.sec-sm{padding:36px 0}
-
-/* ━━ NAV ━━ */
-#topnav{position:sticky;top:0;z-index:200;background:rgba(253,250,246,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--border);height:64px;display:flex;align-items:center;padding:0 20px;gap:8px;box-shadow:var(--shadow-sm);overflow:hidden;max-width:100%}
-.logo{cursor:pointer;white-space:nowrap;flex-shrink:0;display:flex;align-items:center;line-height:1}
-.logo span{color:var(--or)}
-.logo b{color:var(--dark2);font-family:var(--font-head);font-weight:700}
-.nav-center{display:flex;gap:2px;flex:1;justify-content:center}
-.nav-center button{background:none;border:none;color:var(--muted);padding:7px 12px;border-radius:8px;font-size:13px;font-family:var(--font-head);font-weight:500;transition:all var(--transition);position:relative}
-.nav-center button::after{content:'';position:absolute;bottom:2px;left:50%;right:50%;height:2px;background:var(--or);transition:all var(--transition);border-radius:2px}
-.nav-center button:hover{color:var(--text)}.nav-center button.on{color:var(--dark2)}.nav-center button.on::after{left:12px;right:12px}
-.nav-right{display:flex;gap:8px;margin-left:auto;align-items:center}
-.theme-btn{background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;padding:6px 11px;font-size:15px;color:var(--text);transition:all var(--transition)}.theme-btn:hover{border-color:var(--or);background:var(--or-soft)}
-
-/* BANNER */
-#hero-banner{position:relative;overflow:hidden;height:460px;width:100%;max-width:100%}
-.banner-slide{position:absolute;inset:0;opacity:0;transition:opacity .7s;display:flex;align-items:center;overflow:hidden}
-.banner-slide.on{opacity:1}
-.banner-bg-img{position:absolute;inset:0;background-size:cover;background-position:center}
-.banner-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55)}
-.banner-content{position:relative;z-index:1;padding:0 60px;max-width:620px}
-.banner-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,0,.2);border:1px solid rgba(255,107,0,.4);color:var(--or);padding:5px 14px;border-radius:20px;font-size:12px;margin-bottom:14px}
-.banner-content h1{font-size:clamp(24px,4vw,46px);font-weight:700;line-height:1.1;margin-bottom:10px;color:#fff}
-.banner-content h1 span{color:var(--or)}
-.banner-content p{font-size:15px;color:rgba(255,255,255,.8);margin-bottom:22px;line-height:1.6}
-.banner-cta{display:flex;gap:10px;flex-wrap:wrap}
-.ev-detail-grid{display:grid;grid-template-columns:1fr 280px;gap:18px}
-.banner-dots{position:absolute;bottom:16px;left:50%;transform:translateX(-50%);display:flex;gap:6px;z-index:10}
-.bdot{width:8px;height:8px;border-radius:50%;background:rgba(255,255,255,.3);cursor:pointer;transition:.2s}
-.bdot.on{background:var(--or);width:22px;border-radius:4px}
-.banner-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:50%;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer}
-.banner-nav.prev{left:14px}.banner-nav.next{right:14px}
-
-/* ━━ CARDS ━━ */
-.grid{display:grid;gap:20px}
-.g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
-.g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-.g4{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
-.card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all var(--transition);box-shadow:var(--shadow-sm)}
-.card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.card-img{height:160px;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
-.card-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s var(--transition)}
-.card:hover .card-img img{transform:scale(1.04)}
-.card-body{padding:16px}
-.card-body h3{font-size:14px;margin-bottom:5px;line-height:1.3;font-family:var(--font-head);font-weight:700;color:var(--dark2)}
-.card-body p{font-size:12px;color:var(--muted);line-height:1.6}
-.tag{display:inline-block;padding:3px 10px;border-radius:20px;font-size:10px;margin-bottom:6px;font-weight:700;letter-spacing:.3px;font-family:var(--font-head)}
-.tag-or{background:rgba(232,98,42,.12);color:#C04A18}
-.tag-bl{background:rgba(44,62,80,.1);color:#2C3E50}
-.tag-gr{background:rgba(46,125,50,.1);color:#2E7D32}
-.tag-gy{background:rgba(138,112,96,.12);color:#6A5548}
-.tag-re{background:rgba(192,57,43,.1);color:#C0392B}
-.tag-pu{background:rgba(142,68,173,.1);color:#6C3483}
-
-/* ━━ EV CARD ━━ */
-.ev-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:18px;display:flex;gap:16px;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
-.ev-card:hover{border-color:var(--or);transform:translateY(-3px);box-shadow:var(--shadow-md)}
-.ev-date-box{min-width:54px;text-align:center;background:linear-gradient(135deg,var(--or),var(--or2));border-radius:12px;padding:8px 6px;flex-shrink:0;box-shadow:0 4px 12px rgba(232,98,42,.25)}
-.ev-date-box .day{font-size:22px;font-weight:700;color:#fff;line-height:1;font-family:var(--font-head)}
-.ev-date-box .mon{font-size:9px;color:rgba(255,255,255,.8);text-transform:uppercase;margin-top:2px;font-weight:600;letter-spacing:.5px}
-.ev-info{flex:1;min-width:0}
-.ev-meta{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
-.meta{font-size:11px;color:var(--muted)}
-.pace-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
-.pace-chip{padding:2px 8px;background:var(--or-soft);border:1px solid rgba(232,98,42,.25);border-radius:12px;font-size:10px;color:var(--or);font-weight:600}
-
-/* ━━ FIRSAT CARD ━━ */
-.firsat-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all var(--transition);position:relative;cursor:pointer;box-shadow:var(--shadow-sm)}
-.firsat-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.firsat-badge{position:absolute;top:12px;left:12px;background:var(--or);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;z-index:1;box-shadow:0 3px 8px rgba(232,98,42,.35);font-family:var(--font-head)}
-.firsat-img{height:180px;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
-.firsat-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.firsat-body{padding:18px}
-.firsat-body h3{font-size:15px;font-weight:700;margin-bottom:6px;font-family:var(--font-head);color:var(--dark2)}
-.firsat-body p{font-size:12px;color:var(--muted);line-height:1.6;margin-bottom:10px}
-.firsat-meta{display:flex;gap:10px;font-size:11px;color:var(--muted);margin-bottom:12px;flex-wrap:wrap}
-.kod-box{background:var(--cream2);border:2px dashed var(--or);border-radius:10px;padding:13px 18px;text-align:center;margin:10px 0}
-.kod-box .kod{font-size:22px;font-weight:700;color:var(--or);letter-spacing:4px;font-family:monospace}
-.kod-box .kod-label{font-size:11px;color:var(--muted);margin-top:3px}
-
-/* ━━ SEC HEAD ━━ */
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
-.sec-head h2{font-size:22px;font-weight:700;font-family:var(--font-head);color:var(--dark2);position:relative;padding-bottom:8px}
-.sec-head h2::after{content:'';position:absolute;bottom:0;left:0;width:36px;height:3px;background:var(--or);border-radius:2px}
-.divider{height:1.5px;background:var(--border)}
-
-/* ━━ PROGRESS ━━ */
-.prog-bar{height:5px;background:var(--cream3);border-radius:4px;overflow:hidden}
-.prog-fill{height:100%;background:linear-gradient(90deg,var(--or),var(--or-light));border-radius:4px}
-
-/* ━━ COUNTDOWN ━━ */
-.countdown{display:flex;gap:8px;margin:10px 0}
-.cd-unit{text-align:center;background:linear-gradient(135deg,var(--dark2),var(--dark));border-radius:10px;padding:8px 10px;min-width:46px}
-.cd-n{font-size:20px;font-weight:700;color:#fff;font-family:var(--font-head)}
-.cd-l{font-size:9px;color:rgba(255,255,255,.5);text-transform:uppercase;letter-spacing:.5px}
-
-/* ━━ OVERLAY & MODAL ━━ */
-.overlay{position:fixed;inset:0;background:rgba(26,10,4,.75);z-index:500;display:none;align-items:center;justify-content:center;padding:20px;backdrop-filter:blur(6px)}
-.overlay.on{display:flex;animation:fadeIn .25s ease}
-.modal{background:var(--card);border:1.5px solid var(--border);border-radius:20px;padding:28px;width:100%;max-width:480px;position:relative;max-height:90vh;overflow-y:auto;box-shadow:var(--shadow-lg);animation:scaleIn .25s var(--transition)}
-.modal-lg{max-width:660px}
-.modal h2{font-size:20px;margin-bottom:4px;font-family:var(--font-head);color:var(--dark2);font-weight:700}
-.modal .sub{color:var(--muted);font-size:13px;margin-bottom:20px}
-.close-x{position:absolute;top:14px;right:14px;background:var(--cream2);border:1.5px solid var(--border);color:var(--muted);font-size:20px;cursor:pointer;width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;transition:all var(--transition)}.close-x:hover{background:var(--or-soft);color:var(--or);border-color:var(--or)}
-.tab-row{display:flex;border-bottom:1.5px solid var(--border);margin-bottom:20px}
-.tab-btn{flex:1;padding:10px;background:none;border:none;color:var(--muted);font-size:13px;border-bottom:2.5px solid transparent;cursor:pointer;font-family:var(--font-head);font-weight:600;margin-bottom:-1.5px;transition:all var(--transition)}
-.tab-btn.on{color:var(--or);border-bottom-color:var(--or)}
-.form-row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.form-grp{margin-bottom:14px}
-.chk-row{display:flex;align-items:flex-start;gap:9px;font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px}
-.chk-row input{width:16px;height:16px;flex-shrink:0;margin-top:2px;accent-color:var(--or)}
-.div-or{text-align:center;font-size:12px;color:var(--muted);margin:14px 0;position:relative}
-.div-or::before,.div-or::after{content:'';position:absolute;top:50%;width:calc(50% - 16px);height:1.5px;background:var(--border)}
-.div-or::before{left:0}.div-or::after{right:0}
-.btn-google{background:var(--card);border:1.5px solid var(--border);color:var(--text);width:100%;padding:10px;border-radius:10px;display:flex;align-items:center;justify-content:center;gap:9px;font-size:13px;cursor:pointer;font-family:var(--font-head);font-weight:600;transition:all var(--transition)}.btn-google:hover{border-color:var(--or);background:var(--or-soft)}
-
-/* ━━ IMG UPLOAD ━━ */
-.img-upload-area{border:2px dashed var(--border2);border-radius:12px;padding:18px;text-align:center;cursor:pointer;transition:all var(--transition);position:relative}
-.img-upload-area:hover,.img-upload-area.drag-over{border-color:var(--or);background:var(--or-soft)}
-.img-upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
-.img-preview{width:100%;max-height:130px;object-fit:cover;border-radius:8px;margin-top:10px;display:none}
-
-/* ━━ POPUP ━━ */
-#popup-modal .modal{max-width:480px;padding:0;overflow:hidden;border-radius:22px}
-.popup-img-area{width:100%;height:200px;background:linear-gradient(135deg,var(--dark2),var(--or));display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;overflow:hidden}
-.popup-img-area img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.popup-body-inner{padding:26px}
-.popup-close-top{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.45);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all var(--transition)}.popup-close-top:hover{background:rgba(0,0,0,.7)}
-
-/* ━━ TOAST ━━ */
-#toast{position:fixed;bottom:24px;right:24px;background:var(--dark2);border:none;border-radius:12px;padding:12px 18px;font-size:13px;z-index:9999;transform:translateY(80px);opacity:0;transition:all .3s cubic-bezier(.4,0,.2,1);max-width:300px;pointer-events:none;color:#fff;font-family:var(--font-head);font-weight:600;box-shadow:var(--shadow-lg)}
-#toast.on{transform:translateY(0);opacity:1}
-#toast.ok{background:linear-gradient(135deg,#2E7D32,#388E3C);color:#fff}
-#toast.err{background:linear-gradient(135deg,#c0392b,#e74c3c);color:#fff}
-
-/* ━━ DASHBOARD ━━ */
-.dash-wrap{display:grid;grid-template-columns:220px 1fr;gap:24px;padding:30px 0;min-height:calc(100vh - 64px)}
-.sidebar{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r2);padding:20px;height:fit-content;position:sticky;top:84px;box-shadow:var(--shadow-sm)}
-.sb-user{text-align:center;padding:16px 0 20px;border-bottom:1.5px solid var(--border);margin-bottom:14px}
-.sb-avatar{width:60px;height:60px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--or2));display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;margin:0 auto 10px;overflow:hidden;cursor:pointer;box-shadow:0 4px 14px rgba(232,98,42,.3);transition:all var(--transition)}.sb-avatar:hover{transform:scale(1.05)}
-.sb-avatar img{width:100%;height:100%;object-fit:cover}
-.sb-nav button{display:flex;align-items:center;gap:9px;width:100%;padding:9px 12px;background:none;border:none;color:var(--muted);border-radius:10px;font-size:12px;text-align:left;transition:all var(--transition);margin-bottom:3px;position:relative;font-family:var(--font-head);font-weight:600}
-.sb-nav button:hover{background:var(--or-soft);color:var(--or)}
-.sb-nav button.on{background:var(--or);color:#fff;box-shadow:0 3px 10px rgba(232,98,42,.25)}
-.badge-notif{background:var(--or);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:auto}
-.dash-content{display:none}.dash-content.on{display:block;animation:fadeUp .3s var(--transition)}
-.stat-cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:14px;margin-bottom:22px}
-.s-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;box-shadow:var(--shadow-sm);transition:all var(--transition)}.s-card:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.s-card .n{font-size:26px;font-weight:700;color:var(--or);font-family:var(--font-head)}
-.s-card .l{font-size:11px;color:var(--muted);margin-top:3px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
-.badge-grid{display:flex;flex-wrap:wrap;gap:12px}
-.badge-it{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;width:92px;transition:all var(--transition);box-shadow:var(--shadow-sm)}.badge-it:hover{transform:translateY(-2px)}
-.badge-it.earned{border-color:rgba(232,98,42,.4);background:var(--or-soft)}
-.badge-it .bi{font-size:28px;margin-bottom:6px}
-.badge-it .bn{font-size:10px;font-weight:700;margin-bottom:3px;font-family:var(--font-head);color:var(--dark2)}
-.badge-it .bd{font-size:9px;color:var(--muted)}
-
-/* ━━ BLOG SOCIAL ━━ */
-.blog-social{display:flex;gap:10px;margin-top:18px;padding-top:16px;border-top:1.5px solid var(--border)}
-.social-btn{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:10px;font-size:13px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);cursor:pointer;transition:all var(--transition);font-family:var(--font-head);font-weight:600}
-.social-btn:hover,.social-btn.liked{border-color:var(--or);color:var(--or);background:var(--or-soft)}
-
-/* ━━ ADMIN ━━ */
-.admin-wrap{display:grid;grid-template-columns:200px 1fr;min-height:calc(100vh - 64px)}
-.admin-sb{background:var(--card);border-right:1.5px solid var(--border);padding:16px 0;display:flex;flex-direction:column}
-.admin-sb .sb-title{padding:0 16px 12px;font-size:10px;color:var(--muted);font-weight:700;letter-spacing:1.5px;text-transform:uppercase;font-family:var(--font-head)}
-.admin-sb button{display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;background:none;border:none;color:var(--muted);font-size:12px;text-align:left;transition:all var(--transition);cursor:pointer;position:relative;font-family:var(--font-head);font-weight:600}
-.admin-sb button:hover{background:var(--or-soft);color:var(--or)}
-.admin-sb button.on{background:var(--or-soft);border-right:3px solid var(--or);color:var(--or)}
-.admin-sb .logout-btn{margin-top:auto;color:#c0392b!important;border-top:1.5px solid var(--border)}
-.admin-main{padding:26px;overflow:auto;background:var(--bg2)}
-.admin-sec{display:none}.admin-sec.on{display:block;animation:fadeUp .3s var(--transition)}
-.a-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
-.a-stat{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;position:relative;box-shadow:var(--shadow-sm);transition:all var(--transition)}.a-stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.a-stat .n{font-size:28px;font-weight:700;color:var(--or);font-family:var(--font-head)}
-.a-stat .l{font-size:11px;color:var(--muted);margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.3px}
-.a-stat .t{font-size:10px;color:#27AE60}
-.a-stat .alert-dot{position:absolute;top:12px;right:12px;width:10px;height:10px;border-radius:50%;background:#E74C3C;animation:pulse 1.5s infinite}
-@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.15)}}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{padding:10px 12px;text-align:left;color:var(--muted);font-size:10px;font-weight:700;border-bottom:1.5px solid var(--border);text-transform:uppercase;letter-spacing:.8px;font-family:var(--font-head)}
-td{padding:11px 12px;border-bottom:1.5px solid var(--border);vertical-align:middle}
-tr:hover td{background:var(--or-soft)}
-.pill{padding:3px 9px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-head)}
-.pill-gr{background:rgba(46,125,50,.12);color:#1E8449}
-.pill-or{background:rgba(232,98,42,.12);color:#C04A18}
-.pill-re{background:rgba(192,57,43,.12);color:#C0392B}
-.pill-bl{background:rgba(44,62,80,.12);color:#2C3E50}
-.action-btns{display:flex;gap:6px}
-
-/* ━━ SPONSOR ━━ */
-.sponsor-strip{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
-.sponsor-logo-item{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:10px 22px;font-size:12px;color:var(--muted);transition:all var(--transition);display:flex;align-items:center;justify-content:center;min-width:80px;min-height:50px;box-shadow:var(--shadow-sm)}
-.sponsor-logo-item img{max-height:38px;max-width:100px;object-fit:contain}
-.sponsor-logo-item:hover{border-color:var(--or);transform:translateY(-2px);box-shadow:var(--shadow-md)}
-.sponsor-grid-admin{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
-.sponsor-item{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:12px;text-align:center;position:relative;min-height:72px;display:flex;align-items:center;justify-content:center}
-.sponsor-item img{max-width:100%;max-height:52px;object-fit:contain}
-.sponsor-del{position:absolute;top:5px;right:5px;background:#c0392b;border:none;color:#fff;width:20px;height:20px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-.sponsor-edit{position:absolute;top:5px;left:5px;background:var(--or);border:none;color:#fff;width:20px;height:20px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
-
-/* ━━ RACE CARD ━━ */
-.race-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
-.race-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.race-img{height:180px;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:48px;position:relative;overflow:hidden}
-.race-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s}
-.race-card:hover .race-img img{transform:scale(1.04)}
-.race-date-badge{position:absolute;top:10px;right:10px;background:var(--or);color:#fff;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-head);box-shadow:0 2px 8px rgba(232,98,42,.3)}
-
-/* ━━ BLOG CARD ━━ */
-.blog-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
-.blog-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.blog-img{height:180px;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
-.blog-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s}
-.blog-card:hover .blog-img img{transform:scale(1.04)}
-
-/* ━━ MAP ━━ */
-#map-container{height:380px;border-radius:var(--r);overflow:hidden;border:1.5px solid var(--border);margin-top:18px;box-shadow:var(--shadow-sm)}
-#club-map{height:100%;width:100%}
-
-/* ━━ NEWSLETTER ━━ */
-.newsletter-wrap{background:linear-gradient(135deg,var(--dark2),#3D1A0A);padding:44px 0;position:relative;overflow:hidden}
-.newsletter-wrap::before{content:'';position:absolute;top:-40px;right:-40px;width:240px;height:240px;border-radius:50%;background:rgba(232,98,42,.15)}
-.newsletter-form{display:flex;gap:10px;max-width:500px;margin:18px auto 0}
-.newsletter-form input{flex:1;background:rgba(255,255,255,.12);border-color:rgba(255,255,255,.2);color:#fff}
-.newsletter-form input::placeholder{color:rgba(255,255,255,.5)}
-
-/* ━━ FOOTER ━━ */
-footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
-.footer-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:30px;margin-bottom:30px}
-.footer-col h4{font-size:11px;font-weight:700;color:rgba(255,255,255,.9);margin-bottom:12px;text-transform:uppercase;letter-spacing:1px;font-family:var(--font-head)}
-.footer-col a{display:block;color:rgba(255,255,255,.45);margin-bottom:8px;font-size:12px;cursor:pointer;transition:color var(--transition)}
-.footer-col a:hover{color:var(--or)}
-.footer-legal{display:flex;flex-wrap:wrap;gap:14px;padding:16px 0;border-top:1px solid rgba(255,255,255,.08);font-size:11px}
-.footer-bot{border-top:1px solid rgba(255,255,255,.08);padding:16px 0;display:flex;justify-content:space-between;font-size:11px;color:rgba(255,255,255,.3)}
-
-/* ━━ SEARCH & FILTER ━━ */
-.search-wrap{position:relative;margin-bottom:18px}
-.search-wrap input{padding-left:42px;background:var(--card);border-color:var(--border)}
-.search-wrap::before{content:'🔍';position:absolute;left:13px;top:50%;transform:translateY(-50%);font-size:13px;pointer-events:none;z-index:1}
-.filter-strip{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:18px}
-.filt{padding:6px 14px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:11px;cursor:pointer;transition:all var(--transition);font-family:var(--font-head);font-weight:600}
-.filt:hover,.filt.on{border-color:var(--or);color:var(--or);background:var(--or-soft)}
-
-/* ━━ PACE ━━ */
-.pace-selector{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
-.pace-opt{padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);background:none;color:var(--muted);font-size:11px;cursor:pointer;transition:all var(--transition);font-family:var(--font-head);font-weight:600}
-.pace-opt.on{border-color:var(--or);color:var(--or);background:var(--or-soft)}
-
-/* ━━ CONTACT MSG ━━ */
-.contact-msg-item{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all var(--transition);margin-bottom:9px;box-shadow:var(--shadow-sm)}
-.contact-msg-item:hover{border-color:var(--or-light);box-shadow:var(--shadow-md)}
-.contact-msg-item.unread{border-left:4px solid var(--or)}
-.contact-msg-detail{background:var(--cream2);border-radius:10px;padding:18px;margin-top:14px;display:none;border:1.5px solid var(--border)}
-.contact-msg-detail.on{display:block}
-
-/* ━━ PROFILE POPUP ━━ */
-#user-profile-modal .modal{max-width:420px}
-.profile-popup-avatar{width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--or),var(--or2));display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;color:#fff;margin:0 auto 14px;overflow:hidden;box-shadow:0 4px 16px rgba(232,98,42,.3)}
-.profile-popup-avatar img{width:100%;height:100%;object-fit:cover}
-
-/* ━━ SEO ━━ */
-.seo-tools{background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;padding:16px;margin-bottom:14px}
-.char-count{font-size:11px;color:var(--muted);margin-top:4px}
-
-/* ━━ LOADING ━━ */
-.loading{position:fixed;inset:0;background:var(--cream);display:flex;align-items:center;justify-content:center;z-index:9999;flex-direction:column;gap:16px}
-.spinner{width:32px;height:32px;border:3px solid var(--border);border-top-color:var(--or);border-radius:50%;animation:spin .8s linear infinite}
-@keyframes spin{to{transform:rotate(360deg)}}
-
-/* ━━ SKELETON ━━ */
-.skeleton{background:linear-gradient(90deg,var(--cream2) 25%,var(--cream3) 50%,var(--cream2) 75%);background-size:200% 100%;animation:shimmer 1.6s infinite;border-radius:10px}
-@keyframes shimmer{0%{background-position:200% 0}100%{background-position:-200% 0}}
-.skel-card{height:200px;border-radius:var(--r)}.skel-line{height:14px;margin-bottom:8px}.skel-line.short{width:60%}
-
-/* ━━ EMPTY STATE ━━ */
-.empty-state{text-align:center;padding:50px 22px;color:var(--muted)}.empty-state .empty-ico{font-size:50px;margin-bottom:16px;opacity:.5}.empty-state p{font-size:14px;margin-bottom:18px}
-
-/* ━━ MEMBER BADGE ━━ */
-.member-badge{position:absolute;top:9px;right:9px;background:rgba(46,125,50,.85);color:#fff;font-size:10px;padding:3px 8px;border-radius:20px;font-weight:700;font-family:var(--font-head)}
-
-/* ━━ SCROLL TOP ━━ */
-#scroll-top{position:fixed;bottom:84px;right:20px;width:42px;height:42px;border-radius:50%;background:var(--or);color:#fff;border:none;font-size:18px;cursor:pointer;z-index:100;opacity:0;transform:translateY(12px);transition:all var(--transition);display:flex;align-items:center;justify-content:center;box-shadow:0 4px 14px rgba(232,98,42,.4)}
-#scroll-top.show{opacity:1;transform:translateY(0)}
-
-/* ━━ BOTTOM NAV ━━ */
-#bottom-nav{display:none;position:fixed;bottom:0;left:0;right:0;background:rgba(253,250,246,.97);border-top:1.5px solid var(--border);padding:8px 0;z-index:150;backdrop-filter:blur(16px)}
-.bn-item{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;background:none;border:none;color:var(--muted);font-size:10px;cursor:pointer;padding:6px 0;transition:all var(--transition);font-family:var(--font-head);font-weight:600}
-.bn-item.on{color:var(--or)}
-.bn-item .bi{font-size:18px}
-
-/* ━━ ADMIN NOTIF BADGE ━━ */
-.admin-notif-badge{background:#E74C3C;color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:auto;min-width:18px;text-align:center;line-height:16px}
-
-/* ━━ AI BLOG ━━ */
-.ai-assistant-box{background:linear-gradient(135deg,var(--or-soft),rgba(44,24,16,.04));border:1.5px solid rgba(232,98,42,.2);border-radius:14px;padding:22px;margin-bottom:22px}
-.ai-assistant-box h3{font-size:14px;margin-bottom:5px;display:flex;align-items:center;gap:9px;font-family:var(--font-head);font-weight:700}
-.ai-loading{display:flex;align-items:center;gap:10px;padding:14px;background:var(--cream2);border-radius:10px;font-size:13px;color:var(--muted);margin-top:10px}
-.ai-loading .spinner{width:18px;height:18px;flex-shrink:0}
-
-/* ━━ FIRSAT DETAIL ━━ */
-.firsat-detail-hero{height:290px;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-radius:var(--r);margin-bottom:26px}
-.firsat-detail-hero img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
-.firsat-detail-hero .hero-overlay{position:absolute;inset:0;background:rgba(26,10,4,.55)}
-.firsat-detail-hero .hero-inner{position:relative;z-index:1;text-align:center;padding:22px}
-
-/* ━━ SECTION BG VARIANTS ━━ */
-.sec-dark{background:var(--dark3);color:#fff}
-.sec-dark .sec-head h2{color:#fff}.sec-dark .sec-head h2::after{background:var(--or)}
-.sec-cream{background:var(--cream2)}
-.sec-orange{background:var(--or);color:#fff}
-
-/* ━━ RESPONSIVE ━━ */
-@media(max-width:768px){
-  #bottom-nav{display:flex}
-  body{padding-bottom:66px}
-  .dash-wrap,.admin-wrap{grid-template-columns:1fr}
-  .sidebar{display:none}
-  .admin-sb{flex-direction:row;overflow-x:auto;padding:6px;border-right:none;border-bottom:1.5px solid var(--border)}
-  .admin-sb button{white-space:nowrap;font-size:11px;padding:7px 11px}
-  .admin-sb .sb-title{display:none}
-  .nav-center{display:none}
-  .form-row{grid-template-columns:1fr}
-  .banner-content{padding:0 22px}
-  .banner-content h1{font-size:22px}
-  #hero-banner{height:340px}
-  .grid.g2,.grid.g3{grid-template-columns:1fr}
-  .newsletter-form{flex-direction:column}
-  .sec{padding:40px 0}
-  .container{padding:0 16px}
-  #topnav{padding:0 14px;gap:10px;height:58px}
-  .logo{font-size:16px}
-  .nav-right{gap:5px}
-  .btn{padding:7px 12px;font-size:11px}
-  .admin-main{padding:16px}
-  table{font-size:11px}
-  th,td{padding:8px 9px}
-}
-
-/* ━━ PAGE BANNER ━━ */
-.page-banner{position:relative;overflow:hidden;height:320px;background:#1a0800}
-.page-banner.pb-events{background:linear-gradient(135deg,#0d1b2a,#1a3a5c)}
-.page-banner.pb-clubs{background:linear-gradient(135deg,#1a0d00,#3d1f00)}
-.page-banner.pb-races{background:linear-gradient(135deg,#0d1a0d,#1a3d1a)}
-.page-banner.pb-blog{background:linear-gradient(135deg,#1a0d1a,#3d1a3d)}
-.page-banner .pb-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 8s ease}
-.page-banner:hover .pb-bg{transform:scale(1.04)}
-.page-banner .pb-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.35) 100%)}
-.page-banner .pb-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 60px}
-.page-banner .pb-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(232,98,42,.18);border:1px solid rgba(232,98,42,.4);color:#E8622A;padding:5px 14px;border-radius:20px;font-size:12px;font-family:'Raleway',sans-serif;font-weight:700;margin-bottom:16px;width:fit-content;letter-spacing:.3px}
-.page-banner h1{font-family:'Raleway',sans-serif;font-size:clamp(26px,4vw,50px);font-weight:800;line-height:1.1;color:#fff;margin-bottom:10px}
-.page-banner h1 span{color:#E8622A}
-.page-banner .pb-sub{font-size:15px;color:rgba(255,255,255,.75);margin-bottom:22px;line-height:1.6;max-width:560px;font-family:'Open Sans',sans-serif}
-.page-banner .pb-cta{display:flex;gap:10px;flex-wrap:wrap}
-/* 3D Floating shapes */
-.pb-shapes{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:1}
-.pb-shape{position:absolute;border-radius:50%;opacity:.08;animation:pbFloat 6s ease-in-out infinite}
-.pb-shape:nth-child(1){width:300px;height:300px;background:#E8622A;top:-80px;right:10%;animation-delay:0s;animation-duration:7s}
-.pb-shape:nth-child(2){width:180px;height:180px;background:#fff;bottom:-40px;right:25%;animation-delay:-2s;animation-duration:9s}
-.pb-shape:nth-child(3){width:120px;height:120px;background:#E8622A;top:30%;right:5%;animation-delay:-4s;animation-duration:6s}
-.pb-shape:nth-child(4){width:80px;height:80px;background:#fff;top:15%;right:40%;animation-delay:-1s;animation-duration:8s;opacity:.05}
-@keyframes pbFloat{0%,100%{transform:translateY(0) rotate(0deg) scale(1)}33%{transform:translateY(-20px) rotate(5deg) scale(1.05)}66%{transform:translateY(10px) rotate(-3deg) scale(.97)}}
-/* Özel sayfa şekilleri */
-.pb-runner-3d{position:absolute;right:8%;top:50%;transform:translateY(-50%);z-index:2;opacity:.18;animation:pbRunner 4s ease-in-out infinite}
-@keyframes pbRunner{0%,100%{transform:translateY(-50%) translateX(0)}50%{transform:translateY(-54%) translateX(8px)}}
-.pb-stat-chip{display:inline-flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.15);padding:6px 14px;border-radius:10px;font-size:12px;color:rgba(255,255,255,.8);font-family:'Raleway',sans-serif;font-weight:600;backdrop-filter:blur(8px)}
-.pb-stats{display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px}
-@media(max-width:768px){
-  .page-banner{height:240px}
-  .page-banner .pb-content{padding:0 20px}
-  .page-banner h1{font-size:22px}
-  .page-banner .pb-sub{font-size:13px}
-  .pb-runner-3d{display:none}
-}
-
-@keyframes ctaSlideIn{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-
-/* ━━ BLOG BODY CONTENT ━━ */
-.blog-body-content h1{font-size:26px;font-weight:700;margin:24px 0 12px;color:var(--dark2);line-height:1.2;font-family:var(--font-head)}
-.blog-body-content h2{font-size:21px;font-weight:700;margin:20px 0 10px;color:var(--dark2);line-height:1.25;font-family:var(--font-head)}
-.blog-body-content h3{font-size:17px;font-weight:600;margin:16px 0 8px;color:var(--dark2)}
-.blog-body-content p{margin-bottom:14px;line-height:1.85}
-.blog-body-content ul,.blog-body-content ol{margin:12px 0 16px 24px}
-.blog-body-content li{margin-bottom:6px;line-height:1.7}
-.blog-body-content strong,.blog-body-content b{font-weight:700;color:var(--dark2)}
-.blog-body-content em,.blog-body-content i{font-style:italic}
-.blog-body-content a{color:var(--or);text-decoration:underline}
-.blog-body-content blockquote{border-left:4px solid var(--or);padding:12px 18px;margin:16px 0;background:var(--bg2);border-radius:0 8px 8px 0;font-style:italic;color:var(--muted2)}
-.blog-body-content img{max-width:100%;border-radius:10px;margin:12px 0;display:block}
-.blog-body-content hr{border:none;border-top:1.5px solid var(--border);margin:24px 0}
-.blog-body-content code{background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}
-.blog-body-content pre{background:var(--bg3);padding:14px;border-radius:8px;overflow-x:auto;margin:14px 0}
-/* ━━ BLOG COMMENTS ━━ */
-.comment-item{padding:14px 0;border-bottom:1px solid var(--border)}
-.comment-item:last-child{border-bottom:none}
-.comment-header{display:flex;align-items:center;gap:10px;margin-bottom:8px}
-.comment-avatar{width:32px;height:32px;border-radius:50%;background:var(--or-soft);border:1.5px solid var(--or-light);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:var(--or);flex-shrink:0}
-.comment-name{font-weight:600;font-size:13px;color:var(--dark2)}
-.comment-date{font-size:11px;color:var(--muted)}
-.comment-text{font-size:13px;color:var(--text);line-height:1.6;margin-bottom:8px}
-.comment-actions{display:flex;gap:12px}
-.comment-like-btn,.comment-reply-btn{background:none;border:none;font-size:12px;color:var(--muted);cursor:pointer;padding:3px 8px;border-radius:6px;transition:.15s}
-.comment-like-btn:hover,.comment-reply-btn:hover{background:var(--bg3);color:var(--dark2)}
-.comment-like-btn.liked{color:var(--or);font-weight:600}
-.reply-list{margin-top:10px;padding-left:20px;border-left:2px solid var(--border)}
-.reply-item{padding:10px 0;border-bottom:1px solid var(--border2)}
-.reply-item:last-child{border-bottom:none}
-.comment-input-wrap{display:flex;gap:10px;align-items:flex-start;margin-top:10px}
-.comment-input-wrap textarea{flex:1;border:1.5px solid var(--border);border-radius:10px;padding:10px 14px;font-size:13px;resize:none;font-family:var(--font-body);background:var(--bg);color:var(--text);transition:border .2s}
-.comment-input-wrap textarea:focus{outline:none;border-color:var(--or)}
-
-/* ━━ FOMO SİSTEMİ ━━ */
-.fomo-bar{height:6px;border-radius:3px;background:var(--bg3);overflow:hidden;margin:6px 0}
-.fomo-bar-fill{height:100%;border-radius:3px;transition:width .4s,background .4s}
-.fomo-bar-fill.normal{background:var(--muted)}
-.fomo-bar-fill.warning{background:var(--or)}
-.fomo-bar-fill.danger{background:#f87171}
-.fomo-avatars{display:flex;align-items:center;gap:-4px;margin:6px 0}
-.fomo-avatar{width:24px;height:24px;border-radius:50%;background:var(--or);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;border:2px solid var(--card);margin-left:-6px;flex-shrink:0}
-.fomo-avatar:first-child{margin-left:0}
-.fomo-avatar-more{background:var(--bg3);color:var(--muted);font-size:9px}
-.fomo-tag{display:inline-flex;align-items:center;gap:4px;font-size:10px;font-weight:700;padding:3px 8px;border-radius:20px;margin-top:4px}
-.fomo-tag.scarcity{background:rgba(248,113,113,.12);color:#f87171}
-.fomo-tag.activity{background:rgba(232,98,42,.12);color:var(--or)}
-.fomo-tag.full{background:rgba(248,113,113,.2);color:#f87171}
-@keyframes fomoSlideIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
-.fomo-tag{animation:fomoSlideIn .3s ease}
-.fomo-participants{margin-top:14px;padding-top:14px;border-top:1px solid var(--border)}
-.fomo-participant-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border2);font-size:13px}
-.fomo-participant-row:last-child{border-bottom:none}
-.fomo-participant-row.latest{background:linear-gradient(90deg,rgba(232,98,42,.06),transparent);border-radius:8px;padding:8px 10px;margin:0 -10px}
-.fomo-participant-row.latest .fomo-avatar{background:var(--or);box-shadow:0 0 0 3px rgba(232,98,42,.2)}
-.fomo-realtime-toast{position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);background:var(--dark2);color:#fff;padding:10px 18px;border-radius:30px;font-size:13px;font-weight:600;z-index:9999;opacity:0;transition:all .3s;pointer-events:none;display:flex;align-items:center;gap:8px;white-space:nowrap}
-.fomo-realtime-toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
-.fomo-countdown-wrap{display:flex;gap:8px;margin:10px 0;flex-wrap:wrap}
-.fomo-cd-unit{text-align:center;background:var(--bg2);border-radius:10px;padding:8px 12px;min-width:52px}
-.fomo-cd-n{font-size:22px;font-weight:800;font-family:var(--font-head);color:var(--or);line-height:1}
-.fomo-cd-l{font-size:9px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-top:2px}
-
-/* ━━ SSS SAYFASI ━━ */
-.sss-section{margin-bottom:36px}
-.sss-cat-title{font-size:16px;font-weight:700;font-family:var(--font-head);color:var(--or);margin-bottom:14px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
-.sss-item{border:1.5px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .2s}
-.sss-item:hover{border-color:var(--or-light)}
-.sss-q{width:100%;background:none;border:none;padding:16px 20px;text-align:left;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--font-body);line-height:1.4}
-.sss-q:hover{background:var(--bg2)}
-.sss-q.open{color:var(--or);background:var(--bg2)}
-.sss-arrow{font-size:16px;color:var(--muted);transition:transform .2s;flex-shrink:0}
-.sss-q.open .sss-arrow{transform:rotate(180deg);color:var(--or)}
-.sss-a{display:none;padding:0 20px 16px;font-size:13px;color:var(--muted2);line-height:1.75;border-top:1px solid var(--border)}
-.sss-a p{margin:0}
-.sss-a ul{color:var(--muted2)}
-.sss-a a{color:var(--or)}
-.sss-item.open .sss-a{display:block}
-
-/* ━━ SSS ━━ */
-.sss-section{margin-bottom:36px}
-.sss-cat{font-size:16px;font-weight:700;font-family:var(--font-head);color:var(--or);margin-bottom:12px;padding-bottom:8px;border-bottom:2px solid var(--border);display:flex;align-items:center;gap:8px}
-.sss-item{border:1.5px solid var(--border);border-radius:12px;margin-bottom:8px;overflow:hidden;transition:border-color .2s}
-.sss-item:hover{border-color:var(--or-light)}
-.sss-q{width:100%;background:var(--card);border:none;padding:16px 20px;text-align:left;font-size:14px;font-weight:600;color:var(--text);cursor:pointer;display:flex;justify-content:space-between;align-items:center;gap:12px;font-family:var(--font-body);transition:background .2s}
-.sss-q:hover{background:var(--bg2)}
-.sss-q.open{background:var(--bg2);color:var(--or)}
-.sss-icon{font-size:20px;font-weight:300;color:var(--muted);transition:transform .25s;flex-shrink:0;line-height:1}
-.sss-q.open .sss-icon{transform:rotate(45deg);color:var(--or)}
-.sss-a{display:none;padding:0 20px 18px;background:var(--bg2);font-size:13px;color:var(--muted2);line-height:1.75}
-.sss-a.open{display:block;animation:sssOpen .2s ease}
-.sss-a p{margin-bottom:8px}
-.sss-a p:last-child{margin-bottom:0}
-.sss-a ul{margin:8px 0 8px 20px;display:flex;flex-direction:column;gap:4px}
-.sss-a li{list-style:none;padding:2px 0}
-@keyframes sssOpen{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)}}
-
-/* ━━ KAYAN YAZI ŞERİDİ ━━ */
-#ticker-wrap{background:var(--dark2);overflow:hidden;padding:0;height:42px;display:flex;align-items:center;position:relative;border-top:2px solid rgba(232,98,42,.3);border-bottom:2px solid rgba(232,98,42,.3);max-width:100%;width:100%}
-#ticker-wrap.hidden{display:none}
-.ticker-track{display:flex;align-items:center;gap:0;white-space:nowrap;animation:tickerScroll 30s linear infinite}
-.ticker-track:hover{animation-play-state:paused}
-@keyframes tickerScroll{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
-.ticker-item{display:inline-flex;align-items:center;gap:6px;padding:0 28px;font-size:13px;font-weight:600;font-family:var(--font-head);color:#fff;letter-spacing:.3px;border-right:1px solid rgba(255,255,255,.12);cursor:default}
-.ticker-item:last-child{border-right:none}
-.ticker-sep{color:var(--or);font-size:16px;padding:0 4px}
-
-/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-   MOBİL RESPONSIVE — 480px ve altı
-━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
-@media(max-width:480px){
-
-  /* ── CONTAINER ── */
-  .container{padding:0 14px}
-  .sec{padding:28px 0}
-  .sec-sm{padding:16px 0}
-
-  /* ── NAV ── */
-  nav{gap:4px;padding:0 10px}
   #nav-guest{gap:3px;flex-shrink:1;min-width:0}
   #nav-guest .btn{font-size:10px;padding:5px 8px;white-space:nowrap}
   #nav-user{gap:3px;flex-shrink:1}
@@ -1612,6 +694,47 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .admin-wrap{min-height:auto}
 
 }
+/* ━━ NASIL ÇALIŞIR ━━ */
+.how-section{background:var(--bg2);padding:20px 0 16px}
+.how-header{text-align:center;margin-bottom:16px}
+.how-tag{display:inline-block;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--or);background:rgba(232,98,42,.1);padding:3px 10px;border-radius:20px;margin-bottom:6px}
+.how-title{font-size:18px;font-family:var(--font-head);margin:4px 0;color:var(--dark2)}
+.how-sub{font-size:12px;color:var(--muted);margin:0}
+.how-steps{display:flex;align-items:flex-start;justify-content:center;gap:0;flex-wrap:wrap}
+.how-step{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:12px;background:var(--card);border:1.5px solid var(--border);width:170px;flex-shrink:0;transition:all .25s;cursor:default}
+.how-step:hover{border-color:var(--or);transform:translateY(-3px);box-shadow:0 8px 24px rgba(232,98,42,.12)}
+.how-step:hover .how-icon{transform:scale(1.15)}
+.how-icon-wrap{position:relative;flex-shrink:0}
+.how-icon{width:40px;height:40px;border-radius:50%;background:rgba(232,98,42,.1);border:1.5px solid rgba(232,98,42,.25);display:flex;align-items:center;justify-content:center;font-size:18px;transition:transform .25s}
+.how-num{position:absolute;top:-4px;right:-4px;background:var(--or);color:#fff;width:16px;height:16px;border-radius:50%;font-size:9px;font-weight:800;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)}
+.how-text h3{font-size:12px;font-weight:700;margin:0 0 3px;font-family:var(--font-head);color:var(--dark2)}
+.how-text p{font-size:11px;color:var(--muted);line-height:1.45;margin:0}
+.how-arrow{display:flex;align-items:center;color:var(--or);font-size:16px;padding:0 4px;padding-top:18px;opacity:.5}
+.how-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap}
+.how-stat{display:flex;flex-direction:column;align-items:center;padding:6px 20px;gap:2px}
+.how-stat-n{font-size:18px;font-weight:800;color:var(--or);font-family:var(--font-head);line-height:1}
+.how-stat-l{font-size:10px;color:var(--muted);letter-spacing:.3px}
+.how-stat-div{width:1px;height:28px;background:var(--border)}
+
+/* ━━ HAMBURGER MENÜ ━━ */
+#hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border-radius:8px;background:none;border:none}
+#hamburger span{display:block;width:22px;height:2px;background:var(--text);border-radius:2px;transition:all .3s}
+#hamburger.open span:nth-child(1){transform:translateY(7px) rotate(45deg)}
+#hamburger.open span:nth-child(2){opacity:0}
+#hamburger.open span:nth-child(3){transform:translateY(-7px) rotate(-45deg)}
+#mobile-menu{display:none;position:fixed;top:64px;left:0;right:0;background:var(--card);border-bottom:1.5px solid var(--border);z-index:199;padding:12px 20px;flex-direction:column;gap:4px;box-shadow:var(--shadow-md)}
+#mobile-menu.open{display:flex}
+#mobile-menu button{text-align:left;background:none;border:none;padding:10px 4px;font-size:14px;color:var(--text);border-bottom:1px solid var(--border2);cursor:pointer;font-family:var(--font-body)}
+#mobile-menu button:last-child{border-bottom:none}
+#mobile-menu button:hover{color:var(--or)}
+
+@media(max-width:768px){
+  .how-steps{gap:8px}
+  .how-step{width:calc(50% - 20px);min-width:140px}
+  .how-arrow{display:none}
+  .nav-center{display:none !important}
+  #hamburger{display:flex}
+}
 </style>
 </head>
 <body>
@@ -1663,7 +786,24 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <button class="btn btn-or btn-sm" id="nav-dashboard-btn" onclick="nav('dashboard')">Dashboard</button>
     </div>
   </div>
+    <button id="hamburger" onclick="toggleMobileMenu()" aria-label="Menü">
+    <span></span><span></span><span></span>
+  </button>
 </nav>
+<!-- Mobil Menü -->
+<div id="mobile-menu">
+  <button onclick="nav('home');toggleMobileMenu()">🏠 Ana Sayfa</button>
+  <button onclick="nav('events');toggleMobileMenu()">📅 Etkinlikler</button>
+  <button onclick="nav('clubs');toggleMobileMenu()">🤝 Kulüpler</button>
+  <button onclick="nav('races');toggleMobileMenu()">🏆 Yarış Takvimi</button>
+  <button onclick="nav('firsatlar');toggleMobileMenu()">🎁 Fırsatlar</button>
+  <button onclick="nav('blog');toggleMobileMenu()">📰 Blog</button>
+  <button onclick="nav('contact');toggleMobileMenu()">📧 İletişim</button>
+  <button onclick="nav('sss');toggleMobileMenu()">❓ SSS</button>
+  <div style="height:1px;background:var(--border);margin:4px 0"></div>
+  <button onclick="openAuth('login');toggleMobileMenu()">Giriş Yap</button>
+  <button onclick="openAuth('register');toggleMobileMenu()" style="color:var(--or);font-weight:600">✨ Üye Ol</button>
+</div>
 
 <div id="bottom-nav">
   <button class="bn-item on" onclick="nav('home')"><div class="bi">🏠</div><span>Ana</span></button>
@@ -1719,95 +859,45 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   </div></div>
   <div class="divider"></div>
     <div class="divider"></div>
-  <div class="sec" style="background:var(--bg2);padding:28px 0"><div class="container">
-    <h2 style="text-align:center;margin-bottom:8px;font-size:20px;font-family:var(--font-head)">Nasıl Çalışır?</h2>
-    <p style="text-align:center;color:var(--muted);font-size:13px;margin-bottom:24px">Dakikalar içinde koşu topluluğuna katıl</p>
-    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:0;position:relative">
-      <!-- Bağlantı çizgisi (masaüstü) -->
-      <div style="position:absolute;top:28px;left:10%;right:10%;height:2px;background:linear-gradient(90deg,var(--or),rgba(232,98,42,.1));z-index:0;display:none" class="how-line"></div>
-
-      <!-- Adım 1 -->
-      <div style="text-align:center;padding:14px 12px;position:relative;z-index:1">
-        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(232,98,42,.15),rgba(232,98,42,.05));border:2px solid var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;position:relative">
-          📝
-          <span style="position:absolute;top:-6px;right:-6px;background:var(--or);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)">1</span>
-        </div>
-        <h3 style="font-size:13px;font-weight:700;margin-bottom:5px;font-family:var(--font-head)">Üye Ol</h3>
-        <p style="font-size:11px;color:var(--muted);line-height:1.5">E-posta ile saniyeler içinde kaydol. Profilini oluştur, şehrini ve koşu seviyeni belirt.</p>
+    <div class="how-section"><div class="container">
+    <div class="how-header">
+      <span class="how-tag">Platform</span>
+      <h2 class="how-title">Nasıl Çalışır?</h2>
+      <p class="how-sub">Dakikalar içinde Türkiye'nin koşu topluluğuna katıl</p>
+    </div>
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-icon-wrap"><span class="how-num">1</span><div class="how-icon">📝</div></div>
+        <div class="how-text"><h3>Üye Ol</h3><p>E-posta ile saniyeler içinde kaydol. Profilini oluştur, şehrini ve koşu seviyeni belirt.</p></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--or);padding-top:14px">→</div>
-
-      <!-- Adım 2 -->
-      <div style="text-align:center;padding:14px 12px;position:relative;z-index:1">
-        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(232,98,42,.15),rgba(232,98,42,.05));border:2px solid var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;position:relative">
-          🔍
-          <span style="position:absolute;top:-6px;right:-6px;background:var(--or);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)">2</span>
-        </div>
-        <h3 style="font-size:13px;font-weight:700;margin-bottom:5px;font-family:var(--font-head)">Keşfet</h3>
-        <p style="font-size:11px;color:var(--muted);line-height:1.5">Şehrindeki kulüpleri, yaklaşan etkinlikleri ve yarış takvimini tek yerden incele.</p>
+      <div class="how-arrow">→</div>
+      <div class="how-step">
+        <div class="how-icon-wrap"><span class="how-num">2</span><div class="how-icon">🔍</div></div>
+        <div class="how-text"><h3>Keşfet</h3><p>Şehrindeki kulüpleri, etkinlikleri ve yarış takvimini tek yerden incele.</p></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--or);padding-top:14px">→</div>
-
-      <!-- Adım 3 -->
-      <div style="text-align:center;padding:14px 12px;position:relative;z-index:1">
-        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(232,98,42,.15),rgba(232,98,42,.05));border:2px solid var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;position:relative">
-          🤝
-          <span style="position:absolute;top:-6px;right:-6px;background:var(--or);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)">3</span>
-        </div>
-        <h3 style="font-size:13px;font-weight:700;margin-bottom:5px;font-family:var(--font-head)">Katıl</h3>
-        <p style="font-size:11px;color:var(--muted);line-height:1.5">Kulübüne üye ol, etkinliğe anında kaydol. İlk 5 katılımcıdan biri ol, yer bulmadan yetiş!</p>
+      <div class="how-arrow">→</div>
+      <div class="how-step">
+        <div class="how-icon-wrap"><span class="how-num">3</span><div class="how-icon">🤝</div></div>
+        <div class="how-text"><h3>Katıl & Grupla</h3><p>Kulübüne üye ol, etkinliğe kaydol. Kendi grubunu kur, koşucuları davet et.</p></div>
       </div>
-      <div style="display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--or);padding-top:14px">→</div>
-
-      <!-- Adım 4 -->
-      <div style="text-align:center;padding:14px 12px;position:relative;z-index:1">
-        <div style="width:52px;height:52px;border-radius:50%;background:linear-gradient(135deg,rgba(232,98,42,.15),rgba(232,98,42,.05));border:2px solid var(--or);display:flex;align-items:center;justify-content:center;font-size:22px;margin:0 auto 10px;position:relative">
-          🏅
-          <span style="position:absolute;top:-6px;right:-6px;background:var(--or);color:#fff;width:18px;height:18px;border-radius:50%;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;font-family:var(--font-head)">4</span>
-        </div>
-        <h3 style="font-size:13px;font-weight:700;margin-bottom:5px;font-family:var(--font-head)">Kazan</h3>
-        <p style="font-size:11px;color:var(--muted);line-height:1.5">Etkinliklere katıldıkça rozet kazan, liderboardda yüksel. Topluluğun parçası ol.</p>
+      <div class="how-arrow">→</div>
+      <div class="how-step">
+        <div class="how-icon-wrap"><span class="how-num">4</span><div class="how-icon">🏅</div></div>
+        <div class="how-text"><h3>Kazan</h3><p>Etkinliklere katıldıkça rozet kazan, liderboardda yüksel.</p></div>
       </div>
     </div>
-
-    <!-- Alt istatistikler -->
-    <div style="display:flex;justify-content:center;gap:32px;margin-top:20px;padding-top:16px;border-top:1px solid var(--border);flex-wrap:wrap">
-      <div style="text-align:center">
-        <div style="font-size:20px;font-weight:800;color:var(--or);font-family:var(--font-head)">81</div>
-        <div style="font-size:11px;color:var(--muted)">İl</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:20px;font-weight:800;color:var(--or);font-family:var(--font-head)">100%</div>
-        <div style="font-size:11px;color:var(--muted)">Ücretsiz</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:20px;font-weight:800;color:var(--or);font-family:var(--font-head)">∞</div>
-        <div style="font-size:11px;color:var(--muted)">Etkinlik</div>
-      </div>
-      <div style="text-align:center">
-        <div style="font-size:20px;font-weight:800;color:var(--or);font-family:var(--font-head)">🏃</div>
-        <div style="font-size:11px;color:var(--muted)">Koşucular</div>
+    <div class="how-stats">
+      <div class="how-stat"><span class="how-stat-n">81</span><span class="how-stat-l">İl</span></div>
+      <div class="how-stat-div"></div>
+      <div class="how-stat"><span class="how-stat-n">%100</span><span class="how-stat-l">Ücretsiz</span></div>
+      <div class="how-stat-div"></div>
+      <div class="how-stat"><span class="how-stat-n">∞</span><span class="how-stat-l">Etkinlik</span></div>
+      <div class="how-stat-div"></div>
+      <div class="how-stat" onclick="openAuth('groupadmin')" style="cursor:pointer">
+        <span class="how-stat-n">🏃</span><span class="how-stat-l" style="color:var(--or);font-weight:600">Grup Kur →</span>
       </div>
     </div>
   </div></div>
-  
-</div>
-
-<!-- EVENTS -->
-<div class="pg" id="pg-events">
-<div id="pb-events" class="page-banner pb-events"></div>
-<div class="container sec">
-  <h2 style="margin-bottom:18px">Etkinlikler</h2>
-  <div class="search-wrap"><input type="text" placeholder="Etkinlik ara..." oninput="filterEvts(this.value)"/></div>
-  <div class="filter-strip">
-    <button class="filt on" onclick="filterEvtCat('tüm',this)">Tümü</button>
-    <button class="filt" onclick="filterEvtCat('Maraton',this)">Maraton</button>
-    <button class="filt" onclick="filterEvtCat('Trail',this)">Trail</button>
-    <button class="filt" onclick="filterEvtCat('5K/10K',this)">5K/10K</button>
-    <button class="filt" onclick="filterEvtCat('Ultra',this)">Ultra</button>
-  </div>
-  <div id="events-list"></div>
-</div></div>
 
 <div class="pg" id="pg-event-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('events')" style="margin-bottom:18px">← Geri</button><div id="event-detail-content"></div></div>  <div class="sec-sm" style="padding:24px 0 16px"><div class="container">
     <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
@@ -2162,7 +1252,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
           <span class="sss-icon">+</span>
         </button>
         <div class="sss-a">
-          <p>Platform üzerindeki <strong>İletişim</strong> formu veya <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">info@runclubturkiye.com</a> adresi üzerinden bize ulaşabilirsin. Geri bildirimlerini değerlendiriyor, platformu sürekli iyileştiriyoruz.</p>
+          <p>Platform üzerindeki <strong>İletişim</strong> formu veya <a href="/cdn-cgi/l/email-protection#a2cbccc4cde2d0d7ccc1ced7c0d6d7d0c9cbdbc78cc1cdcf" style="color:var(--or)"><span class="__cf_email__" data-cfemail="98f1f6fef7d8eaedf6fbf4edfaecedeaf3f1e1fdb6fbf7f5">[email&#160;protected]</span></a> adresi üzerinden bize ulaşabilirsin. Geri bildirimlerini değerlendiriyor, platformu sürekli iyileştiriyoruz.</p>
         </div>
       </div>
 
@@ -2186,7 +1276,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div style="text-align:center;margin-bottom:40px">
       <span class="tag tag-or" style="margin-bottom:12px;display:inline-block">Yardım Merkezi</span>
       <h1 style="font-size:30px;font-family:var(--font-head);margin-bottom:10px">Sıkça Sorulan Sorular</h1>
-      <p style="color:var(--muted);font-size:14px;max-width:520px;margin:0 auto">RunClubTürkiye hakkında merak ettiğin her şey burada. Bulamadığın bir cevap varsa <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">bize yaz</a>.</p>
+      <p style="color:var(--muted);font-size:14px;max-width:520px;margin:0 auto">RunClubTürkiye hakkında merak ettiğin her şey burada. Bulamadığın bir cevap varsa <a href="/cdn-cgi/l/email-protection#432a2d252c0331362d202f3621373631282a3a266d202c2e" style="color:var(--or)">bize yaz</a>.</p>
     </div>
 
     <!-- Platform nedir -->
@@ -2308,7 +1398,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <div class="sss-item">
         <button class="sss-q" onclick="toggleSss(this)">Bir yarışı takvime nasıl ekletirim?<span class="sss-arrow">▾</span></button>
         <div class="sss-a">
-          <p>Organize ettiğin veya haberdar olduğun bir yarışın takvime eklenmesini istiyorsan <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">info@runclubturkiye.com</a> adresine yarış bilgilerini gönder. Editöryal ekibimiz inceler ve uygun gördüğü durumlarda ekler.</p>
+          <p>Organize ettiğin veya haberdar olduğun bir yarışın takvime eklenmesini istiyorsan <a href="/cdn-cgi/l/email-protection#e28b8c848da290978c818e9780969790898b9b87cc818d8f" style="color:var(--or)"><span class="__cf_email__" data-cfemail="620b0c040d2210170c010e1700161710090b1b074c010d0f">[email&#160;protected]</span></a> adresine yarış bilgilerini gönder. Editöryal ekibimiz inceler ve uygun gördüğü durumlarda ekler.</p>
         </div>
       </div>
     </div>
@@ -2343,7 +1433,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <div class="sss-item">
         <button class="sss-q" onclick="toggleSss(this)">Hesabımı nasıl silebilirim?<span class="sss-arrow">▾</span></button>
         <div class="sss-a">
-          <p>Hesap silme işlemi için <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">info@runclubturkiye.com</a> adresine kayıtlı e-posta adresinizden talep gönderebilirsiniz. KVKK kapsamındaki kişisel verilerinizin silinmesini de aynı adres üzerinden talep edebilirsiniz.</p>
+          <p>Hesap silme işlemi için <a href="/cdn-cgi/l/email-protection#abc2c5cdc4ebd9dec5c8c7dec9dfded9c0c2d2ce85c8c4c6" style="color:var(--or)"><span class="__cf_email__" data-cfemail="345d5a525b7446415a575841564041465f5d4d511a575b59">[email&#160;protected]</span></a> adresine kayıtlı e-posta adresinizden talep gönderebilirsiniz. KVKK kapsamındaki kişisel verilerinizin silinmesini de aynı adres üzerinden talep edebilirsiniz.</p>
         </div>
       </div>
     </div>
@@ -2379,7 +1469,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
         <button class="sss-q" onclick="toggleSss(this)">Sorunum burada yok, nasıl iletişime geçebilirim?<span class="sss-arrow">▾</span></button>
         <div class="sss-a">
           <p>Her türlü soru, öneri ve geri bildirim için:</p>
-          <p style="margin-top:8px">📧 <a href="mailto:info@runclubturkiye.com" style="color:var(--or)">info@runclubturkiye.com</a></p>
+          <p style="margin-top:8px">📧 <a href="/cdn-cgi/l/email-protection#543d3a323b1426213a373821362021263f3d2d317a373b39" style="color:var(--or)"><span class="__cf_email__" data-cfemail="0960676f66497b7c676a657c6b7d7c7b6260706c276a6664">[email&#160;protected]</span></a></p>
           <p style="margin-top:4px">📸 Instagram: <a href="https://instagram.com/runclubturkiye" target="_blank" style="color:var(--or)">@runclubturkiye</a></p>
           <p style="margin-top:8px;color:var(--muted);font-size:12px">Mesajlara genellikle 1–2 iş günü içinde dönüş yapılmaktadır.</p>
         </div>
@@ -2759,7 +1849,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="toast"></div>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
@@ -3833,6 +2923,10 @@ window.nav=id=>{
   document.querySelectorAll('.nav-center button').forEach(b=>b.classList.remove('on'));
   const nb=document.getElementById('nb-'+id);if(nb)nb.classList.add('on');
   window.scrollTo(0,0);
+  const _mm=document.getElementById('mobile-menu');
+  const _hb=document.getElementById('hamburger');
+  if(_mm)_mm.classList.remove('open');
+  if(_hb)_hb.classList.remove('open');
   // Mobil menüyü kapat
   const mm=document.getElementById('mobile-menu');
   const hb=document.getElementById('hamburger');
@@ -6756,22 +5850,6 @@ try {
 }
 // URL routing — sayfa yüklenince mevcut URL'yi kontrol et
 setTimeout(()=>{try{if(typeof routerInit==='function')routerInit();}catch(e){}},300);
-// Güvenlik ağı: 2 saniye sonra loading kesinlikle kapansın
-setTimeout(()=>{
-  const l=document.getElementById('loading');
-  if(l&&l.style.display!=='none'){
-    l.style.display='none';l.style.visibility='hidden';
-    try{document.getElementById('pg-home').classList.add('on');}catch(e){}
-    console.warn('Loading timeout — force closed');
-  }
-},2000);
-
-(function waitForDB(attempt){
-  if(attempt>60)return;
-  if(typeof window.loadAllFromDB==='function'&&window._fb&&window._fb.db){
-    window.loadAllFromDB().then(()=>{try{renderHomeData();}catch(e){}}).catch(e=>console.warn('DB:',e));
-  } else { setTimeout(()=>waitForDB(attempt+1),150); }
-})(0);
 </script>
 </body>
 </html>

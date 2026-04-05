@@ -2960,10 +2960,51 @@ window.nav=id=>{
   if(id==='profile')syncProfileUI&&syncProfileUI();
   if(['kvkk','gizlilik','kosullar','riza','cerez'].includes(id))renderLegalPage(id);
   if(id==='sss'){const pg=document.getElementById('pg-sss');if(pg&&!pg.classList.contains('on')){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));pg.classList.add('on');}}
-  if(id==='events'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('events');}catch(e){}; if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
-  if(id==='clubs'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('clubs');}catch(e){}; renderClubsPage();}
-  if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
-  if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
+  if(id==='events'){
+    try{if(typeof renderPageBanner==='function')renderPageBanner('events');}catch(e){}
+    const _evList=document.getElementById('events-list');
+    if(_evList){
+      // Önce mevcut veriyi göster
+      if(window.EVENTS&&window.EVENTS.length>0){
+        console.log('[RCT] events nav: mevcut veri gösteriliyor',window.EVENTS.length);
+        renderEvts(window.EVENTS,'events-list');
+      } else {
+        _evList.innerHTML='<div class="spinner" style="margin:60px auto"></div>';
+      }
+      // Firebase'den taze çek
+      if(window.loadEventsFromDB){
+        window.loadEventsFromDB()
+          .then(()=>{
+            console.log('[RCT] events yüklendi:',window.EVENTS.length);
+            renderEvts(window.EVENTS,'events-list');
+          })
+          .catch(e=>console.error('[RCT] events hata:',e));
+      }
+    }
+  }
+  if(id==='clubs'){
+    try{if(typeof renderPageBanner==='function')renderPageBanner('clubs');}catch(e){}
+    console.log('[RCT] nav clubs çağrıldı, CLUBS:',window.CLUBS?.length);
+    renderClubsPage();
+  }
+  if(id==='races'){
+    try{if(typeof renderPageBanner==='function')renderPageBanner('races');}catch(e){}
+    if(window.RACES&&window.RACES.length>0){renderRaceList();}
+    if(window.loadRacesFromDB){
+      window.loadRacesFromDB()
+        .then(()=>{console.log('[RCT] races:',window.RACES.length);renderRaceList();})
+        .catch(e=>console.error('[RCT] races hata:',e));
+    }
+  }
+  if(id==='blog'){
+    try{if(typeof renderPageBanner==='function')renderPageBanner('blog');}catch(e){}
+    if(window.BLOG_POSTS&&window.BLOG_POSTS.length>0){renderBlogList();}
+    if(window.loadBlogFromDB){
+      window.loadBlogFromDB()
+        .then(()=>{console.log('[RCT] blog:',window.BLOG_POSTS.length);renderBlogList();})
+        .catch(e=>console.error('[RCT] blog hata:',e));
+    }
+  }
   if(id==='firsatlar')renderFirsatlar();
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
   if(id==='home'){
@@ -3139,7 +3180,18 @@ function evtCard(e){
     </div>
   </div>`;
 }
-function renderEvts(list,cid){const el=document.getElementById(cid);if(el)el.innerHTML=list.map(evtCard).join('')||'<p style="color:var(--muted)">Etkinlik bulunamadı.</p>';}
+function renderEvts(list,cid){
+  console.log('[RCT] renderEvts çağrıldı, list:',list?.length,'cid:',cid);
+  const el=document.getElementById(cid);
+  if(!el){console.error('[RCT] renderEvts: element YOK:',cid);return;}
+  try{
+    el.innerHTML=(list||[]).map(evtCard).join('')||'<p style="color:var(--muted);padding:20px">Etkinlik bulunamadı.</p>';
+    console.log('[RCT] renderEvts tamamlandı');
+  }catch(e){
+    console.error('[RCT] renderEvts HATA:',e.message);
+    el.innerHTML='<p style="color:red;padding:20px">Render hatası: '+e.message+'</p>';
+  }
+}
 window.filterEvts=q=>renderEvts(EVENTS.filter(e=>e.title.toLowerCase().includes(q.toLowerCase())||e.city.toLowerCase().includes(q.toLowerCase())),'events-list');
 window.filterEvtCat=(cat,btn)=>{document.querySelectorAll('#pg-events .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderEvts(cat==='tüm'?EVENTS:EVENTS.filter(e=>e.cat===cat),'events-list');};
 window.openEvent=id=>{
@@ -3868,8 +3920,12 @@ function raceCard(r){
 }
 window.raceCard=raceCard;
 function renderRaceList(){
-  const html=window.RACES.map(raceCard).join('');
-  const rl=document.getElementById('races-list');if(rl)rl.innerHTML=html||'<p style="color:var(--muted)">Yarış bulunamadı.</p>';
+  console.log('[RCT] renderRaceList, RACES:',window.RACES?.length);
+  const rl=document.getElementById('races-list');
+  if(!rl){console.error('[RCT] races-list YOK');return;}
+  try{
+    rl.innerHTML=(window.RACES||[]).map(raceCard).join('')||'<p style="color:var(--muted);padding:20px">Yarış bulunamadı.</p>';
+  }catch(e){console.error('[RCT] renderRaceList HATA:',e.message);rl.innerHTML='<p style="color:red">'+e.message+'</p>';}
 }
 function renderRacePreview(){const hr=document.getElementById('home-races');if(hr)hr.innerHTML=window.RACES.slice(0,4).map(raceCard).join('');}
 window.filterRaces=q=>{const el=document.getElementById('races-list');if(el)el.innerHTML=RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())).map(raceCard).join('');};
@@ -3917,7 +3973,14 @@ window.openRace=id=>{
 };
 
 // ── BLOG ──
-function renderBlogList(){const el=document.getElementById('blog-list');if(el)el.innerHTML=BLOG_POSTS.map(blogCard).join('')||'<p style="color:var(--muted)">Yazı yok.</p>';}
+function renderBlogList(){
+  console.log('[RCT] renderBlogList, BLOG_POSTS:',window.BLOG_POSTS?.length);
+  const el=document.getElementById('blog-list');
+  if(!el){console.error('[RCT] blog-list YOK');return;}
+  try{
+    el.innerHTML=(window.BLOG_POSTS||[]).map(blogCard).join('')||'<p style="color:var(--muted);padding:20px">Yazı bulunamadı.</p>';
+  }catch(e){console.error('[RCT] renderBlogList HATA:',e.message);el.innerHTML='<p style="color:red">'+e.message+'</p>';}
+}
 function renderBlogPreview(){const el=document.getElementById('home-blog');if(el)el.innerHTML=BLOG_POSTS.slice(0,4).map(blogCard).join('');}
 function blogCard(p){return`<div class="blog-card" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'📰'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">✍️ ${p.authorName||'Editör'}</div><div style="font-size:11px;color:var(--muted)">❤️ ${p.likes||0}</div></div></div></div>`;}
 window.openBlog=id=>{

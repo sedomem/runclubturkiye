@@ -2968,11 +2968,14 @@ window.nav=id=>{
   if(id==='firsatlar')renderFirsatlar();
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
   if(id==='home'){
-    if(window.EVENTS.length||window.CLUBS.length||window.RACES.length||window.BLOG_POSTS.length){
-      renderHomeData();
-    } else {
-      if(window.loadAllFromDB)window.loadAllFromDB();
+    // Skeleton göster ve veriyi yenile
+    if(typeof renderSkeletons==='function'){
+      renderSkeletons('home-events',4,'120px');
+      renderSkeletons('home-clubs',4,'160px');
+      renderSkeletons('home-races',4,'120px');
+      renderSkeletons('home-blog',4,'160px');
     }
+    if(window.loadAllFromDB)window.loadAllFromDB();
   }
 };
 window.openAuth=type=>{
@@ -4578,9 +4581,9 @@ function renderAdminSection(sec){
           </div>
         </div>
         <div id="tk-list"><div class="spinner" style="margin:20px auto"></div></div>
-      </div>\`,
+      </div>`,
 
-    sponsors:\`<h2 style="margin-bottom:18px">💼 Sponsorlar</h2>
+    sponsors:`<h2 style="margin-bottom:18px">💼 Sponsorlar</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
         ${imgUploadHtml('sp-img-input','Sponsor Logo','200×80px · Şeffaf PNG')}
         <div class="form-row"><div class="form-grp"><label>Sponsor Adı</label><input id="sp-name"/></div><div class="form-grp"><label>Web Sitesi</label><input id="sp-url"/></div></div>
@@ -5853,7 +5856,13 @@ window.addEventListener('scroll',()=>{
 try {
   document.getElementById('pg-home').classList.add('on');
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
-  // Veri yükle — önce hızlı UI, sonra Firebase'den data çek
+  // Veri yükle — önce skeleton göster, sonra Firebase'den data çek
+  if(typeof renderSkeletons==='function'){
+    renderSkeletons('home-events',4,'120px');
+    renderSkeletons('home-clubs',4,'160px');
+    renderSkeletons('home-races',4,'120px');
+    renderSkeletons('home-blog',4,'160px');
+  }
   if(typeof window.loadAllFromDB==='function'){
     window.loadAllFromDB().catch(e=>console.warn('loadAllFromDB:',e));
   }

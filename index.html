@@ -2904,6 +2904,7 @@ window.reloadSiteData=loadAllFromDB;
 window.loadAllFromDB=loadAllFromDB;
 
 loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
+loadAllFromDB();
 window.loadBannersFromDB=loadBannersFromDB;
 </script>
 
@@ -5853,23 +5854,19 @@ window.addEventListener('scroll',()=>{
 },{passive:true});
 
 // ── INIT ──
+// NOT: window.loadAllFromDB() burada ÇALIŞMAZ — module script daha sonra yüklenir.
+// Veri yükleme doğrudan module script içinde loadAllFromDB() çağrısıyla yapılır.
 try {
   document.getElementById('pg-home').classList.add('on');
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
-  // Veri yükle — önce skeleton göster, sonra Firebase'den data çek
+  // Skeleton göster — module script yüklenince loadAllFromDB() bunları gerçek kart ile değiştirecek
   if(typeof renderSkeletons==='function'){
     renderSkeletons('home-events',4,'120px');
     renderSkeletons('home-clubs',4,'160px');
     renderSkeletons('home-races',4,'120px');
     renderSkeletons('home-blog',4,'160px');
   }
-  if(typeof window.loadAllFromDB==='function'){
-    window.loadAllFromDB().catch(e=>console.warn('loadAllFromDB:',e));
-  }
   if(typeof loadBannersFromSlots==='function')loadBannersFromSlots();
-  if(typeof window.loadTickerFromDB==='function'){
-    window.loadTickerFromDB().catch(()=>{});
-  }
   try{if(typeof initPageBanners==='function')initPageBanners();}catch(e){}
   try{
     const cnt=document.querySelectorAll('.banner-slide').length;

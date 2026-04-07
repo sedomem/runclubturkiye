@@ -1800,8 +1800,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <h2 style="margin-bottom:14px" id="edit-event-title-label">Etkinlik</h2>
     <input type="hidden" id="edit-event-id"/>
     <div class="form-row"><div class="form-grp"><label>Etkinlik Adı</label><input type="text" id="edit-ev-name"/></div><div class="form-grp"><label>Kategori</label><select id="edit-ev-cat"><option>Maraton</option><option>Trail</option><option>5K/10K</option><option>Ultra</option></select></div></div>
-    <div class="form-row"><div class="form-grp"><label>Tarih</label><input type="date" id="edit-ev-date"/></div><div class="form-grp"><label>Şehir</label><select id="edit-ev-city"><option>İstanbul</option><option>Ankara</option><option>İzmir</option></select></div></div>
-    <div class="form-row"><div class="form-grp"><label>Mesafe (km)</label><input type="text" id="edit-ev-dist"/></div><div class="form-grp"><label>Kapasite</label><input type="number" id="edit-ev-cap"/></div></div>
+    <div class="form-row"><div class="form-grp"><label>Tarih</label><input type="date" id="edit-ev-date"/></div><div class="form-grp"><label>Başlangıç</label><input type="time" id="edit-ev-time-start"/></div><div class="form-grp"><label>Bitiş</label><input type="time" id="edit-ev-time-end"/></div></div>
+    <div class="form-row"><div class="form-grp"><label>Şehir</label><select id="edit-ev-city"><option>İstanbul</option><option>Ankara</option><option>İzmir</option></select></div><div class="form-grp"><label>Mesafe (km)</label><input type="text" id="edit-ev-dist"/></div><div class="form-grp"><label>Kapasite</label><input type="number" id="edit-ev-cap"/></div></div>
     <div class="form-row"><div class="form-grp"><label>Ücret</label><input type="text" id="edit-ev-fee"/></div><div class="form-grp"><label>Son Kayıt</label><input type="date" id="edit-ev-deadline"/></div></div>
     <div class="form-grp"><label>Pace Grupları</label><div class="pace-selector" id="edit-ev-pace">
       <button class="pace-opt" onclick="this.classList.toggle('on')">4:00–4:30</button><button class="pace-opt" onclick="this.classList.toggle('on')">4:30–5:00</button><button class="pace-opt" onclick="this.classList.toggle('on')">5:00–5:30</button><button class="pace-opt" onclick="this.classList.toggle('on')">5:30–6:00</button><button class="pace-opt" onclick="this.classList.toggle('on')">6:00+</button>
@@ -2156,6 +2156,12 @@ window.rsvpEvent=async(eventId,fee)=>{
     fomoUpdateCard(eventId);
     fomoUpdateDetail(eventId);
     await checkAndAwardBadges();
+    setTimeout(() => {
+      if(confirm('Harika! Etkinliğe kaydın alındı. Bu etkinliği takvimine eklemek ister misin?')) {
+        const eObj = window.EVENTS.find(x=>x.id===eventId);
+        if(eObj) window.downloadICS(eObj.title, eObj.date, eObj.startTime, eObj.endTime, eObj.city, eObj.desc);
+      }
+    }, 500);
   }catch(e){toast(e.message,'err');}
 };
 window.leaveEvent=async(eventId)=>{
@@ -3231,7 +3237,7 @@ window.openEvent=id=>{
       <span class="tag tag-or">${e.cat}</span>
       <h1 style="font-size:clamp(18px,4vw,26px);margin:8px 0;color:#fff;line-height:1.2">${e.emoji||'🏃'} ${e.title}</h1>
       <div style="margin-bottom:14px;display:flex;gap:8px;align-items:center">
-        <button class="btn btn-navy btn-sm" onclick="downloadICS('${e.title?.replace(/'/g,"\\'")}','${e.date}','${e.city}','${e.desc?.replace(/'/g,"\\'")}')" style="background:#2C3E50;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px">📅 Takvime Ekle</button>
+        <button class="btn btn-navy btn-sm" onclick="downloadICS('${e.title?.replace(/'/g,"\\'")}','${e.date}','${e.startTime||''}','${e.endTime||''}','${e.city}','${e.desc?.replace(/'/g,"\\'")}')" style="background:#2C3E50;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px" ${(!e.startTime) ? 'disabled title="Saat bilgisi eksik"' : ''}>📅 Takvime Ekle</button>
       </div>
       <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
       <div class="fomo-countdown-wrap" id="ev-cd"></div>
@@ -4951,15 +4957,15 @@ window.deleteClub=async(id)=>{
     const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=CLUBS.map(clubCard).join('');
   }catch(e){toast(e.message,'err');}
 };
-window.openAddEventModal=()=>{document.getElementById('edit-event-id').value='';document.getElementById('edit-event-title-label').textContent='Yeni Etkinlik';['edit-ev-name','edit-ev-dist','edit-ev-desc','edit-ev-distances'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.querySelectorAll('#edit-ev-pace .pace-opt').forEach(b=>b.classList.remove('on'));openModal('edit-event-modal');};
-window.editEvent=id=>{const e=EVENTS.find(x=>x.id===id);if(!e)return;document.getElementById('edit-event-id').value=id;document.getElementById('edit-event-title-label').textContent='Etkinlik Düzenle';document.getElementById('edit-ev-name').value=e.title;document.getElementById('edit-ev-date').value=e.date;document.getElementById('edit-ev-dist').value=e.dist;document.getElementById('edit-ev-cap').value=e.cap;document.getElementById('edit-ev-fee').value=e.fee;document.getElementById('edit-ev-deadline').value=e.deadline||'';document.getElementById('edit-ev-desc').value=e.desc||'';const distEl=document.getElementById('edit-ev-distances');if(distEl)distEl.value=(e.distances||[]).join(', ');document.querySelectorAll('#edit-ev-pace .pace-opt').forEach(b=>{b.classList.toggle('on',(e.pace||[]).includes(b.textContent));});openModal('edit-event-modal');};
+window.openAddEventModal=()=>{document.getElementById('edit-event-id').value='';document.getElementById('edit-event-title-label').textContent='Yeni Etkinlik';['edit-ev-name','edit-ev-dist','edit-ev-desc','edit-ev-distances','edit-ev-time-start','edit-ev-time-end'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.querySelectorAll('#edit-ev-pace .pace-opt').forEach(b=>b.classList.remove('on'));openModal('edit-event-modal');};
+window.editEvent=id=>{const e=EVENTS.find(x=>x.id===id);if(!e)return;document.getElementById('edit-event-id').value=id;document.getElementById('edit-event-title-label').textContent='Etkinlik Düzenle';document.getElementById('edit-ev-name').value=e.title;document.getElementById('edit-ev-date').value=e.date;document.getElementById('edit-ev-time-start').value=e.startTime||'';document.getElementById('edit-ev-time-end').value=e.endTime||'';document.getElementById('edit-ev-dist').value=e.dist;document.getElementById('edit-ev-cap').value=e.cap;document.getElementById('edit-ev-fee').value=e.fee;document.getElementById('edit-ev-deadline').value=e.deadline||'';document.getElementById('edit-ev-desc').value=e.desc||'';const distEl=document.getElementById('edit-ev-distances');if(distEl)distEl.value=(e.distances||[]).join(', ');document.querySelectorAll('#edit-ev-pace .pace-opt').forEach(b=>{b.classList.toggle('on',(e.pace||[]).includes(b.textContent));});openModal('edit-event-modal');};
 window.saveEventEdit=async()=>{
   const fb=window._fb;
   const id=document.getElementById('edit-event-id').value;
   const pace=[];document.querySelectorAll('#edit-ev-pace .pace-opt.on').forEach(b=>pace.push(b.textContent));
   const distancesRaw=document.getElementById('edit-ev-distances')?.value||'';
   const distances=distancesRaw.split(',').map(d=>d.trim()).filter(Boolean);
-  const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,distances,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',status:'approved',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,startTime:document.getElementById('edit-ev-time-start').value,endTime:document.getElementById('edit-ev-time-end').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,distances,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',status:'approved',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
   try{
     if(id){
       await fb.setDoc(fb.doc(fb.db,'events',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
@@ -5080,9 +5086,11 @@ function renderGroupSection(sec){
         </div>
         <div class="form-row">
           <div class="form-grp"><label>Tarih</label><input id="ge-date" type="date"/></div>
-          <div class="form-grp"><label>Şehir</label><input id="ge-city" placeholder="Şehir"/></div>
+          <div class="form-grp"><label>Başlangıç</label><input id="ge-time-start" type="time"/></div>
+          <div class="form-grp"><label>Bitiş</label><input id="ge-time-end" type="time"/></div>
         </div>
         <div class="form-row">
+          <div class="form-grp"><label>Şehir</label><input id="ge-city" placeholder="Şehir"/></div>
           <div class="form-grp"><label>Mesafe</label><input id="ge-dist" placeholder="42.2 km"/></div>
           <div class="form-grp"><label>Kapasite</label><input id="ge-cap" type="number" placeholder="100"/></div>
         </div>
@@ -5265,6 +5273,8 @@ window.gSaveEvent=async()=>{
     title,
     cat:document.getElementById('ge-cat')?.value||'Genel',
     date:document.getElementById('ge-date')?.value||'',
+    startTime:document.getElementById('ge-time-start')?.value||'',
+    endTime:document.getElementById('ge-time-end')?.value||'',
     city:document.getElementById('ge-city')?.value||CU.city||'',
     dist:document.getElementById('ge-dist')?.value||'',
     cap:parseInt(document.getElementById('ge-cap')?.value)||100,
@@ -5389,6 +5399,8 @@ window.gEditEvent=async(eventId)=>{
     if(s('ge-title'))s('ge-title').value=e.title||'';
     if(s('ge-cat'))s('ge-cat').value=e.cat||'Genel';
     if(s('ge-date'))s('ge-date').value=e.date||'';
+    if(s('ge-time-start'))s('ge-time-start').value=e.startTime||'';
+    if(s('ge-time-end'))s('ge-time-end').value=e.endTime||'';
     if(s('ge-city'))s('ge-city').value=e.city||CU.city||'';
     if(s('ge-dist'))s('ge-dist').value=e.dist||'';
     if(s('ge-cap'))s('ge-cap').value=e.cap||100;
@@ -5619,7 +5631,7 @@ window.gSaveEvent=async()=>{
     if(!imgUrl&&imgFile){
       try{const r=fb.ref(fb.storage,`events/${Date.now()}_${imgFile.name}`);await fb.uploadBytes(r,imgFile);imgUrl=await fb.getDownloadURL(r);}catch(e){}
     }
-    const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',city:document.getElementById('ge-city')?.value||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,status:'pending',updatedAt:fb.serverTimestamp()};
+    const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',startTime:document.getElementById('ge-time-start')?.value||'',endTime:document.getElementById('ge-time-end')?.value||'',city:document.getElementById('ge-city')?.value||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,status:'pending',updatedAt:fb.serverTimestamp()};
     try{
       await fb.setDoc(fb.doc(fb.db,'events',editId),data,{merge:true});
       toast('Etkinlik güncellendi, onay bekliyor ✓','ok');
@@ -5639,7 +5651,7 @@ window.gSaveEvent=async()=>{
       let imgUrl=document.getElementById('ge-img-url')?.value?.trim()||'';
       const imgFile=document.getElementById('ge-img-file')?.files[0];
       if(!imgUrl&&imgFile){try{const r=fb.ref(fb.storage,`events/${Date.now()}_${imgFile.name}`);await fb.uploadBytes(r,imgFile);imgUrl=await fb.getDownloadURL(r);}catch(e){}}
-      const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',city:document.getElementById('ge-city')?.value||CU.city||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,emoji:'🏃',status:'pending',groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',reg:0,createdAt:fb.serverTimestamp(),slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+      const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',startTime:document.getElementById('ge-time-start')?.value||'',endTime:document.getElementById('ge-time-end')?.value||'',city:document.getElementById('ge-city')?.value||CU.city||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,emoji:'🏃',status:'pending',groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',reg:0,createdAt:fb.serverTimestamp(),slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
       try{await fb.addDoc(fb.collection(fb.db,'events'),data);toast('Etkinlik onaya gönderildi ✓','ok');document.getElementById('g-add-event-form').style.display='none';['ge-title','ge-dist','ge-fee','ge-desc','ge-img-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});gLoadEvents();}catch(e){toast('Hata: '+e.message,'err');}
     }
   }
@@ -6155,15 +6167,17 @@ window.IntegrationService = {
     toast('Strava entegrasyonu yakında aktif olacak! (v2.0)','ok');
   }
 };
-window.downloadICS = function(title, dateStr, location, description) {
-  if(!dateStr) { toast('Tarih formatı eksik','err'); return; }
-  let pd = new Date(dateStr);
-  if(isNaN(pd)) pd = new Date();
+window.downloadICS = function(title, dateStr, tStart, tEnd, location, description) {
+  if(!dateStr || !tStart) { toast('Tarih veya saat formatı eksik! Admin saat bilgisini girmemiş.','err'); return; }
+  
+  let pda = new Date(dateStr + "T" + tStart);
+  if(isNaN(pda)) { toast('Geçersiz zaman','err'); return; }
+  let pde = tEnd ? new Date(dateStr + "T" + tEnd) : new Date(pda.getTime() + 2*60*60*1000);
   
   const pad = n => ('0'+n).slice(-2);
-  const toICSDate = d => d.getFullYear()+pad(d.getMonth()+1)+pad(d.getDate())+'T090000Z';
-  const icsDate = toICSDate(pd);
-  const icsEnd = toICSDate(new Date(pd.getTime() + 2*60*60*1000)); // varsayılan 2 saat
+  const toICSDate = d => d.getUTCFullYear()+pad(d.getUTCMonth()+1)+pad(d.getUTCDate())+'T'+pad(d.getUTCHours())+pad(d.getUTCMinutes())+pad(d.getUTCSeconds())+'Z';
+  const icsDate = toICSDate(pda);
+  const icsEnd = toICSDate(pde);
 
   const icsMSG = 
 `BEGIN:VCALENDAR

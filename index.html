@@ -2037,6 +2037,7 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('nav-user').style.display='none';
   }
   loadPopup();
+  if(typeof window.loadCommunityFeed === 'function') window.loadCommunityFeed();
 });
 
 // Güvenlik ağı: 8 saniye içinde loading kapanmazsa zorla kapat
@@ -6456,13 +6457,22 @@ window.renderGroupCharts = function() {
 };
 
 // ━━ TOPLULUK JS ━━
+window.hideLoader = function(elId) {
+  const el = document.getElementById(elId);
+  if(el) {
+    const sp = el.querySelector('.spinner');
+    if(sp) sp.style.display = 'none';
+  }
+};
+
 window.loadCommunityFeed = async function(filter='all') {
   const feedList = document.getElementById('community-feed-list');
-  if(!feedList)return;
+  if(!feedList) return;
+  
   feedList.innerHTML = '<div class="spinner" style="margin:40px auto"></div>';
   const fb = window._fb;
   if(!fb || !fb.db) {
-    feedList.innerHTML = '<div style="color:red;padding:20px;text-align:center">Hata: Firebase veritabanı bağlantısı kurulamadı. Sayfayı yenilemeyi deneyin veya bağlantınızı kontrol edin.</div>';
+    feedList.innerHTML = '<div style="color:red;padding:20px;text-align:center">Hata: Firebase veritabanı bağlantısı kurulamadı. Lütfen sayfayı yenileyiniz.</div>';
     return;
   }
   
@@ -6474,8 +6484,10 @@ window.loadCommunityFeed = async function(filter='all') {
     document.getElementById('community-post-box').style.display='block';
     document.getElementById('community-feed-guest').style.display='none';
     const cwdUrl = window.CU.clubName ? '<span style="font-weight:600">'+window.CU.clubName+'</span> üyesi' : 'Henüz bir kulübe üye değilsin.';
-    document.getElementById('my-club-widget').style.display='block';
-    document.getElementById('com-my-club-content').innerHTML = cwdUrl;
+    const wgt = document.getElementById('my-club-widget');
+    if(wgt) wgt.style.display='block';
+    const cwdCont = document.getElementById('com-my-club-content');
+    if(cwdCont) cwdCont.innerHTML = cwdUrl;
   }
   
   try {
@@ -6484,13 +6496,11 @@ window.loadCommunityFeed = async function(filter='all') {
     let posts = [];
     snap.forEach(doc=>{ posts.push(Object.assign({id:doc.id}, doc.data())); });
     
-    // Apply filters visually
     if(filter !== 'all') {
       if(filter === 'club' && window.CU?.clubId) posts = posts.filter(p => p.club_id === window.CU.clubId);
       if(filter === 'my') posts = posts.filter(p => p.author_id === window.CU?.uid);
     }
     
-    // Filter out hidden EXCEPT if user is admin
     const isAdmin = window.CU && (window.CU.role==='superadmin' || window.CU.role==='admin' || window.CU.role==='groupadmin');
     if(!isAdmin) {
       posts = posts.filter(p => p.status !== 'hidden');
@@ -6498,10 +6508,10 @@ window.loadCommunityFeed = async function(filter='all') {
     
     if(posts.length === 0) {
       feedList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Henüz bir gönderi yok. İlk paylaşan sen ol!</div>';
+      window.hideLoader('community-feed-list');
       return;
     }
     
-    // Sabitlenenleri en üste al
     const pinned = posts.filter(p => p.status === 'pinned_global');
     const others = posts.filter(p => p.status !== 'pinned_global');
     
@@ -6522,20 +6532,26 @@ window.loadCommunityFeed = async function(filter='all') {
        html += '</div>';
     });
     feedList.innerHTML = html;
+    window.hideLoader('community-feed-list');
     
-    // Liderlik tablosu mock
-    document.getElementById('com-leaders-list').innerHTML = `
-      <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥇</span><b>Emre T.</b></div><span style="color:var(--or);font-weight:700">42 KM</span></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥈</span><b>Sedat Y.</b></div><span style="color:var(--or);font-weight:700">38 KM</span></div>
-      <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥉</span><b>Merve K.</b></div><span style="color:var(--or);font-weight:700">32 KM</span></div>
-    `;
-    document.getElementById('com-badges-list').innerHTML = `
-      <div style="font-size:12px;color:var(--dark)"><b style="color:var(--or)">Aylin C.</b> "Profesyonel" rozetini kazandı! 🌟</div>
-      <div style="font-size:12px;color:var(--dark)"><b style="color:var(--or)">Barış T.</b> "Efsane" rozetini kazandı! 👑</div>
-    `;
-    
+    const leadList = document.getElementById('com-leaders-list');
+    if(leadList) {
+      leadList.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥇</span><b>Emre T.</b></div><span style="color:var(--or);font-weight:700">42 KM</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥈</span><b>Sedat Y.</b></div><span style="color:var(--or);font-weight:700">38 KM</span></div>
+        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥉</span><b>Merve K.</b></div><span style="color:var(--or);font-weight:700">32 KM</span></div>
+      `;
+    }
+    const bdgList = document.getElementById('com-badges-list');
+    if(bdgList) {
+      bdgList.innerHTML = `
+        <div style="font-size:12px;color:var(--dark)"><b style="color:var(--or)">Aylin C.</b> "Profesyonel" rozetini kazandı! 🌟</div>
+        <div style="font-size:12px;color:var(--dark)"><b style="color:var(--or)">Barış T.</b> "Efsane" rozetini kazandı! 👑</div>
+      `;
+    }
   }catch(e){
     feedList.innerHTML = '<div style="color:red;padding:20px;text-align:center">Gönderiler yüklenemedi: '+e.message+'</div>';
+    window.hideLoader('community-feed-list');
   }
 };
 

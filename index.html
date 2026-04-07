@@ -429,7 +429,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .grid.g2,.grid.g3{grid-template-columns:1fr}
   .newsletter-form{flex-direction:column}
   .sec{padding:40px 0}
-  .container{padding:0 16px}
+  .container{padding:0 8px}
   #topnav{padding:0 14px;gap:10px;height:58px}
   .logo{font-size:16px}
   .nav-right{gap:5px}
@@ -3236,8 +3236,9 @@ window.openEvent=id=>{
       <div style="position:absolute;right:30px;top:50%;transform:translateY(-50%);font-size:70px;opacity:.1">${e.emoji||'🏃'}</div>
       <span class="tag tag-or">${e.cat}</span>
       <h1 style="font-size:clamp(18px,4vw,26px);margin:8px 0;color:#fff;line-height:1.2">${e.emoji||'🏃'} ${e.title}</h1>
+      ${e.clubName ? '<div style="font-size:11px;color:rgba(255,255,255,0.7);margin-bottom:8px">'+e.clubName+' tarafından düzenleniyor</div>' : ''}
       <div style="margin-bottom:14px;display:flex;gap:8px;align-items:center">
-        <button class="btn btn-navy btn-sm" onclick="downloadICS('${e.title?.replace(/'/g,"\\'")}','${e.date}','${e.startTime||''}','${e.endTime||''}','${e.city}','${e.desc?.replace(/'/g,"\\'")}')" style="background:#2C3E50;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px" ${(!e.startTime) ? 'disabled title="Saat bilgisi eksik"' : ''}>📅 Takvime Ekle</button>
+        <button class="btn btn-navy btn-sm" onclick="triggerICS('${e.id}')" style="background:#2C3E50;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px" ${(!e.startTime) ? 'disabled title="Saat bilgisi eksik"' : ''}>📅 Takvime Ekle</button>
       </div>
       <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span>${e.startTime ? `<span class="meta">🕒 ${e.startTime}${e.endTime ? ' - '+e.endTime : ''}</span>` : ''}<span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
       <div class="fomo-countdown-wrap" id="ev-cd"></div>
@@ -3643,6 +3644,37 @@ window.toggleMobileMenu=function(){
   const menu=document.getElementById('mobile-menu');
   const btn=document.getElementById('hamburger');
   if(!menu||!btn)return;
+  
+  let isDash = false;
+  if(document.getElementById('pg-dashboard') && document.getElementById('pg-dashboard').classList.contains('on')) isDash = true;
+  if(document.getElementById('pg-admin') && document.getElementById('pg-admin').classList.contains('on')) isDash = true;
+  if(document.getElementById('pg-panel') && document.getElementById('pg-panel').classList.contains('on')) isDash = true;
+
+  if(isDash && window.CU) {
+     const navId = (CU.role==='superadmin') ? 'admin-nav-links' : ((CU.role==='admin'||CU.role==='groupadmin') ? 'gadmin-nav-links' : 'dash-nav');
+     const navEl = document.getElementById(navId) || document.querySelector('.admin-sb');
+     if(navEl) {
+        let outHtml = '<div style="font-weight:700;color:var(--or);padding:10px 4px;font-size:12px;text-transform:uppercase">Panel Menü</div>';
+        Array.from(navEl.querySelectorAll('button')).forEach(b => {
+           let oc = b.getAttribute('onclick') || '';
+           if(!oc.includes('toggleMobileMenu')) oc += '; toggleMobileMenu()';
+           outHtml += '<button onclick="'+oc+'" class="'+b.className+'">'+b.innerHTML+'</button>';
+        });
+        outHtml += '<div style="height:1px;background:var(--border);margin:4px 0"></div><button onclick="nav(\'home\');toggleMobileMenu()">🏠 Ana Sayfa</button>';
+        menu.innerHTML = outHtml;
+     }
+  } else {
+     let authBtn = !window.CU ? '<button onclick="openAuth(\'login\');toggleMobileMenu()">Giriş Yap</button>' : '<button onclick="nav(\'dashboard\');toggleMobileMenu()">Dashboard</button>';
+     menu.innerHTML = '<button onclick="nav(\'home\');toggleMobileMenu()">🏠 Ana Sayfa</button>' +
+        '<button onclick="nav(\'events\');toggleMobileMenu()">🏃 Etkinlikler</button>' +
+        '<button onclick="nav(\'clubs\');toggleMobileMenu()">🏢 Kulüpler</button>' +
+        '<button onclick="nav(\'races\');toggleMobileMenu()">🏅 Yarış Takvimi</button>' +
+        '<button onclick="nav(\'firsatlar\');toggleMobileMenu()">🎁 Fırsatlar</button>' +
+        '<button onclick="nav(\'blog\');toggleMobileMenu()">📰 Blog</button>' +
+        '<button onclick="nav(\'contact\');toggleMobileMenu()">💬 İletişim</button>' +
+        '<button onclick="nav(\'sss\');toggleMobileMenu()">❓ SSS</button>' +
+        '<div style="height:1px;background:var(--border);margin:4px 0"></div>' + authBtn;
+  }
   menu.classList.toggle('open');
   btn.classList.toggle('open');
 };
@@ -4489,6 +4521,7 @@ async function loadMyEvents(){
           <span class="tag tag-or">${e.cat||''}</span>
           <h3>${e.emoji||'🏃'} ${e.title}</h3>
           <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span><span class="meta">💳 ${e.fee}</span></div>
+          <div class="dash-cd" data-date="${e.date}" data-time="${e.startTime||'09:00'}" style="font-size:12px;color:var(--or);margin-top:6px;font-weight:700"></div>
         </div>
         <button class="btn btn-red btn-sm" style="flex-shrink:0;align-self:center" onclick="leaveEvent('${e.id}')">İptal</button>
       </div>`;
@@ -5797,6 +5830,7 @@ async function loadOverviewRecent(){
         <div style="flex:1">
           <div style="font-size:13px;font-weight:500">${e.title}</div>
           <div style="font-size:11px;color:var(--muted)">📍 ${e.city} · ${e.dist}</div>
+          ${!isPast ? '<div class="dash-cd" data-date="'+e.date+'" data-time="'+(e.startTime||'09:00')+'" style="font-size:11px;color:var(--or);margin-top:6px;font-weight:700"></div>' : ''}
         </div>
         <span class="pill ${isPast?'pill-gr':'pill-or'}">${isPast?'Tamamlandı':'Yaklaşan'}</span>
       </div>`;
@@ -5869,15 +5903,18 @@ window.gLoadEventAttendees=async(eventId,eventTitle)=>{
   try{
     const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'),fb.where('eventId','==',eventId)));
     if(snap.empty){document.getElementById('attendees-list').innerHTML='<p style="color:var(--muted);padding:20px 0">Henüz kimse kaydolmadı.</p>';return;}
-    const uids=[];snap.forEach(d=>uids.push(d.data().userId));
+    const rsvpMap={};
+    const uids=[];snap.forEach(d=>{ const dat=d.data(); uids.push(dat.userId); rsvpMap[dat.userId]=dat; });
     const userProms=uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)));
     const users=await Promise.all(userProms);
     let tbl=`<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Toplam <b style="color:var(--text)">${uids.length}</b> katılımcı</p>
-      <table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Pace</th></tr></thead><tbody>`;
+      <table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Parkur Seçimi</th></tr></thead><tbody>`;
     users.forEach(s=>{
       if(!s.exists())return;
       const u=s.data();
-      tbl+=`<tr><td><b>${u.name||'—'}</b></td><td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td><td>${u.phone||'—'}</td><td>${(u.pace||[]).join(', ')||'—'}</td></tr>`;
+      const rsvpObj = rsvpMap[s.id] || {};
+      const combinedSelection = [rsvpObj.selectedPace, rsvpObj.selectedDistance].filter(Boolean).join(' / ') || 'Belirtilmedi';
+      tbl+=`<tr><td><b>${u.name||'—'}</b></td><td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td><td>${u.phone||'—'}</td><td><span class="pill pill-or">${combinedSelection}</span></td></tr>`;
     });
     tbl+='</tbody></table>';
     document.getElementById('attendees-list').innerHTML=tbl;
@@ -6163,10 +6200,25 @@ setTimeout(()=>{try{if(typeof routerInit==='function')routerInit();}catch(e){}},
 </script>
 <script>
 window.IntegrationService = {
-  connectStrava() {
-    toast('Strava entegrasyonu yakında aktif olacak! (v2.0)','ok');
-  }
+  connectStrava() { toast('Strava entegrasyonu yakında aktif olacak! (v2.0)','ok'); }
 };
+window.triggerICS = function(eid) {
+  const eObj = window.EVENTS.find(x=>x.id===eid);
+  if(!eObj) { toast('Etkinlik bulunamadı','err'); return; }
+  window.downloadICS(eObj.title, eObj.date, eObj.startTime, eObj.endTime, eObj.city, eObj.desc);
+};
+setInterval(()=>{
+  document.querySelectorAll('.dash-cd').forEach(el=>{
+    const d=el.getAttribute('data-date');
+    const t=el.getAttribute('data-time');
+    const tgt = new Date(d+'T'+t).getTime();
+    if(isNaN(tgt)) return;
+    const dif = tgt - Date.now();
+    if(dif<0) { el.textContent=''; return; }
+    const d_=Math.floor(dif/86400000),h=Math.floor((dif%86400000)/3600000),m=Math.floor((dif%3600000)/60000),s=Math.floor((dif%60000)/1000);
+    el.textContent = `${d_}G ${h.toString().padStart(2,'0')}S ${m.toString().padStart(2,'0')}D ${s.toString().padStart(2,'0')}SN`;
+  });
+}, 1000);
 window.downloadICS = function(title, dateStr, tStart, tEnd, location, description) {
   if(!dateStr || !tStart) { toast('Tarih veya saat formatı eksik! Admin saat bilgisini girmemiş.','err'); return; }
   

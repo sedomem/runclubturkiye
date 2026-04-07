@@ -3239,7 +3239,7 @@ window.openEvent=id=>{
       <div style="margin-bottom:14px;display:flex;gap:8px;align-items:center">
         <button class="btn btn-navy btn-sm" onclick="downloadICS('${e.title?.replace(/'/g,"\\'")}','${e.date}','${e.startTime||''}','${e.endTime||''}','${e.city}','${e.desc?.replace(/'/g,"\\'")}')" style="background:#2C3E50;color:#fff;padding:6px 12px;border-radius:20px;font-size:11px" ${(!e.startTime) ? 'disabled title="Saat bilgisi eksik"' : ''}>📅 Takvime Ekle</button>
       </div>
-      <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
+      <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span>${e.startTime ? `<span class="meta">🕒 ${e.startTime}${e.endTime ? ' - '+e.endTime : ''}</span>` : ''}<span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
       <div class="fomo-countdown-wrap" id="ev-cd"></div>
     </div>
     <div style="" class="ev-detail-grid">

@@ -116,6 +116,30 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .g4{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
 .card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
+/* ━━ TOPLULUK (COMMUNITY) CSS ━━ */
+.pg-community-grid { display: grid; grid-template-columns: 240px 1fr 280px; gap: 24px; padding: 20px 0; align-items: start; }
+@media(max-width: 992px) { .pg-community-grid { grid-template-columns: 1fr 280px; } .com-left-col { display: none; } }
+@media(max-width: 768px) { .pg-community-grid { grid-template-columns: 1fr; } .com-right-col { display: none; } }
+.com-widget { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--r); padding: 18px; margin-bottom: 20px; box-shadow: var(--shadow-sm); }
+.com-widget h4 { font-size: 14px; font-weight: 700; margin-bottom: 14px; color: var(--dark); padding-bottom: 8px; border-bottom: 1.5px solid var(--border); }
+.post-input-box { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 24px; }
+.post-input-box textarea { width: 100%; border: 1.5px solid var(--border); border-radius: 8px; padding: 12px; font-size: 14px; resize: vertical; min-height: 80px; background: var(--bg); transition: border .2s; }
+.post-input-box textarea:focus { border-color: var(--or); outline: none; }
+.post-card { background: var(--card); border: 1.5px solid var(--border); border-radius: var(--r); padding: 20px; margin-bottom: 16px; position: relative; }
+.post-header { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.post-avatar { width: 42px; height: 42px; border-radius: 50%; background: var(--cream2); display: flex; align-items: center; justify-content: center; font-weight: 700; color: var(--or); font-size: 16px; border: 1.5px solid var(--border); }
+.post-author { font-size: 14px; font-weight: 700; color: var(--dark); }
+.post-time { font-size: 11px; color: var(--muted); }
+.post-content { font-size: 14px; color: var(--text); line-height: 1.6; margin-bottom: 12px; word-break: break-word; }
+.post-img-wrap { border-radius: 8px; overflow: hidden; margin-bottom: 12px; max-height: 400px; display: flex; justify-content: center; background: #000; }
+.post-img-wrap img { width: 100%; height: auto; max-height: 400px; object-fit: contain; }
+.post-actions { display: flex; align-items: center; gap: 16px; border-top: 1.5px solid var(--cream3); padding-top: 12px; margin-top: 12px; }
+.btn-like { background: none; border: none; font-size: 13px; color: var(--muted); cursor: pointer; display: flex; align-items: center; gap: 6px; font-weight: 600; transition: color .2s; }
+.btn-like:hover { color: var(--or); }
+.btn-like.liked { color: var(--or); }
+.post-del-btn { position: absolute; top: 20px; right: 20px; background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; }
+.post-del-btn:hover { color: #f87171; }
+.sys-post { border-width: 2px; border-color: rgba(232, 98, 42, 0.4); background: linear-gradient(180deg, rgba(232, 98, 42, 0.03), transparent 40%); }
 /* CLS FIX: card-img aspect-ratio ile yükseklik rezervasyonu */
 .card-img{height:160px;aspect-ratio:16/6;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
 .card-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s var(--transition)}
@@ -809,6 +833,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="nav('home')" id="nb-home">Ana Sayfa</button>
     <button onclick="nav('events')" id="nb-events">Etkinlikler</button>
     <button onclick="nav('clubs')" id="nb-clubs">Kulüpler</button>
+    <button onclick="nav('community')" id="nb-community">💬 Topluluk</button>
     <button onclick="nav('races')" id="nb-races">Yarış Takvimi</button>
     <button onclick="nav('firsatlar')" id="nb-firsatlar">🎁 Fırsatlar</button>
     <button onclick="nav('blog')" id="nb-blog">Blog</button>
@@ -1619,6 +1644,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="aNav('blog',this)">📰 Blog</button>
     <button onclick="aNav('firsatlar',this)">🎁 Fırsatlar</button>
     <button onclick="aNav('banners',this)">🖼 Bannerlar</button>
+    <button onclick="aNav('community',this)">💬 Topluluk</button>
     <button onclick="aNav('popup',this)">💬 Popup</button>
     <button onclick="aNav('sponsors',this)">💼 Sponsorlar</button>
     <button onclick="aNav('ticker',this)">📢 Kayan Yazı</button>
@@ -1643,12 +1669,75 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="gNav('applications',this)" id="g-app-btn">📋 Başvurular<span id="g-app-badge" style="display:none;background:var(--or);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:6px">0</span></button>
     <button onclick="gNav('announcements',this)">📢 Duyurular</button>
     <button onclick="gNav('chat',this)">💬 Mesajlaşma</button>
+    <button onclick="gNav('community',this)">💬 Topluluk Yön.</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
   </div>
   <div class="admin-main" id="panel-main"></div>
 </div></div>
+
+<div class="pg" id="pg-community">
+  <div class="container sec" style="padding-top:20px;min-height:800px">
+    <div class="pg-community-grid">
+      <!-- SOL SÜTUN -->
+      <div class="com-left-col">
+        <div class="com-widget">
+          <h4>Kısayollar</h4>
+          <div style="display:flex;flex-direction:column;gap:12px;font-size:13px;color:var(--text)">
+            <a onclick="nav('events')" style="cursor:pointer;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🏃</span> Yaklaşan Etkinlikler</a>
+            <a onclick="nav('clubs')" style="cursor:pointer;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🏢</span> Tüm Kulüpler</a>
+            <a onclick="nav('races')" style="cursor:pointer;display:flex;align-items:center;gap:8px"><span style="font-size:18px">🏅</span> Yarış Takvimi</a>
+          </div>
+        </div>
+        <div class="com-widget">
+          <h4>🔥 Trend Başlıklar</h4>
+          <div style="display:flex;flex-direction:column;gap:10px;font-size:13px;color:var(--muted)">
+            <span>#RunClubTürkiye (1.2k)</span>
+            <span>#SPXRunning (850)</span>
+            <span>#MaratonHazırlık (420)</span>
+            <span>#KoşuDostluğu (310)</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- ORTA SÜTUN (FEED) -->
+      <div class="com-mid-col">
+        <div class="post-input-box" id="community-post-box" style="display:none">
+          <textarea id="com-post-text" placeholder="Ne düşünüyorsun veya ne başardın? Hadi toplulukla paylaş!"></textarea>
+          <input type="text" id="com-post-img" placeholder="Fotoğraf URL'si (Opsiyonel)" style="width:100%;border:1.5px solid var(--border);border-radius:8px;padding:10px;font-size:13px;margin:8px 0;background:var(--bg);transition:border .2s" onfocus="this.style.borderColor='var(--or)'" onblur="this.style.borderColor='var(--border)'"/>
+          <div style="display:flex;justify-content:flex-end;margin-top:12px">
+            <button class="btn btn-or btn-sm" id="com-post-submit-btn" onclick="submitCommunityPost()">Paylaş</button>
+          </div>
+        </div>
+        <div id="community-feed-guest" style="text-align:center;padding:40px;background:var(--card);border-radius:var(--r);border:1.5px solid var(--border);margin-bottom:20px">
+          <h3>Topluluğa Katıl</h3>
+          <p style="color:var(--muted);font-size:14px;margin:10px 0 20px">Gönderi paylaşmak veya etkileşime geçmek için giriş yapmalısın.</p>
+          <button class="btn btn-or" onclick="openAuth('login')">Giriş Yap / Üye Ol</button>
+        </div>
+        
+        <div id="community-feed-list">
+          <div class="spinner" style="margin:40px auto"></div>
+        </div>
+      </div>
+      
+      <!-- SAĞ SÜTUN -->
+      <div class="com-right-col">
+        <div class="com-widget">
+          <h4>🏆 Liderlik ve Başarı</h4>
+          <div id="com-leaders-list" style="display:flex;flex-direction:column;gap:12px">
+             <div class="spinner" style="margin:20px auto"></div>
+          </div>
+        </div>
+        <div class="com-widget" id="my-club-widget" style="display:none">
+          <h4>🏢 Kulübüm</h4>
+          <div id="com-my-club-content" style="font-size:13px;color:var(--muted)"></div>
+        </div>
+        <p style="color:var(--muted);font-size:11px;text-align:center;margin-top:20px">RunClub Türkiye © 2026<br><a onclick="nav('gizlilik')" style="cursor:pointer;color:inherit;text-decoration:underline">Gizlilik</a> · <a onclick="nav('kosullar')" style="cursor:pointer;color:inherit;text-decoration:underline">Koşullar</a></p>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- LEGAL -->
 <div class="pg" id="pg-kvkk"><div class="container sec"><div id="legal-kvkk"></div></div></div>
@@ -1898,8 +1987,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="club-cta-float" style="position:fixed;bottom:24px;left:24px;z-index:190;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 32px rgba(44,24,16,.18);border:1.5px solid #E0D8CC;display:flex;align-items:center;gap:14px;max-width:320px;animation:ctaSlideIn .5s cubic-bezier(.34,1.56,.64,1) .8s both;">
   <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#E8622A,#c94e1c);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#127939;</div>
   <div style="flex:1;min-width:0">
-    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulübünüz Burada Yok Mu?</div>
-    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Kulübünüzü hemen kaydedin!</div>
+    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulubuunuuz Burada Yok mu?</div>
+    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Klubunuzu hemen kaydedin</div>
   </div>
   <button onclick="openAuth('groupadmin')" style="background:#E8622A;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">Basvur</button>
   <button onclick="document.getElementById('club-cta-float').style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#B09880;font-size:16px;cursor:pointer;line-height:1;padding:2px">x</button>
@@ -2148,6 +2237,7 @@ window.rsvpEvent=async(eventId,fee)=>{
     if(ev)ev.reg=(ev.reg||0)+1;
     localStorage.setItem(`rsvp_${eventId}_${CU.uid}`,'1');
     toast('Etkinliğe kaydoldun! 🎉','ok');
+    if(typeof triggerSystemPost==='function') triggerSystemPost(ev?.title||'bir etkinliğe', CU.name||'Koşucu', CU.uid);
     const btn=document.getElementById('rsvp-btn');if(btn){btn.textContent='✓ Kaydolundu';btn.disabled=true;btn.onclick=()=>leaveEvent(eventId);}
     // Seçim alanlarını gizle
     const paceWrap=document.getElementById('rsvp-pace-wrap');if(paceWrap)paceWrap.closest('.rsvp-selection-group').style.display='none';
@@ -3539,6 +3629,7 @@ const ROUTES = {
   "home":          {path:"/",                   title:"RunClubTürkiye — Koşu Topluluğu",              desc:"Türkiye genelindeki koşu kulüplerini keşfet, etkinliklere katıl, yarış takvimini takip et."},
   "events":        {path:"/etkinlikler",         title:"Etkinlikler — RunClubTürkiye",                 desc:"Yaklaşan koşu etkinlikleri ve maratonlar. Hemen kaydol."},
   "clubs":         {path:"/kulupler",            title:"Koşu Kulüpleri — RunClubTürkiye",              desc:"Türkiye koşu kulüplerini keşfet, katıl veya kendi kulübünü kur."},
+  "community":     {path:"/topluluk",            title:"Topluluk — RunClubTürkiye",                    desc:"RunClub kullanıcılarıyla iletişim kur, deneyimlerini paylaş."},
   "races":         {path:"/yaris-takvimi",       title:"Yarış Takvimi — RunClubTürkiye",               desc:"Türkiye maraton, trail ve ultra yarışları. Tüm yarış takvimi."},
   "blog":          {path:"/haberler",            title:"Koşu Haberleri — RunClubTürkiye",              desc:"Koşu haberleri, antrenman ipuçları ve yarış rehberleri."},
   "firsatlar":     {path:"/firsatlar",           title:"Fırsatlar — RunClubTürkiye",                   desc:"Koşu ekipmanı ve beslenme markalarından özel indirimler."},
@@ -3668,6 +3759,7 @@ window.toggleMobileMenu=function(){
      menu.innerHTML = '<button onclick="nav(\'home\');toggleMobileMenu()">🏠 Ana Sayfa</button>' +
         '<button onclick="nav(\'events\');toggleMobileMenu()">🏃 Etkinlikler</button>' +
         '<button onclick="nav(\'clubs\');toggleMobileMenu()">🏢 Kulüpler</button>' +
+        '<button onclick="nav(\'community\');toggleMobileMenu()">💬 Topluluk</button>' +
         '<button onclick="nav(\'races\');toggleMobileMenu()">🏅 Yarış Takvimi</button>' +
         '<button onclick="nav(\'firsatlar\');toggleMobileMenu()">🎁 Fırsatlar</button>' +
         '<button onclick="nav(\'blog\');toggleMobileMenu()">📰 Blog</button>' +
@@ -3866,6 +3958,7 @@ window.fomoToast=function(msg){
 // Sayfa değişiminde timer'ları temizle
 const _origNav=window.nav;
 window.nav=function(id){
+  if(id==='community') setTimeout(window.loadCommunityFeed, 100);
   if(id!=='event-detail'){
     if(window._fomoPollingTimer){clearInterval(window._fomoPollingTimer);window._fomoPollingTimer=null;}
     if(window._fomoCountdownTimer){clearInterval(window._fomoCountdownTimer);window._fomoCountdownTimer=null;}
@@ -4673,6 +4766,11 @@ function renderAdminSection(sec){
       <div id="banner-tab-clubs" style="display:none"><div id="page-banner-slots-clubs"></div></div>
       <div id="banner-tab-races" style="display:none"><div id="page-banner-slots-races"></div></div>
       <div id="banner-tab-blog" style="display:none"><div id="page-banner-slots-blog"></div></div>`,
+    community:`<h2 style="margin-bottom:18px">💬 Topluluk Yönetimi</h2>
+      <div class="card" style="padding:20px">
+         <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Tüm platformdaki paylaşımları yönetebilir, zararlı içerikleri gizleyebilir (silebilir) ve önemli duyuruları tüm üyeler için en üste sabitleyebilirsin.</p>
+         <div id="admin-community-feed"><div class="spinner" style="margin:20px auto"></div></div>
+      </div>`,
     popup:`<h2 style="margin-bottom:18px">💬 Popup</h2>
       <div class="card" style="padding:24px;max-width:520px">
         ${imgUploadHtml('apu-img-input','Popup Görseli','480×200px')}
@@ -4761,6 +4859,7 @@ function renderAdminSection(sec){
   },100);
   if(sec==='sponsors')setTimeout(()=>renderAdminSponsors(),100);
   if(sec==='ticker')setTimeout(()=>loadTickerAdmin(),100);
+  if(sec==='community')setTimeout(()=>{window._currentAdminMode='community';loadAdminCommunity()},100);
 }
 window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);};
 
@@ -5187,6 +5286,12 @@ function renderGroupSection(sec){
         </div>
       </div>`,
 
+    community:`<h2 style="margin-bottom:18px">💬 Topluluk Yönetimi</h2>
+      <div class="card" style="padding:20px">
+         <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Kulübünüzle etiketlenen paylaşımları görüntüleyebilir ve sakıncalı içerikleri gizleyebilirsiniz.</p>
+         <div id="admin-community-feed"><div class="spinner" style="margin:20px auto"></div></div>
+      </div>`,
+
     settings:`
       <h2 style="margin-bottom:18px">⚙ Kulüp Ayarları</h2>
       <div class="card" style="padding:24px;max-width:560px">
@@ -5229,6 +5334,7 @@ function renderGroupSection(sec){
   if(sec==='announcements')setTimeout(gLoadAnnouncements,100);
   if(sec==='chat')setTimeout(gLoadChat,200);
   if(sec==='applications')setTimeout(gLoadApplications,100);
+  if(sec==='community')setTimeout(()=>{window._currentAdminMode='community';loadAdminCommunity()},100);
   if(sec==='settings'){
     // Ayarlar formunu doldur
     const s=id=>document.getElementById(id);
@@ -6360,8 +6466,264 @@ window.renderGroupCharts = function() {
         }]
       },
       options: { responsive: true, maintainAspectRatio: false }
-    });
   }
 };
+
+// ━━ TOPLULUK JS ━━
+window.loadCommunityFeed = async function(filter='all') {
+  const feedList = document.getElementById('community-feed-list');
+  if(!feedList)return;
+  feedList.innerHTML = '<div class="spinner" style="margin:40px auto"></div>';
+  const fb = window._fb;
+  if(!fb || !fb.db) return;
+  
+  if(!window.CU) {
+    document.getElementById('community-post-box').style.display='none';
+    document.getElementById('community-feed-guest').style.display='block';
+    document.getElementById('my-club-widget').style.display='none';
+  } else {
+    document.getElementById('community-post-box').style.display='block';
+    document.getElementById('community-feed-guest').style.display='none';
+    const cwdUrl = window.CU.clubName ? '<span style="font-weight:600">'+window.CU.clubName+'</span> üyesi' : 'Henüz bir kulübe üye değilsin.';
+    document.getElementById('my-club-widget').style.display='block';
+    document.getElementById('com-my-club-content').innerHTML = cwdUrl;
+  }
+  
+  try {
+    let q = fb.query(fb.collection(fb.db,'posts'), fb.orderBy('timestamp','desc'), fb.limit(30));
+    const snap = await fb.getDocs(q);
+    let posts = [];
+    snap.forEach(doc=>{ posts.push(Object.assign({id:doc.id}, doc.data())); });
+    
+    // Apply filters visually
+    if(filter !== 'all') {
+      if(filter === 'club' && window.CU?.clubId) posts = posts.filter(p => p.club_id === window.CU.clubId);
+      if(filter === 'my') posts = posts.filter(p => p.author_id === window.CU?.uid);
+    }
+    
+    // Filter out hidden EXCEPT if user is admin
+    const isAdmin = window.CU && (window.CU.role==='superadmin' || window.CU.role==='admin' || window.CU.role==='groupadmin');
+    if(!isAdmin) {
+      posts = posts.filter(p => p.status !== 'hidden');
+    }
+    
+    if(posts.length === 0) {
+      feedList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Henüz bir gönderi yok. İlk paylaşan sen ol!</div>';
+      return;
+    }
+    
+    // Sabitlenenleri en üste al
+    const pinned = posts.filter(p => p.status === 'pinned_global');
+    const others = posts.filter(p => p.status !== 'pinned_global');
+    
+    let html = '';
+    [...pinned, ...others].forEach(p => {
+       const isSys = p.is_system;
+       const liked = window.CU && p.likedBy && p.likedBy.includes(window.CU.uid);
+       const dTr = p.timestamp?.toDate ? new Date(p.timestamp.toDate()).toLocaleString('tr-TR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+       
+       html += '<div class="post-card '+(isSys?'sys-post':'')+'">';
+       if(p.status==='pinned_global') html += '<div style="position:absolute;top:-10px;left:20px;background:var(--or);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">📌 Sabitlenmiş</div>';
+       if(p.status==='hidden') html += '<div style="background:#fef2f2;color:#ef4444;border:1px solid #fca5a5;padding:4px 8px;font-size:11px;border-radius:4px;margin-bottom:8px;font-weight:600">GİZLENMİŞ GÖNDERİ (Admin Gösterimi)</div>';
+       if((window.CU && window.CU.uid === p.author_id) || isAdmin) html += '<button class="post-del-btn" onclick="deleteCommunityPost(\''+p.id+'\')">🗑</button>';
+       html += '<div class="post-header"><div class="post-avatar">'+(p.author_name||'S').charAt(0).toUpperCase()+'</div><div><div class="post-author">'+(p.author_name||'Sistem')+(isSys?' 🟢':'')+'</div><div class="post-time">'+dTr+'</div></div></div>';
+       html += '<div class="post-content">'+(p.content||'')+'</div>';
+       if(p.image_url) html += '<div class="post-img-wrap"><img src="'+p.image_url+'" loading="lazy"/></div>';
+       html += '<div class="post-actions"><button class="btn-like '+(liked?'liked':'')+'" onclick="toggleLikePost(\''+p.id+'\')">'+(liked?'🧡':'🤍')+' Çak '+(p.likes_count||0)+'</button></div>';
+       html += '</div>';
+    });
+    feedList.innerHTML = html;
+    
+    // Liderlik tablosu mock
+    document.getElementById('com-leaders-list').innerHTML = `
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥇</span><b>Emre T.</b></div><span style="color:var(--or);font-weight:700">42 KM</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥈</span><b>Sedat Y.</b></div><span style="color:var(--or);font-weight:700">38 KM</span></div>
+      <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥉</span><b>Merve K.</b></div><span style="color:var(--or);font-weight:700">32 KM</span></div>
+    `;
+    document.getElementById('com-badges-list').innerHTML = `
+      <div style="font-size:12px;color:var(--dark)"><b style="color:var(--or)">Aylin C.</b> "Profesyonel" rozetini kazandı! 🌟</div>
+      <div style="font-size:12px;color:var(--dark)"><b style="color:var(--or)">Barış T.</b> "Efsane" rozetini kazandı! 👑</div>
+    `;
+    
+  }catch(e){
+    feedList.innerHTML = '<div style="color:red;padding:20px;text-align:center">Gönderiler yüklenemedi: '+e.message+'</div>';
+  }
+};
+
+window.submitCommunityPost = async function() {
+  if(!window.CU) { toast('Lütfen giriş yapın', 'err'); return; }
+  const btn = document.getElementById('com-post-submit-btn');
+  const textInput = document.getElementById('com-post-text');
+  const imgInput = document.getElementById('com-post-img');
+  
+  const content = textInput.value.trim();
+  const imgUrl = imgInput.value.trim();
+  
+  if(!content && !imgUrl) { toast('Gönderi boş olamaz', 'err'); return; }
+  
+  btn.disabled = true;
+  btn.innerText = '⏳ Paylaşılıyor...';
+  
+  try {
+    const fb = window._fb;
+    await fb.addDoc(fb.collection(fb.db, 'posts'), {
+       author_id: window.CU.uid,
+       author_name: window.CU.name || 'İsimsiz Üye',
+       content: content,
+       image_url: imgUrl || null,
+       club_id: window.CU.clubId || null,
+       timestamp: fb.serverTimestamp(),
+       likes_count: 0,
+       likedBy: [],
+       status: 'active',
+       is_system: false
+    });
+    
+    textInput.value = '';
+    imgInput.value = '';
+    toast('Gönderi paylaşıldı!', 'ok');
+    loadCommunityFeed();
+  }catch(e){
+    toast('Hata: '+e.message, 'err');
+  }finally{
+    btn.disabled = false;
+    btn.innerText = 'Paylaş';
+  }
+};
+
+window.toggleLikePost = async function(postId) {
+  if(!window.CU) { toast('Beğenmek için giriş yapın','err'); return; }
+  try {
+    const fb = window._fb;
+    const postRef = fb.doc(fb.db, 'posts', postId);
+    const snap = await fb.getDoc(postRef);
+    if(!snap.exists()) return;
+    
+    let dbData = snap.data();
+    let likedBy = dbData.likedBy || [];
+    let likesCount = dbData.likes_count || 0;
+    
+    if(likedBy.includes(window.CU.uid)) {
+       likedBy = likedBy.filter(u => u !== window.CU.uid);
+       likesCount = Math.max(0, likesCount - 1);
+    } else {
+       likedBy.push(window.CU.uid);
+       likesCount++;
+    }
+    
+    await fb.setDoc(postRef, { likedBy, likes_count: likesCount }, {merge:true});
+    loadCommunityFeed(); // Refresh
+  }catch(e){
+    toast('Hata: '+e.message, 'err');
+  }
+};
+
+window.deleteCommunityPost = async function(postId) {
+  if(!confirm('Bu gönderiyi silmek istediğinden emin misin?')) return;
+  try {
+    const fb = window._fb;
+    await fb.deleteDoc(fb.doc(fb.db, 'posts', postId));
+    toast('Gönderi silindi', 'ok');
+    loadCommunityFeed();
+  }catch(e){
+    toast('Silinemedi: '+e.message, 'err');
+  }
+};
+
+window.triggerSystemPost = async function(eventName, userName, userUid) {
+  try {
+    const fb = window._fb;
+    await fb.addDoc(fb.collection(fb.db, 'posts'), {
+       author_id: userUid,
+       author_name: userName,
+       content: '🏃 Yeni bir başarıya koşuyor! '+userName+', **'+eventName+'** etkinliğine katıldı. Sen de bize katıl!',
+       image_url: null,
+       club_id: null,
+       timestamp: fb.serverTimestamp(),
+       likes_count: 0,
+       likedBy: [],
+       status: 'active',
+       is_system: true
+    });
+  }catch(e){ console.error('Sistem post hatası:', e); }
+};
+
+window.hideCommunityPost = async function(postId, currentStatus) {
+  try {
+    const fb = window._fb;
+    const newStatus = (currentStatus === 'hidden') ? 'active' : 'hidden';
+    await fb.setDoc(fb.doc(fb.db, 'posts', postId), { status: newStatus }, {merge:true});
+    toast('Durum güncellendi', 'ok');
+    if(window._currentAdminMode === 'community') {
+       loadAdminCommunity();
+    } else {
+       loadCommunityFeed();
+    }
+  }catch(e){ toast('Hata: '+e.message, 'err'); }
+};
+
+window.pinCommunityPost = async function(postId, currentStatus) {
+  try {
+    const fb = window._fb;
+    const newStatus = (currentStatus === 'pinned_global') ? 'active' : 'pinned_global';
+    await fb.setDoc(fb.doc(fb.db, 'posts', postId), { status: newStatus }, {merge:true});
+    toast('Sabitleme durumu güncellendi', 'ok');
+    if(window._currentAdminMode === 'community') {
+       loadAdminCommunity();
+    } else {
+       loadCommunityFeed();
+    }
+  }catch(e){ toast('Hata: '+e.message, 'err'); }
+};
+
+window.loadAdminCommunity = async function() {
+  const cFeed = document.getElementById('admin-community-feed');
+  if(!cFeed) return;
+  cFeed.innerHTML = '<div class="spinner" style="margin:40px auto"></div>';
+  try {
+    const fb = window._fb;
+    let q = fb.query(fb.collection(fb.db,'posts'), fb.orderBy('timestamp','desc'), fb.limit(100));
+    const snap = await fb.getDocs(q);
+    let posts = [];
+    snap.forEach(doc=>{ posts.push(Object.assign({id:doc.id}, doc.data())); });
+    
+    // Group admin filter
+    if(window.CU.role==='groupadmin') {
+       posts = posts.filter(p => p.club_id === window.CU.clubId);
+    }
+    
+    if(posts.length === 0) {
+      cFeed.innerHTML = '<p style="color:var(--muted)">Hiç paylaşım yok.</p>';
+      return;
+    }
+    
+    let html = '<table><thead><tr><th>Tarih</th><th>Yazar</th><th>İçerik</th><th>Durum</th><th>İşlemler</th></tr></thead><tbody>';
+    posts.forEach(p => {
+       const isHidden = p.status === 'hidden';
+       const isPinned = p.status === 'pinned_global';
+       const dTr = p.timestamp?.toDate ? new Date(p.timestamp.toDate()).toLocaleString('tr-TR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
+       const contentAbbr = p.content && p.content.length > 50 ? p.content.substring(0,50)+'...' : p.content;
+       
+       html += `<tr>
+         <td style="font-size:12px;color:var(--muted)">${dTr}</td>
+         <td>${p.author_name||'Sistem'} <br><span style="font-size:10px;color:var(--muted)">${p.author_id}</span></td>
+         <td>${contentAbbr||'-'}${p.image_url?' 🖼️':''}</td>
+         <td>
+            ${isHidden ? '<span class="pill pill-bl">Gizli</span>' : (isPinned?'<span class="pill pill-or">Sabit</span>':'<span class="pill pill-gr">Aktif</span>')}
+         </td>
+         <td class="action-btns" style="white-space:nowrap">
+            <button class="btn btn-ghost btn-sm" onclick="hideCommunityPost('${p.id}', '${p.status}')" title="${isHidden?'Görünür Yap':'Gizle'}">${isHidden?'👁️':'🚫'}</button>
+            ${window.CU.role==='superadmin' ? `<button class="btn btn-ghost btn-sm" onclick="pinCommunityPost('${p.id}', '${p.status}')" title="${isPinned?'Sabitten Kaldır':'Sabitle'}">📌</button>` : ''}
+            <button class="btn btn-red btn-sm" onclick="deleteCommunityPost('${p.id}')" title="Sil">🗑</button>
+         </td>
+       </tr>`;
+    });
+    html += '</tbody></table>';
+    cFeed.innerHTML = html;
+  }catch(e){
+    cFeed.innerHTML = `<div style="color:red">Hata: ${e.message}</div>`;
+  }
+};
+
 </script>
 </html>

@@ -12,9 +12,15 @@
 <meta name="description" content="Türkiye genelinde koşu kulüpleri, etkinlikler ve yarış takvimi."/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23E8622A'/%3E%3Ccircle cx='112' cy='60' r='18' fill='%23fff'/%3E%3Cellipse cx='104' cy='98' rx='12' ry='24' fill='%23fff' transform='rotate(-12 104 98)'/%3E%3Cpath d='M98 82 L68 64' stroke='%23F5F0E8' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 80 L136 90' stroke='%23F5F0E8' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3Cpath d='M96 120 L74 144' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 122 L130 135' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"/>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css"/>
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Open+Sans:wght@300;400;500;600&family=Alatsi&display=swap">
+<!-- Kritik Google Fonts önce yüklensin (LCP için Raleway ve Open Sans) -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Open+Sans:wght@300;400;500;600&family=Alatsi&display=swap">
+<!-- Lexend ve Quill CSS kritik değil → defer benzeri media trick ile lazy-load -->
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&display=swap" media="print" onload="this.media='all'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&display=swap"></noscript>
+<!-- Quill CSS yalnızca Admin paneli açıldığında gerekli → non-blocking -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css"/></noscript>
 <style>
 /* ━━ ROOT TOKENS ━━ */
 *{box-sizing:border-box;margin:0;padding:0}
@@ -80,11 +86,13 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .nav-right{display:flex;gap:8px;margin-left:auto;align-items:center}
 .theme-btn{background:var(--cream2);border:1.5px solid var(--border);border-radius:10px;padding:6px 11px;font-size:15px;color:var(--text);transition:all var(--transition)}.theme-btn:hover{border-color:var(--or);background:var(--or-soft)}
 
-/* BANNER */
-#hero-banner{position:relative;overflow:hidden;height:460px;width:100%;max-width:100%}
+/* BANNER — CLS: sabit yükseklik + img aspect-ratio */
+#hero-banner{position:relative;overflow:hidden;height:460px;width:100%;max-width:100%;contain:layout size}
 .banner-slide{position:absolute;inset:0;opacity:0;transition:opacity .7s;display:flex;align-items:center;overflow:hidden}
 .banner-slide.on{opacity:1}
 .banner-bg-img{position:absolute;inset:0;background-size:cover;background-position:center}
+/* Banner görseli için aspect-ratio CLS koruması */
+.banner-bg-img img{width:100%;height:100%;object-fit:cover;aspect-ratio:16/9}
 .banner-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55)}
 .banner-content{position:relative;z-index:1;padding:0 60px;max-width:620px}
 .banner-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,0,.2);border:1px solid rgba(255,107,0,.4);color:var(--or);padding:5px 14px;border-radius:20px;font-size:12px;margin-bottom:14px}
@@ -99,14 +107,15 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .banner-nav{position:absolute;top:50%;transform:translateY(-50%);z-index:10;background:rgba(0,0,0,.4);border:1px solid rgba(255,255,255,.2);color:#fff;width:38px;height:38px;border-radius:50%;font-size:17px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .banner-nav.prev{left:14px}.banner-nav.next{right:14px}
 
-/* ━━ CARDS ━━ */
+/* ━━ CARDS — CLS: min-height ile layout kayması önlendi ━━ */
 .grid{display:grid;gap:20px}
 .g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .g4{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
 .card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.card-img{height:160px;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
+/* CLS FIX: card-img aspect-ratio ile yükseklik rezervasyonu */
+.card-img{height:160px;aspect-ratio:16/6;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
 .card-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s var(--transition)}
 .card:hover .card-img img{transform:scale(1.04)}
 .card-body{padding:16px}
@@ -132,11 +141,12 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .pace-chips{display:flex;gap:5px;flex-wrap:wrap;margin-top:6px}
 .pace-chip{padding:2px 8px;background:var(--or-soft);border:1px solid rgba(232,98,42,.25);border-radius:12px;font-size:10px;color:var(--or);font-weight:600}
 
-/* ━━ FIRSAT CARD ━━ */
+/* ━━ FIRSAT CARD — CLS fix ━━ */
 .firsat-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all var(--transition);position:relative;cursor:pointer;box-shadow:var(--shadow-sm)}
 .firsat-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
 .firsat-badge{position:absolute;top:12px;left:12px;background:var(--or);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;z-index:1;box-shadow:0 3px 8px rgba(232,98,42,.35);font-family:var(--font-head)}
-.firsat-img{height:180px;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
+/* CLS FIX: asgari yükseklik rezervasyonu + aspect-ratio */
+.firsat-img{height:180px;aspect-ratio:16/8;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
 .firsat-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .firsat-body{padding:18px}
 .firsat-body h3{font-size:15px;font-weight:700;margin-bottom:6px;font-family:var(--font-head);color:var(--dark2)}
@@ -188,9 +198,10 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .img-upload-area input{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%}
 .img-preview{width:100%;max-height:130px;object-fit:cover;border-radius:8px;margin-top:10px;display:none}
 
-/* ━━ POPUP ━━ */
+/* ━━ POPUP — CLS fix ━━ */
 #popup-modal .modal{max-width:480px;padding:0;overflow:hidden;border-radius:22px}
-.popup-img-area{width:100%;height:200px;background:linear-gradient(135deg,var(--dark2),var(--or));display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;overflow:hidden}
+/* CLS FIX: popup görsel alanı için sabit boyut rezervasyonu */
+.popup-img-area{width:100%;height:200px;min-height:200px;aspect-ratio:2.4/1;background:linear-gradient(135deg,var(--dark2),var(--or));display:flex;align-items:center;justify-content:center;font-size:60px;position:relative;overflow:hidden;contain:layout size}
 .popup-img-area img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .popup-body-inner{padding:26px}
 .popup-close-top{position:absolute;top:10px;right:10px;background:rgba(0,0,0,.45);border:none;color:#fff;width:32px;height:32px;border-radius:50%;font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;z-index:10;transition:all var(--transition)}.popup-close-top:hover{background:rgba(0,0,0,.7)}
@@ -267,18 +278,20 @@ tr:hover td{background:var(--or-soft)}
 .sponsor-del{position:absolute;top:5px;right:5px;background:#c0392b;border:none;color:#fff;width:20px;height:20px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 .sponsor-edit{position:absolute;top:5px;left:5px;background:var(--or);border:none;color:#fff;width:20px;height:20px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
-/* ━━ RACE CARD ━━ */
+/* ━━ RACE CARD — CLS fix ━━ */
 .race-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .race-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.race-img{height:180px;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:48px;position:relative;overflow:hidden}
+/* CLS FIX: aspect-ratio ile yükseklik rezervasyonu */
+.race-img{height:180px;aspect-ratio:16/8;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:48px}
 .race-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s}
 .race-card:hover .race-img img{transform:scale(1.04)}
 .race-date-badge{position:absolute;top:10px;right:10px;background:var(--or);color:#fff;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-head);box-shadow:0 2px 8px rgba(232,98,42,.3)}
 
-/* ━━ BLOG CARD ━━ */
+/* ━━ BLOG CARD — CLS fix ━━ */
 .blog-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .blog-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
-.blog-img{height:180px;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
+/* CLS FIX: aspect-ratio ile yükseklik rezervasyonu */
+.blog-img{height:180px;aspect-ratio:16/8;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
 .blog-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s}
 .blog-card:hover .blog-img img{transform:scale(1.04)}
 
@@ -314,6 +327,23 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .pace-selector{display:flex;flex-wrap:wrap;gap:7px;margin-top:6px}
 .pace-opt{padding:6px 13px;border-radius:20px;border:1.5px solid var(--border);background:none;color:var(--muted);font-size:11px;cursor:pointer;transition:all var(--transition);font-family:var(--font-head);font-weight:600}
 .pace-opt.on{border-color:var(--or);color:var(--or);background:var(--or-soft)}
+
+/* ━━ PACE/DISTANCE RADIO SEÇİM (Kullanıcı Tarafı) ━━ */
+.rsvp-selection-group{margin-bottom:16px}
+.rsvp-selection-group label.rsvp-group-label{display:block;font-size:13px;font-weight:700;color:var(--dark2);margin-bottom:8px;text-transform:none;letter-spacing:0;font-family:var(--font-head)}
+.rsvp-radio-wrap{display:flex;flex-wrap:wrap;gap:8px}
+.rsvp-radio-wrap input[type="radio"]{display:none}
+.rsvp-radio-wrap label{display:inline-flex;align-items:center;gap:6px;padding:8px 16px;border-radius:24px;border:1.5px solid var(--border);background:var(--card);color:var(--muted);font-size:12px;cursor:pointer;transition:all var(--transition);font-family:var(--font-head);font-weight:600}
+.rsvp-radio-wrap label:hover{border-color:var(--or-light);color:var(--text)}
+.rsvp-radio-wrap input[type="radio"]:checked+label{border-color:var(--or);color:#fff;background:var(--or);box-shadow:0 3px 10px rgba(232,98,42,.3)}
+.rsvp-validation-msg{font-size:11px;color:#f87171;margin-top:6px;display:none;font-weight:600}
+.rsvp-validation-msg.show{display:block;animation:fomoSlideIn .3s ease}
+/* Stats tablo */
+.stats-dist-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px}
+.stats-dist-table th{background:var(--bg3);padding:8px 10px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;font-family:var(--font-head)}
+.stats-dist-table td{padding:8px 10px;border-bottom:1px solid var(--border)}
+.stats-bar{height:6px;border-radius:3px;background:var(--bg4);overflow:hidden;min-width:60px}
+.stats-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--or),var(--or-light));transition:width .4s}
 
 /* ━━ CONTACT MSG ━━ */
 .contact-msg-item{background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:16px;cursor:pointer;transition:all var(--transition);margin-bottom:9px;box-shadow:var(--shadow-sm)}
@@ -366,8 +396,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .ai-loading{display:flex;align-items:center;gap:10px;padding:14px;background:var(--cream2);border-radius:10px;font-size:13px;color:var(--muted);margin-top:10px}
 .ai-loading .spinner{width:18px;height:18px;flex-shrink:0}
 
-/* ━━ FIRSAT DETAIL ━━ */
-.firsat-detail-hero{height:290px;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-radius:var(--r);margin-bottom:26px}
+/* ━━ FIRSAT DETAIL — CLS fix ━━ */
+/* CLS FIX: detay hero alan rezervasyonu */
+.firsat-detail-hero{height:290px;min-height:290px;aspect-ratio:16/9;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;border-radius:var(--r);margin-bottom:26px;contain:layout size}
 .firsat-detail-hero img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .firsat-detail-hero .hero-overlay{position:absolute;inset:0;background:rgba(26,10,4,.55)}
 .firsat-detail-hero .hero-inner{position:relative;z-index:1;text-align:center;padding:22px}
@@ -776,7 +807,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="nav('contact')" id="nb-contact">İletişim</button>
   </div>
   <div class="nav-right">
-    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn">🌙</button>
+    <button class="theme-btn" onclick="toggleTheme()" id="theme-btn" aria-label="Tema değiştir">🌙</button>
     <div id="nav-guest" style="display:flex;gap:5px">
       <button class="btn btn-ghost" onclick="openAuth('login')">Giriş</button>
       <button class="btn btn-or" onclick="openAuth('register')">Üye Ol</button>
@@ -788,7 +819,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <button class="btn btn-or btn-sm" id="nav-dashboard-btn" onclick="nav('dashboard')">Dashboard</button>
     </div>
   </div>
-    <button id="hamburger" onclick="toggleMobileMenu()" aria-label="Menü">
+    <button id="hamburger" onclick="toggleMobileMenu()" aria-label="Navigasyon menüsünü aç/kapat" aria-expanded="false" aria-controls="mobile-menu">
     <span></span><span></span><span></span>
   </button>
 </nav>
@@ -818,8 +849,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <!-- HOME -->
 <div class="pg" id="pg-home">
   <div id="hero-banner">
-    <button class="banner-nav prev" onclick="bannerPrev()">‹</button>
-    <button class="banner-nav next" onclick="bannerNext()">›</button>
+    <button class="banner-nav prev" onclick="bannerPrev()" aria-label="Önceki banner">‹</button>
+    <button class="banner-nav next" onclick="bannerNext()" aria-label="Sonraki banner">›</button>
     <div class="banner-dots" id="banner-dots"></div>
     <div id="banner-slides"></div>
   </div>
@@ -1619,7 +1650,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 <!-- MODALS -->
 <div class="overlay" id="auth-modal">
-  <div class="modal"><button class="close-x" onclick="closeModal('auth-modal')">×</button>
+  <div class="modal"><button class="close-x" onclick="closeModal('auth-modal')" aria-label="Giriş penceresini kapat">×</button>
     <svg width="180" height="54" viewBox="0 0 400 120" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 16px">
   <circle cx="40" cy="38" r="11" fill="#2C1810"/>
   <ellipse cx="38" cy="58" rx="8" ry="15" fill="#2C1810" transform="rotate(-10 38 58)"/>
@@ -1706,8 +1737,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <!-- POPUP -->
 <div class="overlay" id="popup-modal">
   <div class="modal" style="max-width:480px;padding:0;overflow:hidden;border-radius:20px">
-    <button class="popup-close-top" onclick="closeModal('popup-modal')">×</button>
-    <div class="popup-img-area" id="popup-img-area"></div>
+    <button class="popup-close-top" onclick="closeModal('popup-modal')" aria-label="Popup'ı kapat">×</button>
+    <div class="popup-img-area" id="popup-img-area" role="img" aria-label="Kampanya görseli"></div>
     <div class="popup-body-inner">
       <h2 id="popup-title">Hoş Geldin!</h2>
       <p id="popup-body-text">RunClubTürkiye'ye katıl!</p>
@@ -1766,6 +1797,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="form-grp"><label>Pace Grupları</label><div class="pace-selector" id="edit-ev-pace">
       <button class="pace-opt" onclick="this.classList.toggle('on')">4:00–4:30</button><button class="pace-opt" onclick="this.classList.toggle('on')">4:30–5:00</button><button class="pace-opt" onclick="this.classList.toggle('on')">5:00–5:30</button><button class="pace-opt" onclick="this.classList.toggle('on')">5:30–6:00</button><button class="pace-opt" onclick="this.classList.toggle('on')">6:00+</button>
     </div></div>
+    <div class="form-grp"><label>Mesafe Seçenekleri <span style="font-weight:400;color:var(--muted);text-transform:none">(virgülle ayır, örn: 5K, 10K, 21K)</span></label><input type="text" id="edit-ev-distances" placeholder="5K, 10K, 21K"/></div>
     <div class="form-grp"><label style="display:flex;align-items:center;gap:8px"><input type="checkbox" id="edit-ev-qr" style="width:16px;height:16px;accent-color:var(--or)"/>QR Check-in Aktif</label></div>
     <div class="form-grp"><label>Açıklama</label><textarea id="edit-ev-desc" rows="3"></textarea></div>
     <button class="btn btn-or btn-full" onclick="saveEventEdit()">Kaydet</button>
@@ -1866,11 +1898,14 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 <div id="toast"></div>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-
-<script src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
+<!-- Leaflet CSS: harita sayfasına kadar kritik değil → non-blocking -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'"/>
+<noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/></noscript>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<!-- Leaflet, QRCode ve Quill → yalnızca belirli sayfalarda gerekli, defer ile yükle -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -2067,11 +2102,32 @@ window.handlePhotoUpload=async(input)=>{
 // ── RSVP / CLUB JOIN ──
 window.rsvpEvent=async(eventId,fee)=>{
   if(!CU){openAuth('login');return;}
+  // Pace ve Mesafe validation
+  const ev=window.EVENTS.find(e=>e.id===eventId);
+  let selectedPace='',selectedDistance='';
+  if(ev?.pace?.length){
+    const paceEl=document.querySelector('input[name="rsvp-pace"]:checked');
+    if(!paceEl){
+      const errEl=document.getElementById('rsvp-pace-err');if(errEl)errEl.classList.add('show');
+      toast('Lütfen bir pace grubu seçin','err');return;
+    }
+    selectedPace=paceEl.value;
+    const errEl=document.getElementById('rsvp-pace-err');if(errEl)errEl.classList.remove('show');
+  }
+  if(ev?.distances?.length){
+    const distEl=document.querySelector('input[name="rsvp-distance"]:checked');
+    if(!distEl){
+      const errEl=document.getElementById('rsvp-dist-err');if(errEl)errEl.classList.add('show');
+      toast('Lütfen bir mesafe seçin','err');return;
+    }
+    selectedDistance=distEl.value;
+    const errEl=document.getElementById('rsvp-dist-err');if(errEl)errEl.classList.remove('show');
+  }
   try{
-    // RSVP kaydet — userName ve zaman ile
+    // RSVP kaydet — userName, pace, distance ve zaman ile
     await setDoc(doc(db,'rsvps',eventId+'_'+CU.uid),{
       eventId,userId:CU.uid,userName:CU.name||'Koşucu',
-      userEmail:CU.email||'',joinedAt:serverTimestamp()
+      userEmail:CU.email||'',selectedPace,selectedDistance,joinedAt:serverTimestamp()
     });
     // events/reg sayacını artır
     await setDoc(doc(db,'events',eventId),{reg:increment(1)},{merge:true});
@@ -2079,10 +2135,13 @@ window.rsvpEvent=async(eventId,fee)=>{
     await setDoc(doc(db,'users',CU.uid),{eventCount:increment(1)},{merge:true});
     CU.eventCount=(CU.eventCount||0)+1;
     // Local state güncelle
-    const ev=window.EVENTS.find(e=>e.id===eventId);if(ev)ev.reg=(ev.reg||0)+1;
+    if(ev)ev.reg=(ev.reg||0)+1;
     localStorage.setItem(`rsvp_${eventId}_${CU.uid}`,'1');
     toast('Etkinliğe kaydoldun! 🎉','ok');
     const btn=document.getElementById('rsvp-btn');if(btn){btn.textContent='✓ Kaydolundu';btn.disabled=true;btn.onclick=()=>leaveEvent(eventId);}
+    // Seçim alanlarını gizle
+    const paceWrap=document.getElementById('rsvp-pace-wrap');if(paceWrap)paceWrap.closest('.rsvp-selection-group').style.display='none';
+    const distWrap=document.getElementById('rsvp-distance-wrap');if(distWrap)distWrap.closest('.rsvp-selection-group').style.display='none';
     // FOMO UI güncelle
     fomoUpdateCard(eventId);
     fomoUpdateDetail(eventId);
@@ -2803,7 +2862,7 @@ window.loadChatMessages=async(room)=>{try{const snap=await getDocs(query(collect
 // ── POPUP ──
 async function loadPopup(){
   if(sessionStorage.getItem('popup_seen'))return;
-  try{const snap=await getDoc(doc(db,'popup','active'));if(snap.exists()&&snap.data().active){const d=snap.data();document.getElementById('popup-title').textContent=d.title||'Hoş Geldin!';document.getElementById('popup-body-text').textContent=d.body||'';const area=document.getElementById('popup-img-area');area.innerHTML='';if(d.imgUrl){const img=document.createElement('img');img.src=d.imgUrl;img.style.cssText='width:100%;height:100%;object-fit:cover;position:absolute;inset:0';area.appendChild(img);}const cta=document.getElementById('popup-cta');cta.textContent=d.ctaText||'Keşfet →';if(d.ctaUrl)cta.onclick=()=>{window.open(d.ctaUrl,'_blank');closeModal('popup-modal');};setTimeout(()=>openModal('popup-modal'),1500);sessionStorage.setItem('popup_seen','1');}}catch(e){}
+  try{const snap=await getDoc(doc(db,'popup','active'));if(snap.exists()&&snap.data().active){const d=snap.data();document.getElementById('popup-title').textContent=d.title||'Hoş Geldin!';document.getElementById('popup-body-text').textContent=d.body||'';const area=document.getElementById('popup-img-area');area.innerHTML='';if(d.imgUrl){const img=document.createElement('img');img.src=d.imgUrl;img.alt='Popup kampanya görseli';img.width=480;img.height=200;img.loading='lazy';img.style.cssText='width:100%;height:100%;object-fit:cover;position:absolute;inset:0';area.appendChild(img);}const cta=document.getElementById('popup-cta');cta.textContent=d.ctaText||'Keşfet →';if(d.ctaUrl)cta.onclick=()=>{window.open(d.ctaUrl,'_blank');closeModal('popup-modal');};setTimeout(()=>openModal('popup-modal'),1500);sessionStorage.setItem('popup_seen','1');}}catch(e){}
 }
 
 // ── BANNERS FROM DB ──
@@ -3033,7 +3092,7 @@ function startBannerAuto(count){
 
 // ── SPONSORS ──
 function renderSponsors(){
-  const content=(window.SPONSORS_DATA||[]).map(s=>`<div class="sponsor-logo-item">${s.imgUrl?`<img src="${s.imgUrl}" alt="${s.name}"/>`:`<span>${s.name}</span>`}</div>`).join('');
+  const content=(window.SPONSORS_DATA||[]).map(s=>`<div class="sponsor-logo-item">${s.imgUrl?`<img src="${s.imgUrl}" alt="${s.name}" width="100" height="38" loading="lazy"/>`:`<span>${s.name}</span>`}</div>`).join('');
   // Ana sayfa şeridi
   const main=document.getElementById('sponsors-strip');
   if(main)main.innerHTML=content;
@@ -3086,7 +3145,7 @@ function renderHomeFirsatlar(){
   el.innerHTML=items.map(f=>`
     <div class="firsat-card" onclick="openFirsatDetail('${f.id}')">
       ${f.indirim?`<div class="firsat-badge">${f.indirim}</div>`:''}
-      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}"/>`:'<span style="font-size:48px">🎁</span>'}</div>
+      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" width="400" height="180" loading="lazy"/>`:'<span style="font-size:48px">🎁</span>'}</div>
       <div class="firsat-body">
         <span class="tag tag-pu">${f.kategori||'Genel'}</span>
         <h3>${f.baslik}</h3>
@@ -3200,6 +3259,24 @@ window.openEvent=id=>{
             <div style="display:flex;justify-content:space-between;padding:7px 0;border-bottom:1px solid var(--border)"><span style="color:var(--muted)">Kapasite</span><span>${reg}/${cap}</span></div>
             <div style="display:flex;justify-content:space-between;padding:7px 0"><span style="color:var(--muted)">Son Kayıt</span><span>${e.deadline||'—'}</span></div>
           </div>
+          <!-- PACE SEÇİMİ -->
+          ${(!isFull && !isRsvped && e.pace?.length) ? `
+          <div class="rsvp-selection-group">
+            <label class="rsvp-group-label">🏃 Pace Grubunu Seç</label>
+            <div class="rsvp-radio-wrap" id="rsvp-pace-wrap">
+              ${e.pace.map((p,i)=>'<input type="radio" name="rsvp-pace" id="rsvp-pace-'+i+'" value="'+p+'"/><label for="rsvp-pace-'+i+'">'+p+'</label>').join('')}
+            </div>
+            <div class="rsvp-validation-msg" id="rsvp-pace-err">⚠ Lütfen bir pace grubu seçin</div>
+          </div>` : ''}
+          <!-- MESAFE SEÇİMİ -->
+          ${(!isFull && !isRsvped && e.distances?.length) ? `
+          <div class="rsvp-selection-group">
+            <label class="rsvp-group-label">📏 Mesafe Seç</label>
+            <div class="rsvp-radio-wrap" id="rsvp-distance-wrap">
+              ${e.distances.map((d,i)=>'<input type="radio" name="rsvp-distance" id="rsvp-dist-'+i+'" value="'+d+'"/><label for="rsvp-dist-'+i+'">'+d+'</label>').join('')}
+            </div>
+            <div class="rsvp-validation-msg" id="rsvp-dist-err">⚠ Lütfen bir mesafe seçin</div>
+          </div>` : ''}
           ${isFull
             ?`<button class="btn btn-full" style="background:#f87171;color:#fff;cursor:not-allowed;opacity:.8" disabled>Kapasite Dolu</button>`
             :isRsvped
@@ -3626,10 +3703,12 @@ window.fomoLoadParticipants=async(eventId)=>{
       const name=p.userName||'Koşucu';
       const isLatest=i===0;
       const timeAgo=fomoTimeAgo(p.joinedAt?.seconds);
+      const paceTag=p.selectedPace?`<span class="pace-chip" style="font-size:9px;padding:1px 6px;margin-left:4px">${p.selectedPace}</span>`:'';
+      const distTag=p.selectedDistance?`<span class="pace-chip" style="font-size:9px;padding:1px 6px;margin-left:2px;background:rgba(46,125,50,.1);border-color:rgba(46,125,50,.25);color:#2E7D32">${p.selectedDistance}</span>`:'';
       return`<div class="fomo-participant-row${isLatest?' latest':''}">
         <div class="fomo-avatar">${name.charAt(0).toUpperCase()}</div>
         <div style="flex:1">
-          <div style="font-weight:600;font-size:13px">${name}${isLatest?'<span style="font-size:10px;background:var(--or);color:#fff;padding:1px 6px;border-radius:10px;margin-left:6px">En Son</span>':''}</div>
+          <div style="font-weight:600;font-size:13px;display:flex;align-items:center;flex-wrap:wrap;gap:2px">${name}${isLatest?'<span style="font-size:10px;background:var(--or);color:#fff;padding:1px 6px;border-radius:10px;margin-left:6px">En Son</span>':''}${paceTag}${distTag}</div>
           <div style="font-size:11px;color:var(--muted)">${timeAgo}</div>
         </div>
       </div>`;
@@ -3749,7 +3828,7 @@ function renderCountdown(ds,id){const el=document.getElementById(id);if(!el)retu
 function clubCard(c){
   const isJoined=window.CU&&localStorage.getItem(`club_${c.id}_${window.CU.uid}`);
   const imgBg=c.imgUrl
-    ?`<img src="${c.imgUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`
+    ?`<img src="${c.imgUrl}" alt="${c.name}" width="300" height="150" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`
     :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--or),var(--or2));font-size:40px">🏃</div>`;
   return`<div class="card" style="position:relative;cursor:pointer" onclick="openClub('${c.id}')">
     ${isJoined?`<div class="member-badge">✓ Üyesin</div>`:''}
@@ -3854,7 +3933,7 @@ function raceCard(r){
   const liked=window.CU&&localStorage.getItem('rlk_'+r.id+'_'+(window.CU?.uid||''));
   return`<div class="race-card">
     <div class="race-img" style="position:relative">
-      ${r.imgUrl?`<img src="${r.imgUrl}"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
+      ${r.imgUrl?`<img src="${r.imgUrl}" alt="${r.name}" width="400" height="180" loading="lazy"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
       <div class="race-date-badge">${r.date||''}</div>
       <!-- Detaylar butonu: görsel üstünde sağ alt köşe -->
       <button onclick="openRace('${r.id}')" style="position:absolute;bottom:10px;right:10px;z-index:3;background:var(--or);color:#fff;border:none;padding:6px 14px;border-radius:20px;font-size:12px;font-weight:700;cursor:pointer;font-family:var(--font-head);box-shadow:0 2px 8px rgba(0,0,0,.3);transition:.2s" onmouseover="this.style.background='#c94e1c'" onmouseout="this.style.background='var(--or)'">Detaylar →</button>
@@ -3884,7 +3963,7 @@ window.openRace=id=>{
   document.getElementById('race-detail-content').innerHTML=`
     <div class="card" style="overflow:hidden;margin-bottom:20px">
       <div style="width:100%;padding-top:52.5%;background:linear-gradient(135deg,#0d1a0d,#1a3d1a);position:relative;overflow:hidden">
-        ${r.imgUrl?`<img src="${r.imgUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px">${r.emoji||'🏆'}</span>`}
+        ${r.imgUrl?`<img src="${r.imgUrl}" alt="${r.name}" width="820" height="430" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px">${r.emoji||'\ud83c\udfc6'}</span>`}
       </div>
       <div style="padding:28px">
         <h1 style="font-size:26px;margin-bottom:10px;font-family:var(--font-head)">${r.name}</h1>
@@ -3924,12 +4003,12 @@ window.openRace=id=>{
 // ── BLOG ──
 function renderBlogList(){const el=document.getElementById('blog-list');if(el)el.innerHTML=BLOG_POSTS.map(blogCard).join('')||'<p style="color:var(--muted)">Yazı yok.</p>';}
 function renderBlogPreview(){const el=document.getElementById('home-blog');if(el)el.innerHTML=BLOG_POSTS.slice(0,4).map(blogCard).join('');}
-function blogCard(p){return`<div class="blog-card" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'📰'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">✍️ ${p.authorName||'Editör'}</div><div style="font-size:11px;color:var(--muted)">❤️ ${p.likes||0}</div></div></div></div>`;}
+function blogCard(p){return`<div class="blog-card" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="400" height="180" loading="lazy"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'\ud83d\udcf0'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">\u270d\ufe0f ${p.authorName||'Edit\xf6r'}</div><div style="font-size:11px;color:var(--muted)">\u2764\ufe0f ${p.likes||0}</div></div></div></div>`;}
 window.openBlog=id=>{
   const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;
   const liked=CU&&localStorage.getItem(`blog_like_${p.id}_${CU.uid}`);
   document.getElementById('blog-detail-content').innerHTML=`
-    <div style="width:100%;padding-top:52.5%;border-radius:var(--r);overflow:hidden;margin-bottom:24px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;position:relative">${p.coverUrl?`<img src="${p.coverUrl}" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="font-size:70px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">${p.emoji||'📰'}</span>`}</div>
+    <div style="width:100%;padding-top:52.5%;border-radius:var(--r);overflow:hidden;margin-bottom:24px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;position:relative">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="820" height="430" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="font-size:70px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">${p.emoji||'\ud83d\udcf0'}</span>`}</div>
     <div style="display:flex;gap:6px;margin-bottom:10px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>
     <h1 style="font-size:26px;margin-bottom:10px;line-height:1.2">${p.title}</h1>
     <div style="font-size:12px;color:var(--muted);margin-bottom:20px">✍️ ${p.authorName||'Editör'} · ${p.publishedAt||''}</div>
@@ -4131,7 +4210,7 @@ function renderFirsatlar(list){
   el.innerHTML=items.map(f=>`
     <div class="firsat-card" onclick="openFirsatDetail('${f.id}')">
       ${f.indirim?`<div class="firsat-badge">${f.indirim} İNDİRİM</div>`:''}
-      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}"/>`:'<span style="font-size:48px">🎁</span>'}</div>
+      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" width="400" height="180" loading="lazy"/>`:'<span style="font-size:48px">🎁</span>'}</div>
       <div class="firsat-body">
         <span class="tag tag-pu">${f.kategori||'Genel'}</span>
         <h3>${f.baslik}</h3>
@@ -4163,7 +4242,7 @@ window.openFirsatDetail=id=>{
   const isLoggedIn=!!window.CU;
   document.getElementById('firsat-detail-content').innerHTML=`
     <div class="firsat-detail-hero" style="${f.imgUrl?`background:linear-gradient(135deg,#1a0500,#3d1000)`:'background:linear-gradient(135deg,#1a0500,#2a0800)'}">
-      ${f.imgUrl?`<img src="${f.imgUrl}"/><div class="hero-overlay"></div>`:''}
+      ${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" width="820" height="290" loading="lazy"/><div class="hero-overlay"></div>`:''}
       <div class="hero-inner" style="position:relative;z-index:1;text-align:center">
         ${f.indirim?`<div style="background:var(--or);color:#fff;padding:6px 16px;border-radius:20px;font-size:15px;font-weight:700;display:inline-block;margin-bottom:12px">${f.indirim} İNDİRİM</div>`:'<div style="font-size:60px;margin-bottom:12px">🎁</div>'}
         <h1 style="font-size:clamp(20px,3vw,32px);font-weight:700;color:#fff;margin-bottom:8px">${f.baslik}</h1>
@@ -4424,8 +4503,9 @@ function renderAdminSection(sec){
       <tbody>${CLUBS.map(c=>`<tr><td>${c.name}</td><td>${c.city}</td><td>${c.members}</td><td><span class="pill ${c.open?'pill-gr':'pill-bl'}">${c.open?'Açık':'Kodlu'}</span></td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="editClub('${c.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteClub('${c.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
     groupadmins:`<h2 style="margin-bottom:18px">🔑 Grup Adminler</h2><table><thead><tr><th>Ad</th><th>E-posta</th><th>Kulüp</th><th>Şehir</th><th>Durum</th></tr></thead><tbody id="groupadmins-tbody"><tr><td colspan="5" style="text-align:center;color:var(--muted)">Yükleniyor...</td></tr></tbody></table>`,
     events:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><h2>📅 Etkinlikler</h2><button class="btn btn-or btn-sm" onclick="openAddEventModal()">+ Etkinlik Ekle</button></div>
-      <table><thead><tr><th>Etkinlik</th><th>Tarih</th><th>Mesafe</th><th>Doluluk</th><th>İşlem</th></tr></thead>
-      <tbody>${EVENTS.map(e=>`<tr><td>${e.emoji||'🏃'} ${e.title}</td><td>${e.date}</td><td>${e.dist}</td><td><div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:${Math.round((e.reg||0)/(e.cap||1)*100)}%"></div></div></td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteEvent('${e.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
+      <table><thead><tr><th>Etkinlik</th><th>Tarih</th><th>Mesafe</th><th>Doluluk</th><th>İstatistik</th><th>İşlem</th></tr></thead>
+      <tbody>${EVENTS.map(e=>`<tr><td>${e.emoji||'🏃'} ${e.title}</td><td>${e.date}</td><td>${e.dist}</td><td><div class="prog-bar" style="width:80px"><div class="prog-fill" style="width:${Math.round((e.reg||0)/(e.cap||1)*100)}%"></div></div></td><td><button class="btn btn-ghost btn-sm" onclick="showEventStats('${e.id}')">📊</button></td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteEvent('${e.id}')">🗑</button></td></tr>`).join('')}</tbody></table>
+      <div id="admin-event-stats" style="margin-top:20px"></div>`,
     approvals:`<h2 style="margin-bottom:18px">✅ Etkinlik Onayları</h2><div id="admin-approvals-list"><div class="spinner" style="margin:20px auto"></div></div>`,
     races:`<h2 style="margin-bottom:18px">🏆 Yarış Takvimi</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
@@ -4619,6 +4699,93 @@ function renderAdminSection(sec){
 }
 window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);};
 
+// ── ETKİNLİK İSTATİSTİKLERİ ──
+window.showEventStats=async(eventId)=>{
+  const el=document.getElementById('admin-event-stats');if(!el)return;
+  const ev=window.EVENTS.find(e=>e.id===eventId);if(!ev){toast('Etkinlik bulunamadı','err');return;}
+  el.innerHTML='<div class="spinner" style="margin:20px auto"></div>';
+  el.scrollIntoView({behavior:'smooth',block:'start'});
+  const fb=window._fb;
+  try{
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'),fb.where('eventId','==',eventId)));
+    const participants=[];
+    snap.forEach(d=>{const {id:_,...rest}=d.data();participants.push({id:d.id,...rest});});
+    if(!participants.length){
+      el.innerHTML=`<div class="card" style="padding:20px"><h3 style="font-size:15px;margin-bottom:8px">📊 ${ev.title} — İstatistik</h3><p style="color:var(--muted);font-size:13px">Henüz katılımcı yok.</p></div>`;
+      return;
+    }
+    // Pace dağılımı
+    const paceCounts={};
+    const distCounts={};
+    participants.forEach(p=>{
+      if(p.selectedPace){paceCounts[p.selectedPace]=(paceCounts[p.selectedPace]||0)+1;}
+      if(p.selectedDistance){distCounts[p.selectedDistance]=(distCounts[p.selectedDistance]||0)+1;}
+    });
+    const total=participants.length;
+    const paceHtml=Object.keys(paceCounts).length?`
+      <div style="margin-bottom:20px">
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:10px;font-family:var(--font-head)">🏃 Pace Dağılımı</h4>
+        <table class="stats-dist-table"><thead><tr><th>Pace</th><th>Kişi</th><th>Oran</th><th>Grafik</th></tr></thead><tbody>
+        ${Object.entries(paceCounts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{
+          const pct=Math.round(v/total*100);
+          return`<tr><td style="font-weight:600">${k}</td><td>${v}</td><td>${pct}%</td><td><div class="stats-bar"><div class="stats-bar-fill" style="width:${pct}%"></div></div></td></tr>`;
+        }).join('')}
+        </tbody></table>
+      </div>`:''
+    ;
+    const distHtml=Object.keys(distCounts).length?`
+      <div style="margin-bottom:20px">
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:10px;font-family:var(--font-head)">📏 Mesafe Dağılımı</h4>
+        <table class="stats-dist-table"><thead><tr><th>Mesafe</th><th>Kişi</th><th>Oran</th><th>Grafik</th></tr></thead><tbody>
+        ${Object.entries(distCounts).sort((a,b)=>b[1]-a[1]).map(([k,v])=>{
+          const pct=Math.round(v/total*100);
+          return`<tr><td style="font-weight:600">${k}</td><td>${v}</td><td>${pct}%</td><td><div class="stats-bar"><div class="stats-bar-fill" style="width:${pct}%"></div></div></td></tr>`;
+        }).join('')}
+        </tbody></table>
+      </div>`:''
+    ;
+    // Katılımcı listesi
+    const listHtml=`
+      <div>
+        <h4 style="font-size:13px;font-weight:700;margin-bottom:10px;font-family:var(--font-head)">👥 Katılımcılar (${total})</h4>
+        <table><thead><tr><th>#</th><th>Ad</th><th>E-posta</th><th>Seçilen Pace</th><th>Seçilen Mesafe</th></tr></thead><tbody>
+        ${participants.map((p,i)=>`<tr><td>${i+1}</td><td style="font-weight:600">${p.userName||'—'}</td><td style="font-size:11px;color:var(--muted)">${p.userEmail||'—'}</td><td>${p.selectedPace?`<span class="pill pill-or">${p.selectedPace}</span>`:'—'}</td><td>${p.selectedDistance?`<span class="pill pill-gr">${p.selectedDistance}</span>`:'—'}</td></tr>`).join('')}
+        </tbody></table>
+      </div>`;
+    el.innerHTML=`<div class="card" style="padding:24px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h3 style="font-size:16px;font-family:var(--font-head)">📊 ${ev.title}</h3>
+        <div style="display:flex;gap:8px">
+          <button class="btn btn-ghost btn-sm" onclick="exportEventStatsCSV('${eventId}')">⬇ CSV İndir</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('admin-event-stats').innerHTML=''">✕ Kapat</button>
+        </div>
+      </div>
+      <div class="a-stats" style="margin-bottom:20px">
+        <div class="a-stat"><div class="l">Toplam</div><div class="n">${total}</div><div class="t">katılımcı</div></div>
+        <div class="a-stat"><div class="l">Pace Grubu</div><div class="n">${Object.keys(paceCounts).length}</div><div class="t">farklı</div></div>
+        <div class="a-stat"><div class="l">Mesafe</div><div class="n">${Object.keys(distCounts).length}</div><div class="t">farklı</div></div>
+      </div>
+      ${paceHtml}${distHtml}${listHtml}
+    </div>`;
+    window._lastEventStatsData={eventId,participants,ev};
+  }catch(e){
+    el.innerHTML=`<div class="card" style="padding:20px"><p style="color:var(--muted)">İstatistik yüklenemedi: ${e.message}</p></div>`;
+  }
+};
+window.exportEventStatsCSV=(eventId)=>{
+  const data=window._lastEventStatsData;
+  if(!data||data.eventId!==eventId){toast('Önce istatistik yükleyin','err');return;}
+  const rows=[
+    ['#','Ad Soyad','E-posta','Seçilen Pace','Seçilen Mesafe'],
+    ...data.participants.map((p,i)=>[i+1,p.userName||'',p.userEmail||'',p.selectedPace||'',p.selectedDistance||''])
+  ];
+  const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a');a.href=url;a.download=`etkinlik-istatistik-${data.ev.title||eventId}.csv`;a.click();
+  URL.revokeObjectURL(url);toast('CSV indirildi ✓','ok');
+};
+
 // ── ETKİNLİK ONAYI (Grup Admin'den gelen pending etkinlikler) ──
 window.loadPendingEvents=async()=>{
   const el=document.getElementById('admin-approvals-list');if(!el)return;
@@ -4758,13 +4925,15 @@ window.deleteClub=async(id)=>{
     const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=CLUBS.map(clubCard).join('');
   }catch(e){toast(e.message,'err');}
 };
-window.openAddEventModal=()=>{document.getElementById('edit-event-id').value='';document.getElementById('edit-event-title-label').textContent='Yeni Etkinlik';['edit-ev-name','edit-ev-dist','edit-ev-desc'].forEach(id=>document.getElementById(id).value='');openModal('edit-event-modal');};
-window.editEvent=id=>{const e=EVENTS.find(x=>x.id===id);if(!e)return;document.getElementById('edit-event-id').value=id;document.getElementById('edit-event-title-label').textContent='Etkinlik Düzenle';document.getElementById('edit-ev-name').value=e.title;document.getElementById('edit-ev-date').value=e.date;document.getElementById('edit-ev-dist').value=e.dist;document.getElementById('edit-ev-cap').value=e.cap;document.getElementById('edit-ev-fee').value=e.fee;document.getElementById('edit-ev-deadline').value=e.deadline||'';document.getElementById('edit-ev-desc').value=e.desc||'';openModal('edit-event-modal');};
+window.openAddEventModal=()=>{document.getElementById('edit-event-id').value='';document.getElementById('edit-event-title-label').textContent='Yeni Etkinlik';['edit-ev-name','edit-ev-dist','edit-ev-desc','edit-ev-distances'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.querySelectorAll('#edit-ev-pace .pace-opt').forEach(b=>b.classList.remove('on'));openModal('edit-event-modal');};
+window.editEvent=id=>{const e=EVENTS.find(x=>x.id===id);if(!e)return;document.getElementById('edit-event-id').value=id;document.getElementById('edit-event-title-label').textContent='Etkinlik Düzenle';document.getElementById('edit-ev-name').value=e.title;document.getElementById('edit-ev-date').value=e.date;document.getElementById('edit-ev-dist').value=e.dist;document.getElementById('edit-ev-cap').value=e.cap;document.getElementById('edit-ev-fee').value=e.fee;document.getElementById('edit-ev-deadline').value=e.deadline||'';document.getElementById('edit-ev-desc').value=e.desc||'';const distEl=document.getElementById('edit-ev-distances');if(distEl)distEl.value=(e.distances||[]).join(', ');document.querySelectorAll('#edit-ev-pace .pace-opt').forEach(b=>{b.classList.toggle('on',(e.pace||[]).includes(b.textContent));});openModal('edit-event-modal');};
 window.saveEventEdit=async()=>{
   const fb=window._fb;
   const id=document.getElementById('edit-event-id').value;
   const pace=[];document.querySelectorAll('#edit-ev-pace .pace-opt.on').forEach(b=>pace.push(b.textContent));
-  const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',status:'approved',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const distancesRaw=document.getElementById('edit-ev-distances')?.value||'';
+  const distances=distancesRaw.split(',').map(d=>d.trim()).filter(Boolean);
+  const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,distances,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',status:'approved',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
   try{
     if(id){
       await fb.setDoc(fb.doc(fb.db,'events',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
@@ -4901,6 +5070,7 @@ function renderGroupSection(sec){
             <button class="pace-opt" onclick="this.classList.toggle('on')">6:00+</button>
           </div>
         </div>
+        <div class="form-grp"><label>Mesafe Seçenekleri <span style="font-weight:400;color:var(--muted);text-transform:none">(virgülle ayır, örn: 5K, 10K, 21K)</span></label><input id="ge-distances" placeholder="5K, 10K, 21K"/></div>
         <div class="form-grp"><label>Açıklama</label><textarea id="ge-desc" rows="3"></textarea></div>
         <div style="display:flex;gap:8px">
           <button class="btn btn-or" onclick="gSaveEvent()">Onaya Gönder</button>
@@ -5051,6 +5221,8 @@ window.gSaveEvent=async()=>{
     }catch(e){toast('Görsel yüklenemedi: '+e.message,'err');}
   }
 
+  const distancesRaw=document.getElementById('ge-distances')?.value||'';
+  const distances=distancesRaw.split(',').map(d=>d.trim()).filter(Boolean);
   const data={
     title,
     cat:document.getElementById('ge-cat')?.value||'Genel',
@@ -5061,7 +5233,7 @@ window.gSaveEvent=async()=>{
     fee:document.getElementById('ge-fee')?.value||'',
     deadline:document.getElementById('ge-deadline')?.value||'',
     desc:document.getElementById('ge-desc')?.value||'',
-    imgUrl,pace,emoji:'🏃',status:'pending',
+    imgUrl,pace,distances,emoji:'🏃',status:'pending',
     groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',
     reg:0,createdAt:fb.serverTimestamp(),
     slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')

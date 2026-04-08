@@ -2037,7 +2037,6 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('nav-user').style.display='none';
   }
   loadPopup();
-  if(typeof window.loadCommunityFeed === 'function') window.loadCommunityFeed();
 });
 
 // Güvenlik ağı: 8 saniye içinde loading kapanmazsa zorla kapat
@@ -6492,10 +6491,7 @@ window.loadCommunityFeed = async function(filter='all') {
   
   try {
     let q = fb.query(fb.collection(fb.db,'posts'), fb.orderBy('timestamp','desc'), fb.limit(30));
-    const snap = await Promise.race([
-      fb.getDocs(q),
-      new Promise((_, rj) => setTimeout(() => rj(new Error('Sunucu baglantisi zaman asimina ugradi. Agini veya AdBlocker ayarlarini kontrol et.')), 8000))
-    ]);
+    const snap = await fb.getDocs(q);
     
     let posts = [];
     snap.forEach(doc=>{ posts.push(Object.assign({id:doc.id}, doc.data())); });
@@ -6733,8 +6729,12 @@ window.loadAdminCommunity = async function() {
     });
     html += '</tbody></table>';
     cFeed.innerHTML = html;
-  }catch(e){
+  } catch(e) {
     cFeed.innerHTML = `<div style="color:red">Hata: ${e.message}</div>`;
+  } finally {
+    // If the spinner has an ID, we could hide it via hideLoader
+    // but in Admin, the spinner is just standard innerHTML replaced by success or catch.
+    // If we want to guarantee it's dead, we can just ensure the `spinner` class is gone if it failed.
   }
 };
 

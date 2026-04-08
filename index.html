@@ -2039,6 +2039,11 @@ onAuthStateChanged(auth,async user=>{
   loadPopup();
 });
 
+// Topluluk akışını ilk yüklemede tetikle (Auth'tan bağımsız)
+setTimeout(() => {
+  if(typeof window.loadCommunityFeed === 'function') window.loadCommunityFeed();
+}, 200);
+
 // Güvenlik ağı: 8 saniye içinde loading kapanmazsa zorla kapat
 setTimeout(()=>{
   const ld=document.getElementById('loading');
@@ -6452,6 +6457,7 @@ window.renderGroupCharts = function() {
         }]
       },
       options: { responsive: true, maintainAspectRatio: false }
+    });
   }
 };
 
@@ -6464,91 +6470,100 @@ window.hideLoader = function(elId) {
   }
 };
 
-window.loadCommunityFeed = async function(filter='all') {
+window.loadCommunityFeed = async function(filter = 'all') {
   const feedList = document.getElementById('community-feed-list');
-  if(!feedList) return;
-  
+  if (!feedList) return;
+
+  // Başlangıçta spinner göster
   feedList.innerHTML = '<div class="spinner" style="margin:40px auto"></div>';
+
   const fb = window._fb;
-  if(!fb || !fb.db) {
-    feedList.innerHTML = '<div style="color:red;padding:20px;text-align:center">Hata: Firebase veritabanı bağlantısı kurulamadı. Lütfen sayfayı yenileyiniz.</div>';
+  // Firebase henüz hazır değilse (Modül yüklenme yarışı), 500ms sonra tekrar dene
+  if (!fb || !fb.db) {
+    setTimeout(() => window.loadCommunityFeed(filter), 500);
     return;
   }
+
+  // Kullanıcı durumuna göre üst kutuları göster/gizle (Bağımsız kontrol)
+  const postBox = document.getElementById('community-post-box');
+  const guestBox = document.getElementById('community-feed-guest');
+  const clubWidget = document.getElementById('my-club-widget');
   
-  if(!window.CU) {
-    document.getElementById('community-post-box').style.display='none';
-    document.getElementById('community-feed-guest').style.display='block';
-    document.getElementById('my-club-widget').style.display='none';
+  if (!window.CU) {
+    if (postBox) postBox.style.display = 'none';
+    if (guestBox) guestBox.style.display = 'block';
+    if (clubWidget) clubWidget.style.display = 'none';
   } else {
-    document.getElementById('community-post-box').style.display='block';
-    document.getElementById('community-feed-guest').style.display='none';
-    const cwdUrl = window.CU.clubName ? '<span style="font-weight:600">'+window.CU.clubName+'</span> üyesi' : 'Henüz bir kulübe üye değilsin.';
-    const wgt = document.getElementById('my-club-widget');
-    if(wgt) wgt.style.display='block';
-    const cwdCont = document.getElementById('com-my-club-content');
-    if(cwdCont) cwdCont.innerHTML = cwdUrl;
-  }
-  
-  try {
-    let q = fb.query(fb.collection(fb.db,'posts'), fb.orderBy('timestamp','desc'), fb.limit(30));
-    const snap = await fb.getDocs(q);
-    
-    let posts = [];
-    snap.forEach(doc=>{ posts.push(Object.assign({id:doc.id}, doc.data())); });
-    
-    if(filter !== 'all') {
-      if(filter === 'club' && window.CU?.clubId) posts = posts.filter(p => p.club_id === window.CU.clubId);
-      if(filter === 'my') posts = posts.filter(p => p.author_id === window.CU?.uid);
+    if (postBox) postBox.style.display = 'block';
+    if (guestBox) guestBox.style.display = 'none';
+    if (clubWidget) {
+      clubWidget.style.display = 'block';
+      const cwdUrl = window.CU.clubName ? `<span style="font-weight:600">${window.CU.clubName}</span> Üyesi` : 'Henüz bir kulübe üye değilsin.';
+      const cwdCont = document.getElementById('com-my-club-content');
+      if (cwdCont) cwdCont.innerHTML = cwdUrl;
     }
+  }
+
+  try {
+    // Firebase Syntax: Modular V9/V10 query construction
+    const postsRef = fb.collection(fb.db, 'posts');
+    const q = fb.query(postsRef, fb.orderBy('timestamp', 'desc'), fb.limit(30));
     
-    const isAdmin = window.CU && (window.CU.role==='superadmin' || window.CU.role==='admin' || window.CU.role==='groupadmin');
-    if(!isAdmin) {
+    const snap = await fb.getDocs(q);
+    let posts = [];
+    snap.forEach(doc => { posts.push(Object.assign({ id: doc.id }, doc.data())); });
+
+    // Filtreleme mantığı
+    if (filter !== 'all' && window.CU) {
+      if (filter === 'club' && window.CU.clubId) posts = posts.filter(p => p.club_id === window.CU.clubId);
+      if (filter === 'my') posts = posts.filter(p => p.author_id === window.CU.uid);
+    }
+
+    const isAdmin = window.CU && (['superadmin', 'admin', 'groupadmin'].includes(window.CU.role));
+    if (!isAdmin) {
       posts = posts.filter(p => p.status !== 'hidden');
     }
-    
-    if(posts.length === 0) {
+
+    if (posts.length === 0) {
       feedList.innerHTML = '<div style="text-align:center;color:var(--muted);padding:40px">Henüz bir gönderi yok. İlk paylaşan sen ol!</div>';
-      window.hideLoader('community-feed-list');
-      return;
+    } else {
+      const pinned = posts.filter(p => p.status === 'pinned_global');
+      const others = posts.filter(p => p.status !== 'pinned_global');
+      
+      let html = '';
+      [...pinned, ...others].forEach(p => {
+        const isSys = p.is_system;
+        const liked = window.CU && p.likedBy && p.likedBy.includes(window.CU.uid);
+        const dTr = p.timestamp?.toDate ? new Date(p.timestamp.toDate()).toLocaleString('tr-TR', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+
+        html += `<div class="post-card ${isSys ? 'sys-post' : ''}">`;
+        if (p.status === 'pinned_global') html += '<div style="position:absolute;top:-10px;left:20px;background:var(--or);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">📌 Sabitlenmiş</div>';
+        if (p.status === 'hidden') html += '<div style="background:#fef2f2;color:#ef4444;border:1px solid #fca5a5;padding:4px 8px;font-size:11px;border-radius:4px;margin-bottom:8px;font-weight:600">GİZLENMİŞ GÖNDERİ (Admin Görünümü)</div>';
+        if ((window.CU && window.CU.uid === p.author_id) || isAdmin) html += `<button class="post-del-btn" onclick="deleteCommunityPost('${p.id}')">🗑</button>`;
+        
+        html += `<div class="post-header">
+          <div class="post-avatar">${(p.author_name || 'S').charAt(0).toUpperCase()}</div>
+          <div>
+            <div class="post-author">${p.author_name || 'Sistem'}${isSys ? ' <span class="badge">Sistem</span>' : ''}</div>
+            <div class="post-time">${dTr}</div>
+          </div>
+        </div>
+        <div class="post-content">${p.content || ''}</div>`;
+        
+        if (p.image_url) html += `<div class="post-img-wrap"><img src="${p.image_url}" loading="lazy"/></div>`;
+        
+        html += `<div class="post-actions">
+          <button class="btn-like ${liked ? 'liked' : ''}" onclick="toggleLikePost('${p.id}')">${liked ? '❤️' : '🤍'} Çak ${p.likes_count || 0}</button>
+        </div>
+        </div>`;
+      });
+      feedList.innerHTML = html;
     }
-    
-    const pinned = posts.filter(p => p.status === 'pinned_global');
-    const others = posts.filter(p => p.status !== 'pinned_global');
-    
-    let html = '';
-    [...pinned, ...others].forEach(p => {
-       const isSys = p.is_system;
-       const liked = window.CU && p.likedBy && p.likedBy.includes(window.CU.uid);
-       const dTr = p.timestamp?.toDate ? new Date(p.timestamp.toDate()).toLocaleString('tr-TR', {day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}) : '';
-       
-       html += '<div class="post-card '+(isSys?'sys-post':'')+'">';
-       if(p.status==='pinned_global') html += '<div style="position:absolute;top:-10px;left:20px;background:var(--or);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">📌 Sabitlenmiş</div>';
-       if(p.status==='hidden') html += '<div style="background:#fef2f2;color:#ef4444;border:1px solid #fca5a5;padding:4px 8px;font-size:11px;border-radius:4px;margin-bottom:8px;font-weight:600">GİZLENMİŞ GÖNDERİ (Admin Gösterimi)</div>';
-       if((window.CU && window.CU.uid === p.author_id) || isAdmin) html += '<button class="post-del-btn" onclick="deleteCommunityPost(\''+p.id+'\')">🗑</button>';
-       html += '<div class="post-header"><div class="post-avatar">'+(p.author_name||'S').charAt(0).toUpperCase()+'</div><div><div class="post-author">'+(p.author_name||'Sistem')+(isSys?' 🟢':'')+'</div><div class="post-time">'+dTr+'</div></div></div>';
-       html += '<div class="post-content">'+(p.content||'')+'</div>';
-       if(p.image_url) html += '<div class="post-img-wrap"><img src="'+p.image_url+'" loading="lazy"/></div>';
-       html += '<div class="post-actions"><button class="btn-like '+(liked?'liked':'')+'" onclick="toggleLikePost(\''+p.id+'\')">'+(liked?'🧡':'🤍')+' Çak '+(p.likes_count||0)+'</button></div>';
-       html += '</div>';
-    });
-    feedList.innerHTML = html;
-    window.hideLoader('community-feed-list');
-    
+
+    // Side Widget'ları da güncelle
     const leadList = document.getElementById('com-leaders-list');
-    if(leadList) {
+    if (leadList) {
       leadList.innerHTML = `
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥇</span><b>Emre T.</b></div><span style="color:var(--or);font-weight:700">42 KM</span></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥈</span><b>Sedat Y.</b></div><span style="color:var(--or);font-weight:700">38 KM</span></div>
-        <div style="display:flex;align-items:center;justify-content:space-between;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">🥉</span><b>Merve K.</b></div><span style="color:var(--or);font-weight:700">32 KM</span></div>
-      `;
-    }
-    const bdgList = document.getElementById('com-badges-list');
-    if(bdgList) {
-      bdgList.innerHTML = `
-        <div style="font-size:12px;color:var(--dark)"><b style="color:var(--or)">Aylin C.</b> "Profesyonel" rozetini kazandı! 🌟</div>
-        <div style="font-size:12px;color:var(--dark)"><b style="color:var(--or)">Barış T.</b> "Efsane" rozetini kazandı! 👑</div>
-      `;
-    }
   }catch(e){
     feedList.innerHTML = '<div style="color:red;padding:20px;text-align:center">Gönderiler yüklenemedi: '+e.message+'</div>';
     window.hideLoader('community-feed-list');
@@ -6729,15 +6744,10 @@ window.loadAdminCommunity = async function() {
     });
     html += '</tbody></table>';
     cFeed.innerHTML = html;
-  } catch(e) {
+  }catch(e){
     cFeed.innerHTML = `<div style="color:red">Hata: ${e.message}</div>`;
-  } finally {
-    // If the spinner has an ID, we could hide it via hideLoader
-    // but in Admin, the spinner is just standard innerHTML replaced by success or catch.
-    // If we want to guarantee it's dead, we can just ensure the `spinner` class is gone if it failed.
   }
 };
 
 </script>
 </html>
-

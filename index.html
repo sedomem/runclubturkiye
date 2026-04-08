@@ -6492,7 +6492,11 @@ window.loadCommunityFeed = async function(filter='all') {
   
   try {
     let q = fb.query(fb.collection(fb.db,'posts'), fb.orderBy('timestamp','desc'), fb.limit(30));
-    const snap = await fb.getDocs(q);
+    const snap = await Promise.race([
+      fb.getDocs(q),
+      new Promise((_, rj) => setTimeout(() => rj(new Error('Sunucu baglantisi zaman asimina ugradi. Agini veya AdBlocker ayarlarini kontrol et.')), 8000))
+    ]);
+    
     let posts = [];
     snap.forEach(doc=>{ posts.push(Object.assign({id:doc.id}, doc.data())); });
     
@@ -6736,3 +6740,4 @@ window.loadAdminCommunity = async function() {
 
 </script>
 </html>
+

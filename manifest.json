@@ -1,0 +1,32 @@
+{
+  "name": "RunClubTürkiye",
+  "short_name": "RCT",
+  "description": "Türkiye'nin koşu topluluğu platformu",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#F5F0E8",
+  "theme_color": "#E8622A",
+  "orientation": "portrait-primary",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23E8622A'/%3E%3Ccircle cx='112' cy='60' r='18' fill='%23fff'/%3E%3Cellipse cx='104' cy='98' rx='12' ry='24' fill='%23fff' transform='rotate(-12 104 98)'/%3E%3Cpath d='M98 82 L68 64' stroke='%23F5F0E8' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 80 L136 90' stroke='%23F5F0E8' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3Cpath d='M96 120 L74 144' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 122 L130 135' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='112' fill='%23E8622A'/%3E%3Ccircle cx='286' cy='154' r='46' fill='%23fff'/%3E%3Cellipse cx='266' cy='251' rx='31' ry='61' fill='%23fff' transform='rotate(-12 266 251)'/%3E%3Cpath d='M251 210 L174 164' stroke='%23F5F0E8' stroke-width='23' stroke-linecap='round' fill='none'/%3E%3Cpath d='M276 205 L348 230' stroke='%23F5F0E8' stroke-width='20' stroke-linecap='round' fill='none'/%3E%3Cpath d='M246 307 L189 369' stroke='%23fff' stroke-width='23' stroke-linecap='round' fill='none'/%3E%3Cpath d='M276 312 L332 346' stroke='%23fff' stroke-width='23' stroke-linecap='round' fill='none'/%3E%3C/svg%3E",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ],
+  "categories": ["sports", "health", "lifestyle", "social"],
+  "screenshots": [
+    {
+      "src": "/og-image.png",
+      "sizes": "1200x630",
+      "type": "image/png"
+    }
+  ]
+}

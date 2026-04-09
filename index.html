@@ -1998,7 +1998,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <!-- Leaflet CSS: harita sayfasına kadar kritik değil → non-blocking -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/></noscript>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+
 <!-- Leaflet, QRCode ve Quill → yalnızca belirli sayfalarda gerekli, defer ile yükle -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -2392,7 +2392,7 @@ window.saveFirsatFromAdmin=async()=>{
     link:document.getElementById('fr-link').value.trim(),
     bitis:document.getElementById('fr-bitis').value,
     imgUrl,aktif:true,
-    id:'f'+Date.now(),slug:baslik.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
+    id:'f'+Date.now(),slug:baslik.toLowerCase().replace(/[ğüşıöç]/g,c=>({'ğ':'g','ü':'u','ş':'s','ı':'i','ö':'o','ç':'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
   };
   toast('Kaydediliyor...','ok');
   try{
@@ -2431,7 +2431,7 @@ window.saveRaceFromAdmin=async()=>{
   const name=document.getElementById('ar-name').value.trim();
   if(!name){toast('Yarış adı gerekli','err');return;}
   const aboutVal=(window._quillRaceEditor?window._quillRaceEditor.root.innerHTML:document.getElementById('ar-about').value)||'';
-  const data={name,date:document.getElementById('ar-date').value||'',location:document.getElementById('ar-loc').value||'',about:aboutVal,contact:document.getElementById('ar-contact').value||'',mapUrl:document.getElementById('ar-map').value||'',website:document.getElementById('ar-web').value||'',phone:document.getElementById('ar-phone').value||'',email:document.getElementById('ar-email').value||'',imgUrl,emoji:'🏆',likes:0,slug:name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const data={name,date:document.getElementById('ar-date').value||'',location:document.getElementById('ar-loc').value||'',about:aboutVal,contact:document.getElementById('ar-contact').value||'',mapUrl:document.getElementById('ar-map').value||'',website:document.getElementById('ar-web').value||'',phone:document.getElementById('ar-phone').value||'',email:document.getElementById('ar-email').value||'',imgUrl,emoji:'🏆',likes:0,slug:name.toLowerCase().replace(/[ğüşıöç]/g,c=>({'ğ':'g','ü':'u','ş':'s','ı':'i','ö':'o','ç':'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
   toast('Kaydediliyor...','ok');
   try{
     const {id:_,...dataNoId}=data;
@@ -2702,7 +2702,7 @@ window.saveBlogFromAdmin=async()=>{
   if(!coverUrl&&imgInput?.files[0])coverUrl=await handleImgUpload(imgInput,'blog')||'';
   const title=document.getElementById('ab-title').value.trim();
   if(!title){toast('Başlık gerekli','err');return;}
-  const data={id:'b'+Date.now(),title,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:CU?.name||'RunClub Editör',status:'published',likes:0,publishedAt:new Date().toISOString().split('T')[0],slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const data={id:'b'+Date.now(),title,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:CU?.name||'RunClub Editör',status:'published',likes:0,publishedAt:new Date().toISOString().split('T')[0],slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({'ğ':'g','ü':'u','ş':'s','ı':'i','ö':'o','ç':'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
   toast('Kaydediliyor...','ok');
   try{
     // Önce Firestore'a kaydet — gerçek ID'yi al
@@ -5097,7 +5097,7 @@ window.saveEventEdit=async()=>{
   const pace=[];document.querySelectorAll('#edit-ev-pace .pace-opt.on').forEach(b=>pace.push(b.textContent));
   const distancesRaw=document.getElementById('edit-ev-distances')?.value||'';
   const distances=distancesRaw.split(',').map(d=>d.trim()).filter(Boolean);
-  const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,startTime:document.getElementById('edit-ev-time-start').value,endTime:document.getElementById('edit-ev-time-end').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,distances,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',status:'approved',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const data={title:document.getElementById('edit-ev-name').value,date:document.getElementById('edit-ev-date').value,startTime:document.getElementById('edit-ev-time-start').value,endTime:document.getElementById('edit-ev-time-end').value,dist:document.getElementById('edit-ev-dist').value||'0 km',cat:document.getElementById('edit-ev-cat').value,city:document.getElementById('edit-ev-city').value,cap:parseInt(document.getElementById('edit-ev-cap').value)||100,fee:document.getElementById('edit-ev-fee').value,deadline:document.getElementById('edit-ev-deadline').value,desc:document.getElementById('edit-ev-desc').value,pace,distances,qr:document.getElementById('edit-ev-qr').checked,emoji:'🏃',status:'approved',slug:document.getElementById('edit-ev-name').value.toLowerCase().replace(/[ğüşıöç]/g,c=>({'ğ':'g','ü':'u','ş':'s','ı':'i','ö':'o','ç':'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
   try{
     if(id){
       await fb.setDoc(fb.doc(fb.db,'events',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
@@ -5414,7 +5414,7 @@ window.gSaveEvent=async()=>{
     imgUrl,pace,distances,emoji:'🏃',status:'pending',
     groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',
     reg:0,createdAt:fb.serverTimestamp(),
-    slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
+    slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({'ğ':'g','ü':'u','ş':'s','ı':'i','ö':'o','ç':'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
   };
   try{
     // DÜZENLEME MODU: Mevcut etkinliği güncelle
@@ -5781,7 +5781,7 @@ window.gSaveEvent=async()=>{
       let imgUrl=document.getElementById('ge-img-url')?.value?.trim()||'';
       const imgFile=document.getElementById('ge-img-file')?.files[0];
       if(!imgUrl&&imgFile){try{const r=fb.ref(fb.storage,`events/${Date.now()}_${imgFile.name}`);await fb.uploadBytes(r,imgFile);imgUrl=await fb.getDownloadURL(r);}catch(e){}}
-      const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',startTime:document.getElementById('ge-time-start')?.value||'',endTime:document.getElementById('ge-time-end')?.value||'',city:document.getElementById('ge-city')?.value||CU.city||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,emoji:'🏃',status:'pending',groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',reg:0,createdAt:fb.serverTimestamp(),slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+      const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',startTime:document.getElementById('ge-time-start')?.value||'',endTime:document.getElementById('ge-time-end')?.value||'',city:document.getElementById('ge-city')?.value||CU.city||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,emoji:'🏃',status:'pending',groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',reg:0,createdAt:fb.serverTimestamp(),slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({'ğ':'g','ü':'u','ş':'s','ı':'i','ö':'o','ç':'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
       try{await fb.addDoc(fb.collection(fb.db,'events'),data);toast('Etkinlik onaya gönderildi ✓','ok');document.getElementById('g-add-event-form').style.display='none';['ge-title','ge-dist','ge-fee','ge-desc','ge-img-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});gLoadEvents();}catch(e){toast('Hata: '+e.message,'err');}
     }
   }
@@ -6553,7 +6553,7 @@ window.loadCommunityFeed = async function(filter = 'all') {
         if (p.image_url) html += `<div class="post-img-wrap"><img src="${p.image_url}" loading="lazy"/></div>`;
         
         html += `<div class="post-actions">
-          <button class="btn-like ${liked ? 'liked' : ''}" onclick="toggleLikePost('${p.id}')">${liked ? '❤️' : '🤍'} Çak ${p.likes_count || 0}</button>
+          <button class="btn-like ${liked ? 'liked' : ''}" onclick="toggleLikePostOptimized('${p.id}', this)">${liked ? '❤️' : '🤍'} Çak ${p.likes_count || 0}</button>
         </div>
         </div>`;
       });
@@ -6563,10 +6563,11 @@ window.loadCommunityFeed = async function(filter = 'all') {
     // Side Widget'ları da güncelle
     const leadList = document.getElementById('com-leaders-list');
     if (leadList) {
-      leadList.innerHTML = `
+      leadList.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:14px;border:1.5px dashed var(--border);border-radius:10px;">Liderlik tablosu yakında geliyor 🏃‍♂️</div>`;
+    }
   }catch(e){
     feedList.innerHTML = '<div style="color:red;padding:20px;text-align:center">Gönderiler yüklenemedi: '+e.message+'</div>';
-    window.hideLoader('community-feed-list');
+    if(typeof window.hideLoader === 'function') window.hideLoader('community-feed-list');
   }
 };
 
@@ -6611,30 +6612,49 @@ window.submitCommunityPost = async function() {
   }
 };
 
-window.toggleLikePost = async function(postId) {
-  if(!window.CU) { toast('Beğenmek için giriş yapın','err'); return; }
+window.toggleLikePostOptimized = async function(postId, btnEl) {
+  if (!window.CU) { toast('Lütfen giriş yapın', 'err'); return; }
+  
+  // Mevcut durumu arayüzden anlık olarak oku
+  const isLiked = btnEl.classList.contains('liked');
+  let likesCount = parseInt(btnEl.innerText.replace(/[^0-9]/g, '')) || 0;
+  
+  // Sunucuyu beklemeden (Optimistic UI) butonun görünümünü anında değiştir:
+  if (isLiked) {
+    btnEl.classList.remove('liked');
+    likesCount = Math.max(0, likesCount - 1);
+    btnEl.innerHTML = `🤍 Çak ${likesCount}`;
+  } else {
+    btnEl.classList.add('liked');
+    likesCount++;
+    btnEl.innerHTML = `❤️ Çak ${likesCount}`;
+  }
+
+  // Veritabanı işlemini arka planda sessizce yürüt:
   try {
     const fb = window._fb;
     const postRef = fb.doc(fb.db, 'posts', postId);
-    const snap = await fb.getDoc(postRef);
-    if(!snap.exists()) return;
+    const postSnap = await fb.getDoc(postRef);
     
-    let dbData = snap.data();
-    let likedBy = dbData.likedBy || [];
-    let likesCount = dbData.likes_count || 0;
-    
-    if(likedBy.includes(window.CU.uid)) {
-       likedBy = likedBy.filter(u => u !== window.CU.uid);
-       likesCount = Math.max(0, likesCount - 1);
-    } else {
-       likedBy.push(window.CU.uid);
-       likesCount++;
+    if (postSnap.exists()) {
+      const pData = postSnap.data();
+      let likers = pData.likedBy || [];
+      
+      if (isLiked) {
+        // Bizim lokalde sildiğimizi veritabanından da çıkar
+        likers = likers.filter(id => id !== window.CU.uid);
+      } else {
+        // Bizim lokalde eklediğimizi veritabanına ekle
+        if(!likers.includes(window.CU.uid)) likers.push(window.CU.uid);
+      }
+      
+      await fb.updateDoc(postRef, {
+        likedBy: likers,
+        likes_count: likers.length
+      });
     }
-    
-    await fb.setDoc(postRef, { likedBy, likes_count: likesCount }, {merge:true});
-    loadCommunityFeed(); // Refresh
-  }catch(e){
-    toast('Hata: '+e.message, 'err');
+  } catch (e) {
+    toast('Beğeni kaydedilemedi', 'err');
   }
 };
 

@@ -2026,7 +2026,17 @@ onAuthStateChanged(auth,async user=>{
     const snap=await getDoc(doc(db,'users',user.uid));
     const d=snap.exists()?snap.data():{};
     const role=user.email===SUPER_EMAIL?'superadmin':(d.role||'member');
-    window.CU={uid:user.uid,email:user.email,name:d.name||user.displayName||user.email.split('@')[0],role,totalKm:d.totalKm||0,eventCount:d.eventCount||0,clubCount:d.clubCount||0,badges:d.badges||[],...d};
+    
+    // YENİ EKLENEN BÖLÜM: Kullanıcının üye olduğu kulübü çekme
+    const mSnap = await getDocs(query(collection(db, 'memberships'), where('userId', '==', user.uid), where('status', '==', 'approved'), limit(1)));
+    let clubId = null, clubName = '';
+    if (!mSnap.empty) {
+      const md = mSnap.docs[0].data();
+      clubId = md.clubId;
+      clubName = md.clubName;
+    }
+
+    window.CU={uid:user.uid,email:user.email,name:d.name||user.displayName||user.email.split('@')[0],role,totalKm:d.totalKm||0,eventCount:d.eventCount||0,clubCount:d.clubCount||0,badges:d.badges||[],clubId,clubName,...d};
     document.getElementById('nav-guest').style.display='none';
     document.getElementById('nav-user').style.display='flex';
     setupRoleBtn();buildDashboard();syncProfileUI();
@@ -6563,7 +6573,27 @@ window.loadCommunityFeed = async function(filter = 'all') {
     // Side Widget'ları da güncelle
     const leadList = document.getElementById('com-leaders-list');
     if (leadList) {
-      leadList.innerHTML = `<div style="text-align:center;padding:20px;color:var(--muted);font-size:14px;border:1.5px dashed var(--border);border-radius:10px;">Liderlik tablosu yakında geliyor 🏃‍♂️</div>`;
+      try {
+        const leadSnap = await fb.getDocs(fb.query(fb.collection(fb.db, 'users'), fb.orderBy('eventCount', 'desc'), fb.limit(5)));
+        if (leadSnap.empty) {
+          leadList.innerHTML = '<div style="text-align:center;padding:10px;font-size:13px;color:var(--muted)">Henüz lider yok</div>';
+        } else {
+          let lHtml = '';
+          const medals = ['🥇', '🥈', '🥉', '🏅', '🏅'];
+          let idx = 0;
+          leadSnap.forEach(doc => {
+            const ud = doc.data();
+            const eCount = ud.eventCount || 0;
+            const nm = ud.name || 'Bilinmiyor';
+            lHtml += `<div style="display:flex;align-items:center;justify-content:space-between;padding:6px 0;font-size:13px"><div style="display:flex;align-items:center;gap:8px"><span style="font-size:16px">${medals[idx]||'🏅'}</span><b>${nm}</b></div><span style="color:var(--or);font-weight:700">${eCount} Etkinlik</span></div>`;
+            idx++;
+          });
+          leadList.innerHTML = lHtml;
+        }
+      } catch (err) {
+        console.warn("Liderlik yüklenemedi:", err);
+        leadList.innerHTML = '<div style="text-align:center;padding:10px;font-size:12px;color:var(--muted)">Yüklenemedi</div>';
+      }
     }
   }catch(e){
     feedList.innerHTML = '<div style="color:red;padding:20px;text-align:center">Gönderiler yüklenemedi: '+e.message+'</div>';

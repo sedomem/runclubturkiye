@@ -1918,6 +1918,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button id="sb-applications-btn" onclick="aNav('applications',this)">📋 Başvurular</button>
     <button onclick="aNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="aNav('community',this)">🏃 Topluluk</button>
+    <button onclick="aNav('pushnotif',this)">🔔 Bildirimler</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
   </div>
@@ -2210,11 +2211,74 @@ import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-ap
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getStorage,ref,uploadBytes,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
+import{getMessaging,getToken,onMessage}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
 const cfg={apiKey:"AIzaSyCpr0QnKgm4AugAIZB0WdvBBn45ZeNmChs",authDomain:"runclubturkiye.firebaseapp.com",projectId:"runclubturkiye",storageBucket:"runclubturkiye.firebasestorage.app",messagingSenderId:"112561439264",appId:"1:112561439264:web:e0b3bca89db6f335423245"};
 const app=initializeApp(cfg);
 const auth=getAuth(app);
 const db=getFirestore(app);
+
+// ── FCM Messaging ───────────────────────────────────────────
+let _messaging=null;
+try{ _messaging=getMessaging(app); }catch(e){ console.warn('FCM init:',e.message); }
+window._messaging=_messaging;
+
+// VAPID key — Firebase Console > Project Settings > Cloud Messaging > Web Push certificates
+// Bunu alıp aşağıya yapıştır:
+const VAPID_KEY='BKSDoKs_YOUR_VAPID_KEY_HERE_REPLACE_ME';
+
+// FCM token kayıt
+window.requestPushPermission=async function(){
+  if(!_messaging){toast('Push desteği yok','err');return null;}
+  try{
+    const perm=await Notification.requestPermission();
+    if(perm!=='granted'){toast('Bildirim izni verilmedi','err');return null;}
+    // SW kaydını bekle
+    const sw=await navigator.serviceWorker.ready;
+    const token=await getToken(_messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:sw});
+    if(!token){toast('Token alınamadı','err');return null;}
+    // Token'ı Firestore'a kaydet
+    if(window.CU){
+      const fb=window._fb;
+      await fb.setDoc(fb.doc(fb.db,'users',window.CU.uid),{fcmToken:token,pushEnabled:true},{merge:true});
+    }
+    localStorage.setItem('rct_fcm_token',token);
+    console.log('[FCM] Token:', token);
+    toast('Push bildirimleri aktif! 🔔','ok');
+    return token;
+  }catch(e){
+    console.warn('[FCM] Token error:',e.message);
+    toast('Bildirim hatası: '+e.message,'err');
+    return null;
+  }
+};
+
+// Uygulama açıkken gelen bildirimler
+if(_messaging){
+  onMessage(_messaging,payload=>{
+    console.log('[FCM] Foreground msg:',payload);
+    const n=payload.notification||{};
+    toast((n.title||'RunClubTürkiye')+': '+(n.body||''),'ok');
+  });
+}
+
+// Sayfa yüklenince otomatik token yenile (izin verilmişse)
+window.addEventListener('load',async()=>{
+  if(!_messaging)return;
+  if(Notification.permission==='granted'){
+    try{
+      const sw=await navigator.serviceWorker.ready;
+      const token=await getToken(_messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:sw});
+      if(token){
+        localStorage.setItem('rct_fcm_token',token);
+        if(window.CU){
+          const fb=window._fb;
+          fb.setDoc(fb.doc(fb.db,'users',window.CU.uid),{fcmToken:token,pushEnabled:true},{merge:true}).catch(()=>{});
+        }
+      }
+    }catch(e){console.warn('[FCM] Auto token refresh:',e.message);}
+  }
+});
 const storage=getStorage(app);
 const gp=new GoogleAuthProvider();
 const SUPER_EMAIL='sedomem@gmail.com';
@@ -2233,6 +2297,8 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('nav-user').style.display='flex';
     setupRoleBtn();buildDashboard();syncProfileUI();
     if(role==='superadmin')loadAdminBadges();
+    // Push bildirim izni banner'ı göster
+    setTimeout(()=>{if(typeof window.checkAndRequestPush==='function')window.checkAndRequestPush();},2000);
   }else{
     window.CU=null;
     document.getElementById('nav-guest').style.display='flex';
@@ -4608,6 +4674,100 @@ function renderFirsatlar(list){
 }
 window.filterFirsatlar=(kat,btn)=>{document.querySelectorAll('#firsat-filters .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderFirsatlar(kat==='tümü'?null:FIRSATLAR.filter(f=>f.aktif&&f.kategori===kat));};
 
+
+// ── PUSH BİLDİRİMLER ─────────────────────────────────────────────────────
+window.loadPushSubscribers=async function(){
+  const el=document.getElementById('pn-subscribers-list');
+  if(!el)return;
+  try{
+    const fb=window._fb;
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'users'),fb.where('pushEnabled','==',true)));
+    const users=[];
+    snap.forEach(d=>users.push({id:d.id,...d.data()}));
+    if(!users.length){el.innerHTML='<p style="color:var(--muted)">Kayıtlı push kullanıcısı yok.</p>';return;}
+    el.innerHTML=`<p style="font-size:12px;color:var(--muted);margin-bottom:10px">${users.length} kullanıcı push bildirimleri için kayıtlı</p>`
+      +users.map(u=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:0.5px solid var(--border)">
+        <div style="width:32px;height:32px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700">${(u.name||u.email||'?')[0].toUpperCase()}</div>
+        <div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:600">${u.name||'—'}</div><div style="font-size:11px;color:var(--muted)">${u.email||''}</div></div>
+        <span style="font-size:10px;background:var(--or);color:#fff;padding:2px 8px;border-radius:10px">Aktif</span>
+      </div>`).join('');
+  }catch(e){if(el)el.innerHTML='<p style="color:var(--muted)">Hata: '+e.message+'</p>';}
+};
+
+window.testPushSelf=async function(){
+  const token=localStorage.getItem('rct_fcm_token');
+  if(!token){
+    if(window.requestPushPermission){
+      const t=await window.requestPushPermission();
+      if(!t){toast('Önce bildirim izni ver','err');return;}
+    } else {toast('Push SDK yüklenmedi','err');return;}
+  }
+  toast('Test bildirimi gönderildi (ön planda toast görüntülenir)','ok');
+  // Gerçek FCM Cloud Message için backend gerekir
+  // Şimdilik browser Notification API ile test yapıyoruz
+  if(Notification.permission==='granted'){
+    new Notification('RunClubTürkiye 🏃',{
+      body: document.getElementById('pn-body')?.value||'Test bildirimi!',
+      icon: '/icon-192.png',
+      badge: '/icon-96.png'
+    });
+  }
+};
+
+window.sendPushToAll=async function(){
+  const title=document.getElementById('pn-title')?.value.trim();
+  const body=document.getElementById('pn-body')?.value.trim();
+  if(!title||!body){toast('Başlık ve mesaj zorunlu','err');return;}
+  const url=document.getElementById('pn-url')?.value.trim()||'https://www.runclubturkiye.com/';
+  const image=document.getElementById('pn-image')?.value.trim()||'';
+  const statusEl=document.getElementById('pn-status');
+  if(statusEl)statusEl.textContent='Bildirim kaydediliyor...';
+  try{
+    const fb=window._fb;
+    // Firestore'a bildirim kaydı ekle — Cloud Function bu kaydı izleyip FCM gönderir
+    await fb.addDoc(fb.collection(fb.db,'pushNotifications'),{
+      title,body,url,image,
+      target:'all',
+      status:'pending',
+      sentBy:window.CU?.email||'admin',
+      createdAt:fb.serverTimestamp()
+    });
+    toast('Bildirim kuyruğa eklendi ✅','ok');
+    if(statusEl)statusEl.innerHTML='<span style="color:var(--green)">✅ Bildirim kuyruğa alındı. Cloud Function işleyecek.</span>';
+    // Admin'in kendi tarayıcısına anında göster
+    if(Notification.permission==='granted'){
+      new Notification(title,{body,icon:'/icon-192.png'});
+    }
+  }catch(e){
+    toast('Hata: '+e.message,'err');
+    if(statusEl)statusEl.textContent='Hata: '+e.message;
+  }
+};
+
+// Kullanıcı giriş yaptıktan sonra push izni sor (ilk kez)
+window.checkAndRequestPush=async function(){
+  if(!window.requestPushPermission)return;
+  if(Notification.permission==='default'&&!localStorage.getItem('rct_push_dismissed')){
+    setTimeout(()=>{
+      const banner=document.createElement('div');
+      banner.id='push-banner';
+      banner.innerHTML=`<div style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--card);border:1.5px solid var(--or);border-radius:14px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,.18);display:flex;align-items:center;gap:12px;max-width:340px;width:90%">
+        <span style="font-size:28px">🔔</span>
+        <div style="flex:1">
+          <div style="font-size:13px;font-weight:700;margin-bottom:2px">Bildirimleri aç!</div>
+          <div style="font-size:11px;color:var(--muted)">Yeni yarışlar ve etkinliklerden anında haberdar ol.</div>
+        </div>
+        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
+          <button onclick="window.requestPushPermission();document.getElementById('push-banner').remove()" style="background:var(--or);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Aç</button>
+          <button onclick="localStorage.setItem('rct_push_dismissed','1');document.getElementById('push-banner').remove()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer">Hayır</button>
+        </div>
+      </div>`;
+      document.body.appendChild(banner);
+      setTimeout(()=>banner.remove(),15000);
+    },3000);
+  }
+};
+
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)
 window.renderHomeData=renderHomeData;
 window.renderEvts=renderEvts;
@@ -5131,6 +5291,27 @@ function renderAdminSection(sec){
     return;
   }
   if(sec==='ticker')setTimeout(()=>loadTickerAdmin(),100);
+  if(sec==='pushnotif'){
+    main.innerHTML=`<h2 style="margin-bottom:18px">🔔 Push Bildirim Gönder</h2>
+      <div class="card" style="padding:20px;margin-bottom:18px;border-left:4px solid var(--or)">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kayıtlı kullanıcılara anlık push bildirimi gönder. Tüm kullanıcılara veya belirli bir kullanıcıya gönderebilirsin.</p>
+        <div class="form-grp"><label>Bildirim Başlığı</label><input id="pn-title" placeholder="örn: Yeni Yarış Eklendi 🏆"/></div>
+        <div class="form-grp"><label>Bildirim Mesajı</label><textarea id="pn-body" rows="3" placeholder="örn: İstanbul Maratonu kayıtları açıldı! Hemen başvur."></textarea></div>
+        <div class="form-grp"><label>Tıklama URL (opsiyonel)</label><input id="pn-url" placeholder="https://www.runclubturkiye.com/#races"/></div>
+        <div class="form-grp"><label>Görsel URL (opsiyonel)</label><input id="pn-image" placeholder="https://... .jpg"/></div>
+        <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+          <button class="btn btn-or" onclick="sendPushToAll()">📢 Tüm Kullanıcılara Gönder</button>
+          <button class="btn btn-ghost" onclick="testPushSelf()">🧪 Kendine Test Gönder</button>
+        </div>
+        <div id="pn-status" style="margin-top:12px;font-size:13px;color:var(--muted)"></div>
+      </div>
+      <div class="card" style="padding:20px">
+        <h3 style="font-size:14px;margin-bottom:12px">📊 Push Kayıtlı Kullanıcılar</h3>
+        <div id="pn-subscribers-list"><div class="spinner" style="margin:20px auto"></div></div>
+      </div>`;
+    setTimeout(()=>loadPushSubscribers(),100);
+    return;
+  }
   if(sec==='community'){
     main.innerHTML=`<h2 style="margin-bottom:18px">🏃 Topluluk Yönetimi</h2>
       <div class="card" style="padding:16px;margin-bottom:16px">

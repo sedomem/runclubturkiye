@@ -785,6 +785,73 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .nav-center{display:none !important}
   #hamburger{display:flex}
 }
+
+/* ═══════════════════════════════════════
+   COMMUNITY PAGE
+═══════════════════════════════════════ */
+#community-grid{display:grid;grid-template-columns:1fr 320px;gap:24px;align-items:start}
+.comm-feed{display:flex;flex-direction:column;gap:16px}
+.comm-post-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;transition:var(--transition)}
+.comm-post-card:hover{border-color:var(--or);box-shadow:0 4px 20px rgba(232,98,42,.1)}
+.comm-post-header{display:flex;align-items:center;gap:12px;margin-bottom:12px}
+.comm-avatar{width:40px;height:40px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden}
+.comm-avatar img{width:100%;height:100%;object-fit:cover}
+.comm-user-info{flex:1;min-width:0}
+.comm-user-name{font-weight:700;font-size:14px;color:var(--text)}
+.comm-post-time{font-size:12px;color:var(--muted)}
+.comm-post-type{font-size:11px;background:var(--or);color:#fff;padding:2px 8px;border-radius:20px;font-weight:600}
+.comm-post-body{font-size:14px;color:var(--text);line-height:1.6;margin-bottom:12px}
+.comm-post-img{width:100%;border-radius:12px;margin-bottom:12px;max-height:300px;object-fit:cover}
+.comm-post-actions{display:flex;gap:12px;align-items:center;border-top:1px solid var(--border);padding-top:12px}
+.comm-action-btn{display:flex;align-items:center;gap:6px;font-size:13px;color:var(--muted);cursor:pointer;padding:4px 10px;border-radius:20px;border:none;background:none;transition:.2s}
+.comm-action-btn:hover{background:var(--card-hover,rgba(232,98,42,.08));color:var(--or)}
+.comm-action-btn.liked{color:var(--or);font-weight:600}
+.comm-run-badge{background:linear-gradient(135deg,var(--or),#ff6b35);color:#fff;border-radius:12px;padding:10px 14px;margin-bottom:12px;display:flex;gap:16px;font-size:13px;font-weight:600}
+.comm-run-stat{display:flex;flex-direction:column;align-items:center;gap:2px}
+.comm-run-stat span:first-child{font-size:18px;font-weight:800}
+.comm-run-stat span:last-child{font-size:10px;opacity:.85;font-weight:400}
+/* Sidebar */
+.comm-sidebar{display:flex;flex-direction:column;gap:20px;position:sticky;top:80px}
+.comm-sidebar-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:20px}
+.comm-sidebar-card h3{font-size:14px;font-weight:700;margin-bottom:14px;display:flex;align-items:center;gap:6px}
+.comm-active-users{display:flex;flex-wrap:wrap;gap:8px}
+.comm-active-avatar{width:36px;height:36px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:.2s;overflow:hidden;border:2px solid var(--border)}
+.comm-active-avatar:hover{border-color:var(--or);transform:scale(1.1)}
+.comm-leaderboard{display:flex;flex-direction:column;gap:8px}
+.comm-lb-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+.comm-lb-row:last-child{border-bottom:none}
+.comm-lb-rank{font-size:18px;width:28px;text-align:center;flex-shrink:0}
+.comm-lb-info{flex:1;min-width:0}
+.comm-lb-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comm-lb-stat{font-size:11px;color:var(--muted)}
+.comm-lb-score{font-size:13px;font-weight:700;color:var(--or);flex-shrink:0}
+.comm-clubs-list{display:flex;flex-direction:column;gap:10px}
+.comm-club-row{display:flex;align-items:center;gap:10px;cursor:pointer;padding:8px;border-radius:8px;transition:.2s}
+.comm-club-row:hover{background:var(--card-hover,rgba(0,0,0,.04))}
+.comm-club-icon{width:38px;height:38px;border-radius:10px;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0;overflow:hidden}
+.comm-club-icon img{width:100%;height:100%;object-fit:cover}
+.comm-club-info{flex:1;min-width:0}
+.comm-club-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comm-club-meta{font-size:11px;color:var(--muted)}
+/* Post oluştur */
+.comm-create-post{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:20px}
+.comm-create-row{display:flex;gap:10px;align-items:flex-start}
+.comm-create-input{flex:1;background:var(--bg);border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;font-size:14px;color:var(--text);resize:none;min-height:60px;font-family:inherit}
+.comm-create-input:focus{outline:none;border-color:var(--or)}
+.comm-create-actions{display:flex;gap:8px;margin-top:10px;justify-content:space-between;align-items:center}
+.comm-create-pills{display:flex;gap:6px}
+.comm-pill{font-size:12px;padding:5px 12px;border-radius:20px;border:1.5px solid var(--border);background:none;cursor:pointer;color:var(--muted);transition:.2s}
+.comm-pill.active,.comm-pill:hover{border-color:var(--or);color:var(--or);background:rgba(232,98,42,.07)}
+/* Today events */
+.comm-today-ev{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.comm-today-ev:last-child{border-bottom:none}
+.comm-today-ev-info{flex:1;min-width:0}
+.comm-today-ev-title{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.comm-today-ev-meta{font-size:11px;color:var(--muted)}
+@media(max-width:768px){
+  #community-grid{grid-template-columns:1fr}
+  .comm-sidebar{position:static}
+}
 </style>
 </head>
 <body>
@@ -822,6 +889,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="nav('firsatlar')" id="nb-firsatlar">🎁 Fırsatlar</button>
     <button onclick="nav('blog')" id="nb-blog">Blog</button>
     <button onclick="nav('contact')" id="nb-contact">İletişim</button>
+    <button onclick="nav('community')" id="nb-community">🏃 Topluluk</button>
   </div>
   <div class="nav-right">
     <!-- TEMA BUTONU KALDIRILDI -->
@@ -849,6 +917,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <button onclick="nav('firsatlar');toggleMobileMenu()">🎁 Fırsatlar</button>
   <button onclick="nav('blog');toggleMobileMenu()">📰 Blog</button>
   <button onclick="nav('contact');toggleMobileMenu()">📧 İletişim</button>
+  <button onclick="nav('community');toggleMobileMenu()">🏃 Topluluk</button>
   <button onclick="nav('sss');toggleMobileMenu()">❓ SSS</button>
   <div style="height:1px;background:var(--border);margin:4px 0"></div>
   <button onclick="openAuth('login');toggleMobileMenu()">Giriş Yap</button>
@@ -963,6 +1032,21 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button class="filt" onclick="filterEvtCat('Ultra',this)">Ultra</button>
   </div>
   <div class="grid g2" id="events-list"><p id="events-debug" style="color:red;padding:20px;font-size:16px">⏳ Etkinlikler yükleniyor...</p></div>
+</div></div>
+
+<div class="pg" id="pg-events">
+<div id="pb-events" class="page-banner pb-events"></div>
+<div class="container sec">
+  <h2 style="margin-bottom:18px">🏃 Etkinlikler</h2>
+  <div class="search-wrap"><input type="text" placeholder="Etkinlik veya şehir ara..." oninput="filterEvts(this.value)"/></div>
+  <div class="filter-strip">
+    <button class="filt on" onclick="filterEvtCat('tüm',this)">Tümü</button>
+    <button class="filt" onclick="filterEvtCat('Maraton',this)">Maraton</button>
+    <button class="filt" onclick="filterEvtCat('Trail',this)">Trail</button>
+    <button class="filt" onclick="filterEvtCat('5K/10K',this)">5K/10K</button>
+    <button class="filt" onclick="filterEvtCat('Ultra',this)">Ultra</button>
+  </div>
+  <div class="grid g2" id="events-list"></div>
 </div></div>
 
 <div class="pg" id="pg-event-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('events')" style="margin-bottom:18px">← Geri</button><div id="event-detail-content"></div></div>  <div class="sec-sm" style="padding:24px 0 16px"><div class="container">
@@ -1546,6 +1630,94 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 </div>
 
 <!-- CONTACT -->
+
+<!-- ═══════════════════ COMMUNITY PAGE ═══════════════════ -->
+<div class="pg" id="pg-community">
+<div class="container sec">
+
+  <!-- Post Oluştur -->
+  <div class="comm-create-post" id="comm-create-wrap" style="display:none">
+    <div class="comm-create-row">
+      <div class="comm-avatar" id="comm-my-avatar" style="font-size:22px">👤</div>
+      <textarea class="comm-create-input" id="comm-post-input" placeholder="Bir şeyler paylaş... koşu, etkinlik, deneyim 🏃"></textarea>
+    </div>
+    <div class="comm-create-actions">
+      <div class="comm-create-pills">
+        <button class="comm-pill active" id="cpill-text" onclick="commSelectType('text')">💬 Yazı</button>
+        <button class="comm-pill" id="cpill-run" onclick="commSelectType('run')">🏃 Koşu</button>
+        <button class="comm-pill" id="cpill-photo" onclick="commSelectType('photo')">📸 Fotoğraf</button>
+      </div>
+      <button class="btn btn-or btn-sm" onclick="submitCommPost()">Paylaş</button>
+    </div>
+    <!-- Koşu detayları -->
+    <div id="comm-run-inputs" style="display:none;margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
+      <div class="form-grp"><label style="font-size:11px">Mesafe (km)</label><input type="number" id="comm-run-dist" placeholder="10.5" style="font-size:13px"/></div>
+      <div class="form-grp"><label style="font-size:11px">Süre</label><input type="text" id="comm-run-time" placeholder="1:02:30" style="font-size:13px"/></div>
+      <div class="form-grp"><label style="font-size:11px">Pace (dk/km)</label><input type="text" id="comm-run-pace" placeholder="5:55" style="font-size:13px"/></div>
+    </div>
+    <!-- Fotoğraf -->
+    <div id="comm-photo-input" style="display:none;margin-top:12px">
+      <input type="file" accept="image/*" onchange="previewCommImg(this)" style="font-size:13px"/>
+      <img id="comm-photo-preview" style="max-width:100%;border-radius:10px;margin-top:8px;display:none"/>
+    </div>
+  </div>
+  <div id="comm-login-prompt" style="background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:20px;display:none">
+    <p style="color:var(--muted);font-size:14px;margin-bottom:12px">Toplulukla paylaşım yapmak için giriş yap 👋</p>
+    <button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button>
+  </div>
+
+  <div id="community-grid">
+    <!-- ANA FEED -->
+    <div>
+      <!-- Bugünün Koşuları -->
+      <div style="background:linear-gradient(135deg,#1a0a00,#2a1200);border-radius:var(--r);padding:20px;margin-bottom:20px;color:#fff">
+        <h3 style="font-size:15px;margin-bottom:12px">📅 Bugünün Etkinlikleri</h3>
+        <div id="comm-today-list"><div class="spinner" style="margin:10px auto"></div></div>
+      </div>
+
+      <!-- Feed -->
+      <div class="comm-feed" id="comm-feed">
+        <div class="comm-post-card" style="text-align:center;padding:40px 20px">
+          <div style="font-size:48px;margin-bottom:12px">🏃</div>
+          <p style="color:var(--muted);font-size:14px">Feed yükleniyor...</p>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:20px">
+        <button class="btn btn-ghost" id="comm-load-more" onclick="loadMorePosts()" style="display:none">Daha Fazla Yükle</button>
+      </div>
+    </div>
+
+    <!-- SIDEBAR -->
+    <div class="comm-sidebar">
+      <!-- Aktif Kullanıcılar -->
+      <div class="comm-sidebar-card">
+        <h3>🟢 Aktif Koşucular <span id="comm-active-count" style="font-size:12px;color:var(--muted);font-weight:400"></span></h3>
+        <div class="comm-active-users" id="comm-active-users">
+          <div class="spinner" style="margin:10px auto;grid-column:1/-1"></div>
+        </div>
+      </div>
+
+      <!-- Leaderboard -->
+      <div class="comm-sidebar-card">
+        <h3>🏆 Haftalık Liderboard</h3>
+        <div class="comm-leaderboard" id="comm-leaderboard">
+          <div class="spinner" style="margin:10px auto"></div>
+        </div>
+      </div>
+
+      <!-- Aktif Kulüpler -->
+      <div class="comm-sidebar-card">
+        <h3>👑 En Aktif Kulüpler</h3>
+        <div class="comm-clubs-list" id="comm-clubs-list">
+          <div class="spinner" style="margin:10px auto"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div></div>
+<!-- ═══════════════════ /COMMUNITY PAGE ═══════════════════ -->
+
 <div class="pg" id="pg-contact"><div class="container sec" style="max-width:700px">
   <h2 style="margin-bottom:6px">📬 İletişim</h2>
   <p style="color:var(--muted);font-size:14px;margin-bottom:24px">Bizimle iletişime geç.</p>
@@ -2992,20 +3164,15 @@ async function loadAllFromDB(){
 window.reloadSiteData=loadAllFromDB;
 window.loadAllFromDB=loadAllFromDB;
 
+window.loadBannersFromDB=loadBannersFromDB;
 loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
 loadAllFromDB();
-window.loadBannersFromDB=loadBannersFromDB;
 </script>
 
 <script>
 // ── LOCAL DATA ──
 // ── LOCAL FALLBACK DATA (Firestore boşsa gösterilir) ──
-window.EVENTS=[
-  {id:"mock-e1",title:"Bogaz Koprusu Kosusu",date:"2025-06-15",city:"Istanbul",dist:"10 km",cat:"10K",emoji:"🏃",fee:"150",cap:500,reg:312,status:"approved",desc:"Istanbul Bogazi'nda esiz kosu deneyimi.",imgUrl:"https://images.unsplash.com/photo-1571008887538-b36bb32f4571?w=600&q=80"},
-  {id:"mock-e2",title:"Ankara Maraton 2025",date:"2025-09-21",city:"Ankara",dist:"42 km",cat:"Maraton",emoji:"🏅",fee:"200",cap:1000,reg:756,status:"approved",desc:"Baskentin prestijli maraton etkinligi.",imgUrl:"https://images.unsplash.com/photo-1552674605-db6ffd4facb5?w=600&q=80"},
-  {id:"mock-e3",title:"Izmir Trail Run",date:"2025-07-06",city:"Izmir",dist:"21 km",cat:"Trail",emoji:"🌿",fee:"120",cap:200,reg:88,status:"approved",desc:"Ege'nin dogasinda zorlu trail parkuru.",imgUrl:"https://images.unsplash.com/photo-1476480862126-209bfaa8edc8?w=600&q=80"},
-  {id:"mock-e4",title:"Antalya Gundogumu Kosusu",date:"2025-08-10",city:"Antalya",dist:"5 km",cat:"5K/10K",emoji:"🌅",fee:"80",cap:300,reg:140,status:"approved",desc:"Gunes dogarken sahilde 5K kosusu.",imgUrl:"https://images.unsplash.com/photo-1502904550040-7534597429ae?w=600&q=80"},
-];
+window.EVENTS=[];
 window.CLUBS=[];
 window.RACES=[];
 window.BLOG_POSTS=[];
@@ -3056,6 +3223,9 @@ window.nav=id=>{
   if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
+  if(id==='community'){
+    loadCommunityPage&&loadCommunityPage();
+  }
   if(id==='home'){
     // Skeleton göster ve veriyi yenile
     if(typeof renderSkeletons==='function'){
@@ -4728,7 +4898,22 @@ function renderAdminSection(sec){
     const ht=document.getElementById('banner-tab-home');if(ht)ht.style.display='block';
     const hb=document.getElementById('btab-home');if(hb){document.querySelectorAll('[id^="btab-"]').forEach(b=>b.classList.remove('on'));hb.classList.add('on');}
   },100);
-  if(sec==='sponsors')setTimeout(()=>renderAdminSponsors(),100);
+  if(sec==='sponsors'){
+    main.innerHTML=`<h2 style="margin-bottom:18px">💼 Sponsorlar</h2>
+      <div class="card" style="padding:20px;margin-bottom:18px">
+        <h3 style="margin-bottom:14px;font-size:14px">Yeni Sponsor Ekle</h3>
+        ${imgUploadHtml('sp-img-input','Sponsor Logo','200×80px · Şeffaf PNG')}
+        <div class="form-row">
+          <div class="form-grp"><label>Sponsor Adı</label><input id="sp-name" placeholder="Örn: Nike"/></div>
+          <div class="form-grp"><label>Web Sitesi</label><input id="sp-url" placeholder="https://..."/></div>
+        </div>
+        <button class="btn btn-or" onclick="saveSponsorFromAdmin()">💾 Sponsor Ekle</button>
+      </div>
+      <h3 style="margin-bottom:12px;font-size:14px">Mevcut Sponsorlar</h3>
+      <div class="sponsor-grid-admin" id="admin-sponsor-list"><div class="spinner" style="margin:20px auto"></div></div>`;
+    setTimeout(()=>renderAdminSponsors&&renderAdminSponsors(),200);
+    return;
+  }
   if(sec==='ticker')setTimeout(()=>loadTickerAdmin(),100);
 }
 window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);};
@@ -6122,6 +6307,303 @@ window.addEventListener('scroll',()=>{
   if(btn)btn.classList.toggle('show',window.scrollY>400);
 },{passive:true});
 
+
+// ══════════════════════════════════════════════════════════
+// COMMUNITY PAGE — Tüm fonksiyonlar
+// ══════════════════════════════════════════════════════════
+let _commPostType = 'text';
+let _commPhotoUrl = null;
+let _commLastDoc  = null;
+let _commLoading  = false;
+
+window.commSelectType = function(type) {
+  _commPostType = type;
+  ['text','run','photo'].forEach(t => {
+    const btn = document.getElementById('cpill-'+t);
+    if(btn) btn.classList.toggle('active', t===type);
+  });
+  const runInp   = document.getElementById('comm-run-inputs');
+  const photoInp = document.getElementById('comm-photo-input');
+  if(runInp)   runInp.style.display   = type==='run'   ? 'grid' : 'none';
+  if(photoInp) photoInp.style.display = type==='photo' ? 'block': 'none';
+};
+
+window.previewCommImg = function(input) {
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    _commPhotoUrl = e.target.result;
+    const prev = document.getElementById('comm-photo-preview');
+    if(prev){ prev.src = e.target.result; prev.style.display='block'; }
+  };
+  reader.readAsDataURL(file);
+};
+
+window.loadCommunityPage = async function() {
+  // Auth durumuna göre UI
+  const createWrap  = document.getElementById('comm-create-wrap');
+  const loginPrompt = document.getElementById('comm-login-prompt');
+  if(window.CU) {
+    if(createWrap)  createWrap.style.display  = 'block';
+    if(loginPrompt) loginPrompt.style.display = 'none';
+    // Kullanıcı avatarını ayarla
+    const myAv = document.getElementById('comm-my-avatar');
+    if(myAv) myAv.innerHTML = window.CU.photoURL
+      ? '<img src="'+window.CU.photoURL+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>'
+      : (window.CU.displayName||'?')[0].toUpperCase();
+  } else {
+    if(createWrap)  createWrap.style.display  = 'none';
+    if(loginPrompt) loginPrompt.style.display = 'block';
+  }
+  // Paralel yükle
+  _commLastDoc = null;
+  await Promise.allSettled([
+    loadCommunityFeed(true),
+    loadTodayEvents(),
+    loadActiveUsers(),
+    loadLeaderboard(),
+    loadTopClubs(),
+  ]);
+};
+
+// ── FEED ──────────────────────────────────────────────────
+window.loadCommunityFeed = async function(reset=false) {
+  if(_commLoading) return;
+  _commLoading = true;
+  const feedEl = document.getElementById('comm-feed');
+  if(!feedEl) { _commLoading=false; return; }
+  if(reset){ feedEl.innerHTML=''; _commLastDoc=null; }
+
+  try {
+    const fb = window._fb;
+    if(!fb){ throw new Error('Firebase bağlantısı yok'); }
+    let q = fb.query(
+      fb.collection(fb.db,'posts'),
+      fb.orderBy('createdAt','desc'),
+      fb.where('type','in',['text','run','photo'])
+    );
+    const snap = await fb.getDocs(q);
+    if(snap.empty && reset){
+      feedEl.innerHTML = '<div class="comm-post-card" style="text-align:center;padding:40px 20px"><div style="font-size:48px;margin-bottom:12px">🏃</div><p style="color:var(--muted);font-size:14px">Henüz paylaşım yok. İlk paylaşımı sen yap!</p></div>';
+      _commLoading=false; return;
+    }
+    const cards = [];
+    snap.forEach(d => {
+      const p = {id:d.id,...d.data()};
+      cards.push(renderPostCard(p));
+    });
+    if(reset) feedEl.innerHTML = cards.join('');
+    else feedEl.insertAdjacentHTML('beforeend', cards.join(''));
+    _commLastDoc = snap.docs[snap.docs.length-1];
+    const lmBtn = document.getElementById('comm-load-more');
+    if(lmBtn) lmBtn.style.display = snap.docs.length >= 10 ? 'inline-block' : 'none';
+  } catch(e) {
+    console.warn('[Community] Feed yüklenemedi:', e.message);
+    if(reset && feedEl) feedEl.innerHTML = '<div class="comm-post-card" style="text-align:center;padding:30px"><p style="color:var(--muted);font-size:13px">📡 Paylaşımlar yüklenemedi.</p></div>';
+  }
+  _commLoading = false;
+};
+
+window.loadMorePosts = function(){ loadCommunityFeed(false); };
+
+function renderPostCard(p) {
+  const ts  = p.createdAt?.seconds ? new Date(p.createdAt.seconds*1000) : new Date();
+  const ago = timeAgo(ts);
+  const av  = p.userPhoto
+    ? '<img src="'+p.userPhoto+'" style="width:100%;height:100%;object-fit:cover"/>'
+    : (p.userName||'K')[0].toUpperCase();
+  const typeLabel = {text:'💬 Yazı', run:'🏃 Koşu', photo:'📸 Fotoğraf'}[p.type]||'💬';
+  const liked = window.CU && (p.likes||[]).includes(window.CU.uid);
+
+  let body = '';
+  if(p.text) body += '<div class="comm-post-body">'+escHtml(p.text)+'</div>';
+  if(p.type==='run' && p.runData) {
+    body += '<div class="comm-run-badge">'
+      +(p.runData.dist?'<div class="comm-run-stat"><span>'+p.runData.dist+'</span><span>km</span></div>':'')
+      +(p.runData.time?'<div class="comm-run-stat"><span>'+p.runData.time+'</span><span>süre</span></div>':'')
+      +(p.runData.pace?'<div class="comm-run-stat"><span>'+p.runData.pace+'</span><span>dk/km</span></div>':'')
+      +'</div>';
+  }
+  if(p.photoUrl) body += '<img class="comm-post-img" src="'+p.photoUrl+'" loading="lazy"/>';
+
+  return '<div class="comm-post-card" id="post-'+p.id+'">'
+    +'<div class="comm-post-header">'
+    +'<div class="comm-avatar">'+av+'</div>'
+    +'<div class="comm-user-info"><div class="comm-user-name">'+escHtml(p.userName||'Koşucu')+'</div>'
+    +'<div class="comm-post-time">'+ago+'</div></div>'
+    +'<span class="comm-post-type">'+typeLabel+'</span></div>'
+    +body
+    +'<div class="comm-post-actions">'
+    +'<button class="comm-action-btn'+(liked?' liked':'')+'" onclick="likePost(\'' +p.id+ '\')" >❤️ <span id="like-cnt-'+p.id+'">'+(p.likes||[]).length+'</span></button>'
+    +'<button class="comm-action-btn" onclick="showComments(\'' +p.id+ '\')" >💬 <span>'+(p.commentCount||0)+'</span></button>'
+    +'</div></div>';
+}
+
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function timeAgo(date) {
+  const diff = (Date.now()-date.getTime())/1000;
+  if(diff<60) return 'Az önce';
+  if(diff<3600) return Math.floor(diff/60)+' dk önce';
+  if(diff<86400) return Math.floor(diff/3600)+' sa önce';
+  return Math.floor(diff/86400)+' gün önce';
+}
+
+// ── LIKE ──────────────────────────────────────────────────
+window.likePost = async function(postId) {
+  if(!window.CU){ openAuth('login'); return; }
+  const fb = window._fb;
+  const uid = window.CU.uid;
+  try {
+    const ref = fb.doc(fb.db,'posts',postId);
+    const snap = await fb.getDoc(ref);
+    if(!snap.exists()) return;
+    const likes = snap.data().likes||[];
+    const newLikes = likes.includes(uid) ? likes.filter(x=>x!==uid) : [...likes,uid];
+    await fb.updateDoc(ref,{likes:newLikes});
+    const cntEl = document.getElementById('like-cnt-'+postId);
+    if(cntEl) cntEl.textContent = newLikes.length;
+    const btn = cntEl?.closest('.comm-action-btn');
+    if(btn) btn.classList.toggle('liked', newLikes.includes(uid));
+  } catch(e){ console.warn('Like hata:',e.message); }
+};
+
+window.showComments = function(postId){ toast('Yorumlar yakında...','info'); };
+
+// ── SUBMIT POST ───────────────────────────────────────────
+window.submitCommPost = async function() {
+  if(!window.CU){ openAuth('login'); return; }
+  const fb  = window._fb;
+  const inp = document.getElementById('comm-post-input');
+  const txt = inp ? inp.value.trim() : '';
+  if(!txt && _commPostType==='text'){ toast('Lütfen bir şeyler yaz','error'); return; }
+
+  const postData = {
+    type: _commPostType,
+    text: txt,
+    userName:  window.CU.displayName||'Koşucu',
+    userPhoto: window.CU.photoURL||null,
+    userUid:   window.CU.uid,
+    likes:     [],
+    commentCount: 0,
+    createdAt: fb.serverTimestamp(),
+  };
+  if(_commPostType==='run'){
+    postData.runData = {
+      dist: document.getElementById('comm-run-dist')?.value||'',
+      time: document.getElementById('comm-run-time')?.value||'',
+      pace: document.getElementById('comm-run-pace')?.value||'',
+    };
+  }
+  if(_commPostType==='photo' && _commPhotoUrl) postData.photoUrl = _commPhotoUrl;
+
+  try {
+    const {id:_,...noId} = postData;
+    await fb.addDoc(fb.collection(fb.db,'posts'), noId);
+    if(inp) inp.value='';
+    _commPhotoUrl = null;
+    const prev = document.getElementById('comm-photo-preview');
+    if(prev){ prev.style.display='none'; prev.src=''; }
+    toast('Paylaşım yapıldı! 🎉','success');
+    await loadCommunityFeed(true);
+  } catch(e){ toast('Hata: '+e.message,'error'); }
+};
+
+// ── TODAY EVENTS ──────────────────────────────────────────
+window.loadTodayEvents = function() {
+  const el = document.getElementById('comm-today-list');
+  if(!el) return;
+  const today = new Date().toISOString().slice(0,10);
+  const todayEvs = (window.EVENTS||[]).filter(e => e.date===today || (e.date&&e.date.startsWith(today)));
+  if(!todayEvs.length){
+    el.innerHTML = '<p style="color:rgba(255,255,255,.6);font-size:13px">Bugün için etkinlik yok 🌤</p>';
+    return;
+  }
+  el.innerHTML = todayEvs.slice(0,3).map(e =>
+    '<div class="comm-today-ev">'
+    +'<div style="font-size:22px">'+( e.emoji||'🏃')+'</div>'
+    +'<div class="comm-today-ev-info">'
+    +'<div class="comm-today-ev-title">'+escHtml(e.title)+'</div>'
+    +'<div class="comm-today-ev-meta">'+escHtml(e.city||'')+(e.dist?' · '+e.dist:'')+'</div></div>'
+    +'<button class="btn btn-or btn-sm" data-eid="'+e.id+'" onclick="openEvent(this.dataset.eid)" style="font-size:11px;padding:4px 10px">Katıl</button>'
+    +'</div>'
+  ).join('');
+};
+
+// ── ACTIVE USERS ──────────────────────────────────────────
+window.loadActiveUsers = async function() {
+  const el = document.getElementById('comm-active-users');
+  const cnt = document.getElementById('comm-active-count');
+  if(!el) return;
+  try {
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(
+      fb.collection(fb.db,'users'),
+      fb.orderBy('lastSeen','desc')
+    ));
+    const users = [];
+    snap.forEach(d => users.push({id:d.id,...d.data()}));
+    if(cnt) cnt.textContent = '('+users.length+')';
+    el.innerHTML = users.slice(0,12).map(u =>
+      (function(u2){
+        const nm = u2.displayName||'Koşucu';
+        return '<div class="comm-active-avatar" title="'+nm+'" data-nm="'+nm+'" onclick="toast(this.dataset.nm,\'info\')" >'
+          +(u2.photoURL ? '<img src="'+u2.photoURL+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>'
+                        : nm[0].toUpperCase())
+          +'</div>';
+      })(u)
+    ).join('') || '<p style="font-size:12px;color:var(--muted)">Henüz aktif kullanıcı yok.</p>';
+  } catch(e){
+    el.innerHTML = '<p style="font-size:12px;color:var(--muted)">Yüklenemedi.</p>';
+  }
+};
+
+// ── LEADERBOARD ───────────────────────────────────────────
+window.loadLeaderboard = async function() {
+  const el = document.getElementById('comm-leaderboard');
+  if(!el) return;
+  try {
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(
+      fb.collection(fb.db,'userStats'),
+      fb.orderBy('weeklyKm','desc')
+    ));
+    const rows = [];
+    snap.forEach(d => rows.push({id:d.id,...d.data()}));
+    const medals = ['🥇','🥈','🥉'];
+    el.innerHTML = rows.slice(0,5).map((r,i) =>
+      '<div class="comm-lb-row">'
+      +'<div class="comm-lb-rank">'+(medals[i]||(i+1+'.')+'</div>')
+      +'<div class="comm-lb-info"><div class="comm-lb-name">'+escHtml(r.displayName||'Koşucu')+'</div>'
+      +'<div class="comm-lb-stat">'+(r.totalEvents||0)+' etkinlik</div></div>'
+      +'<div class="comm-lb-score">'+(r.weeklyKm||0)+' km</div>'
+      +'</div>'
+    ).join('') || '<p style="font-size:12px;color:var(--muted)">Henüz istatistik yok.</p>';
+  } catch(e){
+    el.innerHTML = '<p style="font-size:12px;color:var(--muted)">Yüklenemedi.</p>';
+  }
+};
+
+// ── TOP CLUBS ─────────────────────────────────────────────
+window.loadTopClubs = function() {
+  const el = document.getElementById('comm-clubs-list');
+  if(!el) return;
+  const clubs = (window.CLUBS||[]).sort((a,b)=>(b.members||0)-(a.members||0)).slice(0,5);
+  if(!clubs.length){
+    el.innerHTML = '<p style="font-size:12px;color:var(--muted)">Henüz kulüp yok.</p>';
+    return;
+  }
+  el.innerHTML = clubs.map(c => {
+    const img = c.imgUrl ? '<img src="'+c.imgUrl+'" style="width:100%;height:100%;object-fit:cover"/>' : '🏃';
+    return '<div class="comm-club-row" onclick="nav(\'clubs\')">'
+      +'<div class="comm-club-icon">'+img+'</div>'
+      +'<div class="comm-club-info"><div class="comm-club-name">'+escHtml(c.name||'Kulüp')+'</div>'
+      +'<div class="comm-club-meta">'+(c.members||0)+' üye · '+escHtml(c.city||'')+'</div></div>'
+      +'</div>';
+  }).join('');
+};
+// ══════════════════════════════════════════════════════════
+
 // ── INIT ──
 // NOT: window.loadAllFromDB() burada ÇALIŞMAZ — module script daha sonra yüklenir.
 // Veri yükleme doğrudan module script içinde loadAllFromDB() çağrısıyla yapılır.
@@ -6410,8 +6892,10 @@ window.addEventListener('resize', () => {
 try {
   document.getElementById('pg-home').classList.add('on');
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';
-  // Skeleton göster — module script yüklenince loadAllFromDB() bunları gerçek kart ile değiştirecek
-  if(typeof renderSkeletons==='function'){
+  // Veri varsa (hızlı/cache) anında göster, yoksa skeleton
+  if(window.EVENTS&&window.EVENTS.length&&typeof renderHomeData==='function'){
+    renderHomeData();
+  } else if(typeof renderSkeletons==='function'){
     renderSkeletons('home-events',4,'120px');
     renderSkeletons('home-clubs',4,'160px');
     renderSkeletons('home-races',4,'120px');

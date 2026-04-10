@@ -4250,7 +4250,12 @@ window.openClub=async(id)=>{
 // ── RACES ──
 function raceCard(r){
   const liked=window.CU&&localStorage.getItem('rlk_'+r.id+'_'+(window.CU?.uid||''));
-  return`<div class="race-card" onclick="openRace('${r.id}')">
+  const today=new Date();today.setHours(0,0,0,0);
+  const rDate=r.date?new Date(r.date):null;
+  const expired=rDate&&rDate<today;
+  const featBadge=r.featured&&!expired?'<div style="position:absolute;top:10px;left:10px;z-index:4;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;letter-spacing:.3px;box-shadow:0 2px 8px rgba(0,0,0,.3)">⭐ Öne Çıkan</div>':'';
+  const expiredOverlay=expired?'<div style="position:absolute;inset:0;z-index:3;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center"><span style="background:#e55;color:#fff;font-size:12px;font-weight:700;padding:6px 14px;border-radius:20px">Geçmiş Yarış</span></div>':'';
+  return`<div class="race-card${r.featured&&!expired?' featured-race-card':''}" onclick="openRace('${r.id}')" style="${expired?'opacity:.65':''}">
     <div class="race-img" style="position:relative">${featBadge}${expiredOverlay}
       ${r.imgUrl?`<img src="${r.imgUrl}" alt="${r.name}" width="400" height="180" loading="lazy"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
       <div class="race-date-badge">${r.date||''}</div>

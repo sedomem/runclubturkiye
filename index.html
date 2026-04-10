@@ -3194,7 +3194,7 @@ async function loadAllFromDB(){
   if(typeof window.renderHomeData==='function')window.renderHomeData();
   if(typeof window.renderEvts==='function')window.renderEvts(window.EVENTS,'events-list');
   const cl=document.getElementById('clubs-list');
-  if(cl&&typeof window.clubCard==='function')cl.innerHTML=window.CLUBS.map(window.clubCard).join('');
+  if(cl&&typeof window.clubCard==='function')cl.innerHTML=window.CLUBS.map(window.clubCard).join('')+(typeof clubCtaCard==='function'?clubCtaCard():'');
   if(typeof window.renderRaceList==='function')window.renderRaceList();
   if(typeof window.renderBlogList==='function')window.renderBlogList();
   if(typeof window.renderFirsatlar==='function')window.renderFirsatlar();

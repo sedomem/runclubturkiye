@@ -6377,10 +6377,10 @@ window.loadCommunityFeed = async function(reset=false) {
   try {
     const fb = window._fb;
     if(!fb){ throw new Error('Firebase bağlantısı yok'); }
+    // Composite index gerektirmeyen basit query
     let q = fb.query(
       fb.collection(fb.db,'posts'),
-      fb.orderBy('createdAt','desc'),
-      fb.where('type','in',['text','run','photo'])
+      fb.orderBy('createdAt','desc')
     );
     const snap = await fb.getDocs(q);
     if(snap.empty && reset){
@@ -6407,7 +6407,7 @@ window.loadCommunityFeed = async function(reset=false) {
 window.loadMorePosts = function(){ loadCommunityFeed(false); };
 
 function renderPostCard(p) {
-  const ts  = p.createdAt?.seconds ? new Date(p.createdAt.seconds*1000) : new Date();
+  const ts  = p.createdAt?.seconds ? new Date(p.createdAt.seconds*1000) : (p.createdAtMs ? new Date(p.createdAtMs) : new Date());
   const ago = timeAgo(ts);
   const av  = p.userPhoto
     ? '<img src="'+p.userPhoto+'" style="width:100%;height:100%;object-fit:cover"/>'
@@ -6487,6 +6487,7 @@ window.submitCommPost = async function() {
     likes:     [],
     commentCount: 0,
     createdAt: fb.serverTimestamp(),
+    createdAtMs: Date.now(),
   };
   if(_commPostType==='run'){
     postData.runData = {

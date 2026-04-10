@@ -3318,7 +3318,7 @@ window.nav=id=>{
   if(id==='sss'){const pg=document.getElementById('pg-sss');if(pg&&!pg.classList.contains('on')){document.querySelectorAll('.pg').forEach(p=>p.classList.remove('on'));pg.classList.add('on');}}
   if(id==='events'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('events');}catch(e){}; if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
   if(id==='clubs'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('clubs');}catch(e){}; renderClubsPage();}
-  if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
+  if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.RACES&&window.RACES.length){renderRaceList();}else if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
   if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
@@ -4297,6 +4297,7 @@ function renderRaceList(){
 function renderRacePreview(){const hr=document.getElementById('home-races');if(hr)hr.innerHTML=window.RACES.slice(0,4).map(raceCard).join('');}
 window.filterRaces=q=>{filterRacesAll();};
 window.filterRacesAll=function(){
+  if(!window.RACES||!window.RACES.length){if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());return;}
   const q=(document.getElementById('race-q')?.value||'').toLowerCase();
   const city=(document.getElementById('race-city')?.value||'');
   const month=parseInt(document.getElementById('race-month')?.value||'0');
@@ -5020,7 +5021,8 @@ function renderAdminSection(sec){
       <div id="banner-tab-clubs" style="display:none"><div id="page-banner-slots-clubs"></div></div>
       <div id="banner-tab-races" style="display:none"><div id="page-banner-slots-races"></div></div>
       <div id="banner-tab-blog" style="display:none"><div id="page-banner-slots-blog"></div>
-      <div id="banner-tab-community" style="display:none"><h3 style="font-size:13px;margin-bottom:12px;color:var(--muted)">Topluluk Sayfası Banner</h3><div id="page-banner-slots-community"></div></div></div>`,
+      <div id="banner-tab-community" style="display:none"><h3 style="font-size:13px;margin-bottom:12px;color:var(--muted)">Topluluk Sayfası Banner</h3><div id="page-banner-slots-community"></div></div>
+      </div>`,
     popup:`<h2 style="margin-bottom:18px">💬 Popup</h2>
       <div class="card" style="padding:24px;max-width:520px">
         ${imgUploadHtml('apu-img-input','Popup Görseli','480×200px')}

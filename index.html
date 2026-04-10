@@ -852,6 +852,17 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   #community-grid{grid-template-columns:1fr}
   .comm-sidebar{position:static}
 }
+
+/* COMMUNITY COMMENTS */
+.comm-comments-wrap{margin-top:4px;padding-top:12px;border-top:1px solid var(--border)}
+.comm-comments-list{display:flex;flex-direction:column;gap:8px;margin-bottom:10px}
+.comm-comment{background:var(--bg);border-radius:8px;padding:10px 12px;font-size:13px}
+.comm-comment-header{display:flex;gap:8px;align-items:center;margin-bottom:4px}
+.comm-comment-name{font-weight:700;font-size:12px}
+.comm-comment-time{font-size:11px;color:var(--muted)}
+.comm-comment-text{color:var(--text);line-height:1.5;word-break:break-word}
+.comm-comment-actions{display:flex;gap:6px;margin-top:6px}
+.comm-comment-form{border-top:1px solid var(--border);padding-top:10px;margin-top:6px}
 </style>
 </head>
 <body>
@@ -929,6 +940,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <button class="bn-item" onclick="nav('events')"><div class="bi">📅</div><span>Etkinlik</span></button>
   <button class="bn-item" onclick="nav('firsatlar')"><div class="bi">🎁</div><span>Fırsatlar</span></button>
   <button class="bn-item" onclick="nav('races')"><div class="bi">🏆</div><span>Yarış</span></button>
+  <button class="bn-item" onclick="nav('community')"><div class="bi">🏃</div><span>Topluluk</span></button>
   <button class="bn-item" onclick="nav('dashboard')"><div class="bi">👤</div><span>Profil</span></button>
 </div>
 
@@ -1633,6 +1645,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 <!-- ═══════════════════ COMMUNITY PAGE ═══════════════════ -->
 <div class="pg" id="pg-community">
+<div id="pb-community" class="page-banner pb-community"></div>
 <div class="container sec">
 
   <!-- Post Oluştur -->
@@ -1710,6 +1723,33 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
         <h3>👑 En Aktif Kulüpler</h3>
         <div class="comm-clubs-list" id="comm-clubs-list">
           <div class="spinner" style="margin:10px auto"></div>
+        </div>
+      </div>
+
+      <!-- Topluluk Kuralları -->
+      <div class="comm-sidebar-card">
+        <h3 style="color:var(--or)">📋 Topluluk Kuralları</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px">
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="font-size:14px;flex-shrink:0;margin-top:1px">🤝</span>
+            <p style="font-size:12px;color:var(--muted);line-height:1.5;margin:0">Saygılı ve yapıcı bir dil kullan. Hakaret, argo ve küfür yasaktır.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="font-size:14px;flex-shrink:0;margin-top:1px">🚫</span>
+            <p style="font-size:12px;color:var(--muted);line-height:1.5;margin:0">Nefret söylemi, ayrımcılık ve suç teşkil eden içerikler yasaktır.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="font-size:14px;flex-shrink:0;margin-top:1px">🏃</span>
+            <p style="font-size:12px;color:var(--muted);line-height:1.5;margin:0">Paylaşımlarını koşu ve spor topluluğuyla ilgili tut.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="font-size:14px;flex-shrink:0;margin-top:1px">🔒</span>
+            <p style="font-size:12px;color:var(--muted);line-height:1.5;margin:0">Telefon, adres gibi kişisel bilgileri herkese açık paylaşma.</p>
+          </div>
+          <div style="display:flex;gap:8px;align-items:flex-start">
+            <span style="font-size:14px;flex-shrink:0;margin-top:1px">⚠️</span>
+            <p style="font-size:12px;color:var(--muted);line-height:1.5;margin:0">Spam ve reklam içerikler yasaktır. Kuralları çiğneyenler uyarılır veya engellenir.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -1821,6 +1861,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button id="sb-messages-btn" onclick="aNav('messages',this)">✉️ Mesajlar</button>
     <button id="sb-applications-btn" onclick="aNav('applications',this)">📋 Başvurular</button>
     <button onclick="aNav('chat',this)">💬 Mesajlaşma</button>
+    <button onclick="aNav('community',this)">🏃 Topluluk</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
   </div>
@@ -3224,6 +3265,7 @@ window.nav=id=>{
   if(id==='firsatlar')renderFirsatlar();
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
   if(id==='community'){
+    try{if(typeof renderPageBanner==='function')renderPageBanner('community');}catch(e){}
     loadCommunityPage&&loadCommunityPage();
   }
   if(id==='home'){
@@ -4131,7 +4173,7 @@ window.openClub=async(id)=>{
 // ── RACES ──
 function raceCard(r){
   const liked=window.CU&&localStorage.getItem('rlk_'+r.id+'_'+(window.CU?.uid||''));
-  return`<div class="race-card">
+  return`<div class="race-card" onclick="openRace('${r.id}')">
     <div class="race-img" style="position:relative">
       ${r.imgUrl?`<img src="${r.imgUrl}" alt="${r.name}" width="400" height="180" loading="lazy"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
       <div class="race-date-badge">${r.date||''}</div>
@@ -4806,12 +4848,14 @@ function renderAdminSection(sec){
         <button class="filt" id="btab-clubs" onclick="switchBannerTab('clubs',this)">🤝 Kulüpler</button>
         <button class="filt" id="btab-races" onclick="switchBannerTab('races',this)">🏆 Yarış Takvimi</button>
         <button class="filt" id="btab-blog" onclick="switchBannerTab('blog',this)">📰 Blog</button>
+            <button class="filt" id="btab-community" onclick="switchBannerTab('community',this)">🏃 Topluluk</button>
       </div>
       <div id="banner-tab-home"><h3 style="font-size:13px;margin-bottom:12px;color:var(--muted);font-family:'Raleway',sans-serif;font-weight:700;text-transform:uppercase;letter-spacing:.5px">Ana Sayfa Slider</h3><div id="banner-slots"></div></div>
       <div id="banner-tab-events" style="display:none"><div id="page-banner-slots-events"></div></div>
       <div id="banner-tab-clubs" style="display:none"><div id="page-banner-slots-clubs"></div></div>
       <div id="banner-tab-races" style="display:none"><div id="page-banner-slots-races"></div></div>
-      <div id="banner-tab-blog" style="display:none"><div id="page-banner-slots-blog"></div></div>`,
+      <div id="banner-tab-blog" style="display:none"><div id="page-banner-slots-blog"></div>
+      <div id="banner-tab-community" style="display:none"><h3 style="font-size:13px;margin-bottom:12px;color:var(--muted)">Topluluk Sayfası Banner</h3><div id="page-banner-slots-community"></div></div></div>`,
     popup:`<h2 style="margin-bottom:18px">💬 Popup</h2>
       <div class="card" style="padding:24px;max-width:520px">
         ${imgUploadHtml('apu-img-input','Popup Görseli','480×200px')}
@@ -4894,7 +4938,7 @@ function renderAdminSection(sec){
   if(sec==='races')setTimeout(initQuillRaceEditor,200);
   if(sec==='banners')setTimeout(()=>{
     renderBannerSlots();
-    ['events','clubs','races','blog'].forEach(t=>{const el=document.getElementById('banner-tab-'+t);if(el)el.style.display='none';});
+    ['events','clubs','races','blog','community'].forEach(t=>{const el=document.getElementById('banner-tab-'+t);if(el)el.style.display='none';});
     const ht=document.getElementById('banner-tab-home');if(ht)ht.style.display='block';
     const hb=document.getElementById('btab-home');if(hb){document.querySelectorAll('[id^="btab-"]').forEach(b=>b.classList.remove('on'));hb.classList.add('on');}
   },100);
@@ -4915,6 +4959,20 @@ function renderAdminSection(sec){
     return;
   }
   if(sec==='ticker')setTimeout(()=>loadTickerAdmin(),100);
+  if(sec==='community'){
+    main.innerHTML=`<h2 style="margin-bottom:18px">🏃 Topluluk Yönetimi</h2>
+      <div class="card" style="padding:16px;margin-bottom:16px">
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+          <button class="btn btn-sm btn-or" onclick="loadAdminCommunityPosts('all')">Tümü</button>
+          <button class="btn btn-sm btn-ghost" onclick="loadAdminCommunityPosts('run')">🏃 Koşu</button>
+          <button class="btn btn-sm btn-ghost" onclick="loadAdminCommunityPosts('text')">💬 Yazı</button>
+          <button class="btn btn-sm btn-ghost" onclick="loadAdminCommunityPosts('photo')">📸 Fotoğraf</button>
+        </div>
+        <div id="admin-community-list"><div class="spinner" style="margin:20px auto"></div></div>
+      </div>`;
+    setTimeout(()=>loadAdminCommunityPosts&&loadAdminCommunityPosts('all'),100);
+    return;
+  }
 }
 window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);};
 
@@ -6132,7 +6190,7 @@ function renderPageBanner(page){
 window.renderPageBanner=renderPageBanner;
 
 function initPageBanners(){
-  ['events','clubs','races','blog'].forEach(p=>renderPageBanner(p));
+  ['events','clubs','races','blog','community'].forEach(p=>renderPageBanner(p));
 }
 window.initPageBanners=initPageBanners;
 
@@ -6414,6 +6472,9 @@ function renderPostCard(p) {
     : (p.userName||'K')[0].toUpperCase();
   const typeLabel = {text:'💬 Yazı', run:'🏃 Koşu', photo:'📸 Fotoğraf'}[p.type]||'💬';
   const liked = window.CU && (p.likes||[]).includes(window.CU.uid);
+  const isOwner = window.CU && (window.CU.uid === p.userUid);
+  const isSA    = window.CU && (window.CU.email === 'sedomem@gmail.com');
+  const pid = p.id;
 
   let body = '';
   if(p.text) body += '<div class="comm-post-body">'+escHtml(p.text)+'</div>';
@@ -6426,18 +6487,28 @@ function renderPostCard(p) {
   }
   if(p.photoUrl) body += '<img class="comm-post-img" src="'+p.photoUrl+'" loading="lazy"/>';
 
-  return '<div class="comm-post-card" id="post-'+p.id+'">'
+  const ownerBtns = (isOwner || isSA)
+    ? '<button class="comm-action-btn" data-pid="'+pid+'" data-txt="'+escHtml(p.text||'')+'" onclick="editPost(this.dataset.pid,this.dataset.txt)" title="Düzenle">✏️</button>'
+      +'<button class="comm-action-btn" style="color:#e55" data-pid="'+pid+'" onclick="deletePost(this.dataset.pid)" title="Sil">🗑️</button>'
+    : '';
+
+  return '<div class="comm-post-card" id="post-'+pid+'">'
     +'<div class="comm-post-header">'
     +'<div class="comm-avatar">'+av+'</div>'
     +'<div class="comm-user-info"><div class="comm-user-name">'+escHtml(p.userName||'Koşucu')+'</div>'
     +'<div class="comm-post-time">'+ago+'</div></div>'
-    +'<span class="comm-post-type">'+typeLabel+'</span></div>'
+    +'<span class="comm-post-type">'+typeLabel+'</span>'
+    +ownerBtns
+    +'</div>'
     +body
     +'<div class="comm-post-actions">'
-    +'<button class="comm-action-btn'+(liked?' liked':'')+'" onclick="likePost(\'' +p.id+ '\')" >❤️ <span id="like-cnt-'+p.id+'">'+(p.likes||[]).length+'</span></button>'
-    +'<button class="comm-action-btn" onclick="showComments(\'' +p.id+ '\')" >💬 <span>'+(p.commentCount||0)+'</span></button>'
-    +'</div></div>';
+    +'<button class="comm-action-btn'+(liked?' liked':'')+'" data-pid="'+pid+'" onclick="likePost(this.dataset.pid)">❤️ <span id="like-cnt-'+pid+'">'+(p.likes||[]).length+'</span></button>'
+    +'<button class="comm-action-btn" data-pid="'+pid+'" onclick="toggleComments(this.dataset.pid,this)">💬 Yorum <span id="cmt-cnt-'+pid+'">'+(p.commentCount||0)+'</span></button>'
+    +'</div>'
+    +'<div id="comments-'+pid+'" class="comm-comments-wrap" style="display:none"></div>'
+    +'</div>';
 }
+
 
 function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
@@ -6468,7 +6539,211 @@ window.likePost = async function(postId) {
   } catch(e){ console.warn('Like hata:',e.message); }
 };
 
-window.showComments = function(postId){ toast('Yorumlar yakında...','info'); };
+
+// ── YORUM SİSTEMİ ──────────────────────────────────────────────
+window.toggleComments = async function(pid, btn) {
+  const wrap = document.getElementById('comments-'+pid);
+  if(!wrap) return;
+  if(wrap.style.display !== 'none') { wrap.style.display='none'; return; }
+  wrap.style.display = 'block';
+  if(wrap.dataset.loaded) return; // Cache
+  await loadComments(pid);
+};
+
+window.loadComments = async function(pid) {
+  const wrap = document.getElementById('comments-'+pid);
+  if(!wrap) return;
+  wrap.innerHTML = '<div class="spinner" style="margin:10px auto"></div>';
+  try {
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(
+      fb.collection(fb.db, 'comments'),
+      fb.where('postId','==',pid),
+      fb.orderBy('createdAt','asc')
+    ));
+    const cmts = [];
+    snap.forEach(d => cmts.push({id:d.id,...d.data()}));
+    renderComments(pid, cmts);
+    wrap.dataset.loaded = '1';
+  } catch(e) {
+    console.warn('Yorum yükleme:', e.message);
+    renderComments(pid, []);
+  }
+};
+
+function renderComments(pid, cmts) {
+  const wrap = document.getElementById('comments-'+pid);
+  if(!wrap) return;
+  const canPost = !!window.CU;
+  let html = '<div class="comm-comments-list">';
+  if(!cmts.length) html += '<p style="font-size:12px;color:var(--muted);padding:8px 0">Henüz yorum yok. İlk yorumu yap!</p>';
+  cmts.forEach(c => {
+    const cLiked = window.CU && (c.likes||[]).includes(window.CU.uid);
+    const cOwner = window.CU && (window.CU.uid===c.userUid || window.CU.email==='sedomem@gmail.com');
+    html += '<div class="comm-comment" id="cmt-'+c.id+'">'
+      +'<div class="comm-comment-header">'
+      +'<span class="comm-comment-name">'+escHtml(c.userName||'Koşucu')+'</span>'
+      +'<span class="comm-comment-time">'+timeAgo(c.createdAt?.seconds ? new Date(c.createdAt.seconds*1000) : new Date())+'</span>'
+      +'</div>'
+      +'<div class="comm-comment-text">'+escHtml(c.text)+'</div>'
+      +'<div class="comm-comment-actions">'
+      +'<button class="comm-action-btn'+(cLiked?' liked':'')+'" style="font-size:11px;padding:2px 6px" data-cid="'+c.id+'" data-pid="'+pid+'" onclick="likeComment(this.dataset.pid,this.dataset.cid,this)">❤️ '+(c.likes||[]).length+'</button>'
+      +(cOwner ? '<button class="comm-action-btn" style="font-size:11px;padding:2px 6px;color:#e55" data-cid="'+c.id+'" data-pid="'+pid+'" onclick="deleteComment(this.dataset.pid,this.dataset.cid)">🗑️</button>' : '')
+      +'</div>'
+      +'</div>';
+  });
+  html += '</div>';
+  if(canPost) {
+    html += '<div class="comm-comment-form">'
+      +'<div style="display:flex;gap:8px;align-items:flex-end">'
+      +'<div style="flex:1;position:relative">'
+      +'<textarea class="comm-create-input" id="cmt-input-'+pid+'" placeholder="Yorum yaz... (max 140 karakter)" maxlength="140" rows="2" oninput="commCmtCount(this,\'cmt-cnt-char-'+pid+'\')" style="min-height:40px;font-size:13px"></textarea>'
+      +'<span id="cmt-cnt-char-'+pid+'" style="position:absolute;bottom:6px;right:8px;font-size:10px;color:var(--muted)">140</span>'
+      +'</div>'
+      +'<button class="btn btn-or btn-sm" style="flex-shrink:0" data-pid="'+pid+'" onclick="submitComment(this.dataset.pid)">Gönder</button>'
+      +'</div>'
+      +'</div>';
+  }
+  wrap.innerHTML = html;
+}
+
+window.commCmtCount = function(ta, counterId) {
+  const rem = 140 - ta.value.length;
+  const el = document.getElementById(counterId);
+  if(el) { el.textContent = rem; el.style.color = rem < 20 ? '#e55' : 'var(--muted)'; }
+};
+
+window.submitComment = async function(pid) {
+  if(!window.CU){ openAuth('login'); return; }
+  const inp = document.getElementById('cmt-input-'+pid);
+  const txt = inp ? inp.value.trim() : '';
+  if(!txt){ toast('Yorum boş olamaz','error'); return; }
+  if(txt.length > 140){ toast('Yorum 140 karakteri geçemez','error'); return; }
+  const fb = window._fb;
+  try {
+    await fb.addDoc(fb.collection(fb.db,'comments'), {
+      postId: pid,
+      text: txt,
+      userName: window.CU.displayName||'Koşucu',
+      userPhoto: window.CU.photoURL||null,
+      userUid: window.CU.uid,
+      likes: [],
+      createdAt: fb.serverTimestamp(),
+    });
+    // commentCount güncelle
+    const postRef = fb.doc(fb.db,'posts',pid);
+    await fb.updateDoc(postRef, {commentCount: fb.increment(1)});
+    if(inp) inp.value='';
+    const wrap = document.getElementById('comments-'+pid);
+    if(wrap) { delete wrap.dataset.loaded; }
+    await loadComments(pid);
+    // count badge güncelle
+    const cntEl = document.getElementById('cmt-cnt-'+pid);
+    if(cntEl) cntEl.textContent = parseInt(cntEl.textContent||0)+1;
+    toast('Yorum eklendi!','success');
+  } catch(e){ toast('Hata: '+e.message,'error'); }
+};
+
+window.likeComment = async function(pid, cid, btn) {
+  if(!window.CU){ openAuth('login'); return; }
+  const fb = window._fb;
+  const uid = window.CU.uid;
+  try {
+    const ref = fb.doc(fb.db,'comments',cid);
+    const snap = await fb.getDoc(ref);
+    if(!snap.exists()) return;
+    const likes = snap.data().likes||[];
+    const newLikes = likes.includes(uid) ? likes.filter(x=>x!==uid) : [...likes,uid];
+    await fb.updateDoc(ref,{likes:newLikes});
+    if(btn){ btn.classList.toggle('liked',newLikes.includes(uid)); btn.innerHTML='❤️ '+newLikes.length; }
+  } catch(e){ console.warn('Comment like:',e.message); }
+};
+
+window.deleteComment = async function(pid, cid) {
+  if(!window.CU) return;
+  if(!confirm('Yorumu silmek istiyor musun?')) return;
+  const fb = window._fb;
+  try {
+    await fb.deleteDoc(fb.doc(fb.db,'comments',cid));
+    const postRef = fb.doc(fb.db,'posts',pid);
+    await fb.updateDoc(postRef,{commentCount: fb.increment(-1)});
+    const wrap = document.getElementById('comments-'+pid);
+    if(wrap){ delete wrap.dataset.loaded; }
+    await loadComments(pid);
+    const cntEl = document.getElementById('cmt-cnt-'+pid);
+    if(cntEl) cntEl.textContent = Math.max(0,parseInt(cntEl.textContent||0)-1);
+  } catch(e){ toast('Silme hatası','error'); }
+};
+
+// ── POST EDIT / DELETE ──────────────────────────────────────────
+window.editPost = async function(pid, currentText) {
+  const newText = prompt('Gönderiyi düzenle (max 500 karakter):', currentText);
+  if(newText===null) return;
+  const trimmed = newText.trim();
+  if(!trimmed){ toast('Gönderi boş olamaz','error'); return; }
+  if(trimmed.length > 500){ toast('500 karakter sınırı aşıldı','error'); return; }
+  const fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db,'posts',pid),{text:trimmed});
+    toast('Güncellendi!','success');
+    await loadCommunityFeed(true);
+  } catch(e){ toast('Hata: '+e.message,'error'); }
+};
+
+window.deletePost = async function(pid) {
+  if(!confirm('Bu gönderiyi silmek istiyor musun?')) return;
+  const fb = window._fb;
+  try {
+    await fb.deleteDoc(fb.doc(fb.db,'posts',pid));
+    const el = document.getElementById('post-'+pid);
+    if(el) el.remove();
+    toast('Gönderi silindi','success');
+  } catch(e){ toast('Silme hatası: '+e.message,'error'); }
+};
+
+// ── ADMIN COMMUNITY ─────────────────────────────────────────────
+window.loadAdminCommunityPosts = async function(filterType) {
+  const el = document.getElementById('admin-community-list');
+  if(!el) return;
+  el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  try {
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(
+      fb.collection(fb.db,'posts'),
+      fb.orderBy('createdAt','desc')
+    ));
+    const posts = [];
+    snap.forEach(d => posts.push({id:d.id,...d.data()}));
+    const filtered = filterType==='all' ? posts : posts.filter(p=>p.type===filterType);
+    if(!filtered.length){ el.innerHTML='<p style="color:var(--muted);padding:20px">Paylaşım bulunamadı.</p>'; return; }
+    el.innerHTML = filtered.map(p => {
+      const ts = p.createdAt?.seconds ? new Date(p.createdAt.seconds*1000) : new Date();
+      return '<div style="background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;display:flex;gap:12px;align-items:flex-start">'
+        +'<div style="flex:1;min-width:0">'
+        +'<div style="display:flex;gap:8px;align-items:center;margin-bottom:6px">'
+        +'<span style="font-size:12px;font-weight:700">'+escHtml(p.userName||'?')+'</span>'
+        +'<span style="font-size:11px;color:var(--muted)">'+ts.toLocaleDateString('tr-TR')+'</span>'
+        +'<span style="font-size:10px;background:var(--or);color:#fff;padding:1px 6px;border-radius:20px">{'+p.type+'}</span>'
+        +'</div>'
+        +'<p style="font-size:13px;color:var(--text);margin:0;word-break:break-word">'+escHtml(p.text||'[görsel/koşu]')+'</p>'
+        +'<div style="margin-top:6px;font-size:11px;color:var(--muted)">❤️ '+(p.likes||[]).length+' · 💬 '+(p.commentCount||0)+'</div>'
+        +'</div>'
+        +'<button class="btn btn-sm" style="background:#e55;color:#fff;border:none;flex-shrink:0" data-pid="'+p.id+'" onclick="adminDeletePost(this.dataset.pid)">🗑️ Sil</button>'
+        +'</div>';
+    }).join('');
+  } catch(e){ el.innerHTML='<p style="color:var(--muted)">Hata: '+e.message+'</p>'; }
+};
+
+window.adminDeletePost = async function(pid) {
+  if(!confirm('Bu gönderiyi silmek istiyor musun?')) return;
+  const fb = window._fb;
+  try {
+    await fb.deleteDoc(fb.doc(fb.db,'posts',pid));
+    toast('Gönderi silindi','success');
+    loadAdminCommunityPosts&&loadAdminCommunityPosts('all');
+  } catch(e){ toast('Hata: '+e.message,'error'); }
+};
+
 
 // ── SUBMIT POST ───────────────────────────────────────────
 window.submitCommPost = async function() {

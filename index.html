@@ -863,6 +863,12 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .comm-comment-text{color:var(--text);line-height:1.5;word-break:break-word}
 .comm-comment-actions{display:flex;gap:6px;margin-top:6px}
 .comm-comment-form{border-top:1px solid var(--border);padding-top:10px;margin-top:6px}
+
+/* ── Featured cards ──────────────────────────── */
+.featured-race-card{border:2px solid #f59e0b!important;box-shadow:0 4px 20px rgba(245,158,11,.18)!important}
+.featured-race-card:hover{box-shadow:0 8px 32px rgba(245,158,11,.28)!important;transform:translateY(-3px)}
+.featured-blog-card{border:2px solid var(--or)!important}
+.featured-blog-card:hover{box-shadow:0 8px 24px rgba(232,98,42,.15)!important}
 </style>
 </head>
 <body>
@@ -1092,7 +1098,35 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="pb-races" class="page-banner pb-races"></div>
 <div class="container sec">
   <h2 style="margin-bottom:18px">🏆 Yarış Takvimi</h2>
-  <div class="search-wrap"><input type="text" placeholder="Yarış ara..." oninput="filterRaces(this.value)"/></div>
+
+  <!-- Öne Çıkan Yarışlar -->
+  <div id="featured-races-wrap" style="display:none;margin-bottom:32px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:20px">⭐</span>
+      <h3 style="font-size:17px;font-weight:700;font-family:'Raleway',sans-serif;margin:0">Öne Çıkan Yarışlar</h3>
+    </div>
+    <div class="grid g2" id="featured-races-list"></div>
+    <div class="divider" style="margin-top:24px;margin-bottom:24px"></div>
+  </div>
+
+  <!-- Filtreler -->
+  <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:center">
+    <div style="flex:1;min-width:180px;position:relative">
+      <input type="text" id="race-q" placeholder="🔍  Yarış veya şehir ara..." oninput="filterRacesAll()" style="width:100%;padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);font-size:14px"/>
+    </div>
+    <select id="race-city" onchange="filterRacesAll()" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);font-size:14px;cursor:pointer;min-width:150px">
+      <option value="">📍 Tüm Şehirler</option>
+    </select>
+    <select id="race-month" onchange="filterRacesAll()" style="padding:10px 14px;border:1.5px solid var(--border);border-radius:var(--r);background:var(--card);color:var(--text);font-size:14px;cursor:pointer;min-width:140px">
+      <option value="">📅 Tüm Aylar</option>
+      <option value="1">Ocak</option><option value="2">Şubat</option><option value="3">Mart</option>
+      <option value="4">Nisan</option><option value="5">Mayıs</option><option value="6">Haziran</option>
+      <option value="7">Temmuz</option><option value="8">Ağustos</option><option value="9">Eylül</option>
+      <option value="10">Ekim</option><option value="11">Kasım</option><option value="12">Aralık</option>
+    </select>
+  </div>
+
+  <h3 style="font-size:15px;font-weight:700;margin-bottom:14px;font-family:'Raleway',sans-serif;color:var(--muted)">Tüm Yarışlar</h3>
   <div class="grid g3" id="races-list"></div>
 </div></div>
 <div class="pg" id="pg-race-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('races')" style="margin-bottom:18px">← Geri</button><div id="race-detail-content"></div></div></div>
@@ -1135,6 +1169,28 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="pb-blog" class="page-banner pb-blog"></div>
 <div class="container sec">
   <h2 style="margin-bottom:18px">📰 Haberler & Blog</h2>
+
+  <!-- Öne Çıkan Yazılar -->
+  <div id="featured-blog-wrap" style="display:none;margin-bottom:28px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px">
+      <span style="font-size:20px">⭐</span>
+      <h3 style="font-size:17px;font-weight:700;font-family:'Raleway',sans-serif;margin:0">Öne Çıkan Yazılar</h3>
+    </div>
+    <div class="grid g2" id="featured-blog-list"></div>
+    <div class="divider" style="margin-top:20px;margin-bottom:20px"></div>
+  </div>
+
+  <!-- Kategori Filtreleri -->
+  <div class="filter-strip" id="blog-cat-strip" style="margin-bottom:20px;flex-wrap:wrap">
+    <button class="filt on" onclick="filterBlogCat('',this)">Tümü</button>
+    <button class="filt" onclick="filterBlogCat('Haber',this)">📰 Haber</button>
+    <button class="filt" onclick="filterBlogCat('Sağlık',this)">💚 Sağlık</button>
+    <button class="filt" onclick="filterBlogCat('Teknoloji',this)">💻 Teknoloji</button>
+    <button class="filt" onclick="filterBlogCat('Yarış',this)">🏆 Yarış</button>
+    <button class="filt" onclick="filterBlogCat('Antrenman',this)">🏃 Antrenman</button>
+    <button class="filt" onclick="filterBlogCat('Ürün İnceleme',this)">⭐ Ürün İnceleme</button>
+  </div>
+
   <div class="grid g3" id="blog-list"></div>
 </div>  <div class="sec-sm" style="padding:24px 0 16px"><div class="container">
     <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
@@ -2563,7 +2619,8 @@ window.saveRaceFromAdmin=async()=>{
   const name=document.getElementById('ar-name').value.trim();
   if(!name){toast('Yarış adı gerekli','err');return;}
   const aboutVal=(window._quillRaceEditor?window._quillRaceEditor.root.innerHTML:document.getElementById('ar-about').value)||'';
-  const data={name,date:document.getElementById('ar-date').value||'',location:document.getElementById('ar-loc').value||'',about:aboutVal,contact:document.getElementById('ar-contact').value||'',mapUrl:document.getElementById('ar-map').value||'',website:document.getElementById('ar-web').value||'',phone:document.getElementById('ar-phone').value||'',email:document.getElementById('ar-email').value||'',imgUrl,emoji:'🏆',likes:0,slug:name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const featured=document.getElementById('ar-featured')?.checked||false;
+  const data={name,featured,date:document.getElementById('ar-date').value||'',location:document.getElementById('ar-loc').value||'',about:aboutVal,contact:document.getElementById('ar-contact').value||'',mapUrl:document.getElementById('ar-map').value||'',website:document.getElementById('ar-web').value||'',phone:document.getElementById('ar-phone').value||'',email:document.getElementById('ar-email').value||'',imgUrl,emoji:'🏆',likes:0,slug:name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
   toast('Kaydediliyor...','ok');
   try{
     const {id:_,...dataNoId}=data;
@@ -2834,7 +2891,9 @@ window.saveBlogFromAdmin=async()=>{
   if(!coverUrl&&imgInput?.files[0])coverUrl=await handleImgUpload(imgInput,'blog')||'';
   const title=document.getElementById('ab-title').value.trim();
   if(!title){toast('Başlık gerekli','err');return;}
-  const data={id:'b'+Date.now(),title,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:CU?.name||'RunClub Editör',status:'published',likes:0,publishedAt:new Date().toISOString().split('T')[0],slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const kategori=document.getElementById('ab-kategori')?.value||'Haber';
+  const featured=document.getElementById('ab-featured')?.checked||false;
+  const data={id:'b'+Date.now(),title,kategori,featured,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:CU?.name||'RunClub Editör',status:'published',likes:0,publishedAt:new Date().toISOString().split('T')[0],slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
   toast('Kaydediliyor...','ok');
   try{
     // Önce Firestore'a kaydet — gerçek ID'yi al
@@ -4193,7 +4252,7 @@ window.openClub=async(id)=>{
 function raceCard(r){
   const liked=window.CU&&localStorage.getItem('rlk_'+r.id+'_'+(window.CU?.uid||''));
   return`<div class="race-card" onclick="openRace('${r.id}')">
-    <div class="race-img" style="position:relative">
+    <div class="race-img" style="position:relative">${featBadge}${expiredOverlay}
       ${r.imgUrl?`<img src="${r.imgUrl}" alt="${r.name}" width="400" height="180" loading="lazy"/>`:`<span style="position:relative;z-index:1;font-size:46px">${r.emoji||'🏆'}</span>`}
       <div class="race-date-badge">${r.date||''}</div>
       <!-- Detaylar butonu: görsel üstünde sağ alt köşe -->
@@ -4213,11 +4272,49 @@ function raceCard(r){
 }
 window.raceCard=raceCard;
 function renderRaceList(){
-  const html=window.RACES.map(raceCard).join('');
-  const rl=document.getElementById('races-list');if(rl)rl.innerHTML=html||'<p style="color:var(--muted)">Yarış bulunamadı.</p>';
+  const rl=document.getElementById('races-list');
+  if(!rl)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const all=window.RACES||[];
+  // Öne çıkanlar
+  const featured=all.filter(r=>r.featured&&(!r.date||new Date(r.date)>=today));
+  const fw=document.getElementById('featured-races-wrap');
+  const fl=document.getElementById('featured-races-list');
+  if(fw&&fl){
+    if(featured.length){fl.innerHTML=featured.map(raceCard).join('');fw.style.display='block';}
+    else fw.style.display='none';
+  }
+  // Şehir dropdown doldur
+  const citySelect=document.getElementById('race-city');
+  if(citySelect&&citySelect.options.length<=1){
+    const cities=[...new Set(all.map(r=>(r.location||'').split(',')[0].trim()).filter(Boolean))].sort();
+    cities.forEach(c=>{const o=document.createElement('option');o.value=c;o.textContent='📍 '+c;citySelect.appendChild(o);});
+  }
+  // Tarihi geçmiş yarışları listede yine göster (soluk) ama sıra sonuna at
+  const active=all.filter(r=>!r.date||new Date(r.date)>=today);
+  const expired=all.filter(r=>r.date&&new Date(r.date)<today);
+  rl.innerHTML=[...active,...expired].map(raceCard).join('')||'<p style="color:var(--muted)">Yarış bulunamadı.</p>';
 }
 function renderRacePreview(){const hr=document.getElementById('home-races');if(hr)hr.innerHTML=window.RACES.slice(0,4).map(raceCard).join('');}
-window.filterRaces=q=>{const el=document.getElementById('races-list');if(el)el.innerHTML=RACES.filter(r=>r.name.toLowerCase().includes(q.toLowerCase())).map(raceCard).join('');};
+window.filterRaces=q=>{filterRacesAll();};
+window.filterRacesAll=function(){
+  const q=(document.getElementById('race-q')?.value||'').toLowerCase();
+  const city=(document.getElementById('race-city')?.value||'');
+  const month=parseInt(document.getElementById('race-month')?.value||'0');
+  const today=new Date();today.setHours(0,0,0,0);
+  const all=window.RACES||[];
+  const active=all.filter(r=>!r.date||new Date(r.date)>=today);
+  const expired=all.filter(r=>r.date&&new Date(r.date)<today);
+  const filter=r=>{
+    if(q&&!(r.name||'').toLowerCase().includes(q)&&!(r.location||'').toLowerCase().includes(q))return false;
+    if(city&&!(r.location||'').toLowerCase().includes(city.toLowerCase()))return false;
+    if(month){const d=r.date?new Date(r.date):null;if(!d||d.getMonth()+1!==month)return false;}
+    return true;
+  };
+  const filtered=[...active.filter(filter),...expired.filter(filter)];
+  const rl=document.getElementById('races-list');
+  if(rl)rl.innerHTML=filtered.map(raceCard).join('')||'<p style="color:var(--muted);padding:20px">Yarış bulunamadı.</p>';
+};;
 window.openRace=id=>{
   const r=RACES.find(x=>x.id===id);if(!r)return;
   const liked=window.CU&&localStorage.getItem('rlk_'+r.id+'_'+(window.CU?.uid||''));
@@ -4262,9 +4359,32 @@ window.openRace=id=>{
 };
 
 // ── BLOG ──
-function renderBlogList(){const el=document.getElementById('blog-list');if(el)el.innerHTML=BLOG_POSTS.map(blogCard).join('')||'<p style="color:var(--muted)">Yazı yok.</p>';}
+function renderBlogList(catFilter){
+  const el=document.getElementById('blog-list');
+  if(!el)return;
+  const posts=window.BLOG_POSTS||[];
+  // Öne çıkanlar
+  const featured=posts.filter(p=>p.featured);
+  const fw=document.getElementById('featured-blog-wrap');
+  const fl=document.getElementById('featured-blog-list');
+  if(fw&&fl){
+    if(featured.length){fl.innerHTML=featured.map(blogCard).join('');fw.style.display='block';}
+    else fw.style.display='none';
+  }
+  // Kategori filtresi
+  const filtered=catFilter?posts.filter(p=>p.kategori===catFilter):posts;
+  el.innerHTML=filtered.map(blogCard).join('')||'<p style="color:var(--muted);padding:20px">Yazı bulunamadı.</p>';
+}
+window.filterBlogCat=function(cat,btn){
+  document.querySelectorAll('#blog-cat-strip .filt').forEach(b=>b.classList.remove('on'));
+  if(btn)btn.classList.add('on');
+  renderBlogList(cat);
+};
 function renderBlogPreview(){const el=document.getElementById('home-blog');if(el)el.innerHTML=BLOG_POSTS.slice(0,4).map(blogCard).join('');}
-function blogCard(p){return`<div class="blog-card" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="400" height="180" loading="lazy"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'\ud83d\udcf0'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">\u270d\ufe0f ${p.authorName||'Edit\xf6r'}</div><div style="font-size:11px;color:var(--muted)">\u2764\ufe0f ${p.likes||0}</div></div></div></div>`;}
+function blogCard(p){
+  const katIcons={'Haber':'📰','Sağlık':'💚','Teknoloji':'💻','Yarış':'🏆','Antrenman':'🏃','Ürün İnceleme':'⭐'};
+  const katIcon=katIcons[p.kategori]||'📰';
+  return`<div class="blog-card${p.featured?' featured-blog-card':''}" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="400" height="180" loading="lazy"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'\ud83d\udcf0'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${p.kategori?`<span class="tag tag-or" style="font-size:10px;padding:2px 8px">${katIcon} ${p.kategori}</span>`:''} ${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">\u270d\ufe0f ${p.authorName||'Edit\xf6r'}</div><div style="font-size:11px;color:var(--muted)">\u2764\ufe0f ${p.likes||0}</div></div></div></div>`;}
 window.openBlog=id=>{
   const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;
   const liked=CU&&localStorage.getItem(`blog_like_${p.id}_${CU.uid}`);
@@ -4804,10 +4924,17 @@ function renderAdminSection(sec){
         <div class="form-row"><div class="form-grp"><label>Telefon</label><input id="ar-phone"/></div><div class="form-grp"><label>E-posta</label><input id="ar-email"/></div></div>
         <div class="form-row"><div class="form-grp"><label>Web Sitesi</label><input id="ar-web"/></div><div class="form-grp"><label>Google Maps Embed URL</label><input id="ar-map"/></div></div>
         <div class="form-grp"><label>İletişim</label><input id="ar-contact"/></div>
+        <div style="display:flex;align-items:center;gap:10px;padding:12px 0;margin-top:2px;border-top:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text)">
+            <input type="checkbox" id="ar-featured" style="width:18px;height:18px;accent-color:#f59e0b;cursor:pointer"/>
+            ⭐ Öne Çıkar
+          </label>
+          <span style="font-size:12px;color:var(--muted)">Yarış sayfasında öne çıkanlarda gösterilir</span>
+        </div>
         <button class="btn btn-or" onclick="saveRaceFromAdmin()">Yarış Ekle</button>
       </div>
       <table><thead><tr><th>Yarış</th><th>Tarih</th><th>Konum</th><th>İşlem</th></tr></thead>
-      <tbody>${RACES.map(r=>`<tr><td>${r.emoji||'🏆'} ${r.name}</td><td>${r.date||'—'}</td><td>${r.location||'—'}</td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="editRace('${r.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteRace('${r.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
+      <tbody>${(window.RACES||[]).map(r=>{const exp=r.date&&new Date(r.date)<new Date();return'<tr'+(exp?' style="opacity:.55"':'')+'><td>'+(r.featured?'⭐ ':'')+escHtml(r.emoji||'🏆')+' '+escHtml(r.name)+(exp?' <b style="color:#e55;font-size:10px">[Geçti]</b>':'')+'</td><td>'+escHtml(r.date||'—')+'</td><td>'+escHtml(r.location||'—')+'</td><td class="action-btns"><button class="btn btn-ghost btn-sm" data-rid="'+r.id+'" onclick="editRace(this.dataset.rid)">✏️</button><button class="btn btn-red btn-sm" data-rid="'+r.id+'" onclick="deleteRace(this.dataset.rid)">🗑</button></td></tr>';}).join('')}</tbody></table>`,
     // ✅ AI Blog Asistanı eklendi
     blog:`<h2 style="margin-bottom:18px">📰 Blog</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
@@ -4840,7 +4967,27 @@ function renderAdminSection(sec){
           <p style="font-size:11px;color:var(--muted);margin-top:6px">💡 <b>SEO İçin:</b> Toolbar'dan H1, H2, H3 başlıklarını kullanarak içeriğinizi yapılandırın.</p>
           <p style="font-size:11px;color:var(--muted);margin-top:3px">🖼 Yazı arasına görsel eklemek için toolbar'daki resim ikonunu kullanın</p>
         </div>
-        <div class="form-grp"><label>Etiketler (virgülle)</label><input id="ab-tags"/></div>
+        <div class="form-row">
+          <div class="form-grp">
+            <label>Kategori</label>
+            <select id="ab-kategori" style="padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:14px;width:100%;cursor:pointer">
+              <option value="Haber">📰 Haber</option>
+              <option value="Sağlık">💚 Sağlık</option>
+              <option value="Teknoloji">💻 Teknoloji</option>
+              <option value="Yarış">🏆 Yarış</option>
+              <option value="Antrenman">🏃 Antrenman</option>
+              <option value="Ürün İnceleme">⭐ Ürün İnceleme</option>
+            </select>
+          </div>
+          <div class="form-grp"><label>Etiketler (virgülle)</label><input id="ab-tags" placeholder="koşu, sağlık, maraton"/></div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;padding:10px 0;border-top:1px solid var(--border)">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer;font-size:14px;font-weight:600;color:var(--text)">
+            <input type="checkbox" id="ab-featured" style="width:18px;height:18px;accent-color:var(--or);cursor:pointer"/>
+            ⭐ Öne Çıkar
+          </label>
+          <span style="font-size:12px;color:var(--muted)">Blog sayfasında öne çıkanlar bölümünde gösterilir</span>
+        </div>
         ${seoHtml}
         <button class="btn btn-or" onclick="saveBlogFromAdmin()">Yayınla</button>
       </div>

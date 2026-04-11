@@ -4686,6 +4686,51 @@ window.filterFirsatlar=(kat,btn)=>{document.querySelectorAll('#firsat-filters .f
 
 
 // ── PUSH BİLDİRİMLER ─────────────────────────────────────────────────────
+
+window.activateMyPush=async function(){
+  localStorage.removeItem('rct_push_dismissed');
+  const statusEl=document.getElementById('pn-own-status');
+  if(statusEl)statusEl.textContent='İzin isteniyor...';
+  if(Notification.permission==='denied'){
+    if(statusEl)statusEl.innerHTML='<span style="color:#e55">❌ Tarayıcıda bildirimler engellenmiş. Tarayıcı ayarlarından runclubturkiye.com için izni manuel aç.</span>';
+    return;
+  }
+  if(!window.requestPushPermission){
+    if(statusEl)statusEl.textContent='Push SDK henüz yüklenmedi, bekleyin...';
+    return;
+  }
+  const token=await window.requestPushPermission();
+  if(token){
+    if(statusEl)statusEl.innerHTML='<span style="color:green">✅ Aktif! Token kaydedildi.</span>';
+  } else {
+    if(statusEl)statusEl.innerHTML='<span style="color:#e55">❌ Token alınamadı. Console\'a bakın.</span>';
+  }
+  setTimeout(()=>loadPushSubscribers&&loadPushSubscribers(),1000);
+};
+
+window.resetPushDismiss=function(){
+  localStorage.removeItem('rct_push_dismissed');
+  const statusEl=document.getElementById('pn-own-status');
+  if(statusEl)statusEl.textContent='Sıfırlandı. Sayfayı yenileyin.';
+  location.reload();
+};
+
+window.updatePushStatus=function(){
+  const statusEl=document.getElementById('pn-own-status');
+  if(!statusEl)return;
+  const perm=Notification.permission;
+  const token=localStorage.getItem('rct_fcm_token');
+  if(perm==='granted'&&token){
+    statusEl.innerHTML='<span style="color:green">✅ Aktif — Token mevcut</span>';
+  } else if(perm==='granted'&&!token){
+    statusEl.innerHTML='<span style="color:orange">⚠️ İzin var ama token yok — "İzin Ver" butonuna bas</span>';
+  } else if(perm==='denied'){
+    statusEl.innerHTML='<span style="color:#e55">❌ Tarayıcıda engellenmiş — Tarayıcı site ayarlarından izin ver</span>';
+  } else {
+    statusEl.innerHTML='<span style="color:orange">⚠️ İzin verilmemiş — "İzin Ver" butonuna bas</span>';
+  }
+};
+
 window.loadPushSubscribers=async function(){
   const el=document.getElementById('pn-subscribers-list');
   if(!el)return;
@@ -4702,6 +4747,7 @@ window.loadPushSubscribers=async function(){
         <span style="font-size:10px;background:var(--or);color:#fff;padding:2px 8px;border-radius:10px">Aktif</span>
       </div>`).join('');
   }catch(e){if(el)el.innerHTML='<p style="color:var(--muted)">Hata: '+e.message+'</p>';}
+  setTimeout(()=>window.updatePushStatus&&window.updatePushStatus(),100);
 };
 
 window.testPushSelf=async function(){
@@ -5303,6 +5349,17 @@ function renderAdminSection(sec){
   if(sec==='ticker')setTimeout(()=>loadTickerAdmin(),100);
   if(sec==='pushnotif'){
     main.innerHTML=`<h2 style="margin-bottom:18px">🔔 Push Bildirim Gönder</h2>
+      <div class="card" style="padding:16px;margin-bottom:14px;background:var(--bg2);border:1.5px solid var(--or);border-radius:10px">
+        <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
+          <span style="font-size:22px">🔔</span>
+          <div style="flex:1">
+            <div style="font-size:13px;font-weight:700">Kendi cihazında bildirimleri aktifleştir</div>
+            <div style="font-size:12px;color:var(--muted)" id="pn-own-status">Durum kontrol ediliyor...</div>
+          </div>
+          <button class="btn btn-or btn-sm" onclick="activateMyPush()">🔔 İzin Ver / Aktifleştir</button>
+          <button class="btn btn-ghost btn-sm" onclick="resetPushDismiss()">Sıfırla</button>
+        </div>
+      </div>
       <div class="card" style="padding:20px;margin-bottom:18px;border-left:4px solid var(--or)">
         <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kayıtlı kullanıcılara anlık push bildirimi gönder. Tüm kullanıcılara veya belirli bir kullanıcıya gönderebilirsin.</p>
         <div class="form-grp"><label>Bildirim Başlığı</label><input id="pn-title" placeholder="örn: Yeni Yarış Eklendi 🏆"/></div>

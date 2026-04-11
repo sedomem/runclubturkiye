@@ -2738,6 +2738,10 @@ window.joinClub=async(clubId)=>{
     await setDoc(doc(db,'users',CU.uid),{clubCount:increment(1)},{merge:true});
     CU.clubCount=(CU.clubCount||0)+1;
     localStorage.setItem(memKey,'1');
+    // CU'ya clubId ve clubName ekle - raceResults ve diğer özellikler için
+    if(window.CU){ window.CU.clubId=clubId; window.CU.clubName=club.name||''; }
+    // users dokümanına clubId yaz
+    try{ await setDoc(doc(db,'users',CU.uid),{clubId,clubName:club.name||'',clubCount:increment(1)},{merge:true}); }catch(e){}
     toast(`${club.name||'Kulüp'} kulübüne katıldın! 🤝`,'ok');
     // Katıl butonunu güncelle
     document.querySelectorAll(`[onclick="joinClub('${clubId}')"]`).forEach(btn=>{
@@ -5342,15 +5346,17 @@ window.saveRaceResult = async function() {
     const certFile = document.getElementById('rr-cert-file')?.files?.[0];
 
     // Kulüp bilgisi
-    let clubId = ''; let clubName = '';
-    try {
-      const memSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',cu.uid)));
-      if (!memSnap.empty) {
-        // status filtresi JS'de yap - compound index gerektirmez
-        const activeMem = memSnap.docs.find(d=>d.data().status==='active'||!d.data().status);
-        if(activeMem){ const mem=activeMem.data(); clubId=mem.clubId||''; clubName=mem.clubName||''; }
-      }
-    } catch(e) {}
+        let clubId = (window.CU&&window.CU.clubId)||'';
+    let clubName = (window.CU&&window.CU.clubName)||'';
+    if(!clubId){
+      try {
+        const memSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',cu.uid)));
+        if (!memSnap.empty) {
+          const activeMem = memSnap.docs.find(d=>d.data().status==='active'||!d.data().status);
+          if(activeMem){ const mem=activeMem.data(); clubId=mem.clubId||''; clubName=mem.clubName||''; }
+        }
+      } catch(e) {}
+    }
 
     // Sertifika yükleme
     let certUrl = certUrl_input;
@@ -5525,43 +5531,7 @@ window.switchKmTab=function(tab){
 
 
 // ── Kulübe Katıl ─────────────────────────────────────────────
-window.joinClub=async function(clubId){
-  const cu=window.CU;
-  if(!cu){openAuth('login');return;}
-  const fb=window._fb;
-  try{
-    // Zaten üye mi?
-    const existing=await fb.getDocs(fb.query(
-      fb.collection(fb.db,'memberships'),
-      fb.where('uid','==',cu.uid)
-    ));
-    const alreadyMember=!existing.empty&&existing.docs.some(d=>d.data().clubId===clubId);
-    if(alreadyMember){toast&&toast('Zaten bu kulübe üyesiniz.','err');return;}
-
-    const club=window.CLUBS&&window.CLUBS.find(c=>c.id===clubId);
-    const clubName=club?club.name:'';
-
-    const memData={
-      uid:cu.uid,
-      userName:cu.name||cu.email||'',
-      userEmail:cu.email||'',
-      clubId,
-      clubName,
-      status:'active',
-      role:'member',
-      joinedAt:fb.serverTimestamp()
-    };
-    const {id:_,...memNoId}=memData;
-    await fb.addDoc(fb.collection(fb.db,'memberships'),memNoId);
-    toast&&toast('Kulübe katıldınız! 🎉','ok');
-    // Kulüp sayfasını yenile
-    if(typeof renderClubsPage==='function')renderClubsPage();
-    if(typeof loadMyClubs==='function')loadMyClubs();
-  }catch(e){
-    console.error('[joinClub] tam hata:',e.code, e.message, e);
-    toast&&toast('Bildirim hatası: '+e.message,'err');
-  }
-};
+// joinClub: module script'te tanımlı (window.joinClub)
 
 
 // ── Grup Admin Panel Navigation ─────────────────────────
@@ -6710,67 +6680,67 @@ window.gOpenAddEvent=function(){
   if(form)form.style.display=form.style.display==='none'||!form.style.display?'block':'none';
 };
 
-gSaveEvent=async()=>{
-  const title=document.getElementById('ge-title')?.value?.trim();
-  if(!title){toast('Etkinlik adı gerekli','err');return;}
-  const pace=[];
-  document.querySelectorAll('#g-add-event-form .pace-opt.on').forEach(b=>pace.push(b.textContent.trim()));
-  const fb=window._fb;
+// gSaveEvent: window.gSaveEvent olarak tanımlı (aşağıda)
 
-  // Görsel upload
-  let imgUrl=document.getElementById('ge-img-url')?.value?.trim()||'';
-  const imgFile=document.getElementById('ge-img-file')?.files[0];
-  if(!imgUrl&&imgFile){
-    try{
-      const r=fb.ref(fb.storage,`events/${Date.now()}_${imgFile.name}`);
-      await fb.uploadBytes(r,imgFile);
-      imgUrl=await fb.getDownloadURL(r);
-    }catch(e){toast('Görsel yüklenemedi: '+e.message,'err');}
-  }
 
-  const distancesRaw=document.getElementById('ge-distances')?.value||'';
-  const distances=distancesRaw.split(',').map(d=>d.trim()).filter(Boolean);
-  const data={
-    title,
-    cat:document.getElementById('ge-cat')?.value||'Genel',
-    date:document.getElementById('ge-date')?.value||'',
-    city:document.getElementById('ge-city')?.value||CU.city||'',
-    dist:document.getElementById('ge-dist')?.value||'',
-    cap:parseInt(document.getElementById('ge-cap')?.value)||100,
-    fee:document.getElementById('ge-fee')?.value||'',
-    deadline:document.getElementById('ge-deadline')?.value||'',
-    desc:document.getElementById('ge-desc')?.value||'',
-    imgUrl,pace,distances,emoji:'🏃',status:'pending',
-    groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',
-    reg:0,createdAt:fb.serverTimestamp(),
-    slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
-  };
-  try{
-    // DÜZENLEME MODU: Mevcut etkinliği güncelle
-    if(window._gEditingEventId){
-      const editId=window._gEditingEventId;
-      const {reg,createdAt,slug,...updateData}=data;
-      updateData.slug=data.slug;
-      updateData.updatedAt=fb.serverTimestamp();
-      await fb.setDoc(fb.doc(fb.db,'events',editId),updateData,{merge:true});
-      toast('Etkinlik güncellendi ✓','ok');
-      window._gEditingEventId=null;
-      // Buton metnini eski haline getir
-      const submitBtn=document.querySelector('#g-add-event-form button[onclick="gSaveEvent()"]');
-      if(submitBtn)submitBtn.textContent='Onaya Gönder';
-    } else {
-      // YENİ ETKİNLİK: Yeni kayıt oluştur
-      const {id:_geid,...dataNoId2}=data;await fb.addDoc(fb.collection(fb.db,'events'),dataNoId2);
-      toast('Etkinlik onaya gönderildi ✓','ok');
-    }
-    document.getElementById('g-add-event-form').style.display='none';
-    ['ge-title','ge-dist','ge-fee','ge-desc','ge-img-url','ge-distances'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    const prev=document.getElementById('ge-img-preview');if(prev){prev.src='';prev.style.display='none';}
-    const ph=document.getElementById('ge-img-placeholder');if(ph)ph.style.display='block';
-    document.querySelectorAll('#g-add-event-form .pace-opt').forEach(b=>b.classList.remove('on'));
-    gLoadEvents();
-  }catch(e){toast('Hata: '+e.message,'err');}
-};
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 window.gSaveSettings=async()=>{
   const g=id=>document.getElementById(id)?.value?.trim()||'';

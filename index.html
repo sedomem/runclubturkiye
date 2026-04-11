@@ -1081,19 +1081,28 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
     <!-- Kullanıcı menüsü (giriş yapılmışsa) -->
     <div id="mdr-user-nav" style="display:none">
-      <div style="padding:8px 12px 4px">
-        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 4px;margin-bottom:4px">Hesabım</div>
+      <!-- Hesabım başlığı -->
+      <div style="padding:10px 16px 4px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Hesabım</div>
       </div>
-      <button class="mdr-btn" onclick="nav('dashboard');closeMasterDrawer()"><span class="mdr-ico">📊</span><span>Dashboard</span></button>
-      <button class="mdr-btn" onclick="nav('profile');closeMasterDrawer()"><span class="mdr-ico">⚙️</span><span>Profil Ayarları</span></button>
-      <button class="mdr-btn" id="mdr-badges-btn" onclick="nav('dashboard');setTimeout(()=>showDash('badges'),100);closeMasterDrawer()"><span class="mdr-ico">🏅</span><span>Madalyalarım</span></button>
+      <button class="mdr-btn" onclick="mdrDash('overview')"><span class="mdr-ico">🏠</span><span>Genel Bakış</span></button>
+      <button class="mdr-btn" onclick="mdrDash('notifications')"><span class="mdr-ico">🔔</span><span>Bildirimler</span></button>
+      <button class="mdr-btn" onclick="mdrDash('my-events')"><span class="mdr-ico">📅</span><span>Etkinliklerim</span></button>
+      <button class="mdr-btn" onclick="mdrDash('my-clubs')"><span class="mdr-ico">🤝</span><span>Kulüplerim</span></button>
+      <button class="mdr-btn" onclick="mdrDash('my-km')"><span class="mdr-ico">🏃</span><span>KM Takibi</span></button>
+      <button class="mdr-btn" onclick="mdrDash('badges')"><span class="mdr-ico">🏅</span><span>Rozetler</span></button>
+      <button class="mdr-btn" onclick="mdrDash('profile-tab')"><span class="mdr-ico">⚙️</span><span>Profil Ayarları</span></button>
+
+      <!-- Admin bölümü -->
       <div id="mdr-admin-section" style="display:none">
         <div style="height:1px;background:var(--border);margin:8px 16px"></div>
-        <div style="padding:8px 12px 4px">
-          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 4px;margin-bottom:4px">Yönetim</div>
+        <div style="padding:10px 16px 4px">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Yönetim</div>
         </div>
-        <button class="mdr-btn mdr-admin" id="mdr-panel-btn" onclick="goPanel();closeMasterDrawer()"><span class="mdr-ico">⭐</span><span id="mdr-panel-label">Admin Paneli</span></button>
+        <button class="mdr-btn mdr-admin" onclick="goPanel();closeMasterDrawer()"><span class="mdr-ico">⭐</span><span id="mdr-panel-label">Admin Paneli</span></button>
+        <button class="mdr-btn mdr-admin" id="mdr-community-admin-btn" style="display:none" onclick="aNav&&aNav('community');goPanel();closeMasterDrawer()"><span class="mdr-ico">🏃</span><span>Topluluk Yönetimi</span></button>
       </div>
+
       <div style="height:1px;background:var(--border);margin:8px 16px"></div>
     </div>
 
@@ -5022,6 +5031,20 @@ window.buildDashNav=function(navItems, activeId){
 };
 
 
+
+// Master Drawer → Dashboard panel açıcı
+window.mdrDash=function(panelId){
+  closeMasterDrawer();
+  nav('dashboard');
+  setTimeout(function(){
+    if(typeof window.showDash==='function'){
+      // Sidebar butonunu bul
+      const btn=document.getElementById('dash-btn-'+panelId);
+      window.showDash(panelId, btn);
+    }
+  }, 150);
+};
+
 // ══ MASTER DRAWER ═════════════════════════════════════════
 window.openMasterDrawer=function(){
   const drawer=document.getElementById('master-drawer');
@@ -5079,6 +5102,8 @@ window.syncMasterDrawer=function(){
     if(adminSec)adminSec.style.display=isAdmin?'block':'none';
     const panelLabel=document.getElementById('mdr-panel-label');
     if(panelLabel)panelLabel.textContent=cu.role==='superadmin'?'Süper Admin Paneli':'Grup Admin Paneli';
+    const commAdminBtn=document.getElementById('mdr-community-admin-btn');
+    if(commAdminBtn)commAdminBtn.style.display=cu.role==='superadmin'?'block':'none';
   }else{
     if(guestH)guestH.style.display='block';
     if(userH)userH.style.display='none';

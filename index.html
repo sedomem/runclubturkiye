@@ -4803,25 +4803,31 @@ window.sendPushToAll=async function(){
 // Kullanıcı giriş yaptıktan sonra push izni sor (ilk kez)
 window.checkAndRequestPush=async function(){
   if(!window.requestPushPermission)return;
-  if(Notification.permission==='default'&&!localStorage.getItem('rct_push_dismissed')){
-    setTimeout(()=>{
-      const banner=document.createElement('div');
-      banner.id='push-banner';
-      banner.innerHTML=`<div style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--card);border:1.5px solid var(--or);border-radius:14px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,.18);display:flex;align-items:center;gap:12px;max-width:340px;width:90%">
-        <span style="font-size:28px">🔔</span>
-        <div style="flex:1">
-          <div style="font-size:13px;font-weight:700;margin-bottom:2px">Bildirimleri aç!</div>
-          <div style="font-size:11px;color:var(--muted)">Yeni yarışlar ve etkinliklerden anında haberdar ol.</div>
-        </div>
-        <div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">
-          <button onclick="window.requestPushPermission();document.getElementById('push-banner').remove()" style="background:var(--or);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Aç</button>
-          <button onclick="localStorage.setItem('rct_push_dismissed','1');document.getElementById('push-banner').remove()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer">Hayır</button>
-        </div>
-      </div>`;
-      document.body.appendChild(banner);
-      setTimeout(()=>banner.remove(),15000);
-    },3000);
-  }
+  if(localStorage.getItem('rct_fcm_token'))return;
+  const perm=Notification.permission;
+  if(perm==='granted'){window.requestPushPermission().catch(()=>{});return;}
+  const dismissed=parseInt(localStorage.getItem('rct_push_dismissed')||'0');
+  if(dismissed&&(Date.now()-dismissed)<86400000)return;
+  setTimeout(function(){
+    if(document.getElementById('push-banner'))return;
+    const isDenied=perm==='denied';
+    const b=document.createElement('div');
+    b.id='push-banner';
+    const openBtn=isDenied
+      ? '<button onclick="document.getElementById(\'push-banner\').remove()" style="background:var(--or);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Tamam</button>'
+      : '<button onclick="window.requestPushPermission();document.getElementById(\'push-banner\').remove()" style="background:var(--or);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;font-weight:700;cursor:pointer">Aç</button>';
+    const desc=isDenied?'Tarayıcı ayarlarından bildirime izin ver.':'Yeni yarışlar ve etkinliklerden haberdar ol.';
+    b.innerHTML='<div style="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);z-index:9999;background:var(--card);border:1.5px solid var(--or);border-radius:14px;padding:14px 18px;box-shadow:0 8px 32px rgba(0,0,0,.18);display:flex;align-items:center;gap:12px;max-width:360px;width:92%">'
+      +'<span style="font-size:28px">🔔</span>'
+      +'<div style="flex:1"><div style="font-size:13px;font-weight:700;margin-bottom:2px">Bildirimleri aç!</div>'
+      +'<div style="font-size:11px;color:var(--muted)">'+desc+'</div></div>'
+      +'<div style="display:flex;flex-direction:column;gap:6px;flex-shrink:0">'
+      +openBtn
+      +'<button onclick="localStorage.setItem(\'rct_push_dismissed\',String(Date.now()));document.getElementById(\'push-banner\').remove()" style="background:none;border:none;font-size:11px;color:var(--muted);cursor:pointer">Kapat</button>'
+      +'</div></div>';
+    document.body.appendChild(b);
+    setTimeout(function(){var el=document.getElementById('push-banner');if(el)el.remove();},20000);
+  },3000);
 };
 
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)

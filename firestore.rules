@@ -2,24 +2,11 @@ rules_version = '2';
 service cloud.firestore {
   match /databases/{database}/documents {
 
-    function isAuth() {
-      return request.auth != null;
-    }
-    function uid() {
-      return request.auth.uid;
-    }
-    function userDoc() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
-    }
-    function isSuperAdmin() {
-      return isAuth() && request.auth.token.email == 'sedomem@gmail.com';
-    }
-    function isGroupAdmin() {
-      return isAuth() && userDoc().role == 'groupadmin';
-    }
-    function isSuperOrGroup() {
-      return isSuperAdmin() || isGroupAdmin();
-    }
+    function isAuth() { return request.auth != null; }
+    function uid() { return request.auth.uid; }
+    function isSuperAdmin() { return isAuth() && request.auth.token.email == 'sedomem@gmail.com'; }
+    function isGroupAdmin() { return isAuth() && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'groupadmin'; }
+    function isSuperOrGroup() { return isSuperAdmin() || isGroupAdmin(); }
 
     match /users/{userId} {
       allow read: if true;
@@ -27,152 +14,106 @@ service cloud.firestore {
       allow update: if (isAuth() && uid() == userId) || isSuperAdmin();
       allow delete: if isSuperAdmin();
     }
-
     match /clubs/{id} {
       allow read: if true;
       allow create: if isSuperAdmin();
       allow update: if isSuperAdmin() || (isGroupAdmin() && resource.data.adminUid == uid());
       allow delete: if isSuperAdmin();
     }
-
     match /events/{id} {
       allow read: if true;
       allow create: if isSuperOrGroup();
       allow update: if isSuperAdmin() || (isGroupAdmin() && resource.data.adminUid == uid());
       allow delete: if isSuperAdmin();
     }
-
-    match /groups/{groupId}/{document=**} {
-      allow read: if isAuth();
-      allow write: if isSuperOrGroup();
-    }
-
     match /races/{id} {
       allow read: if true;
       allow write: if isSuperAdmin();
     }
-
     match /blog/{id} {
       allow read: if true;
       allow write: if isSuperAdmin();
     }
-
     match /blog_comments/{id} {
       allow read: if true;
       allow create: if isAuth();
       allow update: if isAuth() && uid() == resource.data.userUid;
       allow delete: if isSuperAdmin() || (isAuth() && uid() == resource.data.userUid);
     }
-
-    match /popup/{id} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-    }
-
-    match /banners/{id} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-    }
-
-    match /sponsors/{id} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-    }
-
-    match /firsatlar/{id} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-    }
-
-    match /ticker/{id} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-    }
-
+    match /popup/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    match /banners/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    match /sponsors/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    match /firsatlar/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    match /ticker/{id} { allow read: if true; allow write: if isSuperAdmin(); }
     match /rsvps/{id} {
       allow read: if true;
       allow create: if isAuth();
       allow update, delete: if isAuth() && uid() == resource.data.uid;
     }
-
     match /memberships/{id} {
       allow read: if isAuth();
-      allow create: if isAuth();
+      // Herhangi bir giriş yapmış kullanıcı üyelik oluşturabilir (joinClub)
+      allow create: if isAuth() && request.resource.data.uid == uid();
       allow update: if isSuperOrGroup() || (isAuth() && uid() == resource.data.uid);
       allow delete: if isSuperOrGroup() || (isAuth() && uid() == resource.data.uid);
     }
-
     match /contactMessages/{id} {
       allow read: if isSuperAdmin();
       allow create: if true;
-      allow update: if isSuperAdmin();
-      allow delete: if isSuperAdmin();
+      allow update, delete: if isSuperAdmin();
     }
-
     match /applications/{id} {
       allow read: if isSuperOrGroup();
       allow create: if true;
       allow update, delete: if isSuperAdmin();
     }
-
     match /chats/{room}/{document=**} {
       allow read: if isAuth();
       allow create: if isAuth();
       allow update, delete: if isSuperAdmin();
     }
-
     match /newsletter/{id} {
       allow read: if isSuperAdmin();
       allow create: if true;
       allow delete: if isSuperAdmin();
     }
-
     match /announcements/{id} {
       allow read: if isAuth();
       allow write: if isSuperOrGroup();
     }
-
     match /posts/{id} {
       allow read: if true;
       allow create: if isAuth();
       allow update: if isAuth() && uid() == resource.data.userUid;
       allow delete: if isSuperAdmin() || (isAuth() && uid() == resource.data.userUid);
     }
-
     match /comments/{id} {
       allow read: if true;
       allow create: if isAuth();
       allow update: if isAuth() && uid() == resource.data.userUid;
       allow delete: if isSuperAdmin() || (isAuth() && uid() == resource.data.userUid);
     }
-
     match /userStats/{userId} {
       allow read: if true;
       allow create, update: if isAuth() && uid() == userId;
       allow delete: if isSuperAdmin();
     }
-
-    // ── PUSH BİLDİRİMLER ──────────────────────────────────────
-    // Sadece süper admin oluşturabilir/okuyabilir
-    // Cloud Function bu koleksiyonu izler ve FCM gönderir
     match /pushNotifications/{id} {
-      allow read:   if isSuperAdmin();
+      allow read: if isSuperAdmin();
       allow create: if isSuperAdmin();
-      allow update: if false; // Sadece Cloud Function güncelleyebilir
+      allow update: if false;
       allow delete: if isSuperAdmin();
     }
-
-  }
-}
-
     // ── YARIŞI PERFORMANS VERİLERİ ──────────────────────────────
     match /raceResults/{id} {
-      // Herkes okuyabilir (kulüp admini için) — ama sadece kendi veya süper admin silebilir
+      // Giriş yapmış herkes okuyabilir (kulüp admin filtresi için)
       allow read: if isAuth();
-      // Oluşturma: giriş yapmış kullanıcı, kendi userId'siyle
+      // Sadece kendi userId'siyle kayıt oluşturabilir
       allow create: if isAuth() && request.resource.data.userId == uid();
-      // Güncelleme: sadece kendi kaydı (örn. clubId temizleme)
+      // Sadece kendi kaydını güncelleyebilir (clubId temizleme vb.)
       allow update: if isAuth() && resource.data.userId == uid();
-      // Silme: kendi kaydı veya süper admin
+      // Kendi kaydı veya süper admin silebilir
       allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == uid());
     }
+  }
+}

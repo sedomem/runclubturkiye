@@ -2116,6 +2116,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="gNav('announcements',this)">📢 Duyurular</button>
     <button onclick="gNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
+    <button onclick="gNav('performances',this)">🏅 Performanslar</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
   </div>
@@ -5389,10 +5390,11 @@ window.loadRaceResults = async function() {
   el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
   try {
     const fb = window._fb;
-    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'raceResults'),fb.where('userId','==',cu.uid),fb.orderBy('createdAt','desc')));
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'raceResults'),fb.where('userId','==',cu.uid)));
     if (snap.empty) { el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Henüz yarış sonucu eklenmemiş.</p>'; return; }
     const results = [];
     snap.forEach(d => { const {id:_,...rest}=d.data(); results.push({id:d.id,...rest}); });
+    results.sort((a,b)=>{ const ta=a.createdAt?.seconds||0; const tb=b.createdAt?.seconds||0; return tb-ta; });
     el.innerHTML = results.map(r => window.raceResultCard(r, true)).join('');
   } catch(e) { el.innerHTML='<p style="color:var(--muted)">Yüklenemedi: '+e.message+'</p>'; }
 };
@@ -5450,12 +5452,13 @@ window.loadAllRaceResults = async function(filterUid) {
   el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
   try {
     const fb = window._fb;
-    let q = fb.query(fb.collection(fb.db,'raceResults'), fb.orderBy('createdAt','desc'));
-    if (filterUid) q = fb.query(fb.collection(fb.db,'raceResults'), fb.where('userId','==',filterUid), fb.orderBy('createdAt','desc'));
+    let q = fb.query(fb.collection(fb.db,'raceResults'));
+    if (filterUid) q = fb.query(fb.collection(fb.db,'raceResults'), fb.where('userId','==',filterUid));
     const snap = await fb.getDocs(q);
     if (snap.empty) { el.innerHTML='<p style="color:var(--muted);padding:20px">Kayıt bulunamadı.</p>'; return; }
     const results = [];
     snap.forEach(d=>{ const {id:_,...rest}=d.data(); results.push({id:d.id,...rest}); });
+    results.sort((a,b)=>{ const ta=a.createdAt?.seconds||0; const tb=b.createdAt?.seconds||0; return tb-ta; });
     el.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:12px">${results.length} sonuç listeleniyor</p>`
       + results.map(r=>`<div style="background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px">
         <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
@@ -5481,7 +5484,7 @@ window.loadClubRaceResults = async function(clubId) {
   el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
   try {
     const fb = window._fb;
-    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'raceResults'),fb.where('clubId','==',clubId),fb.orderBy('createdAt','desc')));
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'raceResults'),fb.where('clubId','==',clubId)));
     if (snap.empty) { el.innerHTML='<p style="color:var(--muted);padding:20px">Bu kulüpten henüz performans verisi yok.</p>'; return; }
     const results = [];
     snap.forEach(d=>{ const {id:_,...rest}=d.data(); results.push({id:d.id,...rest}); });
@@ -5516,6 +5519,46 @@ window.switchKmTab=function(tab){
     if(rrBtn){rrBtn.style.color='var(--or)';rrBtn.style.borderBottomColor='var(--or)';}
     if(kmBtn){kmBtn.style.color='var(--muted)';kmBtn.style.borderBottomColor='transparent';}
     if(typeof window.loadRaceResults==='function')window.loadRaceResults();
+  }
+};
+
+
+// ── Kulübe Katıl ─────────────────────────────────────────────
+window.joinClub=async function(clubId){
+  const cu=window.CU;
+  if(!cu){openAuth('login');return;}
+  const fb=window._fb;
+  try{
+    // Zaten üye mi?
+    const existing=await fb.getDocs(fb.query(
+      fb.collection(fb.db,'memberships'),
+      fb.where('uid','==',cu.uid),
+      fb.where('clubId','==',clubId)
+    ));
+    if(!existing.empty){toast&&toast('Zaten bu kulübe üyesiniz.','err');return;}
+
+    const club=window.CLUBS&&window.CLUBS.find(c=>c.id===clubId);
+    const clubName=club?club.name:'';
+
+    const memData={
+      uid:cu.uid,
+      userName:cu.name||cu.email||'',
+      userEmail:cu.email||'',
+      clubId,
+      clubName,
+      status:'active',
+      role:'member',
+      joinedAt:fb.serverTimestamp()
+    };
+    const {id:_,...memNoId}=memData;
+    await fb.addDoc(fb.collection(fb.db,'memberships'),memNoId);
+    toast&&toast('Kulübe katıldınız! 🎉','ok');
+    // Kulüp sayfasını yenile
+    if(typeof renderClubsPage==='function')renderClubsPage();
+    if(typeof loadMyClubs==='function')loadMyClubs();
+  }catch(e){
+    toast&&toast('Hata: '+e.message,'err');
+    console.error('[joinClub]',e);
   }
 };
 
@@ -6573,6 +6616,14 @@ function renderGroupSection(sec){
   if(sec==='announcements')setTimeout(gLoadAnnouncements,100);
   if(sec==='chat')setTimeout(gLoadChat,200);
   if(sec==='applications')setTimeout(gLoadApplications,100);
+  if(sec==='performances'){
+    const clubId=CU.clubId||CU.uid;
+    main.innerHTML=`<h2 style="margin-bottom:18px">🏅 Kulüp Performansları</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kulüp üyelerinizin kaydettiği yarış sonuçları</p>
+      <div id="club-race-results-list"><div class="spinner" style="margin:20px auto"></div></div>`;
+    setTimeout(()=>window.loadClubRaceResults&&window.loadClubRaceResults(clubId),100);
+    return;
+  }
   if(sec==='settings'){
     // Ayarlar formunu doldur
     const s=id=>document.getElementById(id);
@@ -6587,21 +6638,8 @@ function renderGroupSection(sec){
     if(info)info.innerHTML=`<div>👤 <b>${CU.name||'—'}</b></div><div>📧 ${CU.email||'—'}</div><div>📞 ${CU.phone||'—'}</div>`;
   }
 }
-
-window.gNav=(sec,btn)=>{
-  document.querySelectorAll('#pg-panel .admin-sb button').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  renderGroupSection(sec);
-};
-
-window.gOpenAddEvent=()=>{
-  const f=document.getElementById('g-add-event-form');
-  if(f)f.style.display=f.style.display==='none'||f.style.display===''?'block':'none';
-};
-
-// ── GROUP PANEL GÖRSEL YARDIMCILARI ──
-window.gPreviewEventImg=function(input){
-  const file=input.files[0];if(!file)return;
+window.gPreviewEventImg=function(file){
+  if(!file)return;
   const prev=document.getElementById('ge-img-preview');
   const ph=document.getElementById('ge-img-placeholder');
   const reader=new FileReader();

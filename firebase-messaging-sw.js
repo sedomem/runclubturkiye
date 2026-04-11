@@ -1,7 +1,3 @@
-// firebase-messaging-sw.js
-// Bu dosya domain root'una (/firebase-messaging-sw.js) yüklenmelidir.
-// Vercel'de: public/ klasörüne koy veya vercel.json ile serve et.
-
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
@@ -16,28 +12,36 @@ firebase.initializeApp({
 
 const messaging = firebase.messaging();
 
-// Arka planda gelen bildirimler (uygulama kapalıyken)
 messaging.onBackgroundMessage(payload => {
-  console.log('[SW] Arka plan bildirimi:', payload);
-  const { title, body, icon, image, click_action } = payload.notification || {};
-  const data = payload.data || {};
+  console.log('[SW] onBackgroundMessage:', JSON.stringify(payload));
 
-  self.registration.showNotification(title || 'RunClubTürkiye', {
-    body:  body  || 'Yeni bir bildirim var.',
-    icon:  icon  || '/icon-192.png',
+  // webpush.notification varsa onu kullan, yoksa data'dan al
+  const n = payload.notification || {};
+  const d = payload.data || {};
+
+  const title = n.title || d.title || 'RunClubTürkiye';
+  const body  = n.body  || d.body  || 'Yeni bir bildirim var.';
+  const icon  = n.icon  || d.icon  || '/icon-192.png';
+  const url   = n.click_action || d.url || 'https://www.runclubturkiye.com/';
+  const image = n.image || d.image || undefined;
+
+  return self.registration.showNotification(title, {
+    body,
+    icon,
     badge: '/icon-96.png',
-    image: image || undefined,
-    data:  { url: click_action || data.url || 'https://www.runclubturkiye.com/' },
+    image,
+    data: { url },
     actions: [
       { action: 'open',    title: 'Görüntüle' },
-      { action: 'dismiss', title: 'Kapat'     }
+      { action: 'dismiss', title: 'Kapat' }
     ],
     requireInteraction: false,
-    vibrate: [200, 100, 200]
+    vibrate: [200, 100, 200],
+    tag: 'rct-notification',
+    renotify: true,
   });
 });
 
-// Bildirimi tıklama — sayfayı aç
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   if (event.action === 'dismiss') return;

@@ -45,7 +45,6 @@ async function sendBatch(tokens,title,body,url,imageUrl){
   for(const chunk of chunks){
     const messages=chunk.map(({token})=>({
       token,
-      notification:{title,body},
       webpush:{
         notification:{
           title,

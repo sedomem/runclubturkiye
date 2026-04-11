@@ -46,15 +46,7 @@ async function sendBatch(tokens,title,body,url,imageUrl){
     const messages=chunk.map(({token})=>({
       token,
       webpush:{
-        notification:{
-          title,
-          body,
-          icon:DEFAULT_ICON,
-          badge:DEFAULT_BADGE,
-          image:imageUrl||undefined,
-          requireInteraction:false,
-          vibrate:[200,100,200],
-        },
+        headers:{'TTL':'86400'},
         fcmOptions:{link:url||DEFAULT_URL},
       },
       data:{

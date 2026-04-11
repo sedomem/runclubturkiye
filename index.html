@@ -100,7 +100,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .banner-bg-img{position:absolute;inset:0;background-size:cover;background-position:center}
 /* Banner görseli için aspect-ratio CLS koruması */
 .banner-bg-img img{width:100%;height:100%;object-fit:cover;aspect-ratio:16/9}
-.banner-overlay{position:absolute;inset:0;background:rgba(0,0,0,.55)}
+.banner-overlay{position:absolute;inset:0;background:rgba(0,0,0,.15)}
 .banner-content{position:relative;z-index:1;padding:0 60px;max-width:620px}
 .banner-badge{display:inline-flex;align-items:center;gap:6px;background:rgba(255,107,0,.2);border:1px solid rgba(255,107,0,.4);color:var(--or);padding:5px 14px;border-radius:20px;font-size:12px;margin-bottom:14px}
 .banner-content h1{font-size:clamp(24px,4vw,46px);font-weight:700;line-height:1.1;margin-bottom:10px;color:#fff}
@@ -446,14 +446,14 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 }
 
 /* ━━ PAGE BANNER ━━ */
-.page-banner{position:relative;overflow:hidden;height:320px;background:#1a0800}
+.page-banner{position:relative;overflow:hidden;height:320px;background:#f97316}
 .page-banner.pb-events{background:linear-gradient(135deg,#0d1b2a,#1a3a5c)}
 .page-banner.pb-clubs{background:linear-gradient(135deg,#1a0d00,#3d1f00)}
 .page-banner.pb-races{background:linear-gradient(135deg,#0d1a0d,#1a3d1a)}
 .page-banner.pb-blog{background:linear-gradient(135deg,#1a0d1a,#3d1a3d)}
-.page-banner .pb-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 8s ease}
+.page-banner .pb-bg{position:absolute;inset:0;background-size:cover;background-position:center;transition:transform 8s ease;filter:brightness(1.05) saturate(1.1)}
 .page-banner:hover .pb-bg{transform:scale(1.04)}
-.page-banner .pb-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.72) 0%,rgba(0,0,0,.35) 100%)}
+.page-banner .pb-overlay{position:absolute;inset:0;background:linear-gradient(135deg,rgba(0,0,0,.20) 0%,rgba(0,0,0,.05) 100%)}
 .page-banner .pb-content{position:relative;z-index:2;height:100%;display:flex;flex-direction:column;justify-content:center;padding:0 60px}
 .page-banner .pb-badge{display:inline-flex;align-items:center;gap:7px;background:rgba(232,98,42,.18);border:1px solid rgba(232,98,42,.4);color:#E8622A;padding:5px 14px;border-radius:20px;font-size:12px;font-family:'Raleway',sans-serif;font-weight:700;margin-bottom:16px;width:fit-content;letter-spacing:.3px}
 .page-banner h1{font-family:'Raleway',sans-serif;font-size:clamp(26px,4vw,50px);font-weight:800;line-height:1.1;color:#fff;margin-bottom:10px}
@@ -2369,8 +2369,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="club-cta-float" style="position:fixed;bottom:24px;left:24px;z-index:190;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 32px rgba(44,24,16,.18);border:1.5px solid #E0D8CC;display:flex;align-items:center;gap:14px;max-width:320px;animation:ctaSlideIn .5s cubic-bezier(.34,1.56,.64,1) .8s both;">
   <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#E8622A,#c94e1c);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#127939;</div>
   <div style="flex:1;min-width:0">
-    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Külübünüz Burada Yok Mu?</div>
-    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Kulübünüz hemen kaydedin</div>
+    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulubuunuuz Burada Yok mu?</div>
+    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Klubunuzu hemen kaydedin</div>
   </div>
   <button onclick="openAuth('groupadmin')" style="background:#E8622A;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">Basvur</button>
   <button onclick="document.getElementById('club-cta-float').style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#B09880;font-size:16px;cursor:pointer;line-height:1;padding:2px">x</button>
@@ -3616,7 +3616,7 @@ function renderBanners(banners){
   const cont=document.getElementById('banner-slides');const dots=document.getElementById('banner-dots');if(!cont)return;
   cont.innerHTML=banners.map((b,i)=>`
     <div class="banner-slide ${i===0?'on':''}">
-      ${b.imgUrl?`<img src="${b.imgUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0"/><div class="banner-overlay"></div>`:`<div style="position:absolute;inset:0;background:${b.bg||'linear-gradient(135deg,#0a0000,#1a0800)'}"></div>`}
+      ${b.imgUrl?`<img src="${b.imgUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(1.05) saturate(1.1)"/><div class="banner-overlay"></div>`:`<div style="position:absolute;inset:0;background:${b.bg||'linear-gradient(135deg,#0a0000,#1a0800)'}"></div>`}
       <div class="banner-content">
         ${b.badge?`<div class="banner-badge">${b.badge}</div>`:''}
         <h1>${b.title||''}</h1>

@@ -153,7 +153,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .firsat-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
 .firsat-badge{position:absolute;top:12px;left:12px;background:var(--or);color:#fff;padding:4px 12px;border-radius:20px;font-size:11px;font-weight:700;z-index:1;box-shadow:0 3px 8px rgba(232,98,42,.35);font-family:var(--font-head)}
 /* CLS FIX: asgari yükseklik rezervasyonu + aspect-ratio */
-.firsat-img{height:180px;aspect-ratio:16/8;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
+.firsat-img{height:210px;aspect-ratio:unset;width:100%;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;font-size:48px;position:relative;overflow:hidden}
 .firsat-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0}
 .firsat-body{padding:18px}
 .firsat-body h3{font-size:15px;font-weight:700;margin-bottom:6px;font-family:var(--font-head);color:var(--dark2)}
@@ -290,7 +290,7 @@ tr:hover td{background:var(--or-soft)}
 .race-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .race-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
 /* CLS FIX: aspect-ratio ile yükseklik rezervasyonu */
-.race-img{height:180px;aspect-ratio:16/8;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:48px}
+.race-img{height:210px;aspect-ratio:unset;width:100%;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:48px}
 .race-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s}
 .race-card:hover .race-img img{transform:scale(1.04)}
 .race-date-badge{position:absolute;top:10px;right:10px;background:var(--or);color:#fff;padding:4px 10px;border-radius:20px;font-size:10px;font-weight:700;font-family:var(--font-head);box-shadow:0 2px 8px rgba(232,98,42,.3)}
@@ -299,7 +299,7 @@ tr:hover td{background:var(--or-soft)}
 .blog-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .blog-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
 /* CLS FIX: aspect-ratio ile yükseklik rezervasyonu */
-.blog-img{height:180px;aspect-ratio:16/8;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
+.blog-img{height:210px;aspect-ratio:unset;width:100%;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
 .blog-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s}
 .blog-card:hover .blog-img img{transform:scale(1.04)}
 
@@ -869,6 +869,41 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .featured-race-card:hover{box-shadow:0 8px 32px rgba(245,158,11,.28)!important;transform:translateY(-3px)}
 .featured-blog-card{border:2px solid var(--or)!important}
 .featured-blog-card:hover{box-shadow:0 8px 24px rgba(232,98,42,.15)!important}
+
+/* Mobil - kart görselleri tam genişlik */
+@media(max-width:768px){
+  .evt-img,.club-img,.race-img,.blog-img,.firsat-img{
+    height:200px;
+    width:100%;
+    aspect-ratio:unset;
+  }
+  .evt-img img,.club-img img,.race-img img,.blog-img img,.firsat-img img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+    object-position:center;
+  }
+  .blog-card,.race-card,.club-card,.firsat-card{
+    overflow:hidden;
+  }
+}
+
+/* ── Mobil menü kullanıcı bölümü ── */
+#mob-user-btns{flex-direction:column;gap:2px}
+#mob-user-btns button{width:100%;text-align:left;padding:10px 12px;font-size:14px;background:none;border:none;cursor:pointer;border-radius:6px;color:var(--text)}
+#mob-user-btns button:hover{background:var(--bg2)}
+#mob-user-info{border-radius:8px}
+
+/* ── Kart görselleri tam genişlik ── */
+.card-img img,.race-img img,.blog-img img,.firsat-img img{
+  width:100%;height:100%;object-fit:cover;object-position:center;display:block;
+}
+@media(max-width:768px){
+  .card-img{height:200px!important;}
+  .race-img,.blog-img,.firsat-img{height:200px!important;}
+  .grid.g2,.grid.g3,.grid.g4{grid-template-columns:1fr}
+  .blog-card,.race-card,.club-card,.firsat-card{overflow:hidden}
+}
 </style>
 </head>
 <body>
@@ -937,8 +972,29 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <button onclick="nav('community');toggleMobileMenu()">🏃 Topluluk</button>
   <button onclick="nav('sss');toggleMobileMenu()">❓ SSS</button>
   <div style="height:1px;background:var(--border);margin:4px 0"></div>
-  <button onclick="openAuth('login');toggleMobileMenu()">Giriş Yap</button>
-  <button onclick="openAuth('register');toggleMobileMenu()" style="color:var(--or);font-weight:600">✨ Üye Ol</button>
+  <!-- Misafir -->
+  <div id="mob-guest-btns">
+    <button onclick="openAuth('login');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px">🔐 Giriş Yap</button>
+    <button onclick="openAuth('register');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px;color:var(--or);font-weight:600">✨ Üye Ol</button>
+  </div>
+  <!-- Giriş yapılmış -->
+  <div id="mob-user-btns" style="display:none;flex-direction:column;gap:2px">
+    <div id="mob-user-info" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:8px;margin-bottom:4px">
+      <div id="mob-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">U</div>
+      <div style="min-width:0">
+        <div id="mob-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Kullanıcı</div>
+        <div id="mob-role-label" style="font-size:11px;color:var(--muted)">Üye</div>
+      </div>
+    </div>
+    <button onclick="nav('dashboard');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px">👤 Dashboard</button>
+    <button onclick="nav('profile');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px">⚙️ Profil Ayarları</button>
+    <button onclick="nav('community');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px">🏃 Topluluk</button>
+    <div id="mob-admin-btn" style="display:none">
+      <button onclick="goPanel();toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px;color:var(--or);font-weight:600" id="mob-panel-btn">⭐ Yönetim Paneli</button>
+    </div>
+    <div style="height:1px;background:var(--border);margin:4px 0"></div>
+    <button onclick="signOutUser();toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px;color:#e55">🚪 Çıkış Yap</button>
+  </div>
 </div>
 
 <div id="bottom-nav">
@@ -2189,8 +2245,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="club-cta-float" style="position:fixed;bottom:24px;left:24px;z-index:190;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 32px rgba(44,24,16,.18);border:1.5px solid #E0D8CC;display:flex;align-items:center;gap:14px;max-width:320px;animation:ctaSlideIn .5s cubic-bezier(.34,1.56,.64,1) .8s both;">
   <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#E8622A,#c94e1c);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#127939;</div>
   <div style="flex:1;min-width:0">
-    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulübünüz Burada Yok Mu?</div>
-    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Kulübünüzü hemen kaydedin</div>
+    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulubuunuuz Burada Yok mu?</div>
+    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Klubunuzu hemen kaydedin</div>
   </div>
   <button onclick="openAuth('groupadmin')" style="background:#E8622A;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">Basvur</button>
   <button onclick="document.getElementById('club-cta-float').style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#B09880;font-size:16px;cursor:pointer;line-height:1;padding:2px">x</button>
@@ -2306,11 +2362,13 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('nav-guest').style.display='none';
     document.getElementById('nav-user').style.display='flex';
     setupRoleBtn();buildDashboard();syncProfileUI();
+    if(typeof window.syncMobileMenu==='function')window.syncMobileMenu();
     if(role==='superadmin')loadAdminBadges();
     // Push bildirim izni banner'ı göster
     setTimeout(()=>{if(typeof window.checkAndRequestPush==='function')window.checkAndRequestPush();},2000);
   }else{
     window.CU=null;
+    if(typeof window.syncMobileMenu==='function')window.syncMobileMenu();
     document.getElementById('nav-guest').style.display='flex';
     document.getElementById('nav-user').style.display='none';
   }
@@ -4212,7 +4270,7 @@ function clubCard(c){
     :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--or),var(--or2));font-size:40px">🏃</div>`;
   return`<div class="card" style="position:relative;cursor:pointer" onclick="openClub('${c.id}')">
     ${isJoined?`<div class="member-badge">✓ Üyesin</div>`:''}
-    <div class="card-img" style="height:150px;position:relative;overflow:hidden">${imgBg}</div>
+    <div class="card-img" style="height:220px;position:relative;overflow:hidden;border-radius:var(--r) var(--r) 0 0">${imgBg}</div>
     <div class="card-body">
       ${c.city?`<span class="tag tag-or">${c.city}</span>`:''}
       <h3 style="margin:5px 0 4px;font-size:15px">${c.name}</h3>
@@ -4828,6 +4886,36 @@ window.checkAndRequestPush=async function(){
     document.body.appendChild(b);
     setTimeout(function(){var el=document.getElementById('push-banner');if(el)el.remove();},20000);
   },3000);
+};
+
+
+// ── Mobil menü kullanıcı senkronizasyonu
+window.syncMobileMenu=function(){
+  const cu=window.CU;
+  const guestEl=document.getElementById('mob-guest-btns');
+  const userEl=document.getElementById('mob-user-btns');
+  const adminEl=document.getElementById('mob-admin-btn');
+  if(!guestEl||!userEl)return;
+  if(cu){
+    guestEl.style.display='none';
+    userEl.style.display='flex';
+    const mobName=document.getElementById('mob-name');
+    const mobAvatar=document.getElementById('mob-avatar');
+    const mobRole=document.getElementById('mob-role-label');
+    if(mobName)mobName.textContent=cu.name||cu.email||'Kullanıcı';
+    if(mobAvatar)mobAvatar.textContent=(cu.name||cu.email||'U')[0].toUpperCase();
+    const roleLabels={superadmin:'⭐ Süper Admin',groupadmin:'🤝 Grup Admin',member:'🏃 Üye'};
+    if(mobRole)mobRole.textContent=roleLabels[cu.role]||'Üye';
+    if(adminEl){
+      const isAdmin=cu.role==='superadmin'||cu.role==='groupadmin';
+      adminEl.style.display=isAdmin?'block':'none';
+      const panelBtn=document.getElementById('mob-panel-btn');
+      if(panelBtn)panelBtn.textContent=cu.role==='superadmin'?'⭐ Süper Admin Paneli':'🤝 Grup Admin Paneli';
+    }
+  }else{
+    guestEl.style.display='block';
+    userEl.style.display='none';
+  }
 };
 
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)

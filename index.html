@@ -5344,10 +5344,11 @@ window.saveRaceResult = async function() {
     // Kulüp bilgisi
     let clubId = ''; let clubName = '';
     try {
-      const memSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',cu.uid),fb.where('status','==','active')));
+      const memSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',cu.uid)));
       if (!memSnap.empty) {
-        const mem = memSnap.docs[0].data();
-        clubId = mem.clubId||''; clubName = mem.clubName||'';
+        // status filtresi JS'de yap - compound index gerektirmez
+        const activeMem = memSnap.docs.find(d=>d.data().status==='active'||!d.data().status);
+        if(activeMem){ const mem=activeMem.data(); clubId=mem.clubId||''; clubName=mem.clubName||''; }
       }
     } catch(e) {}
 
@@ -5557,8 +5558,8 @@ window.joinClub=async function(clubId){
     if(typeof renderClubsPage==='function')renderClubsPage();
     if(typeof loadMyClubs==='function')loadMyClubs();
   }catch(e){
-    toast&&toast('Hata: '+e.message,'err');
-    console.error('[joinClub]',e);
+    console.error('[joinClub] tam hata:',e.code, e.message, e);
+    toast&&toast('Bildirim hatası: '+e.message,'err');
   }
 };
 
@@ -6637,8 +6638,26 @@ function renderGroupSection(sec){
   if(sec==='chat')setTimeout(gLoadChat,200);
   if(sec==='applications')setTimeout(gLoadApplications,100);
   if(sec==='performances'){
-    const clubId=CU.clubId||CU.uid;
-    setTimeout(()=>window.loadClubRaceResults&&window.loadClubRaceResults(clubId),100);
+    // Grup admin'in clubId'sini memberships veya CU'dan al
+    const _getClubId=async()=>{
+      if(CU.clubId)return CU.clubId;
+      // memberships'ten bul
+      try{
+        const fb=window._fb;
+        const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',CU.uid)));
+        if(!snap.empty){
+          // groupadmin olarak bulabildiği kulüp
+          const adminMem=snap.docs.find(d=>d.data().role==='groupadmin'||d.data().role==='admin');
+          if(adminMem)return adminMem.data().clubId;
+          return snap.docs[0].data().clubId;
+        }
+        // clubs collection'dan kendi kulübünü bul
+        const csnap=await fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('adminUid','==',CU.uid)));
+        if(!csnap.empty)return csnap.docs[0].id;
+      }catch(e){console.warn('getClubId:',e.message);}
+      return CU.uid;
+    };
+    _getClubId().then(clubId=>window.loadClubRaceResults&&window.loadClubRaceResults(clubId));
     main.innerHTML=`<h2 style="margin-bottom:18px">🏅 Kulüp Performansları</h2>
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kulüp üyelerinizin kaydettiği yarış sonuçları</p>
       <div id="club-race-results-list"><div class="spinner" style="margin:20px auto"></div></div>`;
@@ -6685,7 +6704,13 @@ window.gPreviewLogoUrl=function(url){
   if(prev)prev.innerHTML=url?`<img src="${url}" style="width:100%;height:100%;object-fit:cover"/>`:'🏃';
 };
 
-window.gSaveEvent=async()=>{
+window.
+window.gOpenAddEvent=function(){
+  const form=document.getElementById('g-add-event-form');
+  if(form)form.style.display=form.style.display==='none'||!form.style.display?'block':'none';
+};
+
+gSaveEvent=async()=>{
   const title=document.getElementById('ge-title')?.value?.trim();
   if(!title){toast('Etkinlik adı gerekli','err');return;}
   const pace=[];

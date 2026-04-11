@@ -17,11 +17,10 @@ async function getAllFcmTokens(){
   const tokens=[];
   snap.forEach(doc=>{
     const d=doc.data();
-    if(d.fcmToken&&typeof d.fcmToken==='string'&&d.fcmToken.length>20){
+    if(d.fcmToken&&typeof d.fcmToken==='string'&&d.fcmToken.length>20)
       tokens.push({uid:doc.id,token:d.fcmToken});
-    }
   });
-  console.log(`[FCM] ${tokens.length} aktif token`);
+  console.log(`[FCM] ${tokens.length} token`);
   return tokens;
 }
 
@@ -29,13 +28,18 @@ async function cleanInvalidTokens(inv){
   if(!inv||!inv.length)return;
   const snap=await db.collection('users').where('pushEnabled','==',true).get();
   const batch=db.batch();
-  snap.forEach(doc=>{if(inv.includes(doc.data().fcmToken))batch.update(doc.ref,{fcmToken:FieldValue.delete(),pushEnabled:false});});
+  snap.forEach(doc=>{
+    if(inv.includes(doc.data().fcmToken))
+      batch.update(doc.ref,{fcmToken:FieldValue.delete(),pushEnabled:false});
+  });
   await batch.commit();
+  console.log(`[FCM] ${inv.length} geçersiz token temizlendi`);
 }
 
-// CRITICAL: notification alanı YOK — sadece webpush.notification var
-// Bu sayede SW her zaman onBackgroundMessage'ı tetikler
-async function sendBatch(tokens,title,body,url,imageUrl){
+// DATA-ONLY mimari: notification alanı YOK
+// Tüm içerik sadece data:{} içinde gidiyor
+// SW her zaman onBackgroundMessage'ı tetikler ve bildirimi kendisi gösterir
+async function sendBatch(tokens,title,body,url,icon,image){
   const results={success:0,failure:0,invalidTokens:[]};
   if(!tokens.length)return results;
   const chunks=[];
@@ -44,29 +48,41 @@ async function sendBatch(tokens,title,body,url,imageUrl){
   for(const chunk of chunks){
     const messages=chunk.map(({token})=>({
       token,
-      // notification alanı kasıtlı olarak YOK
-      // webpush.notification SW tarafından gösterilir
+      // notification: TAMAMEN KALDIRILDI
+      // webpush.notification: TAMAMEN KALDIRILDI
+      // Sadece data var — SW bu data'yı alıp showNotification çağırır
+      data:{
+        title:   title  ||'RunClubTürkiye',
+        body:    body   ||'',
+        icon:    icon   ||DEFAULT_ICON,
+        badge:   DEFAULT_BADGE,
+        url:     url    ||DEFAULT_URL,
+        image:   image  ||'',
+        timestamp: String(Date.now()),
+      },
       webpush:{
         headers:{'TTL':'86400'},
-        notification:{
-          title,
-          body,
-          icon:DEFAULT_ICON,
-          badge:DEFAULT_BADGE,
-          image:imageUrl||undefined,
-          requireInteraction:false,
-          vibrate:[200,100,200],
-          click_action:url||DEFAULT_URL,
-        },
-        fcmOptions:{link:url||DEFAULT_URL},
+        // fcmOptions.link SW'ye click_action olarak iletilir
+        fcmOptions:{link: url||DEFAULT_URL},
       },
-      // data: SW'nin URL'yi alabilmesi için
-      data:{
-        title,
-        body,
-        url:url||DEFAULT_URL,
-        icon:DEFAULT_ICON,
-        timestamp:String(Date.now()),
+      android:{
+        priority:'high',
+        data:{
+          title:  title ||'RunClubTürkiye',
+          body:   body  ||'',
+          icon:   icon  ||DEFAULT_ICON,
+          url:    url   ||DEFAULT_URL,
+          image:  image ||'',
+        },
+      },
+      apns:{
+        payload:{
+          aps:{
+            'content-available':1,
+            alert:{title: title||'RunClubTürkiye', body: body||''},
+            sound:'default',
+          },
+        },
       },
     }));
 
@@ -74,14 +90,15 @@ async function sendBatch(tokens,title,body,url,imageUrl){
       const response=await fcm.sendEach(messages);
       results.success+=response.successCount;
       results.failure+=response.failureCount;
-      console.log(`[FCM] ${response.successCount} başarı, ${response.failureCount} hata`);
+      console.log(`[FCM] Chunk: ${response.successCount} başarı, ${response.failureCount} hata`);
       response.responses.forEach((resp,idx)=>{
         if(!resp.success){
           const code=resp.error?.code||'';
-          console.warn(`[FCM] Hata uid:${chunk[idx].uid} code:${code}`);
-          if(code==='messaging/registration-token-not-registered'||code==='messaging/invalid-registration-token'){
-            results.invalidTokens.push(chunk[idx].token);
-          }
+          console.warn(`[FCM] Hata uid:${chunk[idx].uid} code:${code} msg:${resp.error?.message}`);
+          if(
+            code==='messaging/registration-token-not-registered'||
+            code==='messaging/invalid-registration-token'
+          ) results.invalidTokens.push(chunk[idx].token);
         }
       });
     }catch(e){
@@ -93,6 +110,7 @@ async function sendBatch(tokens,title,body,url,imageUrl){
   return results;
 }
 
+// ── Trigger: pushNotifications koleksiyonu
 exports.onPushNotificationCreated=onDocumentCreated(
   {document:'pushNotifications/{docId}',region:'europe-west1'},
   async(event)=>{
@@ -104,49 +122,51 @@ exports.onPushNotificationCreated=onDocumentCreated(
     await ref.update({status:'processing',processedAt:FieldValue.serverTimestamp()});
     try{
       const title=data.title||'RunClubTürkiye';
-      const body=data.body||'';
-      const url=data.url||DEFAULT_URL;
+      const body= data.body ||'';
+      const url=  data.url  ||DEFAULT_URL;
       const image=data.image||'';
-      console.log(`[FCM] Gönderilecek title="${title}" body="${body}"`);
+      console.log(`[FCM] Gönderiliyor: title="${title}" body="${body}"`);
       const tokens=await getAllFcmTokens();
       if(!tokens.length){
         await ref.update({status:'no_subscribers',completedAt:FieldValue.serverTimestamp()});
         return;
       }
-      const results=await sendBatch(tokens,title,body,url,image);
-      await ref.update({status:'sent',sentCount:results.success,failCount:results.failure,completedAt:FieldValue.serverTimestamp()});
+      const results=await sendBatch(tokens,title,body,url,DEFAULT_ICON,image);
+      console.log(`[FCM] Tamamlandı: ${results.success} başarı, ${results.failure} hata`);
+      await ref.update({
+        status:'sent',
+        sentCount:results.success,
+        failCount:results.failure,
+        completedAt:FieldValue.serverTimestamp(),
+      });
     }catch(e){
-      console.error('[FCM] Hata:',e.message);
+      console.error('[FCM] Hata:',e.message,e.stack);
       await ref.update({status:'error',error:e.message,errorAt:FieldValue.serverTimestamp()}).catch(()=>{});
     }
   }
 );
 
-exports.sendPushToUser=onCall({region:'europe-west1'},async(request)=>{
-  if(!request.auth||request.auth.token.email!==SUPER_EMAIL)throw new HttpsError('permission-denied','Sadece süper admin.');
-  const{targetUid,title,body,url,image}=request.data;
+exports.sendPushToUser=onCall({region:'europe-west1'},async(req)=>{
+  if(!req.auth||req.auth.token.email!==SUPER_EMAIL)throw new HttpsError('permission-denied','Sadece süper admin.');
+  const{targetUid,title,body,url,image}=req.data;
   if(!targetUid||!title||!body)throw new HttpsError('invalid-argument','Eksik parametre.');
   const userDoc=await db.collection('users').doc(targetUid).get();
   if(!userDoc.exists)throw new HttpsError('not-found','Kullanıcı bulunamadı.');
   const token=userDoc.data()?.fcmToken;
   if(!token)throw new HttpsError('not-found','FCM token yok.');
-  const results=await sendBatch([{uid:targetUid,token}],title,body,url||DEFAULT_URL,image||'');
-  return{success:results.success>0,...results};
+  const r=await sendBatch([{uid:targetUid,token}],title,body,url||DEFAULT_URL,DEFAULT_ICON,image||'');
+  return{success:r.success>0,...r};
 });
 
-exports.sendPushToTopic=onCall({region:'europe-west1'},async(request)=>{
-  if(!request.auth||request.auth.token.email!==SUPER_EMAIL)throw new HttpsError('permission-denied','Sadece süper admin.');
-  const{topic,title,body,url,image}=request.data;
+exports.sendPushToTopic=onCall({region:'europe-west1'},async(req)=>{
+  if(!req.auth||req.auth.token.email!==SUPER_EMAIL)throw new HttpsError('permission-denied','Sadece süper admin.');
+  const{topic,title,body,url,image}=req.data;
   if(!topic||!title||!body)throw new HttpsError('invalid-argument','Eksik parametre.');
-  const msg={
+  const msgId=await fcm.send({
     topic,
-    webpush:{
-      notification:{title,body,icon:DEFAULT_ICON,badge:DEFAULT_BADGE,image:image||undefined},
-      fcmOptions:{link:url||DEFAULT_URL},
-    },
-    data:{title,body,url:url||DEFAULT_URL,icon:DEFAULT_ICON,timestamp:String(Date.now())},
-  };
-  const msgId=await fcm.send(msg);
+    data:{title,body,icon:DEFAULT_ICON,badge:DEFAULT_BADGE,url:url||DEFAULT_URL,image:image||'',timestamp:String(Date.now())},
+    webpush:{headers:{'TTL':'86400'},fcmOptions:{link:url||DEFAULT_URL}},
+  });
   return{success:true,messageId:msgId};
 });
 
@@ -160,7 +180,8 @@ exports.onEventApproved=onDocumentCreated(
     const url=`${DEFAULT_URL}#events/${event.params.eventId}`;
     const tokens=await getAllFcmTokens();
     if(!tokens.length)return;
-    await sendBatch(tokens,title,body,url,'');
+    await sendBatch(tokens,title,body,url,DEFAULT_ICON,'');
+    console.log(`[FCM] Etkinlik bildirimi gönderildi`);
   }
 );
 
@@ -173,7 +194,8 @@ exports.onRaceCreated=onDocumentCreated(
     const url=`${DEFAULT_URL}#races/${event.params.raceId}`;
     const tokens=await getAllFcmTokens();
     if(!tokens.length)return;
-    await sendBatch(tokens,title,body,url,'');
+    await sendBatch(tokens,title,body,url,DEFAULT_ICON,'');
+    console.log(`[FCM] Yarış bildirimi gönderildi`);
   }
 );
 
@@ -183,7 +205,7 @@ exports.cleanOldNotifications=onSchedule(
     const cutoff=new Date();
     cutoff.setDate(cutoff.getDate()-30);
     const snap=await db.collection('pushNotifications').where('createdAt','<',cutoff).get();
-    if(snap.empty)return;
+    if(snap.empty){console.log('[Cleanup] Temizlenecek yok.');return;}
     const batch=db.batch();
     snap.forEach(doc=>batch.delete(doc.ref));
     await batch.commit();

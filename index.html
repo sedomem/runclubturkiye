@@ -2233,9 +2233,17 @@ window.requestPushPermission=async function(){
   try{
     const perm=await Notification.requestPermission();
     if(perm!=='granted'){toast('Bildirim izni verilmedi','err');return null;}
-    // SW kaydını bekle
-    const sw=await navigator.serviceWorker.ready;
-    const token=await getToken(_messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:sw});
+    // firebase-messaging-sw.js'i açıkça kaydet — FCM bu SW'yi kullanmalı
+    let swReg;
+    try{
+      swReg=await navigator.serviceWorker.register('/firebase-messaging-sw.js',{scope:'/'});
+      await swReg.update();
+      console.log('[FCM] messaging SW registered:', swReg.scope);
+    }catch(swErr){
+      console.warn('[FCM] messaging SW kayıt hatası, hazır SW kullanılıyor:', swErr.message);
+      swReg=await navigator.serviceWorker.ready;
+    }
+    const token=await getToken(_messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:swReg});
     if(!token){toast('Token alınamadı','err');return null;}
     // Token'ı Firestore'a kaydet
     if(window.CU){
@@ -2267,8 +2275,10 @@ window.addEventListener('load',async()=>{
   if(!_messaging)return;
   if(Notification.permission==='granted'){
     try{
-      const sw=await navigator.serviceWorker.ready;
-      const token=await getToken(_messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:sw});
+      let swReg2;
+      try{swReg2=await navigator.serviceWorker.register('/firebase-messaging-sw.js',{scope:'/'});}
+      catch(e){swReg2=await navigator.serviceWorker.ready;}
+      const token=await getToken(_messaging,{vapidKey:VAPID_KEY,serviceWorkerRegistration:swReg2});
       if(token){
         localStorage.setItem('rct_fcm_token',token);
         if(window.CU){

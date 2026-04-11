@@ -3568,6 +3568,7 @@ window.nav=id=>{
   const gf=document.getElementById('global-footer');
   if(gf)gf.style.display=['admin','panel','dashboard','profile'].includes(id)?'none':'block';
   if((id==='dashboard'||id==='admin'||id==='panel')&&!window.CU){openAuth('login');return;}
+  if(id==='dashboard'){if(typeof buildDashboard==='function')buildDashboard();}
   if(id==='map-view')setTimeout(initMap,100);
   if(id==='admin'&&CU?.role==='superadmin'){renderAdminSection('dashboard');loadAdminBadges&&loadAdminBadges();}
   if(id==='panel')loadGroupPanel();
@@ -5032,18 +5033,6 @@ window.buildDashNav=function(navItems, activeId){
 
 
 
-// Master Drawer → Dashboard panel açıcı
-window.mdrDash=function(panelId){
-  closeMasterDrawer();
-  nav('dashboard');
-  setTimeout(function(){
-    if(typeof window.showDash==='function'){
-      // Sidebar butonunu bul
-      const btn=document.getElementById('dash-btn-'+panelId);
-      window.showDash(panelId, btn);
-    }
-  }, 150);
-};
 
 // ══ MASTER DRAWER ═════════════════════════════════════════
 window.openMasterDrawer=function(){
@@ -5111,6 +5100,63 @@ window.syncMasterDrawer=function(){
     if(footer)footer.style.display='none';
     if(adminSec)adminSec.style.display='none';
   }
+};
+
+
+// ── showDash: Dashboard panel geçişi ─────────────────────
+window.showDash=function(panelId,btn){
+  // Tüm panelleri gizle
+  document.querySelectorAll('.dash-content').forEach(function(el){
+    el.classList.remove('on');
+  });
+  // Hedef paneli göster
+  var panel=document.getElementById('dp-'+panelId);
+  if(panel)panel.classList.add('on');
+
+  // Sidebar butonlarını güncelle
+  document.querySelectorAll('#dash-nav button').forEach(function(b){
+    b.classList.remove('on');
+  });
+  if(btn)btn.classList.add('on');
+  else{
+    var sideBtn=document.getElementById('dash-btn-'+panelId);
+    if(sideBtn)sideBtn.classList.add('on');
+  }
+
+  // Drawer butonlarını güncelle
+  document.querySelectorAll('#dash-drawer-nav button').forEach(function(b){
+    b.classList.remove('on');
+  });
+  var drawerBtn=document.getElementById('dash-drawer-btn-'+panelId);
+  if(drawerBtn)drawerBtn.classList.add('on');
+
+  // Panel verilerini yükle
+  if(panelId==='my-clubs'&&typeof loadMyClubs==='function')loadMyClubs();
+  if(panelId==='my-events'&&typeof loadMyEvents==='function')loadMyEvents();
+  if(panelId==='notifications'&&typeof loadMyNotifications==='function')loadMyNotifications();
+  if(panelId==='my-km'&&typeof loadKmEvents==='function')loadKmEvents();
+  if(panelId==='overview'&&typeof loadOverviewRecent==='function')loadOverviewRecent();
+};
+
+// ── mdrDash: Drawer'dan dashboard paneline git ─────────────
+window.mdrDash=function(panelId){
+  closeMasterDrawer();
+  // Önce dashboard sayfasına geç
+  if(typeof window.nav==='function')window.nav('dashboard');
+  // buildDashboard panelleri DOM'a yazıyor, 500ms bekle
+  setTimeout(function(){
+    if(typeof window.showDash==='function'){
+      window.showDash(panelId, null);
+    } else {
+      // Fallback: dp- panelini direkt göster
+      document.querySelectorAll('.dash-content').forEach(function(el){el.classList.remove('on');});
+      var p=document.getElementById('dp-'+panelId);
+      if(p)p.classList.add('on');
+      var b=document.getElementById('dash-btn-'+panelId);
+      document.querySelectorAll('#dash-nav button').forEach(function(el){el.classList.remove('on');});
+      if(b)b.classList.add('on');
+    }
+  }, 500);
 };
 
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)

@@ -5270,10 +5270,10 @@ window.buildRaceResultModal = function() {
   if (document.getElementById('race-result-modal')) return;
   const modal = document.createElement('div');
   modal.id = 'race-result-modal';
-  modal.className = 'modal';
-  modal.innerHTML = `<div class="modal-box" style="max-width:520px">
-    <div class="modal-header"><h3>🏅 Yarış Sonucu Ekle</h3><button class="modal-close" onclick="closeModal('race-result-modal')">✕</button></div>
-    <div class="modal-body">
+  modal.className = 'overlay';
+  modal.innerHTML = `<div class="modal" style="max-width:520px;padding:0;overflow:hidden">
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:18px 20px;border-bottom:1.5px solid var(--border)"><h3 style="margin:0;font-size:16px">🏅 Yarış Sonucu Ekle</h3><button onclick="closeModal('race-result-modal')" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">×</button></div>
+    <div style="padding:18px 20px;max-height:60vh;overflow-y:auto">
       <div class="form-grp"><label>Yarış Adı *</label><input id="rr-name" placeholder="İstanbul Maratonu 2025"/></div>
       <div class="form-row">
         <div class="form-grp"><label>Parkur Mesafesi *</label><input id="rr-dist" placeholder="42.2" type="text"/><small style="color:var(--muted);font-size:11px">km cinsinden (ör: 42.2, 21, 10)</small></div>
@@ -5296,7 +5296,7 @@ window.buildRaceResultModal = function() {
       </div>
       <div id="rr-error" style="color:#e55;font-size:13px;display:none;margin-top:4px"></div>
     </div>
-    <div class="modal-footer">
+    <div style="display:flex;justify-content:flex-end;gap:10px;padding:14px 20px;border-top:1.5px solid var(--border)">
       <button class="btn btn-ghost" onclick="closeModal('race-result-modal')">İptal</button>
       <button class="btn btn-or" onclick="saveRaceResult()" id="rr-save-btn">💾 Kaydet</button>
     </div>
@@ -5532,10 +5532,10 @@ window.joinClub=async function(clubId){
     // Zaten üye mi?
     const existing=await fb.getDocs(fb.query(
       fb.collection(fb.db,'memberships'),
-      fb.where('uid','==',cu.uid),
-      fb.where('clubId','==',clubId)
+      fb.where('uid','==',cu.uid)
     ));
-    if(!existing.empty){toast&&toast('Zaten bu kulübe üyesiniz.','err');return;}
+    const alreadyMember=!existing.empty&&existing.docs.some(d=>d.data().clubId===clubId);
+    if(alreadyMember){toast&&toast('Zaten bu kulübe üyesiniz.','err');return;}
 
     const club=window.CLUBS&&window.CLUBS.find(c=>c.id===clubId);
     const clubName=club?club.name:'';
@@ -5560,6 +5560,20 @@ window.joinClub=async function(clubId){
     toast&&toast('Hata: '+e.message,'err');
     console.error('[joinClub]',e);
   }
+};
+
+
+// ── Grup Admin Panel Navigation ─────────────────────────
+window.gNav=function(sec,btn){
+  document.querySelectorAll('#pg-panel .admin-sb button').forEach(function(b){
+    b.classList.remove('on');
+  });
+  if(btn)btn.classList.add('on');
+  else{
+    var b=document.querySelector('#pg-panel .admin-sb button[onclick*="gNav(\''+sec+'\'"');
+    if(b)b.classList.add('on');
+  }
+  if(typeof renderGroupSection==='function')renderGroupSection(sec);
 };
 
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)
@@ -6572,6 +6586,12 @@ function renderGroupSection(sec){
         </div>
       </div>`,
 
+    performances:`
+      <div style="margin-bottom:16px">
+        <h2 style="margin-bottom:8px">🏅 Kulüp Performansları</h2>
+        <p style="font-size:13px;color:var(--muted)">Kulüp üyelerinin kaydettiği yarış sonuçları</p>
+      </div>
+      <div id="club-race-results-list"><div class="spinner" style="margin:20px auto"></div></div>`,
     settings:`
       <h2 style="margin-bottom:18px">⚙ Kulüp Ayarları</h2>
       <div class="card" style="padding:24px;max-width:560px">
@@ -6618,6 +6638,7 @@ function renderGroupSection(sec){
   if(sec==='applications')setTimeout(gLoadApplications,100);
   if(sec==='performances'){
     const clubId=CU.clubId||CU.uid;
+    setTimeout(()=>window.loadClubRaceResults&&window.loadClubRaceResults(clubId),100);
     main.innerHTML=`<h2 style="margin-bottom:18px">🏅 Kulüp Performansları</h2>
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kulüp üyelerinizin kaydettiği yarış sonuçları</p>
       <div id="club-race-results-list"><div class="spinner" style="margin:20px auto"></div></div>`;

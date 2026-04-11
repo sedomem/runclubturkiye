@@ -174,3 +174,28 @@ exports.cleanOldNotifications=onSchedule(
     console.log(`[Cleanup] ${snap.size} silindi.`);
   }
 );
+
+// ══════════════════════════════════════════════════════════════════════════
+// Hesap silme → raceResults cleanup
+// ══════════════════════════════════════════════════════════════════════════
+const { onDocumentDeleted } = require('firebase-functions/v2/firestore');
+
+exports.onUserDeleted = onDocumentDeleted(
+  { document: 'users/{userId}', region: 'europe-west1' },
+  async (event) => {
+    const userId = event.params.userId;
+    console.log(`[Cleanup] Kullanıcı silindi: ${userId}`);
+    try {
+      const snap = await db.collection('raceResults')
+        .where('userId', '==', userId)
+        .get();
+      if (snap.empty) { console.log('[Cleanup] raceResults: kayıt yok.'); return; }
+      const batch = db.batch();
+      snap.forEach(doc => batch.delete(doc.ref));
+      await batch.commit();
+      console.log(`[Cleanup] ${snap.size} raceResult silindi (userId: ${userId})`);
+    } catch (e) {
+      console.error('[Cleanup] raceResults silme hatası:', e.message);
+    }
+  }
+);

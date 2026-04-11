@@ -904,6 +904,46 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .grid.g2,.grid.g3,.grid.g4{grid-template-columns:1fr}
   .blog-card,.race-card,.club-card,.firsat-card{overflow:hidden}
 }
+
+/* ── Dashboard Mobil Responsive ─────────────────────────── */
+@media(max-width:768px){
+  .dash-wrap{
+    grid-template-columns:1fr;
+    gap:0;
+    padding:12px 0;
+  }
+  #dash-sidebar{
+    display:none!important;
+  }
+  #dash-mobile-topbar{
+    display:flex!important;
+  }
+  #dash-panels{
+    min-width:0;
+  }
+}
+@media(min-width:769px){
+  #dash-mobile-topbar{display:none!important;}
+  #dash-drawer{display:none!important;}
+  #dash-drawer-overlay{display:none!important;}
+}
+/* Drawer açık animasyon */
+#dash-drawer.open{
+  transform:translateX(0)!important;
+}
+/* Drawer nav butonları */
+#dash-drawer-nav button{
+  display:flex;align-items:center;gap:10px;width:100%;
+  padding:11px 14px;background:none;border:none;border-radius:10px;
+  cursor:pointer;color:var(--text);font-size:14px;font-weight:500;
+  transition:background .15s;margin-bottom:2px;text-align:left;
+}
+#dash-drawer-nav button:hover{background:var(--bg2);}
+#dash-drawer-nav button.on{
+  background:rgba(249,115,22,.12);
+  color:var(--or);font-weight:700;
+}
+#dash-drawer-nav button span.nav-ico{font-size:18px;width:24px;text-align:center;}
 </style>
 </head>
 <body>
@@ -1890,8 +1930,44 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div class="pg" id="pg-map-view"><div class="container sec"><h2 style="margin-bottom:8px">Harita</h2><div id="map-container"><div id="club-map"></div></div></div></div>
 
 <!-- DASHBOARD -->
-<div class="pg" id="pg-dashboard"><div class="container"><div class="dash-wrap">
-  <div class="sidebar">
+<div class="pg" id="pg-dashboard">
+
+  <!-- Mobil Drawer Overlay -->
+  <div id="dash-drawer-overlay" onclick="closeDashDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:299;transition:opacity .25s"></div>
+
+  <!-- Mobil Drawer -->
+  <div id="dash-drawer" style="display:none;position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--card);z-index:300;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 32px rgba(0,0,0,.18);flex-direction:column;overflow-y:auto">
+    <!-- Drawer Header -->
+    <div style="padding:20px 18px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--or)">
+      <div style="display:flex;align-items:center;gap:10px">
+        <div id="dash-drawer-avatar" style="width:38px;height:38px;border-radius:50%;background:#fff;color:var(--or);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px">U</div>
+        <div>
+          <div id="dash-drawer-name" style="font-size:14px;font-weight:700;color:#fff">Kullanıcı</div>
+          <div id="dash-drawer-role" style="font-size:11px;color:rgba(255,255,255,.8)">Üye</div>
+        </div>
+      </div>
+      <button onclick="closeDashDrawer()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;color:#fff;display:flex;align-items:center;justify-content:center">✕</button>
+    </div>
+    <!-- Drawer Nav -->
+    <div id="dash-drawer-nav" style="padding:12px 10px;flex:1"></div>
+    <!-- Drawer Footer -->
+    <div style="padding:12px 10px;border-top:1.5px solid var(--border)">
+      <button onclick="signOutUser();closeDashDrawer()" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;background:none;border:none;border-radius:8px;cursor:pointer;color:#e55;font-size:14px;font-weight:600">
+        <span style="font-size:16px">🚪</span> Çıkış Yap
+      </button>
+    </div>
+  </div>
+
+  <!-- Mobil Top Bar (sadece dashboard'da) -->
+  <div id="dash-mobile-topbar" style="display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1.5px solid var(--border);position:sticky;top:64px;z-index:100">
+    <div style="font-size:15px;font-weight:700;color:var(--text)">📊 Dashboard</div>
+    <button onclick="openDashDrawer()" style="background:var(--or);border:none;border-radius:10px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#fff;font-size:13px;font-weight:600">
+      <span style="font-size:16px">☰</span> Menü
+    </button>
+  </div>
+
+<div class="container"><div class="dash-wrap">
+  <div class="sidebar" id="dash-sidebar">
     <div class="sb-user">
       <div class="sb-avatar" id="dash-avatar" onclick="nav('profile')">U</div>
       <div style="font-weight:600;font-size:13px" id="dash-name">Kullanıcı</div>
@@ -4918,6 +4994,39 @@ window.syncMobileMenu=function(){
   }
 };
 
+
+// ── Dashboard Mobil Drawer ────────────────────────────────
+window.openDashDrawer=function(){
+  const drawer=document.getElementById('dash-drawer');
+  const overlay=document.getElementById('dash-drawer-overlay');
+  if(!drawer)return;
+  drawer.style.display='flex';
+  overlay.style.display='block';
+  document.body.style.overflow='hidden';
+  setTimeout(()=>{drawer.classList.add('open');},10);
+};
+window.closeDashDrawer=function(){
+  const drawer=document.getElementById('dash-drawer');
+  const overlay=document.getElementById('dash-drawer-overlay');
+  if(!drawer)return;
+  drawer.classList.remove('open');
+  document.body.style.overflow='';
+  setTimeout(()=>{
+    drawer.style.display='none';
+    overlay.style.display='none';
+  },280);
+};
+
+// Dashboard nav'ı hem sidebar hem drawer'a yazar
+window.buildDashNav=function(navItems, activeId){
+  const navHtml=navItems.map((n,i)=>`<button class="${(n.id===activeId||(i===0&&!activeId))?'on':''}" id="dash-btn-${n.id}" onclick="showDash('${n.id}',this)"><span class="nav-ico">${n.ico}</span> ${n.l}</button>`).join('');
+  const drawerNavHtml=navItems.map((n,i)=>`<button class="${(n.id===activeId||(i===0&&!activeId))?'on':''}" id="dash-drawer-btn-${n.id}" onclick="showDash('${n.id}',this);closeDashDrawer()"><span class="nav-ico">${n.ico}</span> ${n.l}</button>`).join('');
+  const sideNav=document.getElementById('dash-nav');
+  const drawNav=document.getElementById('dash-drawer-nav');
+  if(sideNav)sideNav.innerHTML=navHtml;
+  if(drawNav)drawNav.innerHTML=drawerNavHtml;
+};
+
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)
 window.renderHomeData=renderHomeData;
 window.renderEvts=renderEvts;
@@ -5032,6 +5141,17 @@ function buildDashboard(){
   else if(av)av.textContent=initials;
   const isAdmin=CU.role==='superadmin';const isGrp=CU.role==='groupadmin'||CU.role==='subadmin';
   document.getElementById('dash-role-badge').innerHTML=isAdmin?'<span class="tag tag-or">⭐ Süper Admin</span>':isGrp?'<span class="tag tag-bl">🔑 Grup Admin</span>':'<span class="tag tag-gr">👤 Üye</span>';
+  // Drawer kullanıcı bilgisi sync
+  const drawerName=document.getElementById('dash-drawer-name');
+  const drawerAvatar=document.getElementById('dash-drawer-avatar');
+  const drawerRole=document.getElementById('dash-drawer-role');
+  if(drawerName)drawerName.textContent=CU.name||CU.email||'Kullanıcı';
+  if(drawerAvatar){
+    if(CU.photoURL)drawerAvatar.innerHTML=`<img src="${CU.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+    else drawerAvatar.textContent=(CU.name||'U')[0].toUpperCase();
+  }
+  const roleLabels={superadmin:'⭐ Süper Admin',groupadmin:'🤝 Grup Admin',member:'🏃 Üye'};
+  if(drawerRole)drawerRole.textContent=roleLabels[CU.role]||'Üye';
   document.getElementById('dash-nav').innerHTML=[
     {id:'overview',ico:'🏠',l:'Genel'},{id:'notifications',ico:'🔔',l:'Bildirimler'},{id:'my-events',ico:'📅',l:'Etkinliklerim'},{id:'my-clubs',ico:'🤝',l:'Kulüplerim'},{id:'my-km',ico:'🏃',l:'KM Takibi'},{id:'badges',ico:'🏅',l:'Rozetler'},{id:'profile-tab',ico:'⚙',l:'Profil'},
   ].map((n,i)=>`<button class="${i===0?'on':''}" id="dash-btn-${n.id}" onclick="showDash('${n.id}',this)">${n.ico} ${n.l}</button>`).join('')+'<button onclick="logout()" style="margin-top:12px;color:#f87171">🚪 Çıkış</button>';
@@ -5084,22 +5204,12 @@ function buildDashboard(){
   // Kulüpleri ve etkinlikleri yükle
   loadMyClubs();loadMyEvents();loadMyNotifications();loadKmEvents();loadOverviewRecent();
 }
-window.showDash=(id,btn)=>{
-  document.querySelectorAll('.dash-content').forEach(d=>d.classList.remove('on'));
-  const el=document.getElementById('dp-'+id);if(el)el.classList.add('on');
-  document.querySelectorAll('#dash-nav button').forEach(b=>b.classList.remove('on'));
-  if(btn)btn.classList.add('on');
-  if(id==='notifications')loadMyNotifications();
-  if(id==='my-km')loadKmEvents();
-};
-
-// ── DASHBOARD: KULÜPLERİM ──
 async function loadMyClubs(){
   const el=document.getElementById('dash-my-clubs-list');if(!el)return;
-  if(!CU)return;
+  if(!window.CU)return;
   try{
-    const fb2=window._fb;const snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('userId','==',CU.uid)));
-    if(snap.empty){
+    const fb2=window._fb;const snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('uid','==',window.CU.uid)));
+ if(snap.empty){
       el.innerHTML=`<div style="text-align:center;padding:30px;color:var(--muted)">
         <div style="font-size:40px;margin-bottom:10px">🤝</div>
         <p>Henüz hiçbir kulübe katılmadın.</p>

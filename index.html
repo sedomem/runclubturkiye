@@ -3616,7 +3616,7 @@ function renderBanners(banners){
   const cont=document.getElementById('banner-slides');const dots=document.getElementById('banner-dots');if(!cont)return;
   cont.innerHTML=banners.map((b,i)=>`
     <div class="banner-slide ${i===0?'on':''}">
-      ${b.imgUrl?`<img src="${b.imgUrl}" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(1.05) saturate(1.1)"/><div class="banner-overlay"></div>`:`<div style="position:absolute;inset:0;background:${b.bg||'linear-gradient(135deg,#0a0000,#1a0800)'}"></div>`}
+      ${b.imgUrl?`${window.bannerPicture(b.imgUrl)}<div class="banner-overlay"></div>`:`<div style="position:absolute;inset:0;background:${b.bg||'linear-gradient(135deg,#f97316,#ea580c)'}"></div>`}
       <div class="banner-content">
         ${b.badge?`<div class="banner-badge">${b.badge}</div>`:''}
         <h1>${b.title||''}</h1>
@@ -5157,6 +5157,47 @@ window.mdrDash=function(panelId){
       if(b)b.classList.add('on');
     }
   }, 500);
+};
+
+
+// ── Banner Picture Helper ─────────────────────────────────
+// GIF → PNG → JPEG önceliğiyle <picture> oluşturur
+window.bannerPicture=function(imgUrl, extraStyle){
+  if(!imgUrl) return '';
+  var style = extraStyle || 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(1.05) saturate(1.1)';
+
+  // URL'den uzantıyı al
+  var cleanUrl = imgUrl.split('?')[0]; // query string'i kaldır
+  var ext = cleanUrl.split('.').pop().toLowerCase();
+
+  // Eğer GIF ise: GIF'i önce sun, fallback olarak jpg
+  if(ext === 'gif'){
+    return `<picture style="position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0">
+      <source srcset="${imgUrl}" type="image/gif"/>
+      <img src="${imgUrl}" style="${style}" alt="banner" loading="eager" decoding="async"/>
+    </picture>`;
+  }
+
+  // Eğer PNG ise: picture tag ile sun
+  if(ext === 'png'){
+    return `<picture style="position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0">
+      <source srcset="${imgUrl}" type="image/png"/>
+      <img src="${imgUrl}" style="${style}" alt="banner" loading="eager" decoding="async"/>
+    </picture>`;
+  }
+
+  // JPEG veya diğer: picture tag ile sun, webp de dene
+  // URL'i değiştirerek webp alternatifi oluştur
+  var baseUrl = imgUrl.replace(/\.(jpg|jpeg|png|gif)(\?.*)?$/i, '');
+  var hasQuery = imgUrl.includes('?');
+  // Firebase Storage URL'leri için format parametresi ekle
+  var isFirebase = imgUrl.includes('firebasestorage.googleapis.com');
+
+  return `<picture style="position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0">
+    ${isFirebase ? '' : `<source srcset="${baseUrl}.webp${hasQuery ? imgUrl.slice(imgUrl.indexOf('?')) : ''}" type="image/webp"/>`}
+    <source srcset="${imgUrl}" type="image/${ext === 'jpg' ? 'jpeg' : ext}"/>
+    <img src="${imgUrl}" style="${style}" alt="banner" loading="eager" decoding="async"/>
+  </picture>`;
 };
 
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)
@@ -6922,10 +6963,10 @@ function renderPageBanner(page){
   const def=PAGE_BANNER_DEFAULTS[page];
   const d=custom||def;
   if(!d)return;
-  const bgStyle=d.imgUrl?`background-image:url('${d.imgUrl}')`:'';
+  const bgStyle='';
   const stats=(d.stats||def.stats||[]).map(s=>`<div class="pb-stat-chip">${s.ico} <b>${s.val}</b> ${s.label}</div>`).join('');
   el.innerHTML=`
-    ${d.imgUrl?`<div class="pb-bg" style="${bgStyle}"></div>`:''}
+    ${d.imgUrl?window.bannerPicture(d.imgUrl,'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(1.05) saturate(1.1)'):''}
     <div class="pb-overlay"></div>
     <div class="pb-shapes">
       <div class="pb-shape"></div>

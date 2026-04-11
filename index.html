@@ -944,6 +944,35 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   color:var(--or);font-weight:700;
 }
 #dash-drawer-nav button span.nav-ico{font-size:18px;width:24px;text-align:center;}
+
+/* ══ MASTER DRAWER ════════════════════════════════════════ */
+#master-hamburger{display:none}
+@media(max-width:768px){
+  #master-hamburger{display:flex!important}
+  .nav-center{display:none!important}
+  #nav-guest{display:none!important}
+  #nav-user{display:none!important}
+  #hamburger{display:none!important}
+  #dash-mobile-topbar{display:none!important}
+}
+#master-drawer.open{transform:translateX(0)!important}
+#master-overlay.open{opacity:1}
+.mdr-btn{
+  display:flex;align-items:center;gap:12px;width:100%;
+  padding:12px 16px;background:none;border:none;
+  cursor:pointer;color:var(--text);font-size:14px;font-weight:500;
+  text-align:left;transition:background .15s;
+}
+.mdr-btn:hover{background:var(--bg2)}
+.mdr-btn:active{background:var(--border)}
+.mdr-btn.active{background:rgba(232,98,42,.1);color:var(--or);font-weight:700}
+.mdr-admin{color:var(--or)!important;font-weight:700!important}
+.mdr-ico{font-size:18px;width:26px;text-align:center;flex-shrink:0}
+/* Dash sidebar desktop'ta görünür, mobilden gizlenir */
+@media(max-width:768px){
+  #dash-sidebar{display:none!important}
+  .dash-wrap{grid-template-columns:1fr!important;gap:0!important;padding:12px 0!important}
+}
 </style>
 </head>
 <body>
@@ -996,44 +1025,89 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <button class="btn btn-or btn-sm" id="nav-dashboard-btn" onclick="nav('dashboard')">Dashboard</button>
     </div>
   </div>
-    <button id="hamburger" onclick="toggleMobileMenu()" aria-label="Navigasyon menüsünü aç/kapat" aria-expanded="false" aria-controls="mobile-menu">
-    <span></span><span></span><span></span>
+  <button id="master-hamburger" onclick="openMasterDrawer()" aria-label="Menüyü aç" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:40px;height:40px;background:var(--or);border:none;border-radius:10px;cursor:pointer;flex-shrink:0">
+    <span style="display:block;width:18px;height:2px;background:#fff;border-radius:2px;transition:.25s"></span>
+    <span style="display:block;width:14px;height:2px;background:#fff;border-radius:2px;transition:.25s;align-self:flex-end"></span>
+    <span style="display:block;width:18px;height:2px;background:#fff;border-radius:2px;transition:.25s"></span>
   </button>
 </nav>
 <!-- Mobil Menü -->
-<div id="mobile-menu">
-  <button onclick="nav('home');toggleMobileMenu()">🏠 Ana Sayfa</button>
-  <button onclick="nav('events');toggleMobileMenu()">📅 Etkinlikler</button>
-  <button onclick="nav('clubs');toggleMobileMenu()">🤝 Kulüpler</button>
-  <button onclick="nav('races');toggleMobileMenu()">🏆 Yarış Takvimi</button>
-  <button onclick="nav('firsatlar');toggleMobileMenu()">🎁 Fırsatlar</button>
-  <button onclick="nav('blog');toggleMobileMenu()">📰 Blog</button>
-  <button onclick="nav('contact');toggleMobileMenu()">📧 İletişim</button>
-  <button onclick="nav('community');toggleMobileMenu()">🏃 Topluluk</button>
-  <button onclick="nav('sss');toggleMobileMenu()">❓ SSS</button>
-  <div style="height:1px;background:var(--border);margin:4px 0"></div>
-  <!-- Misafir -->
-  <div id="mob-guest-btns">
-    <button onclick="openAuth('login');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px">🔐 Giriş Yap</button>
-    <button onclick="openAuth('register');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px;color:var(--or);font-weight:600">✨ Üye Ol</button>
-  </div>
-  <!-- Giriş yapılmış -->
-  <div id="mob-user-btns" style="display:none;flex-direction:column;gap:2px">
-    <div id="mob-user-info" style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--bg2);border-radius:8px;margin-bottom:4px">
-      <div id="mob-avatar" style="width:36px;height:36px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:14px;flex-shrink:0">U</div>
-      <div style="min-width:0">
-        <div id="mob-name" style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Kullanıcı</div>
-        <div id="mob-role-label" style="font-size:11px;color:var(--muted)">Üye</div>
+<!-- ══ MASTER DRAWER ══ -->
+<div id="master-overlay" onclick="closeMasterDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);z-index:398;transition:opacity .28s"></div>
+
+<div id="master-drawer" style="position:fixed;top:0;right:0;bottom:0;width:300px;max-width:88vw;background:var(--card);z-index:399;transform:translateX(100%);transition:transform .3s cubic-bezier(.4,0,.2,1);display:flex;flex-direction:column;box-shadow:-4px 0 40px rgba(0,0,0,.18)">
+  
+  <!-- DRAWER HEADER -->
+  <div id="mdr-header" style="background:var(--or);padding:20px 18px 18px;flex-shrink:0;position:relative">
+    <button onclick="closeMasterDrawer()" style="position:absolute;top:14px;right:14px;background:rgba(255,255,255,.2);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;color:#fff;font-size:16px;display:flex;align-items:center;justify-content:center;line-height:1">✕</button>
+    <!-- Misafir header -->
+    <div id="mdr-guest-header">
+      <div style="font-size:16px;font-weight:700;color:#fff;margin-bottom:4px">RunClubTürkiye</div>
+      <div style="font-size:12px;color:rgba(255,255,255,.8)">Türkiye'nin Koşu Topluluğu</div>
+      <div style="display:flex;gap:8px;margin-top:14px">
+        <button onclick="openAuth('login');closeMasterDrawer()" style="flex:1;padding:8px;background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.4);border-radius:8px;color:#fff;font-size:13px;font-weight:600;cursor:pointer">Giriş Yap</button>
+        <button onclick="openAuth('register');closeMasterDrawer()" style="flex:1;padding:8px;background:#fff;border:none;border-radius:8px;color:var(--or);font-size:13px;font-weight:700;cursor:pointer">Üye Ol</button>
       </div>
     </div>
-    <button onclick="nav('dashboard');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px">👤 Dashboard</button>
-    <button onclick="nav('profile');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px">⚙️ Profil Ayarları</button>
-    <button onclick="nav('community');toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px">🏃 Topluluk</button>
-    <div id="mob-admin-btn" style="display:none">
-      <button onclick="goPanel();toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px;color:var(--or);font-weight:600" id="mob-panel-btn">⭐ Yönetim Paneli</button>
+    <!-- Kullanıcı header -->
+    <div id="mdr-user-header" style="display:none">
+      <div style="display:flex;align-items:center;gap:12px">
+        <div id="mdr-avatar" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,.25);border:2px solid rgba(255,255,255,.5);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:700;color:#fff;flex-shrink:0;overflow:hidden">U</div>
+        <div style="min-width:0">
+          <div id="mdr-name" style="font-size:16px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Kullanıcı</div>
+          <div id="mdr-role" style="font-size:12px;color:rgba(255,255,255,.8);margin-top:2px">🏃 Sporcu</div>
+        </div>
+      </div>
     </div>
-    <div style="height:1px;background:var(--border);margin:4px 0"></div>
-    <button onclick="signOutUser();toggleMobileMenu()" style="width:100%;text-align:left;padding:10px 12px;font-size:14px;color:#e55">🚪 Çıkış Yap</button>
+  </div>
+
+  <!-- DRAWER BODY (scrollable) -->
+  <div style="flex:1;overflow-y:auto;padding:8px 0">
+    
+    <!-- Site Navigasyonu -->
+    <div style="padding:8px 12px 4px">
+      <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 4px;margin-bottom:4px">Keşfet</div>
+    </div>
+    <button class="mdr-btn" onclick="nav('home');closeMasterDrawer()"><span class="mdr-ico">🏠</span><span>Ana Sayfa</span></button>
+    <button class="mdr-btn" onclick="nav('events');closeMasterDrawer()"><span class="mdr-ico">📅</span><span>Etkinlikler</span></button>
+    <button class="mdr-btn" onclick="nav('clubs');closeMasterDrawer()"><span class="mdr-ico">🤝</span><span>Kulüpler</span></button>
+    <button class="mdr-btn" onclick="nav('races');closeMasterDrawer()"><span class="mdr-ico">🏆</span><span>Yarış Takvimi</span></button>
+    <button class="mdr-btn" onclick="nav('community');closeMasterDrawer()"><span class="mdr-ico">🏃</span><span>Topluluk</span></button>
+    <button class="mdr-btn" onclick="nav('firsatlar');closeMasterDrawer()"><span class="mdr-ico">🎁</span><span>Fırsatlar</span></button>
+    <button class="mdr-btn" onclick="nav('blog');closeMasterDrawer()"><span class="mdr-ico">📰</span><span>Blog</span></button>
+
+    <!-- Divider -->
+    <div style="height:1px;background:var(--border);margin:8px 16px"></div>
+
+    <!-- Kullanıcı menüsü (giriş yapılmışsa) -->
+    <div id="mdr-user-nav" style="display:none">
+      <div style="padding:8px 12px 4px">
+        <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 4px;margin-bottom:4px">Hesabım</div>
+      </div>
+      <button class="mdr-btn" onclick="nav('dashboard');closeMasterDrawer()"><span class="mdr-ico">📊</span><span>Dashboard</span></button>
+      <button class="mdr-btn" onclick="nav('profile');closeMasterDrawer()"><span class="mdr-ico">⚙️</span><span>Profil Ayarları</span></button>
+      <button class="mdr-btn" id="mdr-badges-btn" onclick="nav('dashboard');setTimeout(()=>showDash('badges'),100);closeMasterDrawer()"><span class="mdr-ico">🏅</span><span>Madalyalarım</span></button>
+      <div id="mdr-admin-section" style="display:none">
+        <div style="height:1px;background:var(--border);margin:8px 16px"></div>
+        <div style="padding:8px 12px 4px">
+          <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase;padding:0 4px;margin-bottom:4px">Yönetim</div>
+        </div>
+        <button class="mdr-btn mdr-admin" id="mdr-panel-btn" onclick="goPanel();closeMasterDrawer()"><span class="mdr-ico">⭐</span><span id="mdr-panel-label">Admin Paneli</span></button>
+      </div>
+      <div style="height:1px;background:var(--border);margin:8px 16px"></div>
+    </div>
+
+    <!-- Diğer linkler -->
+    <button class="mdr-btn" onclick="nav('sss');closeMasterDrawer()"><span class="mdr-ico">❓</span><span>Sıkça Sorulanlar</span></button>
+    <button class="mdr-btn" onclick="nav('contact');closeMasterDrawer()"><span class="mdr-ico">📧</span><span>İletişim</span></button>
+
+  </div>
+
+  <!-- DRAWER FOOTER -->
+  <div id="mdr-footer-logout" style="display:none;padding:12px;border-top:1px solid var(--border);flex-shrink:0">
+    <button onclick="signOutUser();closeMasterDrawer()" style="width:100%;display:flex;align-items:center;justify-content:center;gap:8px;padding:11px;background:rgba(229,85,85,.1);border:1px solid rgba(229,85,85,.2);border-radius:10px;cursor:pointer;color:#e55;font-size:14px;font-weight:600">
+      <span>🚪</span> Çıkış Yap
+    </button>
   </div>
 </div>
 
@@ -1931,41 +2005,6 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 <!-- DASHBOARD -->
 <div class="pg" id="pg-dashboard">
-
-  <!-- Mobil Drawer Overlay -->
-  <div id="dash-drawer-overlay" onclick="closeDashDrawer()" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:299;transition:opacity .25s"></div>
-
-  <!-- Mobil Drawer -->
-  <div id="dash-drawer" style="display:none;position:fixed;top:0;left:0;bottom:0;width:280px;background:var(--card);z-index:300;transform:translateX(-100%);transition:transform .28s cubic-bezier(.4,0,.2,1);box-shadow:4px 0 32px rgba(0,0,0,.18);flex-direction:column;overflow-y:auto">
-    <!-- Drawer Header -->
-    <div style="padding:20px 18px 14px;border-bottom:1.5px solid var(--border);display:flex;align-items:center;justify-content:space-between;background:var(--or)">
-      <div style="display:flex;align-items:center;gap:10px">
-        <div id="dash-drawer-avatar" style="width:38px;height:38px;border-radius:50%;background:#fff;color:var(--or);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px">U</div>
-        <div>
-          <div id="dash-drawer-name" style="font-size:14px;font-weight:700;color:#fff">Kullanıcı</div>
-          <div id="dash-drawer-role" style="font-size:11px;color:rgba(255,255,255,.8)">Üye</div>
-        </div>
-      </div>
-      <button onclick="closeDashDrawer()" style="background:rgba(255,255,255,.2);border:none;border-radius:8px;width:32px;height:32px;cursor:pointer;font-size:18px;color:#fff;display:flex;align-items:center;justify-content:center">✕</button>
-    </div>
-    <!-- Drawer Nav -->
-    <div id="dash-drawer-nav" style="padding:12px 10px;flex:1"></div>
-    <!-- Drawer Footer -->
-    <div style="padding:12px 10px;border-top:1.5px solid var(--border)">
-      <button onclick="signOutUser();closeDashDrawer()" style="width:100%;display:flex;align-items:center;gap:10px;padding:10px 12px;background:none;border:none;border-radius:8px;cursor:pointer;color:#e55;font-size:14px;font-weight:600">
-        <span style="font-size:16px">🚪</span> Çıkış Yap
-      </button>
-    </div>
-  </div>
-
-  <!-- Mobil Top Bar (sadece dashboard'da) -->
-  <div id="dash-mobile-topbar" style="display:none;align-items:center;justify-content:space-between;padding:12px 16px;background:var(--card);border-bottom:1.5px solid var(--border);position:sticky;top:64px;z-index:100">
-    <div style="font-size:15px;font-weight:700;color:var(--text)">📊 Dashboard</div>
-    <button onclick="openDashDrawer()" style="background:var(--or);border:none;border-radius:10px;padding:8px 12px;cursor:pointer;display:flex;align-items:center;gap:6px;color:#fff;font-size:13px;font-weight:600">
-      <span style="font-size:16px">☰</span> Menü
-    </button>
-  </div>
-
 <div class="container"><div class="dash-wrap">
   <div class="sidebar" id="dash-sidebar">
     <div class="sb-user">
@@ -4135,11 +4174,7 @@ window.routerUpdateMeta=routerUpdateMeta;
 
 // ── MOBİL MENÜ ──
 window.toggleMobileMenu=function(){
-  const menu=document.getElementById('mobile-menu');
-  const btn=document.getElementById('hamburger');
-  if(!menu||!btn)return;
-  menu.classList.toggle('open');
-  btn.classList.toggle('open');
+  openMasterDrawer(); // legacy compat
 };
 // Dışarı tıklayınca kapat
 document.addEventListener('click',function(e){
@@ -4966,56 +5001,15 @@ window.checkAndRequestPush=async function(){
 
 
 // ── Mobil menü kullanıcı senkronizasyonu
-window.syncMobileMenu=function(){
-  const cu=window.CU;
-  const guestEl=document.getElementById('mob-guest-btns');
-  const userEl=document.getElementById('mob-user-btns');
-  const adminEl=document.getElementById('mob-admin-btn');
-  if(!guestEl||!userEl)return;
-  if(cu){
-    guestEl.style.display='none';
-    userEl.style.display='flex';
-    const mobName=document.getElementById('mob-name');
-    const mobAvatar=document.getElementById('mob-avatar');
-    const mobRole=document.getElementById('mob-role-label');
-    if(mobName)mobName.textContent=cu.name||cu.email||'Kullanıcı';
-    if(mobAvatar)mobAvatar.textContent=(cu.name||cu.email||'U')[0].toUpperCase();
-    const roleLabels={superadmin:'⭐ Süper Admin',groupadmin:'🤝 Grup Admin',member:'🏃 Üye'};
-    if(mobRole)mobRole.textContent=roleLabels[cu.role]||'Üye';
-    if(adminEl){
-      const isAdmin=cu.role==='superadmin'||cu.role==='groupadmin';
-      adminEl.style.display=isAdmin?'block':'none';
-      const panelBtn=document.getElementById('mob-panel-btn');
-      if(panelBtn)panelBtn.textContent=cu.role==='superadmin'?'⭐ Süper Admin Paneli':'🤝 Grup Admin Paneli';
-    }
-  }else{
-    guestEl.style.display='block';
-    userEl.style.display='none';
-  }
-};
+window.syncMobileMenu=function(){syncMasterDrawer();};
+
 
 
 // ── Dashboard Mobil Drawer ────────────────────────────────
-window.openDashDrawer=function(){
-  const drawer=document.getElementById('dash-drawer');
-  const overlay=document.getElementById('dash-drawer-overlay');
-  if(!drawer)return;
-  drawer.style.display='flex';
-  overlay.style.display='block';
-  document.body.style.overflow='hidden';
-  setTimeout(()=>{drawer.classList.add('open');},10);
-};
-window.closeDashDrawer=function(){
-  const drawer=document.getElementById('dash-drawer');
-  const overlay=document.getElementById('dash-drawer-overlay');
-  if(!drawer)return;
-  drawer.classList.remove('open');
-  document.body.style.overflow='';
-  setTimeout(()=>{
-    drawer.style.display='none';
-    overlay.style.display='none';
-  },280);
-};
+window.openDashDrawer=function(){openMasterDrawer();};
+
+window.closeDashDrawer=function(){closeMasterDrawer();};
+
 
 // Dashboard nav'ı hem sidebar hem drawer'a yazar
 window.buildDashNav=function(navItems, activeId){
@@ -5025,6 +5019,73 @@ window.buildDashNav=function(navItems, activeId){
   const drawNav=document.getElementById('dash-drawer-nav');
   if(sideNav)sideNav.innerHTML=navHtml;
   if(drawNav)drawNav.innerHTML=drawerNavHtml;
+};
+
+
+// ══ MASTER DRAWER ═════════════════════════════════════════
+window.openMasterDrawer=function(){
+  const drawer=document.getElementById('master-drawer');
+  const overlay=document.getElementById('master-overlay');
+  if(!drawer)return;
+  drawer.style.display='flex';
+  overlay.style.display='block';
+  document.body.style.overflow='hidden';
+  requestAnimationFrame(()=>{
+    drawer.classList.add('open');
+    overlay.classList.add('open');
+  });
+  syncMasterDrawer();
+};
+
+window.closeMasterDrawer=function(){
+  const drawer=document.getElementById('master-drawer');
+  const overlay=document.getElementById('master-overlay');
+  if(!drawer)return;
+  drawer.classList.remove('open');
+  overlay.classList.remove('open');
+  document.body.style.overflow='';
+  setTimeout(()=>{
+    drawer.style.display='none';
+    overlay.style.display='none';
+  },300);
+};
+
+window.syncMasterDrawer=function(){
+  const cu=window.CU;
+  // Header
+  const guestH=document.getElementById('mdr-guest-header');
+  const userH=document.getElementById('mdr-user-header');
+  const userNav=document.getElementById('mdr-user-nav');
+  const footer=document.getElementById('mdr-footer-logout');
+  const adminSec=document.getElementById('mdr-admin-section');
+  if(cu){
+    if(guestH)guestH.style.display='none';
+    if(userH)userH.style.display='block';
+    if(userNav)userNav.style.display='block';
+    if(footer)footer.style.display='block';
+    // Avatar
+    const av=document.getElementById('mdr-avatar');
+    if(av){
+      if(cu.photoURL)av.innerHTML=`<img src="${cu.photoURL}" style="width:100%;height:100%;object-fit:cover"/>`;
+      else av.textContent=(cu.name||'U')[0].toUpperCase();
+    }
+    const nameEl=document.getElementById('mdr-name');
+    const roleEl=document.getElementById('mdr-role');
+    if(nameEl)nameEl.textContent=cu.name||cu.email||'Kullanıcı';
+    const roleMap={superadmin:'⭐ Süper Admin',groupadmin:'🤝 Grup Admin',member:'🏃 Sporcu'};
+    if(roleEl)roleEl.textContent=roleMap[cu.role]||'🏃 Sporcu';
+    // Admin bölümü
+    const isAdmin=cu.role==='superadmin'||cu.role==='groupadmin';
+    if(adminSec)adminSec.style.display=isAdmin?'block':'none';
+    const panelLabel=document.getElementById('mdr-panel-label');
+    if(panelLabel)panelLabel.textContent=cu.role==='superadmin'?'Süper Admin Paneli':'Grup Admin Paneli';
+  }else{
+    if(guestH)guestH.style.display='block';
+    if(userH)userH.style.display='none';
+    if(userNav)userNav.style.display='none';
+    if(footer)footer.style.display='none';
+    if(adminSec)adminSec.style.display='none';
+  }
 };
 
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)

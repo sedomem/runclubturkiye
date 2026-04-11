@@ -2729,7 +2729,7 @@ window.joinClub=async(clubId)=>{
   try{
     const club=window.CLUBS.find(c=>c.id===clubId)||{name:'Kulüp',adminUid:clubId};
     await setDoc(doc(db,'memberships',clubId+'_'+CU.uid),{
-      clubId,userId:CU.uid,clubName:club.name||'',
+      uid:CU.uid,userId:CU.uid,clubId,clubName:club.name||'',
       userName:CU.name||'',userEmail:CU.email||'',
       clubAdminUid:club.adminUid||club.id||clubId,
       status:club.open===false?'pending':'approved',
@@ -5350,7 +5350,7 @@ window.saveRaceResult = async function() {
     let clubName = (window.CU&&window.CU.clubName)||'';
     if(!clubId){
       try {
-        const memSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',cu.uid)));
+        const memSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',cu.uid)));
         if (!memSnap.empty) {
           const activeMem = memSnap.docs.find(d=>d.data().status==='active'||!d.data().status);
           if(activeMem){ const mem=activeMem.data(); clubId=mem.clubId||''; clubName=mem.clubName||''; }
@@ -5389,7 +5389,6 @@ window.saveRaceResult = async function() {
     if(btn){btn.disabled=false;btn.textContent='💾 Kaydet';}
   }
 };
-
 // ── Yarış sonuçlarını yükle (dashboard) ──────────────────────────────────
 window.loadRaceResults = async function() {
   const el = document.getElementById('race-results-list'); if(!el)return;
@@ -5741,7 +5740,10 @@ async function loadMyClubs(){
   const el=document.getElementById('dash-my-clubs-list');if(!el)return;
   if(!window.CU)return;
   try{
-    const fb2=window._fb;const snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('uid','==',window.CU.uid)));
+    const fb2=window._fb;
+    // memberships'te hem 'userId' hem 'uid' field'ı olabilir - ikisini de dene
+    let snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('userId','==',window.CU.uid)));
+    if(snap.empty) snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('uid','==',window.CU.uid)));
  if(snap.empty){
       el.innerHTML=`<div style="text-align:center;padding:30px;color:var(--muted)">
         <div style="font-size:40px;margin-bottom:10px">🤝</div>
@@ -6464,9 +6466,10 @@ function loadGroupPanel(){
     try{
       const fb=window._fb;if(!fb)return;
       const clubId=CU.clubId||CU.uid;
-      const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('clubId','==',clubId),fb.where('status','==','pending')));
+      const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('clubId','==',clubId)));
       const badge=document.getElementById('g-app-badge');
-      if(badge&&!snap.empty){badge.textContent=snap.size;badge.style.display='inline';}
+      const pendingCount=snap.docs.filter(d=>d.data().status==='pending').length;
+      if(badge&&pendingCount>0){badge.textContent=pendingCount;badge.style.display='inline';}
     }catch(e){}
   },500);
 }
@@ -6677,7 +6680,15 @@ window.gPreviewLogoUrl=function(url){
 window.
 window.gOpenAddEvent=function(){
   const form=document.getElementById('g-add-event-form');
-  if(form)form.style.display=form.style.display==='none'||!form.style.display?'block':'none';
+  if(!form){console.warn('[gOpenAddEvent] form bulunamadı');return;}
+  const isHidden=form.style.display===''||form.style.display==='none'||!form.style.display;
+  form.style.display=isHidden?'block':'none';
+  if(isHidden){
+    // Form görünür olduğunda scroll et
+    form.scrollIntoView({behavior:'smooth',block:'nearest'});
+    const titleInput=document.getElementById('ge-title');
+    if(titleInput)titleInput.focus();
+  }
 };
 
 // gSaveEvent: window.gSaveEvent olarak tanımlı (aşağıda)

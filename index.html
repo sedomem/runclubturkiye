@@ -2098,6 +2098,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button id="sb-applications-btn" onclick="aNav('applications',this)">📋 Başvurular</button>
     <button onclick="aNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="aNav('community',this)">🏃 Topluluk</button>
+    <button onclick="aNav('performances',this)">🏅 Performanslar</button>
     <button onclick="aNav('pushnotif',this)">🔔 Bildirimler</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
@@ -5135,6 +5136,7 @@ window.showDash=function(panelId,btn){
   if(panelId==='my-events'&&typeof loadMyEvents==='function')loadMyEvents();
   if(panelId==='notifications'&&typeof loadMyNotifications==='function')loadMyNotifications();
   if(panelId==='my-km'&&typeof loadKmEvents==='function')loadKmEvents();
+  if(panelId==='my-km'&&typeof window.loadRaceResults==='function')window.loadRaceResults();
   if(panelId==='overview'&&typeof loadOverviewRecent==='function')loadOverviewRecent();
 };
 
@@ -5198,6 +5200,323 @@ window.bannerPicture=function(imgUrl, extraStyle){
     <source srcset="${imgUrl}" type="image/${ext === 'jpg' ? 'jpeg' : ext}"/>
     <img src="${imgUrl}" style="${style}" alt="banner" loading="eager" decoding="async"/>
   </picture>`;
+};
+
+// ══════════════════════════════════════════════════════════════════════════
+// YARIŞI PERFORMANS TAKİBİ — JS (non-module script'e eklenecek)
+// ══════════════════════════════════════════════════════════════════════════
+
+// ── Pace hesaplama (ss:dd:ss → dk/km) ────────────────────────────────────
+window.calcPace = function(distanceKm, timeStr) {
+  if (!distanceKm || !timeStr) return '';
+  const parts = timeStr.split(':').map(Number);
+  let totalMin = 0;
+  if (parts.length === 3) totalMin = parts[0] * 60 + parts[1] + parts[2] / 60;
+  else if (parts.length === 2) totalMin = parts[0] + parts[1] / 60;
+  else return '';
+  const pace = totalMin / parseFloat(distanceKm);
+  if (!isFinite(pace) || pace <= 0) return '';
+  const pMin = Math.floor(pace);
+  const pSec = Math.round((pace - pMin) * 60);
+  return `${pMin}:${String(pSec).padStart(2, '0')} dk/km`;
+};
+
+// ── Derece badge ─────────────────────────────────────────────────────────
+window.racePlaceBadge = function(place) {
+  if (!place) return '';
+  const p = String(place).trim();
+  if (p === '1' || p === '1.') return '<span style="background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700">🥇 1. Derece</span>';
+  if (p === '2' || p === '2.') return '<span style="background:linear-gradient(135deg,#94a3b8,#64748b);color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700">🥈 2. Derece</span>';
+  if (p === '3' || p === '3.') return '<span style="background:linear-gradient(135deg,#cd7f32,#a0522d);color:#fff;padding:3px 10px;border-radius:12px;font-size:12px;font-weight:700">🥉 3. Derece</span>';
+  return `<span style="background:var(--bg2);color:var(--muted);padding:3px 10px;border-radius:12px;font-size:12px;font-weight:600">${p}. Sıra</span>`;
+};
+
+// ── Performans kartı render ───────────────────────────────────────────────
+window.raceResultCard = function(r, showDelete) {
+  const placeBadge = window.racePlaceBadge(r.place);
+  const isTop3 = ['1','1.','2','2.','3','3.'].includes(String(r.place||'').trim());
+  const borderColor = r.place === '1' || r.place === '1.' ? '#f59e0b'
+    : r.place === '2' || r.place === '2.' ? '#94a3b8'
+    : r.place === '3' || r.place === '3.' ? '#cd7f32'
+    : 'var(--border)';
+  return `<div style="background:var(--card);border:2px solid ${borderColor};border-radius:14px;padding:18px;margin-bottom:12px;position:relative;transition:.2s">
+    <div style="display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap">
+      <div style="flex:1;min-width:0">
+        <div style="font-size:16px;font-weight:700;margin-bottom:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">🏅 ${r.raceName||'Yarış'}</div>
+        <div style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:8px">
+          ${r.distance?`<span style="background:var(--or);color:#fff;padding:2px 9px;border-radius:10px;font-size:12px;font-weight:700">${r.distance}</span>`:''}
+          ${r.time?`<span style="background:var(--bg2);padding:2px 9px;border-radius:10px;font-size:12px">⏱ ${r.time}</span>`:''}
+          ${r.pace?`<span style="background:var(--bg2);padding:2px 9px;border-radius:10px;font-size:12px">🚀 ${r.pace}</span>`:''}
+          ${placeBadge}
+        </div>
+        <div style="font-size:12px;color:var(--muted);display:flex;gap:10px;flex-wrap:wrap">
+          ${r.date?`<span>📅 ${r.date}</span>`:''}
+          ${r.clubName?`<span>🤝 ${r.clubName}</span>`:''}
+        </div>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
+        <button onclick="shareRaceResult('${r.id}')" style="background:var(--or);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600">📤 Paylaş</button>
+        ${r.resultUrl?`<a href="${r.resultUrl}" target="_blank" style="font-size:11px;color:var(--or);text-decoration:none">🔗 Resmi Sonuç</a>`:''}
+        ${showDelete?`<button onclick="deleteRaceResult('${r.id}')" style="background:none;border:none;color:#e55;font-size:11px;cursor:pointer;padding:2px">🗑 Sil</button>`:''}
+      </div>
+    </div>
+    ${r.certUrl?`<div style="margin-top:10px"><img src="${r.certUrl}" style="max-height:120px;border-radius:8px;object-fit:cover" alt="Sertifika"/></div>`:''}
+  </div>`;
+};
+
+// ── Yarış sonucu modal HTML ───────────────────────────────────────────────
+window.buildRaceResultModal = function() {
+  if (document.getElementById('race-result-modal')) return;
+  const modal = document.createElement('div');
+  modal.id = 'race-result-modal';
+  modal.className = 'modal';
+  modal.innerHTML = `<div class="modal-box" style="max-width:520px">
+    <div class="modal-header"><h3>🏅 Yarış Sonucu Ekle</h3><button class="modal-close" onclick="closeModal('race-result-modal')">✕</button></div>
+    <div class="modal-body">
+      <div class="form-grp"><label>Yarış Adı *</label><input id="rr-name" placeholder="İstanbul Maratonu 2025"/></div>
+      <div class="form-row">
+        <div class="form-grp"><label>Parkur Mesafesi *</label><input id="rr-dist" placeholder="42.2" type="text"/><small style="color:var(--muted);font-size:11px">km cinsinden (ör: 42.2, 21, 10)</small></div>
+        <div class="form-grp"><label>Tamamlama Süresi *</label><input id="rr-time" placeholder="03:45:22" type="text"/><small style="color:var(--muted);font-size:11px">SS:DD:SS formatında</small></div>
+      </div>
+      <div class="form-grp" id="rr-pace-display" style="display:none">
+        <div style="background:var(--bg2);padding:10px 14px;border-radius:8px;font-size:14px;font-weight:600;color:var(--or)">🚀 Pace: <span id="rr-pace-val">—</span></div>
+      </div>
+      <div class="form-row">
+        <div class="form-grp"><label>Derece (opsiyonel)</label><input id="rr-place" placeholder="1. / 2. / 3. / 45."/><small style="color:var(--muted);font-size:11px">Kürsü veya genel klasman</small></div>
+        <div class="form-grp"><label>Yarış Tarihi</label><input id="rr-date" type="date"/></div>
+      </div>
+      <div class="form-grp"><label>Resmi Sonuç Linki (opsiyonel)</label><input id="rr-url" placeholder="https://..."/></div>
+      <div class="form-grp"><label>Sertifika Fotoğrafı (opsiyonel)</label>
+        <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+          <input id="rr-cert-file" type="file" accept="image/*" style="font-size:12px;flex:1"/>
+          <span style="font-size:11px;color:var(--muted)">veya</span>
+          <input id="rr-cert-url" placeholder="URL yapıştır..." style="flex:2;min-width:120px"/>
+        </div>
+      </div>
+      <div id="rr-error" style="color:#e55;font-size:13px;display:none;margin-top:4px"></div>
+    </div>
+    <div class="modal-footer">
+      <button class="btn btn-ghost" onclick="closeModal('race-result-modal')">İptal</button>
+      <button class="btn btn-or" onclick="saveRaceResult()" id="rr-save-btn">💾 Kaydet</button>
+    </div>
+  </div>`;
+  document.body.appendChild(modal);
+
+  // Pace otomatik hesapla
+  function updatePace() {
+    const dist = document.getElementById('rr-dist')?.value;
+    const time = document.getElementById('rr-time')?.value;
+    const pace = window.calcPace(dist, time);
+    const disp = document.getElementById('rr-pace-display');
+    const val  = document.getElementById('rr-pace-val');
+    if (pace && disp && val) { disp.style.display = 'block'; val.textContent = pace; }
+    else if (disp) disp.style.display = 'none';
+  }
+  setTimeout(() => {
+    document.getElementById('rr-dist')?.addEventListener('input', updatePace);
+    document.getElementById('rr-time')?.addEventListener('input', updatePace);
+  }, 100);
+};
+
+// ── Yarış sonucu kaydet ───────────────────────────────────────────────────
+window.saveRaceResult = async function() {
+  const cu = window.CU; if (!cu) return;
+  const name  = document.getElementById('rr-name')?.value.trim();
+  const dist  = document.getElementById('rr-dist')?.value.trim();
+  const time  = document.getElementById('rr-time')?.value.trim();
+  const errEl = document.getElementById('rr-error');
+  if (!name || !dist || !time) { if(errEl){errEl.textContent='Yarış adı, mesafe ve süre zorunlu.';errEl.style.display='block';} return; }
+  if(errEl) errEl.style.display='none';
+
+  const btn = document.getElementById('rr-save-btn');
+  if(btn){btn.disabled=true;btn.textContent='Kaydediliyor...';}
+
+  try {
+    const fb = window._fb;
+    const place   = document.getElementById('rr-place')?.value.trim()||'';
+    const date    = document.getElementById('rr-date')?.value||'';
+    const url     = document.getElementById('rr-url')?.value.trim()||'';
+    const pace    = window.calcPace(dist, time)||'';
+    const certUrl_input = document.getElementById('rr-cert-url')?.value.trim()||'';
+    const certFile = document.getElementById('rr-cert-file')?.files?.[0];
+
+    // Kulüp bilgisi
+    let clubId = ''; let clubName = '';
+    try {
+      const memSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',cu.uid),fb.where('status','==','active')));
+      if (!memSnap.empty) {
+        const mem = memSnap.docs[0].data();
+        clubId = mem.clubId||''; clubName = mem.clubName||'';
+      }
+    } catch(e) {}
+
+    // Sertifika yükleme
+    let certUrl = certUrl_input;
+    if (certFile && !certUrl) {
+      const storRef = fb.ref(fb.storage, `raceResults/${cu.uid}/${Date.now()}_${certFile.name}`);
+      const snap = await fb.uploadBytes(storRef, certFile);
+      certUrl = await fb.getDownloadURL(snap.ref);
+    }
+
+    const data = {
+      userId: cu.uid, userName: cu.name||cu.email||'',
+      raceName: name, distance: dist+'km', distanceNum: parseFloat(dist)||0,
+      time, pace, place, date, resultUrl: url, certUrl,
+      clubId, clubName,
+      createdAt: fb.serverTimestamp()
+    };
+    const {id:_, ...dataNoId} = data;
+    await fb.addDoc(fb.collection(fb.db,'raceResults'), dataNoId);
+
+    closeModal('race-result-modal');
+    window._toast && window._toast('Yarış sonucu kaydedildi! 🏅', 'ok') || toast && toast('Yarış sonucu kaydedildi! 🏅', 'ok');
+    loadRaceResults && loadRaceResults();
+    // Form temizle
+    ['rr-name','rr-dist','rr-time','rr-place','rr-date','rr-url','rr-cert-url'].forEach(id=>{
+      const el=document.getElementById(id); if(el)el.value='';
+    });
+  } catch(e) {
+    if(errEl){errEl.textContent='Hata: '+e.message;errEl.style.display='block';}
+  } finally {
+    if(btn){btn.disabled=false;btn.textContent='💾 Kaydet';}
+  }
+};
+
+// ── Yarış sonuçlarını yükle (dashboard) ──────────────────────────────────
+window.loadRaceResults = async function() {
+  const el = document.getElementById('race-results-list'); if(!el)return;
+  const cu = window.CU; if(!cu)return;
+  el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  try {
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'raceResults'),fb.where('userId','==',cu.uid),fb.orderBy('createdAt','desc')));
+    if (snap.empty) { el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Henüz yarış sonucu eklenmemiş.</p>'; return; }
+    const results = [];
+    snap.forEach(d => { const {id:_,...rest}=d.data(); results.push({id:d.id,...rest}); });
+    el.innerHTML = results.map(r => window.raceResultCard(r, true)).join('');
+  } catch(e) { el.innerHTML='<p style="color:var(--muted)">Yüklenemedi: '+e.message+'</p>'; }
+};
+
+// ── Yarış sonucu sil ─────────────────────────────────────────────────────
+window.deleteRaceResult = async function(id) {
+  if (!confirm('Bu yarış sonucunu silmek istediğinizden emin misiniz?')) return;
+  try {
+    const fb = window._fb;
+    await fb.deleteDoc(fb.doc(fb.db,'raceResults',id));
+    toast && toast('Yarış sonucu silindi.','ok');
+    loadRaceResults && loadRaceResults();
+  } catch(e) { toast && toast('Hata: '+e.message,'err'); }
+};
+
+// ── Web Share API ile paylaş ──────────────────────────────────────────────
+window.shareRaceResult = async function(id) {
+  try {
+    const fb = window._fb;
+    const docSnap = await fb.getDoc(fb.doc(fb.db,'raceResults',id));
+    if (!docSnap.exists()) return;
+    const r = docSnap.data();
+    const text = `🏅 ${r.raceName||'Yarış'} tamamlandı!\n📏 ${r.distance||''} | ⏱ ${r.time||''} | 🚀 ${r.pace||''}\n${r.place?'🏆 '+r.place+'. derece\n':''}RunClubTürkiye — runclubturkiye.com`;
+    if (navigator.share) {
+      await navigator.share({ title: 'Yarış Sonucum — RunClubTürkiye', text, url: r.resultUrl||'https://www.runclubturkiye.com' });
+    } else {
+      await navigator.clipboard.writeText(text);
+      toast && toast('Paylaşım metni panoya kopyalandı!','ok');
+    }
+  } catch(e) { if (e.name !== 'AbortError') toast && toast('Paylaşım hatası: '+e.message,'err'); }
+};
+
+// ── leaveClub — kulüpten ayrılınca raceResults'dan clubId temizle ─────────
+window.leaveClub = async function(clubId) {
+  const cu = window.CU; if(!cu)return;
+  if(!confirm('Kulüpten ayrılmak istediğinizden emin misiniz?'))return;
+  try{
+    const fb=window._fb;
+    // Membership sil
+    const memSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',cu.uid),fb.where('clubId','==',clubId)));
+    const batch=[]; // Batch delete
+    memSnap.forEach(d=>batch.push(fb.deleteDoc(d.ref)));
+    // raceResults'dan clubId temizle
+    const rrSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'raceResults'),fb.where('userId','==',cu.uid),fb.where('clubId','==',clubId)));
+    rrSnap.forEach(d=>batch.push(fb.updateDoc(d.ref,{clubId:'',clubName:''})));
+    await Promise.all(batch);
+    toast&&toast('Kulüpten ayrıldınız.','ok');
+    loadMyClubs&&loadMyClubs();
+  }catch(e){toast&&toast('Hata: '+e.message,'err');}
+};
+
+// ── Admin: Tüm üye performanslarını listele ───────────────────────────────
+window.loadAllRaceResults = async function(filterUid) {
+  const el = document.getElementById('admin-race-results-list'); if(!el)return;
+  el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  try {
+    const fb = window._fb;
+    let q = fb.query(fb.collection(fb.db,'raceResults'), fb.orderBy('createdAt','desc'));
+    if (filterUid) q = fb.query(fb.collection(fb.db,'raceResults'), fb.where('userId','==',filterUid), fb.orderBy('createdAt','desc'));
+    const snap = await fb.getDocs(q);
+    if (snap.empty) { el.innerHTML='<p style="color:var(--muted);padding:20px">Kayıt bulunamadı.</p>'; return; }
+    const results = [];
+    snap.forEach(d=>{ const {id:_,...rest}=d.data(); results.push({id:d.id,...rest}); });
+    el.innerHTML = `<p style="font-size:12px;color:var(--muted);margin-bottom:12px">${results.length} sonuç listeleniyor</p>`
+      + results.map(r=>`<div style="background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:14px;margin-bottom:8px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+          <div>
+            <div style="font-weight:700;font-size:14px">🏅 ${r.raceName||'—'}</div>
+            <div style="font-size:12px;color:var(--muted);margin-top:3px">👤 ${r.userName||r.userId} ${r.clubName?'• 🤝 '+r.clubName:''}</div>
+          </div>
+          <div style="display:flex;flex-wrap:wrap;gap:5px;align-items:center">
+            ${r.distance?`<span style="background:var(--or);color:#fff;padding:2px 8px;border-radius:8px;font-size:11px">${r.distance}</span>`:''}
+            ${r.time?`<span style="background:var(--bg2);padding:2px 8px;border-radius:8px;font-size:11px">⏱ ${r.time}</span>`:''}
+            ${r.pace?`<span style="background:var(--bg2);padding:2px 8px;border-radius:8px;font-size:11px">🚀 ${r.pace}</span>`:''}
+            ${window.racePlaceBadge(r.place)}
+          </div>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">${r.date?'📅 '+r.date:''} ${r.resultUrl?`<a href="${r.resultUrl}" target="_blank" style="color:var(--or)">🔗 Sonuç</a>`:''}</div>
+      </div>`).join('');
+  } catch(e) { el.innerHTML='<p style="color:var(--muted)">Hata: '+e.message+'</p>'; }
+};
+
+// ── Kulüp admin: Kendi kulübünün üyelerinin performansları ───────────────
+window.loadClubRaceResults = async function(clubId) {
+  const el = document.getElementById('club-race-results-list'); if(!el||!clubId)return;
+  el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  try {
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'raceResults'),fb.where('clubId','==',clubId),fb.orderBy('createdAt','desc')));
+    if (snap.empty) { el.innerHTML='<p style="color:var(--muted);padding:20px">Bu kulüpten henüz performans verisi yok.</p>'; return; }
+    const results = [];
+    snap.forEach(d=>{ const {id:_,...rest}=d.data(); results.push({id:d.id,...rest}); });
+    el.innerHTML = results.map(r => `<div style="background:var(--card);border:1.5px solid var(--border);border-radius:10px;padding:12px;margin-bottom:8px">
+      <div style="font-weight:700;font-size:13px">🏅 ${r.raceName||'—'} <span style="font-weight:400;color:var(--muted);font-size:12px">— ${r.userName||''}</span></div>
+      <div style="display:flex;flex-wrap:wrap;gap:5px;margin-top:6px">
+        ${r.distance?`<span style="background:var(--or);color:#fff;padding:2px 8px;border-radius:8px;font-size:11px">${r.distance}</span>`:''}
+        ${r.time?`<span style="background:var(--bg2);padding:2px 8px;border-radius:8px;font-size:11px">⏱ ${r.time}</span>`:''}
+        ${r.pace?`<span style="background:var(--bg2);padding:2px 8px;border-radius:8px;font-size:11px">🚀 ${r.pace}</span>`:''}
+        ${window.racePlaceBadge(r.place)}
+      </div>
+      <div style="font-size:11px;color:var(--muted);margin-top:4px">${r.date||''}</div>
+    </div>`).join('');
+  } catch(e) { el.innerHTML='<p style="color:var(--muted)">Hata: '+e.message+'</p>'; }
+};
+
+
+
+window.switchKmTab=function(tab){
+  const kmContent=document.getElementById('km-tab-content');
+  const rrContent=document.getElementById('rr-tab-content');
+  const kmBtn=document.getElementById('km-tab-btn');
+  const rrBtn=document.getElementById('rr-tab-btn');
+  if(tab==='km'){
+    if(kmContent)kmContent.style.display='block';
+    if(rrContent)rrContent.style.display='none';
+    if(kmBtn){kmBtn.style.color='var(--or)';kmBtn.style.borderBottomColor='var(--or)';}
+    if(rrBtn){rrBtn.style.color='var(--muted)';rrBtn.style.borderBottomColor='transparent';}
+  }else{
+    if(kmContent)kmContent.style.display='none';
+    if(rrContent)rrContent.style.display='block';
+    if(rrBtn){rrBtn.style.color='var(--or)';rrBtn.style.borderBottomColor='var(--or)';}
+    if(kmBtn){kmBtn.style.color='var(--muted)';kmBtn.style.borderBottomColor='transparent';}
+    if(typeof window.loadRaceResults==='function')window.loadRaceResults();
+  }
 };
 
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)
@@ -5357,18 +5676,31 @@ function buildDashboard(){
       <div id="dash-my-clubs-list"><div class="spinner" style="margin:20px auto"></div></div>
     </div>
     <div class="dash-content" id="dp-my-km">
-      <h2 style="margin-bottom:16px">KM Takibi</h2>
-      <div class="card" style="padding:24px;margin-bottom:14px">
-        <div style="font-size:36px;font-weight:700;color:var(--or);margin-bottom:4px">${CU.totalKm||0} km</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Toplam koşulan mesafe</div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
-          <input type="number" id="km-input" placeholder="km girin..." style="max-width:130px"/>
-          <button class="btn btn-or" onclick="addKm(document.getElementById('km-input').value)">Manuel Ekle</button>
-          ${CU.stravaLink?'<button class="btn btn-sm" style="background:#fc4c02;color:#fff;border:none;cursor:pointer" onclick="syncStravaData()">🟠 Strava Sync</button>':''}
-        </div>
-        ${!CU.stravaLink?'<p style="font-size:11px;color:var(--muted)">Strava senkronizasyonu için <a onclick="nav(\'profile\'" style="cursor:pointer;color:var(--or)">profiline</a> Strava linki ekle.</p>':''}
+      <h2 style="margin-bottom:16px">🏃 Antrenman & Yarış</h2>
+      <div style="display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid var(--border)">
+        <button id="km-tab-btn" onclick="switchKmTab('km')" style="padding:8px 16px;border:none;background:none;cursor:pointer;font-weight:700;font-size:14px;color:var(--or);border-bottom:2px solid var(--or);margin-bottom:-2px">📍 KM Takibi</button>
+        <button id="rr-tab-btn" onclick="switchKmTab('rr')" style="padding:8px 16px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px">🏅 Yarış Sonuçlarım</button>
       </div>
-      <div id="km-events-list"></div>
+      <div id="km-tab-content">
+        <div class="card" style="padding:24px;margin-bottom:14px">
+          <div style="font-size:36px;font-weight:700;color:var(--or);margin-bottom:4px">${CU.totalKm||0} km</div>
+          <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Toplam koşulan mesafe</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+            <input type="number" id="km-input" placeholder="km girin..." style="max-width:130px"/>
+            <button class="btn btn-or" onclick="addKm(document.getElementById('km-input').value)">Manuel Ekle</button>
+            ${CU.stravaLink?'<button class="btn btn-sm" style="background:#fc4c02;color:#fff;border:none;cursor:pointer" onclick="syncStravaData()">🟠 Strava Sync</button>':''}
+          </div>
+          ${!CU.stravaLink?'<p style="font-size:11px;color:var(--muted)">Strava senkronizasyonu için <a onclick="nav(\'profile\'" style="cursor:pointer;color:var(--or)">profiline</a> Strava linki ekle.</p>':''}
+        </div>
+        <div id="km-events-list"></div>
+      </div>
+      <div id="rr-tab-content" style="display:none">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
+          <h3 style="margin:0">🏅 Yarış Sonuçlarım</h3>
+          <button class="btn btn-or btn-sm" onclick="buildRaceResultModal();openModal('race-result-modal')">+ Yarış Sonucu Ekle</button>
+        </div>
+        <div id="race-results-list"><p style="color:var(--muted);text-align:center;padding:20px">Yüklemek için sekmeye tıklayın.</p></div>
+      </div>
     </div>
     <div class="dash-content" id="dp-badges"><h2 style="margin-bottom:16px">Rozetlerim</h2>
       <div class="badge-grid">${BADGE_RULES.map(b=>`<div class="badge-it ${myBadges.includes(b.id)?'earned':''}"><div class="bi">${myBadges.includes(b.id)?b.ico:'🔒'}</div><div class="bn">${b.name}</div><div class="bd">${b.desc}</div></div>`).join('')}</div>
@@ -5754,6 +6086,19 @@ function renderAdminSection(sec){
         <div id="pn-subscribers-list"><div class="spinner" style="margin:20px auto"></div></div>
       </div>`;
     setTimeout(()=>loadPushSubscribers(),100);
+    return;
+  }
+  if(sec==='performances'){
+    main.innerHTML=`<h2 style="margin-bottom:18px">🏅 Yarış Performansları</h2>
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap;margin-bottom:12px">
+          <input id="perf-filter-uid" placeholder="Kullanıcı ID ile filtrele (opsiyonel)" style="flex:1;min-width:200px"/>
+          <button class="btn btn-or btn-sm" onclick="loadAllRaceResults(document.getElementById('perf-filter-uid').value.trim()||undefined)">Listele</button>
+          <button class="btn btn-ghost btn-sm" onclick="document.getElementById('perf-filter-uid').value='';loadAllRaceResults()">Tümünü Göster</button>
+        </div>
+        <div id="admin-race-results-list"><p style="color:var(--muted)">Yukarıdan listeleme yapın.</p></div>
+      </div>`;
+    setTimeout(()=>loadAllRaceResults(),100);
     return;
   }
   if(sec==='community'){

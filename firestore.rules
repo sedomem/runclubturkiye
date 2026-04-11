@@ -164,3 +164,15 @@ service cloud.firestore {
 
   }
 }
+
+    // ── YARIŞI PERFORMANS VERİLERİ ──────────────────────────────
+    match /raceResults/{id} {
+      // Herkes okuyabilir (kulüp admini için) — ama sadece kendi veya süper admin silebilir
+      allow read: if isAuth();
+      // Oluşturma: giriş yapmış kullanıcı, kendi userId'siyle
+      allow create: if isAuth() && request.resource.data.userId == uid();
+      // Güncelleme: sadece kendi kaydı (örn. clubId temizleme)
+      allow update: if isAuth() && resource.data.userId == uid();
+      // Silme: kendi kaydı veya süper admin
+      allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == uid());
+    }

@@ -101,7 +101,9 @@ service cloud.firestore {
 
     match /announcements/{id} {
       allow read: if isAuth();
-      allow write: if isSuperOrGroup();
+      allow create: if isSuperOrGroup();
+      allow update: if isSuperOrGroup() && (isSuperAdmin() || resource.data.authorUid == request.auth.uid);
+      allow delete: if isSuperOrGroup() && (isSuperAdmin() || resource.data.authorUid == request.auth.uid);
     }
 
     match /posts/{id} {

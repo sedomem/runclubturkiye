@@ -4446,7 +4446,7 @@ window.renderClubsPage=async()=>{
         const u=d.data();
         if(u.clubName){
           seen.add(d.id);
-          allClubs.push({id:d.id,name:u.clubName,city:u.city||'',desc:u.clubDesc||'',imgUrl:u.clubImg||'',open:u.clubOpen!==false,members:u.clubMemberCount||0,adminUid:d.id,insta:u.clubInsta||'',strava:u.clubStrava||''});
+          allClubs.push({id:d.id,name:u.clubName,city:u.city||'',desc:u.clubDesc||'',imgUrl:u.clubImg||'',open:u.clubOpen!==false,members:u.clubMemberCount||0,adminUid:d.id,insta:u.clubInsta||'',strava:u.clubStrava||'',parkur:u.clubParkur||'',mapUrl:u.clubMapUrl||''});
         }
       });
     }catch(e1){console.warn('users query:',e1.message);}
@@ -4497,6 +4497,8 @@ window.openClub=async(id)=>{
           <span class="tag ${c.open?'tag-gr':'tag-bl'}" style="margin:0">${c.open?'Açık Kulüp':'Kodlu Kulüp'}</span>
           ${c.insta?`<a href="https://instagram.com/${c.insta.replace('@','')}" target="_blank">📸 ${c.insta}</a>`:''}
           ${c.strava?`<a href="${c.strava}" target="_blank">🟠 Strava</a>`:''}
+          ${c.parkur?`<span style="font-size:12px;color:var(--muted)">🏃 Parkur: <b style="color:var(--text)">${c.parkur}</b></span>`:''}
+          ${c.mapUrl?`<a href="${c.mapUrl}" target="_blank" style="font-size:12px">📍 Haritada Gör</a>`:''}
         </div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           ${isJoined
@@ -5616,6 +5618,78 @@ window.sendClubPush=async function(){
   }
 };
 
+
+// ── DUYURU DÜZENLEME ────────────────────────────────────────────
+window.gEditAnnouncement=function(id,title,body){
+  // Formu edit moduna al
+  const titleEl=document.getElementById('ga-ann-title');
+  const bodyEl=document.getElementById('ga-ann-body');
+  if(!titleEl||!bodyEl)return;
+  titleEl.value=decodeURIComponent(title)||title;
+  bodyEl.value=decodeURIComponent(body)||body;
+  // Edit ID'yi forma yaz
+  const form=titleEl.closest('.card')||titleEl.parentElement;
+  if(form)form.dataset.editId=id;
+  titleEl.dataset.editId=id;
+  // Buton metnini güncelle
+  const btn=document.querySelector('[onclick*="gSaveAnnouncement"]');
+  if(btn){btn.textContent='💾 Güncelle';btn.onclick=()=>gUpdateAnnouncement(id);}
+  titleEl.focus();
+  titleEl.scrollIntoView({behavior:'smooth',block:'nearest'});
+};
+
+window.gUpdateAnnouncement=async function(id){
+  const title=document.getElementById('ga-ann-title')?.value?.trim();
+  const body=document.getElementById('ga-ann-body')?.value?.trim();
+  if(!title||!body){toast('Başlık ve içerik gerekli','err');return;}
+  try{
+    const fb=window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'announcements',id),{
+      title,body,
+      updatedAt:fb.serverTimestamp(),
+      updatedBy:window.CU?.uid||''
+    });
+    toast('Duyuru güncellendi ✓','ok');
+    document.getElementById('ga-ann-title').value='';
+    document.getElementById('ga-ann-body').value='';
+    // Butonu tekrar Yayınla'ya döndür
+    const btn=document.querySelector('[onclick*="gUpdateAnnouncement"],[onclick*="gSaveAnnouncement"]');
+    if(btn){btn.textContent='Yayınla';btn.onclick=gSaveAnnouncement;}
+    gLoadAnnouncements();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+
+
+// ── Duyuru düzenleme ────────────────────────────────────────
+window.gEditAnnouncement=function(id,title,body){
+  // Form'u doldur ve edit moduna al
+  const titleEl=document.getElementById('ga-ann-title');
+  const bodyEl=document.getElementById('ga-ann-body');
+  const btn=document.querySelector('[onclick="gSaveAnnouncement()"]');
+  if(titleEl)titleEl.value=title;
+  if(bodyEl)bodyEl.value=body;
+  if(btn){btn.textContent='✏️ Güncelle';btn.onclick=()=>gUpdateAnnouncement(id);}
+  titleEl?.scrollIntoView({behavior:'smooth'});
+  titleEl?.focus();
+};
+
+window.gUpdateAnnouncement=async function(id){
+  const title=document.getElementById('ga-ann-title')?.value?.trim();
+  const body=document.getElementById('ga-ann-body')?.value?.trim();
+  if(!title||!body){toast('Başlık ve içerik gerekli','err');return;}
+  try{
+    const fb=window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'announcements',id),{title,body,updatedAt:fb.serverTimestamp()});
+    toast('Duyuru güncellendi ✓','ok');
+    // Formu sıfırla
+    document.getElementById('ga-ann-title').value='';
+    document.getElementById('ga-ann-body').value='';
+    const btn=document.querySelector('[onclick*="gUpdateAnnouncement"]');
+    if(btn){btn.textContent='Yayınla';btn.onclick=gSaveAnnouncement;}
+    gLoadAnnouncements();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)
 window.renderHomeData=renderHomeData;
 window.renderEvts=renderEvts;
@@ -6240,18 +6314,6 @@ function renderAdminSection(sec){
     },100);
     return;
   }
-  if(sec==='notifications'){
-    main.innerHTML=`<h2 style="margin-bottom:18px">🔔 Kulüp Bildirimi Gönder</h2>
-      <div class="card" style="padding:20px;margin-bottom:16px">
-        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Sadece kendi kulübünüzün üyelerine anlık bildirim gönderin.</p>
-        <div class="form-grp"><label>Bildirim Başlığı *</label><input id="gp-notif-title" placeholder="Örn: Yarın sabah antrenman var!"/></div>
-        <div class="form-grp"><label>Mesaj *</label><textarea id="gp-notif-body" rows="3" placeholder="Örn: Pazar 08:00'de parkta buluşuyoruz."></textarea></div>
-        <div class="form-grp"><label>Deep Link URL (opsiyonel)</label><input id="gp-notif-url" placeholder="https://www.runclubturkiye.com/#events"/></div>
-        <div id="gp-notif-status" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
-        <button class="btn btn-or" onclick="sendClubPush()">📢 Kulübüme Bildirim Gönder</button>
-      </div>`;
-    return;
-  }
   if(sec==='performances'){
     main.innerHTML=`<h2 style="margin-bottom:18px">🏅 Yarış Performansları</h2>
       <div class="card" style="padding:20px;margin-bottom:16px">
@@ -6726,6 +6788,8 @@ function renderGroupSection(sec){
         </div>
         <div class="form-grp"><label>Instagram</label><input id="gs-insta" placeholder="@kulupadi"/></div>
         <div class="form-grp"><label>Strava Kulübü Linki</label><input id="gs-strava" placeholder="https://www.strava.com/clubs/..."/></div>
+        <div class="form-grp"><label>Antrenman Parkuru</label><input id="gs-parkur" placeholder="Örn: Atatürk Koşu Parkuru"/></div>
+        <div class="form-grp"><label>Google Harita Konumu</label><input id="gs-mapurl" placeholder="https://maps.google.com/..."/></div>
         <button class="btn btn-or" onclick="gSaveSettings()">Kaydet</button>
         <div style="margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
           <h3 style="margin-bottom:12px;font-size:14px">Admin Bilgilerim</h3>
@@ -6781,19 +6845,14 @@ function renderGroupSection(sec){
     if(s('gs-open'))s('gs-open').value=CU.clubOpen===false?'false':'true';
     if(s('gs-insta'))s('gs-insta').value=CU.clubInsta||'';
     if(s('gs-strava'))s('gs-strava').value=CU.clubStrava||'';
+    if(s('gs-parkur'))s('gs-parkur').value=CU.clubParkur||'';
+    if(s('gs-mapurl'))s('gs-mapurl').value=CU.clubMapUrl||'';
+    if(s('gs-parkur'))s('gs-parkur').value=CU.clubParkur||'';
+    if(s('gs-harita'))s('gs-harita').value=CU.clubHarita||'';
     const info=document.getElementById('g-admin-info');
     if(info)info.innerHTML=`<div>👤 <b>${CU.name||'—'}</b></div><div>📧 ${CU.email||'—'}</div><div>📞 ${CU.phone||'—'}</div>`;
   }
 }
-window.gPreviewEventImg=function(file){
-  if(!file)return;
-  const prev=document.getElementById('ge-img-preview');
-  const ph=document.getElementById('ge-img-placeholder');
-  const reader=new FileReader();
-  reader.onload=e=>{if(prev){prev.src=e.target.result;prev.style.display='block';}if(ph)ph.style.display='none';};
-  reader.readAsDataURL(file);
-};
-window.gPreviewEventUrl=function(url){
   const prev=document.getElementById('ge-img-preview');
   const ph=document.getElementById('ge-img-placeholder');
   if(prev){prev.src=url;prev.style.display=url?'block':'none';}
@@ -6910,7 +6969,9 @@ window.gSaveSettings=async()=>{
     clubImg,
     clubOpen:document.getElementById('gs-open')?.value==='true',
     clubInsta:g('gs-insta')||'',
-    clubStrava:g('gs-strava')||''
+    clubStrava:g('gs-strava')||'',
+    clubParkur:g('gs-parkur')||'',
+    clubMapUrl:g('gs-mapurl')||''
   };
   try{
     // users koleksiyonuna yaz (auth gerekli)
@@ -6918,7 +6979,7 @@ window.gSaveSettings=async()=>{
     Object.assign(CU,data);
     // clubs koleksiyonuna da yaz (public read için) — Rules'da izin yoksa sessizce geç
     try{
-      const clubsData={name:data.clubName||'',city:data.city||'',desc:data.clubDesc||'',imgUrl:clubImg,open:data.clubOpen!==false,members:CU.clubMemberCount||0,adminUid:CU.uid,insta:data.clubInsta||'',strava:data.clubStrava||'',updatedAt:fb.serverTimestamp()};
+      const clubsData={name:data.clubName||'',city:data.city||'',desc:data.clubDesc||'',imgUrl:clubImg,open:data.clubOpen!==false,members:CU.clubMemberCount||0,adminUid:CU.uid,insta:data.clubInsta||'',strava:data.clubStrava||'',parkur:clubParkur,harita:clubHarita,updatedAt:fb.serverTimestamp()};
       await fb.setDoc(fb.doc(fb.db,'clubs',CU.uid),clubsData,{merge:true});
     }catch(clubErr){
       console.warn('clubs koleksiyonu yazılamadı (Firestore rules güncellemesi gerekiyor):',clubErr.message);
@@ -7037,8 +7098,24 @@ window.gSaveAnnouncement=async()=>{
   if(!title||!body){toast('Başlık ve içerik gerekli','err');return;}
   try{
     const fb=window._fb;
-    await fb.addDoc(fb.collection(fb.db,'announcements'),{title,body,clubId:CU.clubId||CU.uid,clubName:CU.clubName||'',authorName:CU.name,authorUid:CU.uid,createdAt:fb.serverTimestamp()});
-    toast('Duyuru yayınlandı ✓','ok');
+    const clubId=CU.clubId||CU.uid;
+    await fb.addDoc(fb.collection(fb.db,'announcements'),{title,body,clubId,clubName:CU.clubName||'',authorName:CU.name,authorUid:CU.uid,createdAt:fb.serverTimestamp()});
+    // Aynı anda kulüp üyelerine push bildirim gönder
+    try{
+      await fb.addDoc(fb.collection(fb.db,'pushNotifications'),{
+        title,
+        body: body.length>100?body.slice(0,97)+'...':body,
+        url:'https://www.runclubturkiye.com/',
+        image:'',
+        target:'club',
+        targetRole:'',
+        targetClubId:clubId,
+        status:'pending',
+        sentBy:CU.email||'groupadmin',
+        createdAt:fb.serverTimestamp()
+      });
+    }catch(pe){console.warn('[Push] Bildirim gönderilemedi:',pe.message);}
+    toast('Duyuru yayınlandı ve üyelere bildirim gönderildi ✓','ok');
     document.getElementById('ga-ann-title').value='';
     document.getElementById('ga-ann-body').value='';
     gLoadAnnouncements();
@@ -7230,7 +7307,7 @@ window.gSaveEvent=async()=>{
 };
 
 
-async function gLoadAnnouncements(){
+async async function gLoadAnnouncements(){
   const el=document.getElementById('g-announcements-list');if(!el)return;
   try{
     const fb=window._fb;
@@ -7241,7 +7318,19 @@ async function gLoadAnnouncements(){
     let html='';
     anns.forEach(a=>{
       const date=a.createdAt?.toDate?.()?.toLocaleDateString('tr')||'';
-      html+=`<div class="card" style="padding:16px;margin-bottom:10px"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div><h3 style="font-size:14px;margin-bottom:4px">${a.title}</h3><p style="font-size:12px;color:var(--muted);line-height:1.6">${a.body}</p><div style="font-size:11px;color:var(--muted);margin-top:8px">📅 ${date}</div></div><button class="btn btn-red btn-sm" onclick="gDeleteAnnouncement('${a.id}')">🗑</button></div></div>`;
+      html+=`<div class="card" style="padding:16px;margin-bottom:10px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+          <div style="flex:1">
+            <h3 style="font-size:14px;margin-bottom:4px">${a.title}</h3>
+            <p style="font-size:12px;color:var(--muted);line-height:1.6">${a.body}</p>
+            <div style="font-size:11px;color:var(--muted);margin-top:8px">📅 ${date}</div>
+          </div>
+          <div style="display:flex;gap:6px;flex-shrink:0">
+            <button class="btn btn-ghost btn-sm" onclick="gEditAnnouncement('${a.id}','${(a.title||'').replace(/'/g,"&#39;")}','${(a.body||'').replace(/'/g,"&#39;")}')">✏️ Düzenle</button>
+            <button class="btn btn-red btn-sm" onclick="gDeleteAnnouncement('${a.id}')">🗑</button>
+          </div>
+        </div>
+      </div>`;
     });
     el.innerHTML=html;
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi</p>`;}
@@ -7253,14 +7342,21 @@ window.gDeleteAnnouncement=async(id)=>{
   catch(e){toast(e.message,'err');}
 };
 
-async function gLoadChat(){
-  const room='group-'+(CU.clubId||CU.uid);
+async async function gLoadChat(){
+  const room='admin-chat';
   const container=document.getElementById('g-chat-box');if(!container)return;
   try{
     const fb=window._fb;
-    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,`chats/${room}/messages`),fb.orderBy('createdAt')));
+    // orderBy Firestore index gerektiriyor - JS'de sırala
+    const snap=await fb.getDocs(fb.collection(fb.db,`chats/${room}/messages`));
+    // createdAt'a göre sırala
+    const chatDocs=[...snap.docs].sort((a,b)=>{
+      const ta=a.data().createdAt?.seconds||0;
+      const tb=b.data().createdAt?.seconds||0;
+      return ta-tb;
+    });
     container.innerHTML='';
-    snap.forEach(d=>{
+    chatDocs.forEach(d=>{
       const m=d.data();const isMe=m.senderId===CU.uid;
       const div=document.createElement('div');
       div.style.cssText=`display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px`;
@@ -7272,7 +7368,7 @@ async function gLoadChat(){
 }
 
 window.gSendChat=async()=>{
-  const room='group-'+(CU.clubId||CU.uid);
+  const room='admin-chat';
   const input=document.getElementById('g-chat-input');
   const msg=input?.value?.trim();if(!msg)return;
   try{
@@ -7441,17 +7537,45 @@ window.gLoadEventAttendees=async(eventId,eventTitle)=>{
   try{
     const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'),fb.where('eventId','==',eventId)));
     if(snap.empty){document.getElementById('attendees-list').innerHTML='<p style="color:var(--muted);padding:20px 0">Henüz kimse kaydolmadı.</p>';return;}
-    const uids=[];snap.forEach(d=>uids.push(d.data().userId));
-    const userProms=uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)));
-    const users=await Promise.all(userProms);
-    let tbl=`<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Toplam <b style="color:var(--text)">${uids.length}</b> katılımcı</p>
-      <table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Pace</th></tr></thead><tbody>`;
-    users.forEach(s=>{
-      if(!s.exists())return;
-      const u=s.data();
-      tbl+=`<tr><td><b>${u.name||'—'}</b></td><td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td><td>${u.phone||'—'}</td><td>${(u.pace||[]).join(', ')||'—'}</td></tr>`;
+    // RSVP verilerini topla (pace + parkur rsvp dokümanından gelir)
+    const rsvpRows=[];
+    snap.forEach(d=>{const r=d.data();rsvpRows.push({...r,_rsvpId:d.id});});
+    // Kullanıcı bilgilerini paralel çek
+    const uids=[...new Set(rsvpRows.map(r=>r.userId).filter(Boolean))];
+    const userMap={};
+    if(uids.length){
+      const userProms=uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)));
+      const userDocs=await Promise.all(userProms);
+      userDocs.forEach(s=>{if(s.exists())userMap[s.id]=s.data();});
+    }
+    let tbl=`<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Toplam <b style="color:var(--text)">${rsvpRows.length}</b> katılımcı</p>
+      <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
+        <thead><tr>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">Ad Soyad</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">E-posta</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">Telefon</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">Pace</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">Parkur</th>
+        </tr></thead><tbody>`;
+    rsvpRows.forEach(rsvp=>{
+      const u=userMap[rsvp.userId]||{};
+      const name=rsvp.userName||u.name||'—';
+      const email=rsvp.userEmail||u.email||'—';
+      const phone=u.phone||'—';
+      // Pace: RSVP'den al (kullanıcının etkinlik için seçtiği pace)
+      const paceArr=Array.isArray(rsvp.pace)?rsvp.pace:(rsvp.pace?[rsvp.pace]:[]);
+      const paceStr=paceArr.length?paceArr.join(', '):'—';
+      // Parkur: RSVP'den al
+      const parkurStr=rsvp.parkur||rsvp.distance||'—';
+      tbl+=`<tr style="border-bottom:1px solid var(--border)">
+        <td style="padding:8px 10px;font-size:13px"><b>${name}</b></td>
+        <td style="padding:8px 10px;font-size:11px;color:var(--muted)">${email}</td>
+        <td style="padding:8px 10px;font-size:12px">${phone}</td>
+        <td style="padding:8px 10px"><span style="background:var(--or);color:#fff;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600">${paceStr}</span></td>
+        <td style="padding:8px 10px"><span style="background:var(--bg2);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600">${parkurStr}</span></td>
+      </tr>`;
     });
-    tbl+='</tbody></table>';
+    tbl+='</tbody></table></div>';
     document.getElementById('attendees-list').innerHTML=tbl;
   }catch(e){document.getElementById('attendees-list').innerHTML=`<p style="color:var(--muted)">Hata: ${e.message}</p>`;}
 };

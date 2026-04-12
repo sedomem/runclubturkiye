@@ -5997,7 +5997,7 @@ window.openQRScanner = function(eventId) {
   }
 
   // Scanner container oluştur
-  wrap.innerHTML = '<div id="qr-reader" style="width:100%;max-width:400px;border-radius:10px;overflow:hidden"></div><button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="closeQRScanner()">✕ Tarayıcıyı Kapat</button>';
+  wrap.innerHTML = '<div style="width:100%;max-width:480px;margin:0 auto"><div id="qr-reader" style="width:100%;border-radius:10px;overflow:hidden"></div><button class="btn btn-ghost btn-sm" style="margin-top:8px;width:100%" onclick="closeQRScanner()">✕ Tarayıcıyı Kapat</button></div>';
   wrap.style.display = 'block';
   if (resultEl) resultEl.innerHTML = '';
 
@@ -6010,7 +6010,7 @@ window.openQRScanner = function(eventId) {
   window._qrScanner = new Html5Qrcode('qr-reader');
   window._qrScanner.start(
     { facingMode: 'environment' },
-    { fps: 10, qrbox: { width: 250, height: 250 } },
+    { fps: 10, qrbox: (vw => ({ width: Math.min(250, vw-40), height: Math.min(250, vw-40) }))(window.innerWidth) },
     (decodedText) => { window.processQRScan(decodedText, eventId); },
     (err) => { /* tarama devam ediyor */ }
   ).catch(err => {
@@ -6028,27 +6028,56 @@ window.closeQRScanner = function() {
 };
 
 window.processQRScan = async function(scannedText, eventId) {
-  // Bip sesi + kısa duraklat (aynı kodu iki kez okuma)
-  if (window._lastScanned === scannedText && Date.now() - (window._lastScannedAt||0) < 3000) return;
-  window._lastScanned = scannedText;
+  // 1. Sanitize — trim + boşluk/satırsonu temizle
+  const raw = (scannedText || '').trim();
+
+  // Debounce — aynı QR 3 sn içinde tekrar okunmasın
+  if (window._lastScanned === raw && Date.now() - (window._lastScannedAt||0) < 3000) return;
+  window._lastScanned = raw;
   window._lastScannedAt = Date.now();
 
   const resultEl = document.getElementById('qr-scan-result');
   const fb = window._fb;
   if (!fb) return;
 
-  // uid ayıkla - "RCT:eventId:uid:timestamp" veya düz uid
-  let uid = scannedText;
-  if (scannedText.startsWith('RCT:')) {
-    const parts = scannedText.split(':');
-    uid = parts[2] || '';
+  // 2. UID ayıkla — tüm formatları destekle
+  let uid = '';
+  try {
+    // JSON format: {"userId":"xxx"} veya {"uid":"xxx"}
+    if (raw.startsWith('{')) {
+      const obj = JSON.parse(raw);
+      uid = (obj.userId || obj.uid || '').trim();
+    }
+    // URL format: https://...?uid=xxx
+    else if (raw.startsWith('http')) {
+      const url = new URL(raw);
+      uid = (url.searchParams.get('uid') || url.searchParams.get('userId') || '').trim();
+    }
+    // RCT:eventId:uid:timestamp formatı
+    else if (raw.startsWith('RCT:')) {
+      uid = (raw.split(':')[2] || '').trim();
+    }
+    // Düz UID
+    else {
+      uid = raw;
+    }
+  } catch(parseErr) {
+    uid = raw; // parse başarısız → raw'ı kullan
   }
-  if (!uid) { if(resultEl) resultEl.innerHTML = '<p style="color:#f87171">Geçersiz QR kod</p>'; return; }
+
+  if (!uid) {
+    if (resultEl) resultEl.innerHTML = '<p style="color:#f87171">Geçersiz QR — UID okunamadı</p>';
+    return;
+  }
+
+  // 3. Path log — doğrulamak için
+  console.log('[QR] eventId:', eventId, '| scannedUid:', uid);
+  console.log('[QR] Firestore path: events/' + eventId + '/attendees/' + uid);
 
   if (resultEl) resultEl.innerHTML = '<div class="spinner" style="margin:8px auto"></div>';
 
   try {
-    // 1. events/{eventId}/attendees/{uid} yaz (checkedIn)
+    // events/{eventId}/attendees/{uid} yaz
     await fb.setDoc(
       fb.doc(fb.db, `events/${eventId}/attendees/${uid}`),
       { checkedIn: true, checkInTime: fb.serverTimestamp(), uid },

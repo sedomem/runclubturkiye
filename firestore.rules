@@ -42,9 +42,11 @@ service cloud.firestore {
       // QR Check-in: sadece SA ve GA yazabilir
       match /attendees/{userId} {
         allow read: if isAuth();
-        allow create: if isSuperOrGroup();
-        allow update: if isSuperOrGroup();
-        allow delete: if isSuperAdmin();
+        allow create, update: if isAuth() && (
+          request.auth.token.email == 'sedomem@gmail.com' ||
+          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'groupadmin'
+        );
+        allow delete: if isAuth() && request.auth.token.email == 'sedomem@gmail.com';
       }
     }
 

@@ -973,6 +973,21 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   #dash-sidebar{display:none!important}
   .dash-wrap{grid-template-columns:1fr!important;gap:0!important;padding:12px 0!important}
 }
+
+/* ── Mobile Responsive ─────────────────────────────────── */
+@media(max-width:640px){
+  .profile-grid{grid-template-columns:1fr!important;}
+  .health-grid{grid-template-columns:1fr!important;}
+  #pg-profile .container{padding:12px!important;}
+  #qr-modal .modal{width:95vw!important;padding:16px!important;}
+  #qr-container{transform:scale(.95);}
+  .admin-wrap{flex-direction:column;}
+  .admin-sb{width:100%!important;min-height:unset!important;flex-direction:row!important;flex-wrap:wrap;gap:4px;padding:8px!important;}
+  .admin-sb button{flex:1;min-width:100px;font-size:12px!important;padding:8px 6px!important;}
+  .admin-main{padding:12px!important;}
+  #panel-main table{font-size:11px;}
+  #panel-main th,#panel-main td{padding:5px 6px!important;}
+}
 </style>
 </head>
 <body>
@@ -2038,7 +2053,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(this)"/>
     <div><div style="font-size:19px;font-weight:700" id="profile-name-display">Kullanıcı</div><div style="font-size:13px;color:var(--muted)" id="profile-email-display"></div></div>
   </div>
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px" class="profile-grid">
     <div class="card" style="padding:22px">
       <h3 style="margin-bottom:14px;font-size:15px">Kişisel Bilgiler</h3>
       <div class="form-grp"><label>Ad Soyad</label><input type="text" id="pf-name"/></div>
@@ -2074,6 +2089,45 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <button class="btn btn-ghost btn-full" onclick="toast('Şifre güncellendi ✓','ok')">Şifreyi Güncelle</button>
     </div>
   </div>
+
+  <!-- Güvenlik & Sağlık Bölümü -->
+  <div class="card" style="padding:22px;margin-top:20px;border-left:3px solid #ef4444">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+      <span style="font-size:20px">🚨</span>
+      <h3 style="font-size:15px;margin:0">Acil Durum & Sağlık Bilgileri</h3>
+    </div>
+    <p style="font-size:12px;color:#ef4444;background:#fef2f2;padding:8px 12px;border-radius:6px;margin-bottom:16px">
+      ⚠️ Bu bilgiler sadece acil durumlarda hayat kurtarmak için toplanır ve yalnızca yetkili kişilerle paylaşılır.
+    </p>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px" class="health-grid">
+      <div class="form-grp" style="margin:0">
+        <label>Acil Kişi Adı</label>
+        <input type="text" id="pf-ec-name" placeholder="Ad Soyad"/>
+      </div>
+      <div class="form-grp" style="margin:0">
+        <label>Acil Kişi Telefonu</label>
+        <input type="tel" id="pf-ec-phone" placeholder="05xx xxx xx xx"/>
+      </div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;margin-top:12px" class="health-grid">
+      <div class="form-grp" style="margin:0">
+        <label>Kan Grubu</label>
+        <select id="pf-blood">
+          <option value="">Seçin</option>
+          <option>A+</option><option>A-</option>
+          <option>B+</option><option>B-</option>
+          <option>AB+</option><option>AB-</option>
+          <option>0+</option><option>0-</option>
+        </select>
+      </div>
+      <div class="form-grp" style="margin:0">
+        <label>Tıbbi Notlar (alerji, ilaç, kronik hastalık)</label>
+        <input type="text" id="pf-medical" placeholder="Örn: Penisilin alerjisi, EpiPen taşıyorum"/>
+      </div>
+    </div>
+    <button class="btn btn-or" style="margin-top:16px;width:100%" onclick="saveProfile()">🚑 Sağlık Bilgilerini Kaydet</button>
+  </div>
+
 </div></div>
 
 <!-- SUPER ADMIN -->
@@ -2234,7 +2288,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 <!-- QR -->
 <div class="overlay" id="qr-modal">
-  <div class="modal" style="text-align:center;max-width:360px">
+  <div class="modal" style="text-align:center;max-width:360px;width:95vw">
     <button class="close-x" onclick="closeModal('qr-modal')">×</button>
     <h2 style="margin-bottom:4px">📲 QR Check-in</h2>
     <p style="font-size:12px;color:var(--muted);margin-bottom:14px" id="qr-event-name"></p>
@@ -2371,8 +2425,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="club-cta-float" style="position:fixed;bottom:24px;left:24px;z-index:190;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 32px rgba(44,24,16,.18);border:1.5px solid #E0D8CC;display:flex;align-items:center;gap:14px;max-width:320px;animation:ctaSlideIn .5s cubic-bezier(.34,1.56,.64,1) .8s both;">
   <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#E8622A,#c94e1c);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#127939;</div>
   <div style="flex:1;min-width:0">
-    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulübünüz Burada Yok mu?</div>
-    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Kulübünüzü hemen kaydedin</div>
+    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulubuunuuz Burada Yok mu?</div>
+    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Klubunuzu hemen kaydedin</div>
   </div>
   <button onclick="openAuth('groupadmin')" style="background:#E8622A;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">Basvur</button>
   <button onclick="document.getElementById('club-cta-float').style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#B09880;font-size:16px;cursor:pointer;line-height:1;padding:2px">x</button>
@@ -2652,6 +2706,12 @@ function syncProfileUI(){
   document.getElementById('pf-phone').value=CU.phone||'';
   document.getElementById('pf-strava').value=CU.stravaLink||'';
   if(CU.pace)CU.pace.forEach(p=>{document.querySelectorAll('#pf-pace-sel .pace-opt').forEach(b=>{if(b.textContent.trim()===p)b.classList.add('on');});});
+  // Güvenlik & Sağlık alanları
+  const ec=CU.emergencyContact||{};
+  const pfEcN=document.getElementById('pf-ec-name');if(pfEcN)pfEcN.value=ec.name||'';
+  const pfEcP=document.getElementById('pf-ec-phone');if(pfEcP)pfEcP.value=ec.phone||'';
+  const pfBl=document.getElementById('pf-blood');if(pfBl)pfBl.value=CU.bloodType||'';
+  const pfMed=document.getElementById('pf-medical');if(pfMed)pfMed.value=CU.medicalNotes||'';
 }
 window.saveProfile=async()=>{
   if(!CU)return;
@@ -5969,30 +6029,54 @@ window.processQRScan = async function(scannedText, eventId) {
 
 // ── Dijital Kart QR ────────────────────────────────────────
 window.showMyQR = function() {
-  if (!window.CU) { toast('Giriş yapmalısınız','err'); return; }
-  // Mevcut qr-modal'ı kullan
-  const nameEl = document.getElementById('qr-event-name');
+  const cu = window.CU;
+  if (!cu || !cu.uid) { toast('Giriş yapmalısınız','err'); return; }
+  // Modal içeriğini hazırla
+  const nameEl  = document.getElementById('qr-event-name');
   const labelEl = document.getElementById('qr-uid-label');
   const container = document.getElementById('qr-container');
-  if (!container) { toast('QR modal bulunamadı','err'); return; }
-  if (nameEl) nameEl.textContent = CU.name || '';
-  if (labelEl) labelEl.textContent = 'UID: ' + CU.uid;
-  container.innerHTML = '';
-  // QR data: sadece uid (admin scanner bu UID'i okuyacak)
-  const qrData = CU.uid;
-  if (typeof QRCode !== 'undefined') {
-    new QRCode(container, {text:qrData, width:220, height:220, colorDark:'#1a1a1a', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.H});
-  } else {
-    const img = document.createElement('img');
-    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrData)}&color=1a1a1a`;
-    img.style.cssText = 'width:220px;height:220px;border-radius:8px';
-    container.appendChild(img);
-  }
-  // Modal başlığını güncelle
   const h2 = document.querySelector('#qr-modal h2');
-  if (h2) h2.textContent = '🪪 Dijital Kartım';
+  if (!container) { toast('QR modal bulunamadı','err'); return; }
+  // Başlık & meta
+  if (h2) h2.textContent = '🪪 Dijital Sporcu Kimliği';
+  if (nameEl) nameEl.textContent = cu.name || '';
+  // Acil durum bilgisi
+  const ec = cu.emergencyContact;
+  if (labelEl) {
+    if (ec && ec.phone) {
+      labelEl.innerHTML = `Acil: <a href="tel:${ec.phone}" style="color:var(--or);font-weight:600">${ec.name||''} ${ec.phone}</a>`;
+    } else {
+      labelEl.textContent = 'UID: ' + cu.uid;
+    }
+  }
+  // Loading placeholder göster, modal aç
+  container.innerHTML = '<div style="width:220px;height:220px;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:13px">Yükleniyor…</div>';
   openModal('qr-modal');
+  // Modal açıldıktan sonra (bir frame bekle) QR render et
+  requestAnimationFrame(() => {
+    setTimeout(() => {
+      container.innerHTML = '';
+      const qrData = cu.uid;
+      if (typeof QRCode !== 'undefined') {
+        try {
+          new QRCode(container, {text:qrData, width:220, height:220,
+            colorDark:'#1a1a1a', colorLight:'#ffffff',
+            correctLevel: QRCode.CorrectLevel.H});
+        } catch(e) { _qrFallback(container, qrData); }
+      } else {
+        _qrFallback(container, qrData);
+      }
+    }, 120);
+  });
 };
+
+function _qrFallback(container, data) {
+  const img = document.createElement('img');
+  img.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(data)}&color=1a1a1a`;
+  img.style.cssText = 'width:220px;height:220px;border-radius:8px';
+  img.onerror = () => { container.textContent = 'QR üretilemedi'; };
+  container.appendChild(img);
+}
 
 window.showQR=(eid,ename)=>{
   document.getElementById('qr-event-name').textContent=ename||'';

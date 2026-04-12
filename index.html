@@ -6847,16 +6847,23 @@ function renderGroupSection(sec){
     if(s('gs-strava'))s('gs-strava').value=CU.clubStrava||'';
     if(s('gs-parkur'))s('gs-parkur').value=CU.clubParkur||'';
     if(s('gs-mapurl'))s('gs-mapurl').value=CU.clubMapUrl||'';
-    if(s('gs-parkur'))s('gs-parkur').value=CU.clubParkur||'';
-    if(s('gs-harita'))s('gs-harita').value=CU.clubHarita||'';
     const info=document.getElementById('g-admin-info');
     if(info)info.innerHTML=`<div>👤 <b>${CU.name||'—'}</b></div><div>📧 ${CU.email||'—'}</div><div>📞 ${CU.phone||'—'}</div>`;
   }
 }
+window.gPreviewEventUrl=function(url){
   const prev=document.getElementById('ge-img-preview');
   const ph=document.getElementById('ge-img-placeholder');
   if(prev){prev.src=url;prev.style.display=url?'block':'none';}
   if(ph)ph.style.display=url?'none':'block';
+};
+window.gPreviewEventImg=function(input){
+  const file=input.files[0];if(!file)return;
+  const prev=document.getElementById('ge-img-preview');
+  const ph=document.getElementById('ge-img-placeholder');
+  const reader=new FileReader();
+  reader.onload=e=>{if(prev){prev.src=e.target.result;prev.style.display='block';}if(ph)ph.style.display='none';};
+  reader.readAsDataURL(file);
 };
 window.gPreviewLogo=function(input){
   const file=input.files[0];if(!file)return;
@@ -7307,7 +7314,7 @@ window.gSaveEvent=async()=>{
 };
 
 
-async async function gLoadAnnouncements(){
+async function gLoadAnnouncements(){
   const el=document.getElementById('g-announcements-list');if(!el)return;
   try{
     const fb=window._fb;
@@ -7342,7 +7349,7 @@ window.gDeleteAnnouncement=async(id)=>{
   catch(e){toast(e.message,'err');}
 };
 
-async async function gLoadChat(){
+async function gLoadChat(){
   const room='admin-chat';
   const container=document.getElementById('g-chat-box');if(!container)return;
   try{

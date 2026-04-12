@@ -128,7 +128,7 @@ service cloud.firestore {
 
     match /pushNotifications/{id} {
       allow read: if isSuperAdmin();
-      allow create: if isSuperAdmin();
+      allow create: if isSuperOrGroup();
       allow update: if false;
       allow delete: if isSuperAdmin();
     }
@@ -138,7 +138,7 @@ service cloud.firestore {
       allow read: if isAuth() && (
         resource.data.userId == uid() ||
         isSuperAdmin() ||
-        (isGroupAdmin() && resource.data.clubId == getUserData().clubId)
+        isGroupAdmin()
       );
       allow create: if isAuth() && request.resource.data.userId == uid();
       allow update: if isAuth() && resource.data.userId == uid();

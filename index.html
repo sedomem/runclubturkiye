@@ -2117,7 +2117,6 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="gNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
     <button onclick="gNav('performances',this)">🏅 Performanslar</button>
-    <button onclick="gNav('notifications',this)">🔔 Bildirim Gönder</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
   </div>
@@ -2392,7 +2391,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getStorage,ref,uploadBytes,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import{getMessaging,getToken,onMessage}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
@@ -2475,7 +2474,7 @@ window.addEventListener('load',async()=>{
 const storage=getStorage(app);
 const gp=new GoogleAuthProvider();
 const SUPER_EMAIL='sedomem@gmail.com';
-window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
+window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
 
 onAuthStateChanged(auth,async user=>{
   // Auth state geldi — loading'i HEMEN kapat
@@ -2587,7 +2586,16 @@ window.submitGroupAdminApplication=async()=>{
     await signOut(auth);
   }catch(e){const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı'};toast(m[e.code]||e.message,'err');}
 };
-window.logout=async()=>{const fb=window._fb;try{if(fb&&fb.auth)await fb.signOut(fb.auth);}catch(e){}window.CU=null;nav('home');toast('Çıkış yapıldı');};
+window.logout=async()=>{
+  const fb=window._fb;
+  try{if(fb&&fb.auth)await fb.signOut(fb.auth);}catch(e){console.warn('signOut:',e);}
+  if(window._chatUnsub){try{window._chatUnsub();}catch(e){}}
+  if(window._gChatUnsub){try{window._gChatUnsub();}catch(e){}}
+  window.CU=null;
+  ['rct_user','rct_cu','rct_token','rct_fcm_token'].forEach(k=>localStorage.removeItem(k));
+  toast('Çıkış yapıldı ✓','ok');
+  setTimeout(()=>{location.href='/';},800);
+};
 
 // ── ✅ ADMIN BADGES — Bildirim Sayacı ──
 async function loadAdminBadges(){
@@ -5660,6 +5668,88 @@ window.gUpdateAnnouncement=async function(id){
 };
 
 
+
+// ── Çıkış Yap ───────────────────────────────────────────────
+window.signOutUser = async function() {
+  try {
+    const fb = window._fb;
+    if (fb && fb.auth) await fb.signOut(fb.auth);
+    // localStorage temizle
+    ['rct_user','rct_cu','rct_token'].forEach(k => localStorage.removeItem(k));
+    window.CU = null;
+    toast('Çıkış yapıldı', 'ok');
+    setTimeout(() => location.reload(), 600);
+  } catch(e) {
+    console.error('signOut error:', e);
+    // Yine de temizle
+    localStorage.clear();
+    location.reload();
+  }
+};
+
+// ── SA ↔ GA Mesajlaşma (admin-chat odası) ───────────────────
+// ── Chat mesajlarını render eden yardımcı ──────────────────
+function _renderChatMsgs(container, msgs, myUid) {
+  container.innerHTML = '';
+  if (!msgs.length) {
+    container.innerHTML = '<p style="color:var(--muted);font-size:12px;text-align:center;padding:20px">Henüz mesaj yok. Sohbeti başlatın!</p>';
+    return;
+  }
+  msgs.forEach(m => {
+    const isMe = m.senderId === myUid;
+    const div = document.createElement('div');
+    div.style.cssText = `display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;margin-bottom:4px`;
+    div.innerHTML = `${!isMe?`<span style="font-size:10px;color:var(--muted);margin-left:4px">${m.senderName||''}</span>`:''}
+      <div style="background:${isMe?'var(--or)':'var(--bg4)'};color:${isMe?'#fff':'var(--text)'};padding:8px 12px;border-radius:${isMe?'14px 14px 2px 14px':'14px 14px 14px 2px'};max-width:80%;font-size:13px;word-break:break-word">${m.text||''}</div>`;
+    container.appendChild(div);
+  });
+  container.scrollTop = container.scrollHeight;
+}
+
+window.loadChatMessages = async function(room) {
+  const roomId = 'admin-chat';
+  const container = document.getElementById('chat-messages-' + (room||'admin'));
+  if (!container) return;
+  // Önceki listener'ı iptal et
+  if (window._chatUnsub) { try{window._chatUnsub();}catch(e){} }
+  try {
+    const fb = window._fb;
+    // onSnapshot ile realtime
+    window._chatUnsub = fb.onSnapshot(
+      fb.collection(fb.db, `chats/${roomId}/messages`),
+      (snap) => {
+        const msgs = [];
+        snap.forEach(d => msgs.push({id:d.id,...d.data()}));
+        msgs.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+        _renderChatMsgs(container, msgs, CU.uid);
+      },
+      (err) => {
+        console.error('[Chat SA]', err);
+        container.innerHTML = `<p style="color:var(--muted);font-size:12px">Hata: ${err.message}</p>`;
+      }
+    );
+  } catch(e) {
+    console.error('[Chat SA]', e);
+    container.innerHTML = `<p style="color:var(--muted);font-size:12px">Hata: ${e.message}</p>`;
+  }
+};
+
+window.sendChatMessage = async function(room) {
+  const roomId = 'admin-chat';
+  const input = document.getElementById('chat-input-' + (room||'admin'));
+  const msg = input?.value?.trim();
+  if (!msg) return;
+  try {
+    const fb = window._fb;
+    await fb.addDoc(fb.collection(fb.db, `chats/${roomId}/messages`), {
+      text: msg, senderId: CU.uid, senderName: CU.name||CU.email||'Admin',
+      createdAt: fb.serverTimestamp()
+    });
+    input.value = '';
+    await window.loadChatMessages(room);
+  } catch(e) { toast(e.message, 'err'); }
+};
+
 // ── Duyuru düzenleme ────────────────────────────────────────
 window.gEditAnnouncement=function(id,title,body){
   // Form'u doldur ve edit moduna al
@@ -5817,7 +5907,7 @@ function buildDashboard(){
   if(drawerRole)drawerRole.textContent=roleLabels[CU.role]||'Üye';
   document.getElementById('dash-nav').innerHTML=[
     {id:'overview',ico:'🏠',l:'Genel'},{id:'notifications',ico:'🔔',l:'Bildirimler'},{id:'my-events',ico:'📅',l:'Etkinliklerim'},{id:'my-clubs',ico:'🤝',l:'Kulüplerim'},{id:'my-km',ico:'🏃',l:'KM Takibi'},{id:'badges',ico:'🏅',l:'Rozetler'},{id:'profile-tab',ico:'⚙',l:'Profil'},
-  ].map((n,i)=>`<button class="${i===0?'on':''}" id="dash-btn-${n.id}" onclick="showDash('${n.id}',this)">${n.ico} ${n.l}</button>`).join('')+'<button onclick="logout()" style="margin-top:12px;color:#f87171">🚪 Çıkış</button>';
+  ].map((n,i)=>`<button class="${i===0?'on':''}" id="dash-btn-${n.id}" onclick="showDash('${n.id}',this)">${n.ico} ${n.l}</button>`).join('')+'<button onclick="window.logout()" style="margin-top:12px;color:#f87171;background:transparent;border:none;cursor:pointer;font-size:14px;padding:8px 0;width:100%;text-align:left">🚪 Çıkış Yap</button>';
   const myBadges=CU.badges||[];
   const earnedBadges=BADGE_RULES.filter(r=>myBadges.includes(r.id));
   document.getElementById('dash-panels').innerHTML=`
@@ -6828,11 +6918,12 @@ function renderGroupSection(sec){
       }catch(e){console.warn('getClubId:',e.message);}
       return CU.uid;
     };
-    _getClubId().then(clubId=>window.loadClubRaceResults&&window.loadClubRaceResults(clubId));
     main.innerHTML=`<h2 style="margin-bottom:18px">🏅 Kulüp Performansları</h2>
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kulüp üyelerinizin kaydettiği yarış sonuçları</p>
       <div id="club-race-results-list"><div class="spinner" style="margin:20px auto"></div></div>`;
-    setTimeout(()=>window.loadClubRaceResults&&window.loadClubRaceResults(clubId),100);
+    _getClubId().then(clubId=>{
+      if(window.loadClubRaceResults) window.loadClubRaceResults(clubId);
+    }).catch(e=>{ document.getElementById('club-race-results-list').innerHTML='<p style="color:var(--muted)">Kulüp ID alınamadı.</p>'; });
     return;
   }
   if(sec==='settings'){
@@ -7105,13 +7196,29 @@ window.gSaveAnnouncement=async()=>{
   if(!title||!body){toast('Başlık ve içerik gerekli','err');return;}
   try{
     const fb=window._fb;
-    const clubId=CU.clubId||CU.uid;
+    // clubId güvenli al - CU.clubId yoksa memberships'ten çek
+    let clubId=CU.clubId||'';
+    if(!clubId){
+      try{
+        const msnap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',CU.uid)));
+        if(!msnap.empty){
+          const adm=msnap.docs.find(d=>d.data().role==='groupadmin'||d.data().role==='admin');
+          clubId=(adm||msnap.docs[0]).data().clubId||'';
+        }
+        if(!clubId){
+          const csnap=await fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('adminUid','==',CU.uid)));
+          if(!csnap.empty)clubId=csnap.docs[0].id;
+        }
+      }catch(e2){console.warn('[Ann] clubId alınamadı:',e2.message);}
+    }
+    if(!clubId){toast('Kulüp bilgisi bulunamadı','err');return;}
+    // Duyuruyu kaydet
     await fb.addDoc(fb.collection(fb.db,'announcements'),{title,body,clubId,clubName:CU.clubName||'',authorName:CU.name,authorUid:CU.uid,createdAt:fb.serverTimestamp()});
-    // Aynı anda kulüp üyelerine push bildirim gönder
+    // Push bildirim gönder
     try{
-      await fb.addDoc(fb.collection(fb.db,'pushNotifications'),{
+      const pushDoc={
         title,
-        body: body.length>100?body.slice(0,97)+'...':body,
+        body:body.length>100?body.slice(0,97)+'...':body,
         url:'https://www.runclubturkiye.com/',
         image:'',
         target:'club',
@@ -7120,9 +7227,11 @@ window.gSaveAnnouncement=async()=>{
         status:'pending',
         sentBy:CU.email||'groupadmin',
         createdAt:fb.serverTimestamp()
-      });
-    }catch(pe){console.warn('[Push] Bildirim gönderilemedi:',pe.message);}
-    toast('Duyuru yayınlandı ve üyelere bildirim gönderildi ✓','ok');
+      };
+      await fb.addDoc(fb.collection(fb.db,'pushNotifications'),pushDoc);
+      console.log('[Push] Bildirim kuyruğa eklendi, clubId:',clubId);
+    }catch(pe){console.error('[Push] Bildirim gönderilemedi:',pe.message,pe);}
+    toast('Duyuru yayınlandı ✓','ok');
     document.getElementById('ga-ann-title').value='';
     document.getElementById('ga-ann-body').value='';
     gLoadAnnouncements();
@@ -7351,27 +7460,34 @@ window.gDeleteAnnouncement=async(id)=>{
 
 async function gLoadChat(){
   const room='admin-chat';
-  const container=document.getElementById('g-chat-box');if(!container)return;
+  const container=document.getElementById('g-chat-box');
+  if(!container){console.warn('[gLoadChat] g-chat-box bulunamadı');return;}
+  // Önceki listener'ı iptal et
+  if(window._gChatUnsub){try{window._gChatUnsub();}catch(e){}}
   try{
     const fb=window._fb;
-    // orderBy Firestore index gerektiriyor - JS'de sırala
-    const snap=await fb.getDocs(fb.collection(fb.db,`chats/${room}/messages`));
-    // createdAt'a göre sırala
-    const chatDocs=[...snap.docs].sort((a,b)=>{
-      const ta=a.data().createdAt?.seconds||0;
-      const tb=b.data().createdAt?.seconds||0;
-      return ta-tb;
-    });
-    container.innerHTML='';
-    chatDocs.forEach(d=>{
-      const m=d.data();const isMe=m.senderId===CU.uid;
-      const div=document.createElement('div');
-      div.style.cssText=`display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px`;
-      div.innerHTML=`${!isMe?`<span style="font-size:10px;color:var(--muted);margin-left:4px">${m.senderName||''}</span>`:''}<div style="background:${isMe?'var(--or)':'var(--bg4)'};color:${isMe?'#fff':'var(--text)'};padding:8px 12px;border-radius:${isMe?'14px 14px 4px 14px':'14px 14px 14px 4px'};font-size:13px;max-width:75%">${m.text}</div>`;
-      container.appendChild(div);
-    });
-    container.scrollTop=container.scrollHeight;
-  }catch(e){console.error('Chat error:',e);}
+    window._gChatUnsub=fb.onSnapshot(
+      fb.collection(fb.db,`chats/${room}/messages`),
+      (snap)=>{
+        const msgs=[];
+        snap.forEach(d=>msgs.push({id:d.id,...d.data()}));
+        msgs.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+        if(typeof _renderChatMsgs==='function') _renderChatMsgs(container,msgs,CU.uid);
+        else {
+          container.innerHTML='';
+          msgs.forEach(m=>{
+            const isMe=m.senderId===CU.uid;
+            const div=document.createElement('div');
+            div.style.cssText=`display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;margin-bottom:4px`;
+            div.innerHTML=`${!isMe?`<span style="font-size:10px;color:var(--muted);margin-left:4px">${m.senderName||''}</span>`:''}<div style="background:${isMe?'var(--or)':'var(--bg4)'};color:${isMe?'#fff':'var(--text)'};padding:8px 12px;border-radius:${isMe?'14px 14px 2px 14px':'14px 14px 14px 2px'};font-size:13px;max-width:75%;word-break:break-word">${m.text||''}</div>`;
+            container.appendChild(div);
+          });
+          container.scrollTop=container.scrollHeight;
+        }
+      },
+      (err)=>{console.error('[gLoadChat]',err);container.innerHTML=`<p style="color:var(--muted)">Hata: ${err.message}</p>`;}
+    );
+  }catch(e){console.error('[gLoadChat]',e);}
 }
 
 window.gSendChat=async()=>{

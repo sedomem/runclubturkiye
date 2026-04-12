@@ -2716,8 +2716,29 @@ function syncProfileUI(){
 window.saveProfile=async()=>{
   if(!CU)return;
   const pace=[];document.querySelectorAll('#pf-pace-sel .pace-opt.on').forEach(b=>pace.push(b.textContent.trim()));
-  const data={name:document.getElementById('pf-name').value,phone:document.getElementById('pf-phone').value,stravaLink:document.getElementById('pf-strava').value,city:document.getElementById('pf-city').value,pace,updatedAt:serverTimestamp()};
-  try{await setDoc(doc(db,'users',CU.uid),data,{merge:true});Object.assign(CU,data);syncProfileUI();toast('Profil güncellendi ✓','ok');}catch(e){toast(e.message,'err');}
+  // Güvenlik & Sağlık alanları
+  const ecName  = (document.getElementById('pf-ec-name')?.value||'').trim();
+  const ecPhone = (document.getElementById('pf-ec-phone')?.value||'').trim();
+  const blood   = document.getElementById('pf-blood')?.value||'';
+  const medical = (document.getElementById('pf-medical')?.value||'').trim();
+  const data={
+    name:document.getElementById('pf-name')?.value||'',
+    phone:document.getElementById('pf-phone')?.value||'',
+    stravaLink:document.getElementById('pf-strava')?.value||'',
+    city:document.getElementById('pf-city')?.value||'',
+    pace,
+    emergencyContact:{name:ecName, phone:ecPhone},
+    bloodType:blood,
+    medicalNotes:medical,
+    updatedAt:serverTimestamp()
+  };
+  try{
+    await setDoc(doc(db,'users',CU.uid),data,{merge:true});
+    // Optimistic update: CU'yu hemen güncelle, UI yenile
+    Object.assign(CU, data);
+    syncProfileUI();
+    toast('Profil güncellendi ✓','ok');
+  }catch(e){toast(e.message,'err');}
 };
 window.handlePhotoUpload=async(input)=>{
   if(!CU||!input.files[0])return;
@@ -5492,19 +5513,62 @@ window.deleteRaceResult = async function(id) {
 
 // ── Web Share API ile paylaş ──────────────────────────────────────────────
 window.shareRaceResult = async function(id) {
+  const cu = window.CU;
+  if (!cu) { toast('Giriş yapmalısınız','err'); return; }
   try {
     const fb = window._fb;
     const docSnap = await fb.getDoc(fb.doc(fb.db,'raceResults',id));
     if (!docSnap.exists()) return;
     const r = docSnap.data();
-    const text = `🏅 ${r.raceName||'Yarış'} tamamlandı!\n📏 ${r.distance||''} | ⏱ ${r.time||''} | 🚀 ${r.pace||''}\n${r.place?'🏆 '+r.place+'. derece\n':''}RunClubTürkiye — runclubturkiye.com`;
-    if (navigator.share) {
-      await navigator.share({ title: 'Yarış Sonucum — RunClubTürkiye', text, url: r.resultUrl||'https://www.runclubturkiye.com' });
-    } else {
-      await navigator.clipboard.writeText(text);
-      toast && toast('Paylaşım metni panoya kopyalandı!','ok');
+
+    // Paylaşım metni
+    const shareText = [
+      `🏅 ${r.raceName||'Yarış'} tamamladım!`,
+      [r.distance && `📏 ${r.distance}`, r.time && `⏱ ${r.time}`, r.pace && `🚀 ${r.pace}`].filter(Boolean).join(' · '),
+      r.place ? `🏆 ${r.place}. derece` : '',
+      'runclubturkiye.com'
+    ].filter(Boolean).join('\n');
+
+    // 1. Topluluk akışına post oluştur
+    try {
+      const postData = {
+        type: 'run',
+        text: shareText,
+        userName:  cu.name || cu.displayName || 'Koşucu',
+        userPhoto: cu.photoURL || null,
+        userUid:   cu.uid,
+        likes:     [],
+        commentCount: 0,
+        createdAt: fb.serverTimestamp(),
+        createdAtMs: Date.now(),
+        runData: {
+          dist: r.distance || '',
+          time: r.time || '',
+          pace: r.pace || '',
+          raceName: r.raceName || '',
+        },
+        source: 'raceResult',
+        raceResultId: id,
+      };
+      const {id:_, ...noId} = postData;
+      await fb.addDoc(fb.collection(fb.db,'posts'), noId);
+      toast('Yarış sonucun akışa paylaşıldı! 🎉','ok');
+    } catch(pe) {
+      console.warn('[Share] Post oluşturulamadı:', pe.message);
     }
-  } catch(e) { if (e.name !== 'AbortError') toast && toast('Paylaşım hatası: '+e.message,'err'); }
+
+    // 2. Native share / clipboard
+    try {
+      if (navigator.share) {
+        await navigator.share({ title: 'Yarış Sonucum — RunClubTürkiye', text: shareText, url: r.resultUrl||'https://www.runclubturkiye.com' });
+      } else {
+        await navigator.clipboard.writeText(shareText);
+      }
+    } catch(se) { if (se.name !== 'AbortError') console.warn('[Share] Native share:', se.message); }
+
+  } catch(e) {
+    if (e.name !== 'AbortError') toast && toast('Hata: '+e.message,'err');
+  }
 };
 
 // ── leaveClub — kulüpten ayrılınca raceResults'dan clubId temizle ─────────
@@ -6015,11 +6079,30 @@ window.processQRScan = async function(scannedText, eventId) {
         <span style="font-size:13px;color:#15803d">${userName}</span></div>
       </div>`;
 
-    // Katılımcı listesini yenile
-    setTimeout(() => {
-      const eventTitleEl = document.querySelector('#panel-main p');
-      window.gLoadEventAttendees(eventId, eventTitleEl?.textContent || '');
-    }, 1500);
+    // Katılımcı listesini yenile (sadece attendees-list, scanner korunur)
+    setTimeout(async () => {
+      try {
+        const fb2 = window._fb;
+        const snap2 = await fb2.getDocs(fb2.query(
+          fb2.collection(fb2.db,'rsvps'), fb2.where('eventId','==',eventId)
+        ));
+        const rsvpRows2 = [];
+        snap2.forEach(d2 => rsvpRows2.push({...d2.data(), _rsvpId: d2.id}));
+        const listEl = document.getElementById('attendees-list');
+        if (!listEl) return;
+        // Basit yenileme - sadece checkedIn durumlarını güncelle
+        listEl.querySelectorAll('tr[data-uid]').forEach(tr => {
+          const uid2 = tr.dataset.uid;
+          const row = rsvpRows2.find(r => r.userId === uid2);
+          const cell = tr.querySelector('.checkin-status');
+          if (cell && row) {
+            cell.innerHTML = row.checkedIn
+              ? '<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:8px;font-size:11px">✓ Girdi</span>'
+              : '<span style="color:var(--muted);font-size:11px">—</span>';
+          }
+        });
+      } catch(e3) { console.warn('[QR refresh]', e3.message); }
+    }, 1000);
 
   } catch(e) {
     console.error('[QR Check-in]', e);
@@ -7922,13 +8005,13 @@ window.gLoadEventAttendees=async(eventId,eventTitle)=>{
       const paceStr=paceArr.length?paceArr.join(', '):'—';
       // Parkur: RSVP'den al
       const parkurStr=rsvp.parkur||rsvp.distance||'—';
-      tbl+=`<tr style="border-bottom:1px solid var(--border)">
+      tbl+=`<tr style="border-bottom:1px solid var(--border)" data-uid="${rsvp.userId||''}">
         <td style="padding:8px 10px;font-size:13px"><b>${name}</b></td>
         <td style="padding:8px 10px;font-size:11px;color:var(--muted)">${email}</td>
         <td style="padding:8px 10px;font-size:12px">${phone}</td>
         <td style="padding:8px 10px"><span style="background:var(--or);color:#fff;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600">${paceStr}</span></td>
         <td style="padding:8px 10px"><span style="background:var(--bg2);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600">${parkurStr}</span></td>
-        <td style="padding:8px 10px">${rsvp.checkedIn?'<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:8px;font-size:11px">✓ Girdi</span>':'<span style="color:var(--muted);font-size:11px">—</span>'}</td>
+        <td style="padding:8px 10px" class="checkin-status">${rsvp.checkedIn?'<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:8px;font-size:11px">✓ Girdi</span>':'<span style="color:var(--muted);font-size:11px">—</span>'}</td>
       </tr>`;
     });
     tbl+='</tbody></table></div>';

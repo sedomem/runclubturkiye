@@ -42,7 +42,9 @@ service cloud.firestore {
       // QR Check-in: sadece SA ve GA yazabilir
       match /attendees/{userId} {
         allow read: if isAuth();
-        allow write: if isSuperOrGroup();
+        allow create: if isSuperOrGroup();
+        allow update: if isSuperOrGroup();
+        allow delete: if isSuperAdmin();
       }
     }
 

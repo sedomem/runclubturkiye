@@ -2117,6 +2117,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="gNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
     <button onclick="gNav('performances',this)">🏅 Performanslar</button>
+    <button onclick="gNav('notifications',this)">🔔 Bildirim Gönder</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
   </div>
@@ -2371,8 +2372,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <div id="club-cta-float" style="position:fixed;bottom:24px;left:24px;z-index:190;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 32px rgba(44,24,16,.18);border:1.5px solid #E0D8CC;display:flex;align-items:center;gap:14px;max-width:320px;animation:ctaSlideIn .5s cubic-bezier(.34,1.56,.64,1) .8s both;">
   <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#E8622A,#c94e1c);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#127939;</div>
   <div style="flex:1;min-width:0">
-    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulübünüz Burada Yok Mu?</div>
-    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Kulübünüzü hemen kaydedin!</div>
+    <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulubuunuuz Burada Yok mu?</div>
+    <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Klubunuzu hemen kaydedin</div>
   </div>
   <button onclick="openAuth('groupadmin')" style="background:#E8622A;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">Basvur</button>
   <button onclick="document.getElementById('club-cta-float').style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#B09880;font-size:16px;cursor:pointer;line-height:1;padding:2px">x</button>
@@ -2735,13 +2736,15 @@ window.joinClub=async(clubId)=>{
       status:club.open===false?'pending':'approved',
       joinedAt:serverTimestamp()
     });
-    await setDoc(doc(db,'users',CU.uid),{clubCount:increment(1)},{merge:true});
+    // users dokümanını tek seferde güncelle: clubId + clubCount
+    await setDoc(doc(db,'users',CU.uid),{
+      clubId, clubName:club.name||'',
+      clubCount:increment(1)
+    },{merge:true});
     CU.clubCount=(CU.clubCount||0)+1;
-    localStorage.setItem(memKey,'1');
-    // CU'ya clubId ve clubName ekle - raceResults ve diğer özellikler için
+    // CU runtime'ı güncelle
     if(window.CU){ window.CU.clubId=clubId; window.CU.clubName=club.name||''; }
-    // users dokümanına clubId yaz
-    try{ await setDoc(doc(db,'users',CU.uid),{clubId,clubName:club.name||'',clubCount:increment(1)},{merge:true}); }catch(e){}
+    localStorage.setItem(memKey,'1');
     toast(`${club.name||'Kulüp'} kulübüne katıldın! 🤝`,'ok');
     // Katıl butonunu güncelle
     document.querySelectorAll(`[onclick="joinClub('${clubId}')"]`).forEach(btn=>{
@@ -5546,6 +5549,73 @@ window.gNav=function(sec,btn){
   if(typeof renderGroupSection==='function')renderGroupSection(sec);
 };
 
+
+// ── PUSH SEGMENTASYONlu GÖNDERİM ─────────────────────────────────
+window.sendPushSegmented=async function(){
+  const title   = document.getElementById('pn-title')?.value.trim();
+  const body    = document.getElementById('pn-body')?.value.trim();
+  if(!title||!body){toast('Başlık ve mesaj zorunlu','err');return;}
+  const url     = document.getElementById('pn-url')?.value.trim()||'https://www.runclubturkiye.com/';
+  const image   = document.getElementById('pn-image')?.value.trim()||'';
+  const target  = document.getElementById('pn-target')?.value||'all';
+  const clubId  = document.getElementById('pn-clubid')?.value||'';
+  const statusEl= document.getElementById('pn-status');
+
+  if(target==='club'&&!clubId){toast('Kulüp seçin','err');return;}
+  if(statusEl)statusEl.textContent='Bildirim kuyruğa ekleniyor...';
+
+  try{
+    const fb=window._fb;
+    const doc_data={
+      title, body, url, image,
+      target,                    // 'all' | 'members' | 'groupadmins' | 'club'
+      targetRole: target==='members'?'member': target==='groupadmins'?'groupadmin': '',
+      targetClubId: target==='club'?clubId:'',
+      status:'pending',
+      sentBy:window.CU?.email||'admin',
+      createdAt:fb.serverTimestamp()
+    };
+    const {id:_,...dataNoId}=doc_data;
+    await fb.addDoc(fb.collection(fb.db,'pushNotifications'),dataNoId);
+    toast('Bildirim kuyruğa eklendi ✅','ok');
+    if(statusEl)statusEl.innerHTML='<span style="color:var(--green)">✅ Bildirim kuyruğa alındı. Cloud Function işleyecek.</span>';
+    if(Notification.permission==='granted') new Notification(title,{body,icon:'/icon-192.png'});
+  }catch(e){
+    toast('Hata: '+e.message,'err');
+    if(statusEl)statusEl.textContent='Hata: '+e.message;
+  }
+};
+
+// ── GRUP ADMİN PUSH GÖNDERİM ──────────────────────────────────────
+window.sendClubPush=async function(){
+  const cu=window.CU; if(!cu)return;
+  const title  = document.getElementById('gp-notif-title')?.value.trim();
+  const body   = document.getElementById('gp-notif-body')?.value.trim();
+  if(!title||!body){toast('Başlık ve mesaj zorunlu','err');return;}
+  const url    = document.getElementById('gp-notif-url')?.value.trim()||'https://www.runclubturkiye.com/';
+  const clubId = cu.clubId||cu.uid;
+  const statusEl=document.getElementById('gp-notif-status');
+  if(statusEl)statusEl.textContent='Gönderiliyor...';
+  try{
+    const fb=window._fb;
+    await fb.addDoc(fb.collection(fb.db,'pushNotifications'),{
+      title, body, url, image:'',
+      target:'club',
+      targetRole:'',
+      targetClubId:clubId,
+      status:'pending',
+      sentBy:cu.email||'groupadmin',
+      createdAt:fb.serverTimestamp()
+    });
+    toast('Kulüp bildirimi gönderildi ✅','ok');
+    if(statusEl)statusEl.innerHTML='<span style="color:var(--green)">✅ Kuyruğa alındı.</span>';
+    ['gp-notif-title','gp-notif-body','gp-notif-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+  }catch(e){
+    toast('Hata: '+e.message,'err');
+    if(statusEl)statusEl.textContent='Hata: '+e.message;
+  }
+};
+
 // Tüm render fonksiyonlarını window'a bağla (module script'ten erişim için)
 window.renderHomeData=renderHomeData;
 window.renderEvts=renderEvts;
@@ -5741,9 +5811,25 @@ async function loadMyClubs(){
   if(!window.CU)return;
   try{
     const fb2=window._fb;
-    // memberships'te hem 'userId' hem 'uid' field'ı olabilir - ikisini de dene
-    let snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('userId','==',window.CU.uid)));
-    if(snap.empty) snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('uid','==',window.CU.uid)));
+    // userId ve uid her ikisini de sorgula, sonuçları birleştir
+    const [snapUserId, snapUid] = await Promise.all([
+      fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('userId','==',window.CU.uid))),
+      fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('uid','==',window.CU.uid)))
+    ]);
+    // Tekrarlı sonuçları birleştir (aynı doküman ID'si olanları filtrele)
+    const seenIds=new Set();
+    const allDocs=[];
+    [...snapUserId.docs,...snapUid.docs].forEach(d=>{
+      if(!seenIds.has(d.id)){seenIds.add(d.id);allDocs.push(d);}
+    });
+    // localStorage'ı da sync et (Üyesin butonu için)
+    allDocs.forEach(d=>{
+      const data=d.data();
+      if(data.clubId&&window.CU){
+        localStorage.setItem('club_'+data.clubId+'_'+window.CU.uid,'1');
+      }
+    });
+    const snap={empty:allDocs.length===0,docs:allDocs,forEach:cb=>allDocs.forEach(cb)};
  if(snap.empty){
       el.innerHTML=`<div style="text-align:center;padding:30px;color:var(--muted)">
         <div style="font-size:40px;margin-bottom:10px">🤝</div>
@@ -5755,7 +5841,11 @@ async function loadMyClubs(){
     const mems=[];snap.forEach(d=>mems.push(d.data()));
     let html='<div class="grid g3">';
     mems.forEach(m=>{
-      const club=window.CLUBS.find(c=>c.id===m.clubId)||{name:m.clubName||'Kulüp',city:'',imgUrl:'',id:m.clubId};
+      // Önce CLUBS array'den bak, yoksa membership'teki bilgilerle göster
+      const club=( (window.CLUBS&&window.CLUBS.length)
+        ? (window.CLUBS.find(c=>c.id===m.clubId)||null)
+        : null
+      ) || {name:m.clubName||'Kulüp',city:m.city||'',imgUrl:m.imgUrl||'',id:m.clubId};
       html+=`<div class="card">
         <div class="card-img" style="height:100px">${club.imgUrl?`<img src="${club.imgUrl}"/>`:'🏃'}</div>
         <div class="card-body">
@@ -6088,6 +6178,8 @@ function renderAdminSection(sec){
   if(sec==='ticker')setTimeout(()=>loadTickerAdmin(),100);
   if(sec==='pushnotif'){
     main.innerHTML=`<h2 style="margin-bottom:18px">🔔 Push Bildirim Gönder</h2>
+
+      <!-- Kendi cihaz aktivasyon -->
       <div class="card" style="padding:16px;margin-bottom:14px;background:var(--bg2);border:1.5px solid var(--or);border-radius:10px">
         <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">
           <span style="font-size:22px">🔔</span>
@@ -6105,9 +6197,25 @@ function renderAdminSection(sec){
         <div class="form-grp"><label>Bildirim Mesajı</label><textarea id="pn-body" rows="3" placeholder="örn: İstanbul Maratonu kayıtları açıldı! Hemen başvur."></textarea></div>
         <div class="form-grp"><label>Tıklama URL (opsiyonel)</label><input id="pn-url" placeholder="https://www.runclubturkiye.com/#races"/></div>
         <div class="form-grp"><label>Görsel URL (opsiyonel)</label><input id="pn-image" placeholder="https://... .jpg"/></div>
+        <!-- Segmentasyon seçimi -->
+        <div class="form-grp" style="margin-top:8px">
+          <label>Hedef Kitle</label>
+          <select id="pn-target" style="width:100%">
+            <option value="all">📢 Tüm Kullanıcılar</option>
+            <option value="members">🏃 Sadece Üyeler (member rolü)</option>
+            <option value="groupadmins">🤝 Sadece Grup Adminleri</option>
+            <option value="club">🏟️ Belirli Bir Kulüp Üyeleri</option>
+          </select>
+        </div>
+        <div class="form-grp" id="pn-club-select" style="display:none">
+          <label>Kulüp Seç</label>
+          <select id="pn-clubid" style="width:100%">
+            <option value="">Kulüp seçin...</option>
+          </select>
+        </div>
         <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
-          <button class="btn btn-or" onclick="sendPushToAll()">📢 Tüm Kullanıcılara Gönder</button>
-          <button class="btn btn-ghost" onclick="testPushSelf()">🧪 Kendine Test Gönder</button>
+          <button class="btn btn-or" onclick="sendPushSegmented()">📢 Bildirimi Gönder</button>
+          <button class="btn btn-ghost" onclick="testPushSelf()">🧪 Test (Kendine)</button>
         </div>
         <div id="pn-status" style="margin-top:12px;font-size:13px;color:var(--muted)"></div>
       </div>
@@ -6115,7 +6223,33 @@ function renderAdminSection(sec){
         <h3 style="font-size:14px;margin-bottom:12px">📊 Push Kayıtlı Kullanıcılar</h3>
         <div id="pn-subscribers-list"><div class="spinner" style="margin:20px auto"></div></div>
       </div>`;
-    setTimeout(()=>loadPushSubscribers(),100);
+    setTimeout(()=>{
+      loadPushSubscribers();
+      // Kulüp dropdown'u doldur
+      const clubSel=document.getElementById('pn-clubid');
+      const targetSel=document.getElementById('pn-target');
+      const clubDiv=document.getElementById('pn-club-select');
+      if(clubSel&&window.CLUBS){
+        window.CLUBS.forEach(c=>{
+          const o=document.createElement('option');o.value=c.id;o.textContent=c.name;clubSel.appendChild(o);
+        });
+      }
+      if(targetSel&&clubDiv){
+        targetSel.onchange=()=>{clubDiv.style.display=targetSel.value==='club'?'block':'none';};
+      }
+    },100);
+    return;
+  }
+  if(sec==='notifications'){
+    main.innerHTML=`<h2 style="margin-bottom:18px">🔔 Kulüp Bildirimi Gönder</h2>
+      <div class="card" style="padding:20px;margin-bottom:16px">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Sadece kendi kulübünüzün üyelerine anlık bildirim gönderin.</p>
+        <div class="form-grp"><label>Bildirim Başlığı *</label><input id="gp-notif-title" placeholder="Örn: Yarın sabah antrenman var!"/></div>
+        <div class="form-grp"><label>Mesaj *</label><textarea id="gp-notif-body" rows="3" placeholder="Örn: Pazar 08:00'de parkta buluşuyoruz."></textarea></div>
+        <div class="form-grp"><label>Deep Link URL (opsiyonel)</label><input id="gp-notif-url" placeholder="https://www.runclubturkiye.com/#events"/></div>
+        <div id="gp-notif-status" style="font-size:13px;color:var(--muted);margin-bottom:8px"></div>
+        <button class="btn btn-or" onclick="sendClubPush()">📢 Kulübüme Bildirim Gönder</button>
+      </div>`;
     return;
   }
   if(sec==='performances'){

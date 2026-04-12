@@ -103,7 +103,8 @@ async function sendBatch(tokens, title, body, url, image) {
       },
       webpush: {
         headers: {'TTL':'86400'},
-        fcmOptions: {link: url || DEFAULT_URL},
+        // fcmOptions.link kaldırıldı - SW notificationclick ile yönlendirme yapılıyor
+        // Bu satır "URL kopyalamak için dokunun" sorununa neden oluyordu
       },
       android: {priority:'high'},
       apns: {payload:{aps:{'content-available':1}}},

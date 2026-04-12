@@ -97,7 +97,7 @@ async function sendBatch(tokens, title, body, url, image) {
         title: title || 'RunClubTürkiye',
         body:  body  || '',
         icon:  DEFAULT_ICON,
-        url:   url   || DEFAULT_URL,
+        clickTarget: url   || DEFAULT_URL,
         image: image || '',
         timestamp: String(Date.now()),
       },

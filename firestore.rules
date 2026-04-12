@@ -38,6 +38,12 @@ service cloud.firestore {
       allow create: if isSuperOrGroup();
       allow update: if isSuperAdmin() || (isGroupAdmin() && (resource.data.adminUid == uid() || resource.data.clubId == getUserData().clubId));
       allow delete: if isSuperAdmin();
+
+      // QR Check-in: sadece SA ve GA yazabilir
+      match /attendees/{userId} {
+        allow read: if isAuth();
+        allow write: if isSuperOrGroup();
+      }
     }
 
     match /races/{id} {
@@ -66,7 +72,8 @@ service cloud.firestore {
     match /rsvps/{id} {
       allow read: if true;
       allow create: if isAuth();
-      allow update, delete: if isAuth() && uid() == resource.data.uid;
+      allow update: if (isAuth() && uid() == resource.data.uid) || isSuperOrGroup();
+      allow delete: if isAuth() && uid() == resource.data.uid;
     }
 
     match /memberships/{id} {

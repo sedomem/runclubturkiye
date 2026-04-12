@@ -2387,6 +2387,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <!-- Leaflet, QRCode ve Quill → yalnızca belirli sayfalarda gerekli, defer ile yükle -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
@@ -5854,6 +5855,145 @@ function initMap(){
 
 // ── QR ──
 window._lastQRData={};
+
+// ── QR Check-in Sistemi ─────────────────────────────────────
+window._qrScanner = null;
+window._qrScannerEventId = null;
+
+window.openQRScanner = function(eventId) {
+  window._qrScannerEventId = eventId;
+  const wrap = document.getElementById('qr-scanner-wrap');
+  const resultEl = document.getElementById('qr-scan-result');
+  if (!wrap) return;
+
+  // Önceki scanner'ı kapat
+  if (window._qrScanner) {
+    try { window._qrScanner.stop().catch(()=>{}); } catch(e) {}
+    window._qrScanner = null;
+  }
+
+  // Scanner container oluştur
+  wrap.innerHTML = '<div id="qr-reader" style="width:100%;max-width:400px;border-radius:10px;overflow:hidden"></div><button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="closeQRScanner()">✕ Tarayıcıyı Kapat</button>';
+  wrap.style.display = 'block';
+  if (resultEl) resultEl.innerHTML = '';
+
+  // html5-qrcode başlat
+  if (typeof Html5Qrcode === 'undefined') {
+    wrap.innerHTML = '<p style="color:var(--muted)">QR kütüphanesi yüklenemedi. Sayfayı yenileyin.</p>';
+    return;
+  }
+
+  window._qrScanner = new Html5Qrcode('qr-reader');
+  window._qrScanner.start(
+    { facingMode: 'environment' },
+    { fps: 10, qrbox: { width: 250, height: 250 } },
+    (decodedText) => { window.processQRScan(decodedText, eventId); },
+    (err) => { /* tarama devam ediyor */ }
+  ).catch(err => {
+    wrap.innerHTML = `<p style="color:var(--muted)">Kamera açılamadı: ${err}</p>`;
+  });
+};
+
+window.closeQRScanner = function() {
+  if (window._qrScanner) {
+    try { window._qrScanner.stop().catch(()=>{}); } catch(e) {}
+    window._qrScanner = null;
+  }
+  const wrap = document.getElementById('qr-scanner-wrap');
+  if (wrap) { wrap.innerHTML = ''; wrap.style.display = 'none'; }
+};
+
+window.processQRScan = async function(scannedText, eventId) {
+  // Bip sesi + kısa duraklat (aynı kodu iki kez okuma)
+  if (window._lastScanned === scannedText && Date.now() - (window._lastScannedAt||0) < 3000) return;
+  window._lastScanned = scannedText;
+  window._lastScannedAt = Date.now();
+
+  const resultEl = document.getElementById('qr-scan-result');
+  const fb = window._fb;
+  if (!fb) return;
+
+  // uid ayıkla - "RCT:eventId:uid:timestamp" veya düz uid
+  let uid = scannedText;
+  if (scannedText.startsWith('RCT:')) {
+    const parts = scannedText.split(':');
+    uid = parts[2] || '';
+  }
+  if (!uid) { if(resultEl) resultEl.innerHTML = '<p style="color:#f87171">Geçersiz QR kod</p>'; return; }
+
+  if (resultEl) resultEl.innerHTML = '<div class="spinner" style="margin:8px auto"></div>';
+
+  try {
+    // 1. events/{eventId}/attendees/{uid} yaz (checkedIn)
+    await fb.setDoc(
+      fb.doc(fb.db, `events/${eventId}/attendees/${uid}`),
+      { checkedIn: true, checkInTime: fb.serverTimestamp(), uid },
+      { merge: true }
+    );
+
+    // 2. rsvps'den kullanıcı adını al ve güncelle
+    let userName = uid;
+    try {
+      const rsvpSnap = await fb.getDocs(fb.query(
+        fb.collection(fb.db, 'rsvps'),
+        fb.where('eventId', '==', eventId),
+        fb.where('userId', '==', uid)
+      ));
+      if (!rsvpSnap.empty) {
+        const rsvpData = rsvpSnap.docs[0].data();
+        userName = rsvpData.userName || rsvpData.userEmail || uid;
+        // rsvp dokümanını da güncelle
+        await fb.updateDoc(rsvpSnap.docs[0].ref, { checkedIn: true, checkInTime: fb.serverTimestamp() });
+      }
+    } catch(e2) { console.warn('[QR] rsvp güncelleme:', e2.message); }
+
+    // Başarı bildirimi
+    if (resultEl) resultEl.innerHTML = `
+      <div style="background:#dcfce7;border:1px solid #86efac;border-radius:8px;padding:12px;display:flex;align-items:center;gap:10px">
+        <span style="font-size:24px">✅</span>
+        <div><b style="color:#16a34a">Giriş Onaylandı!</b><br>
+        <span style="font-size:13px;color:#15803d">${userName}</span></div>
+      </div>`;
+
+    // Katılımcı listesini yenile
+    setTimeout(() => {
+      const eventTitleEl = document.querySelector('#panel-main p');
+      window.gLoadEventAttendees(eventId, eventTitleEl?.textContent || '');
+    }, 1500);
+
+  } catch(e) {
+    console.error('[QR Check-in]', e);
+    if (resultEl) resultEl.innerHTML = `<p style="color:#f87171;padding:8px">Hata: ${e.message}</p>`;
+  }
+};
+
+// ── Dijital Kart QR ────────────────────────────────────────
+window.showMyQR = function() {
+  if (!window.CU) { toast('Giriş yapmalısınız','err'); return; }
+  // Mevcut qr-modal'ı kullan
+  const nameEl = document.getElementById('qr-event-name');
+  const labelEl = document.getElementById('qr-uid-label');
+  const container = document.getElementById('qr-container');
+  if (!container) { toast('QR modal bulunamadı','err'); return; }
+  if (nameEl) nameEl.textContent = CU.name || '';
+  if (labelEl) labelEl.textContent = 'UID: ' + CU.uid;
+  container.innerHTML = '';
+  // QR data: sadece uid (admin scanner bu UID'i okuyacak)
+  const qrData = CU.uid;
+  if (typeof QRCode !== 'undefined') {
+    new QRCode(container, {text:qrData, width:220, height:220, colorDark:'#1a1a1a', colorLight:'#ffffff', correctLevel:QRCode.CorrectLevel.H});
+  } else {
+    const img = document.createElement('img');
+    img.src = `https://api.qrserver.com/v1/create-qr-code/?size=220x220&data=${encodeURIComponent(qrData)}&color=1a1a1a`;
+    img.style.cssText = 'width:220px;height:220px;border-radius:8px';
+    container.appendChild(img);
+  }
+  // Modal başlığını güncelle
+  const h2 = document.querySelector('#qr-modal h2');
+  if (h2) h2.textContent = '🪪 Dijital Kartım';
+  openModal('qr-modal');
+};
+
 window.showQR=(eid,ename)=>{
   document.getElementById('qr-event-name').textContent=ename||'';
   document.getElementById('qr-uid-label').textContent=`Kullanıcı: ${CU?.name||'Misafir'}`;
@@ -5920,6 +6060,10 @@ function buildDashboard(){
         <div class="s-card"><div class="n">${earnedBadges.length}</div><div class="l">Rozet</div></div>
       </div>
       <div id="overview-recent-events"></div>
+      <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
+        <button class="btn btn-or" style="width:100%" onclick="showMyQR()">📲 Dijital Kartımı Göster</button>
+        <p style="font-size:11px;color:var(--muted);text-align:center;margin-top:6px">Etkinlik girişinde QR kodunuzu okutun</p>
+      </div>
     </div>
     <div class="dash-content" id="dp-notifications">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
@@ -7655,7 +7799,10 @@ window.gLoadEventAttendees=async(eventId,eventTitle)=>{
   const fb=window._fb;
   main.innerHTML=`<button class="btn btn-ghost btn-sm" style="margin-bottom:16px" onclick="renderGroupSection('events')">← Etkinliklere Dön</button>
     <h2 style="margin-bottom:6px">📋 Katılımcılar</h2>
-    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">${eventTitle}</p>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:8px">${eventTitle}</p>
+    <button class="btn btn-or btn-sm" style="margin-bottom:16px" onclick="openQRScanner('${eventId}')" >📷 QR Tarayıcı Aç</button>
+    <div id="qr-scanner-wrap" style="display:none;margin-bottom:16px"></div>
+    <div id="qr-scan-result" style="margin-bottom:12px"></div>
     <div id="attendees-list"><div class="spinner" style="margin:20px auto"></div></div>`;
   try{
     const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'),fb.where('eventId','==',eventId)));
@@ -7679,6 +7826,7 @@ window.gLoadEventAttendees=async(eventId,eventTitle)=>{
           <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">Telefon</th>
           <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">Pace</th>
           <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">Parkur</th>
+          <th style="text-align:left;padding:8px 10px;border-bottom:2px solid var(--border);font-size:12px">Giriş</th>
         </tr></thead><tbody>`;
     rsvpRows.forEach(rsvp=>{
       const u=userMap[rsvp.userId]||{};
@@ -7696,6 +7844,7 @@ window.gLoadEventAttendees=async(eventId,eventTitle)=>{
         <td style="padding:8px 10px;font-size:12px">${phone}</td>
         <td style="padding:8px 10px"><span style="background:var(--or);color:#fff;padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600">${paceStr}</span></td>
         <td style="padding:8px 10px"><span style="background:var(--bg2);padding:2px 8px;border-radius:8px;font-size:11px;font-weight:600">${parkurStr}</span></td>
+        <td style="padding:8px 10px">${rsvp.checkedIn?'<span style="background:#22c55e;color:#fff;padding:2px 8px;border-radius:8px;font-size:11px">✓ Girdi</span>':'<span style="color:var(--muted);font-size:11px">—</span>'}</td>
       </tr>`;
     });
     tbl+='</tbody></table></div>';

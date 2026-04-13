@@ -118,7 +118,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .grid{display:grid;gap:20px}
 .g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
-.g4{grid-template-columns:repeat(auto-fill,minmax(220px,1fr))}
+.g4{grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr))}
 .card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all var(--transition);box-shadow:var(--shadow-sm)}
 .card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
 /* CLS FIX: card-img aspect-ratio ile yükseklik rezervasyonu */
@@ -2443,6 +2443,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 <script src="https://unpkg.com/html5-qrcode@2.3.8/html5-qrcode.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
@@ -3564,7 +3565,7 @@ async function loadClubsFromDB(){
         const c=d.data();
         if(c.name||c.clubName){
           seen.add(d.id);
-          clubs.push({id:d.id,name:c.name||c.clubName||'',city:c.city||'',desc:c.desc||c.clubDesc||'',imgUrl:c.imgUrl||c.clubImg||'',open:c.open!==false,members:c.members||0,adminUid:c.adminUid||'',insta:c.insta||'',strava:c.strava||''});
+          clubs.push({id:d.id,name:c.name||c.clubName||'',city:c.city||'',desc:c.desc||c.clubDesc||'',imgUrl:c.imgUrl||c.clubImg||'',open:c.open!==false,members:c.members||0,adminUid:c.adminUid||c.adminuid||'',insta:c.insta||c.clubInsta||'',strava:c.strava||c.clubStrava||'',parkur:c.clubParkur||c.parkur||'',mapUrl:c.clubMapUrl||c.mapUrl||''});
         }
       });
     }catch(e2){console.warn('clubs collection:',e2.message);}
@@ -3586,9 +3587,20 @@ async function loadClubsFromDB(){
 window.loadClubsFromDB=loadClubsFromDB;
 async function loadRacesFromDB(){
   try{
-    const snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
-    const races=[];snap.forEach(d=>{const {id:_,...rest}=d.data();races.push({id:d.id,...rest});});
-    if(races.length)window.RACES=races;
+    const todayStr=new Date().toISOString().split('T')[0];
+    let snap;
+    try{
+      snap=await getDocs(query(collection(db,'races'),where('date','>=',todayStr),orderBy('date','asc')));
+    }catch(idxErr){
+      console.warn('[Races] Index yok, tümü çekiliyor:',idxErr.message);
+      snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
+    }
+    const races=[];
+    snap.forEach(d=>{const {id:_,...rest}=d.data();races.push({id:d.id,...rest});});
+    const today=new Date();today.setHours(0,0,0,0);
+    const upcoming=races.filter(r=>!r.date||new Date(r.date)>=today);
+    window.RACES=[...upcoming,...races.filter(r=>r.date&&new Date(r.date)<today)];
+    console.log('[Races] loaded:',upcoming.length,'upcoming,',races.length-upcoming.length,'past');
   }catch(e){console.warn('Races load:',e.message);}
 }
 window.loadRacesFromDB=loadRacesFromDB;
@@ -4566,9 +4578,26 @@ window.renderClubsPage=async()=>{
   }
 };
 window.openClub=async(id)=>{
-  const c=CLUBS.find(x=>x.id===id);if(!c)return;
+  // Stale cache önleme — her açılışta Firestore'dan taze veri çek
+  let c=CLUBS.find(x=>x.id===id)||{id};
+  try{
+    const fb2=window._fb;
+    const cSnap=await fb2.getDoc(fb2.doc(fb2.db,'clubs',id));
+    if(cSnap.exists()){
+      const d=cSnap.data();
+      c={id,...c,name:d.name||d.clubName||c.name||'',city:d.city||c.city||'',
+        desc:d.desc||d.clubDesc||c.desc||'',imgUrl:d.imgUrl||d.clubImg||c.imgUrl||'',
+        open:d.open!==false,insta:d.insta||d.clubInsta||c.insta||'',
+        strava:d.strava||d.clubStrava||c.strava||'',
+        parkur:d.clubParkur||d.parkur||c.parkur||'',
+        mapUrl:d.clubMapUrl||d.mapUrl||c.mapUrl||''};
+    } else {
+      const uSnap=await fb2.getDoc(fb2.doc(fb2.db,'users',id));
+      if(uSnap.exists()){const u=uSnap.data();c={id,...c,name:u.clubName||c.name||'',city:u.city||c.city||'',desc:u.clubDesc||c.desc||'',imgUrl:u.clubImg||c.imgUrl||'',open:u.clubOpen!==false,insta:u.clubInsta||c.insta||'',strava:u.clubStrava||c.strava||'',parkur:u.clubParkur||c.parkur||'',mapUrl:u.clubMapUrl||c.mapUrl||''};}
+    }
+  }catch(fetchErr){console.warn('[openClub]',fetchErr.message);}
+  if(!c.name){toast('Kulüp bulunamadı','err');return;}
   const isJoined=CU&&localStorage.getItem(`club_${c.id}_${CU.uid}`);
-  // Üye sayısını Firestore'dan çek
   let memberCount=c.members||0;
   try{
     const fb2=window._fb;const snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'memberships'),fb2.where('clubId','==',c.id)));

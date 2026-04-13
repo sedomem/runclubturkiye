@@ -2058,7 +2058,30 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <h3 style="margin-bottom:14px;font-size:15px">Kişisel Bilgiler</h3>
       <div class="form-grp"><label>Ad Soyad</label><input type="text" id="pf-name"/></div>
       <div class="form-grp"><label>Telefon</label><input type="text" id="pf-phone"/></div>
-      <div class="form-grp"><label>Şehir</label><select id="pf-city"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option></select></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px" class="health-grid">
+        <div class="form-grp" style="margin:0"><label>Cinsiyet</label>
+          <select id="pf-gender">
+            <option value="">Belirtmek istemiyorum</option>
+            <option value="Erkek">Erkek</option>
+            <option value="Kadın">Kadın</option>
+          </select>
+        </div>
+        <div class="form-grp" style="margin:0"><label>Doğum Tarihi</label>
+          <input type="date" id="pf-birthdate"/>
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:0" class="health-grid">
+        <div class="form-grp" style="margin:0"><label>Tişört Bedeni</label>
+          <select id="pf-tshirt">
+            <option value="">Seçin</option>
+            <option>XS</option><option>S</option><option>M</option>
+            <option>L</option><option>XL</option><option>XXL</option>
+          </select>
+        </div>
+        <div class="form-grp" style="margin:0"><label>Şehir</label>
+          <select id="pf-city"><option>İstanbul</option><option>Ankara</option><option>İzmir</option><option>Bursa</option><option>Antalya</option></select>
+        </div>
+      </div>
       <div class="form-grp"><label>Strava Linki</label><input type="text" id="pf-strava"/></div>
       <div class="form-grp"><label>Pace Grubum</label><div class="pace-selector" id="pf-pace-sel">
         <button class="pace-opt" onclick="this.classList.toggle('on')">4:00–4:30</button>
@@ -2713,6 +2736,10 @@ function syncProfileUI(){
   const pfEcP=document.getElementById('pf-ec-phone');if(pfEcP)pfEcP.value=ec.phone||'';
   const pfBl=document.getElementById('pf-blood');if(pfBl)pfBl.value=CU.bloodType||'';
   const pfMed=document.getElementById('pf-medical');if(pfMed)pfMed.value=CU.medicalNotes||'';
+  // Yeni alanlar
+  const pfGen=document.getElementById('pf-gender');if(pfGen)pfGen.value=CU.gender||'';
+  const pfBd=document.getElementById('pf-birthdate');if(pfBd)pfBd.value=CU.birthDate||'';
+  const pfTs=document.getElementById('pf-tshirt');if(pfTs)pfTs.value=CU.tshirtSize||'';
 }
 window.saveProfile=async()=>{
   if(!CU)return;
@@ -2722,12 +2749,19 @@ window.saveProfile=async()=>{
   const ecPhone = (document.getElementById('pf-ec-phone')?.value||'').trim();
   const blood   = document.getElementById('pf-blood')?.value||'';
   const medical = (document.getElementById('pf-medical')?.value||'').trim();
+  // Yeni profil alanları
+  const gender    = document.getElementById('pf-gender')?.value||'';
+  const birthDate = document.getElementById('pf-birthdate')?.value||'';
+  const tshirt    = document.getElementById('pf-tshirt')?.value||'';
   const data={
     name:document.getElementById('pf-name')?.value||'',
     phone:document.getElementById('pf-phone')?.value||'',
     stravaLink:document.getElementById('pf-strava')?.value||'',
     city:document.getElementById('pf-city')?.value||'',
     pace,
+    gender,
+    birthDate,
+    tshirtSize:tshirt,
     emergencyContact:{name:ecName, phone:ecPhone},
     bloodType:blood,
     medicalNotes:medical,
@@ -3342,26 +3376,28 @@ window.loadAdminUsers=async()=>{
     window._adminUsers=users;
     const roleLabel=r=>r==='superadmin'?'⭐ Süper Admin':r==='groupadmin'?'🔑 Grup Admin':r==='pending_groupadmin'?'⏳ Bekleyen':r==='subadmin'?'🔑 Sub Admin':'👤 Üye';
     const rolePill=r=>r==='superadmin'?'pill-or':r==='groupadmin'||r==='subadmin'?'pill-bl':r==='pending_groupadmin'?'pill-re':'pill-gr';
-    let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+    let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <span style="font-size:13px;color:var(--muted)">${users.length} kullanıcı</span>
       <button class="btn btn-green btn-sm" onclick="exportUsersExcel()">⬇ Excel İndir</button>
     </div>
-    <table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Rol</th><th>km</th><th>Etkinlik</th><th>İşlem</th></tr></thead><tbody>`;
+    <div style="overflow-x:auto"><table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Doğum</th><th>Tişört</th><th>Rol</th><th>km</th><th>İşlem</th></tr></thead><tbody>`;
     users.forEach((u,i)=>{
       html+=`<tr>
         <td><b>${u.name||'—'}</b></td>
         <td style="color:var(--muted);font-size:11px">${u.email||'—'}</td>
-        <td style="font-size:11px">${u.phone||'<span style="color:var(--muted)">—</span>'}</td>
+        <td style="font-size:11px">${u.phone||'—'}</td>
+        <td style="font-size:11px">${u.gender||'—'}</td>
+        <td style="font-size:11px">${u.birthDate||'—'}</td>
+        <td style="font-size:11px">${u.tshirtSize||'—'}</td>
         <td><span class="pill ${rolePill(u.role)}" style="font-size:10px">${roleLabel(u.role)}</span></td>
         <td>${u.totalKm||0}</td>
-        <td>${u.eventCount||0}</td>
         <td class="action-btns">
           <button class="btn btn-ghost btn-sm" onclick="showUserProfile(${i})">👁</button>
           <button class="btn btn-ghost btn-sm" onclick="adminAddKm('${u.id}')">+km</button>
         </td>
       </tr>`;
     });
-    html+='</tbody></table>';el.innerHTML=html;
+    html+='</tbody></table></div>';el.innerHTML=html;
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
 };
 window.showUserProfile=i=>{
@@ -3389,17 +3425,19 @@ window.exportUsersExcel=()=>{
   if(!data?.length){toast('Önce listeyi yükleyin','err');return;}
   const roleLabel=r=>r==='superadmin'?'Süper Admin':r==='groupadmin'?'Grup Admin':r==='pending_groupadmin'?'Bekleyen GA':r==='subadmin'?'Sub Admin':'Üye';
   const rows=[
-    ['#','Ad Soyad','E-posta','Telefon','Rol','Şehir','Toplam km','Etkinlik Sayısı','Kulüp Sayısı','Kayıt Tarihi'],
+    ['#','Ad Soyad','E-posta','Telefon','Cinsiyet','Doğum Tarihi','Tişört Bedeni','Rol','Şehir','Toplam km','Etkinlik','Kulüp','Kayıt Tarihi'],
     ...data.map((u,i)=>[
-      i+1,u.name||'',u.email||'',u.phone||'',roleLabel(u.role),
-      u.city||'',u.totalKm||0,u.eventCount||0,u.clubCount||0,
+      i+1,u.name||'',u.email||'',u.phone||'',
+      u.gender||'',u.birthDate||'',u.tshirtSize||'',
+      roleLabel(u.role),u.city||'',
+      u.totalKm||0,u.eventCount||0,u.clubCount||0,
       u.createdAt?.toDate?.().toLocaleDateString('tr')||''
     ])
   ];
   const csv=rows.map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
   const blob=new Blob(['\uFEFF'+csv],{type:'text/csv;charset=utf-8;'});
   const url=URL.createObjectURL(blob);
-  const a=document.createElement('a');a.href=url;a.download='kullanicilar.csv';a.click();
+  const a=document.createElement('a');a.href=url;a.download=`kullanicilar-${new Date().toISOString().split('T')[0]}.csv`;a.click();
   URL.revokeObjectURL(url);toast('Excel indirildi ✓','ok');
 };
 window.deleteUser=async(uid)=>{if(!confirm('Kullanıcı silinsin mi?'))return;try{await deleteDoc(doc(db,'users',uid));closeModal('user-profile-modal');toast('Silindi','ok');loadAdminUsers();}catch(e){toast(e.message,'err');}};
@@ -7547,17 +7585,48 @@ async function gLoadMembers(){
       el.innerHTML=`<div class="card" style="padding:24px;text-align:center;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">👥</div><p>Henüz üye yok.</p></div>`;
       return;
     }
-    const uids=[];snap.forEach(d=>uids.push(d.data().userId));
+    const uids=[];snap.forEach(d=>uids.push(d.data().userId||d.data().uid));
     const userSnaps=await Promise.all(uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid))));
-    let html='<table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Toplam km</th><th>Etkinlik</th></tr></thead><tbody>';
-    userSnaps.forEach(s=>{
-      if(!s.exists())return;
-      const u=s.data();
-      html+=`<tr><td><b>${u.name||'—'}</b></td><td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td><td>${u.phone||'—'}</td><td style="color:var(--or);font-weight:600">${u.totalKm||0} km</td><td>${u.eventCount||0}</td></tr>`;
+    // Kullanıcı verilerini topla
+    window._gMemberData=[];
+    userSnaps.forEach(s=>{if(s.exists())window._gMemberData.push({id:s.id,...s.data()});});
+    let tbl='<table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Şehir</th><th>Toplam km</th></tr></thead><tbody>';
+    window._gMemberData.forEach(u=>{
+      tbl+=`<tr>
+        <td><b>${u.name||'—'}</b></td>
+        <td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td>
+        <td>${u.phone||'—'}</td>
+        <td>${u.gender||'—'}</td>
+        <td>${u.city||'—'}</td>
+        <td style="color:var(--or);font-weight:600">${u.totalKm||0} km</td>
+      </tr>`;
     });
-    el.innerHTML=`<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Toplam <b style="color:var(--text)">${uids.length}</b> üye</p>`+html+'</tbody></table>';
+    tbl+='</tbody></table>';
+    el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <p style="font-size:13px;color:var(--muted)">Toplam <b style="color:var(--text)">${window._gMemberData.length}</b> üye</p>
+      <button class="btn btn-ghost btn-sm" onclick="gExportMembersExcel()">⬇ Excel İndir</button>
+    </div>`+tbl;
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
 }
+
+window.gExportMembersExcel=function(){
+  const data=window._gMemberData||[];
+  if(!data.length){toast('Üye verisi yok','err');return;}
+  const headers=['Ad Soyad','E-posta','Telefon','Cinsiyet','Doğum Tarihi','Tişört Bedeni','Şehir','Toplam km','Etkinlik'];
+  const rows=data.map(u=>[
+    u.name||'',u.email||'',u.phone||'',u.gender||'',
+    u.birthDate||'',u.tshirtSize||'',u.city||'',
+    u.totalKm||0,u.eventCount||0
+  ]);
+  const csv=[headers,...rows].map(r=>r.map(v=>`"${String(v).replace(/"/g,'""')}"`).join(',')).join('\n');
+  const blob=new Blob(['﻿'+csv],{type:'text/csv;charset=utf-8'});
+  const a=document.createElement('a');
+  a.href=URL.createObjectURL(blob);
+  a.download=`uye-listesi-${new Date().toISOString().split('T')[0]}.csv`;
+  a.click();
+  URL.revokeObjectURL(a.href);
+  toast('Excel indiriliyor ✓','ok');
+};
 
 window.gSaveAnnouncement=async()=>{
   const title=document.getElementById('ga-ann-title')?.value?.trim();

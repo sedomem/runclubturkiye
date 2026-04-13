@@ -7590,18 +7590,20 @@ async function gLoadMembers(){
     // Kullanıcı verilerini topla
     window._gMemberData=[];
     userSnaps.forEach(s=>{if(s.exists())window._gMemberData.push({id:s.id,...s.data()});});
-    let tbl='<table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Şehir</th><th>Toplam km</th></tr></thead><tbody>';
+    let tbl='<div style="overflow-x:auto"><table style="min-width:700px"><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Doğum Tarihi</th><th>Tişört</th><th>Şehir</th><th>Toplam km</th></tr></thead><tbody>';
     window._gMemberData.forEach(u=>{
       tbl+=`<tr>
         <td><b>${u.name||'—'}</b></td>
         <td style="font-size:11px;color:var(--muted)">${u.email||'—'}</td>
-        <td>${u.phone||'—'}</td>
-        <td>${u.gender||'—'}</td>
-        <td>${u.city||'—'}</td>
+        <td style="font-size:12px">${u.phone||'—'}</td>
+        <td style="font-size:12px">${u.gender||'—'}</td>
+        <td style="font-size:12px">${u.birthDate||'—'}</td>
+        <td style="font-size:12px">${u.tshirtSize?`<span style="background:var(--bg2);padding:2px 8px;border-radius:6px;font-weight:600">${u.tshirtSize}</span>`:'—'}</td>
+        <td style="font-size:12px">${u.city||'—'}</td>
         <td style="color:var(--or);font-weight:600">${u.totalKm||0} km</td>
       </tr>`;
     });
-    tbl+='</tbody></table>';
+    tbl+='</tbody></table></div>';
     el.innerHTML=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;flex-wrap:wrap;gap:8px">
       <p style="font-size:13px;color:var(--muted)">Toplam <b style="color:var(--text)">${window._gMemberData.length}</b> üye</p>
       <button class="btn btn-ghost btn-sm" onclick="gExportMembersExcel()">⬇ Excel İndir</button>

@@ -5889,9 +5889,10 @@ function _renderChatMsgs(container, msgs, myUid) {
   }
   msgs.forEach(m => {
     const isMe = m.senderId === myUid;
+    const roleTag = !isMe ? (m.role==='superadmin'?'<span style="font-size:9px;background:var(--or);color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px">⭐SA</span>':m.role==='groupadmin'?'<span style="font-size:9px;background:#60a5fa;color:#fff;padding:1px 5px;border-radius:4px;margin-left:4px">🔑GA</span>':'') : '';
     const div = document.createElement('div');
     div.style.cssText = `display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;margin-bottom:4px`;
-    div.innerHTML = `${!isMe?`<span style="font-size:10px;color:var(--muted);margin-left:4px">${m.senderName||''}</span>`:''}
+    div.innerHTML = `${!isMe?`<span style="font-size:10px;color:var(--muted);margin-left:4px">${m.senderName||''}${roleTag}</span>`:''}
       <div style="background:${isMe?'var(--or)':'var(--bg4)'};color:${isMe?'#fff':'var(--text)'};padding:8px 12px;border-radius:${isMe?'14px 14px 2px 14px':'14px 14px 14px 2px'};max-width:80%;font-size:13px;word-break:break-word">${m.text||''}</div>`;
     container.appendChild(div);
   });
@@ -5913,7 +5914,21 @@ window.loadChatMessages = async function(room) {
         const msgs = [];
         snap.forEach(d => msgs.push({id:d.id,...d.data()}));
         msgs.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
-        _renderChatMsgs(container, msgs, CU.uid);
+        if(typeof _renderChatMsgs==='function'){
+          _renderChatMsgs(container, msgs, CU?.uid||'');
+        } else {
+          // fallback inline render
+          container.innerHTML='';
+          msgs.forEach(m=>{
+            const isMe=m.senderId===(CU?.uid||'');
+            const wrap=document.createElement('div');
+            wrap.style.cssText=`display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;margin-bottom:6px`;
+            const roleTag=m.role==='superadmin'?'<span style="font-size:9px;color:var(--or);margin-left:4px">⭐SA</span>':m.role==='groupadmin'?'<span style="font-size:9px;color:#60a5fa;margin-left:4px">🔑GA</span>':'';
+            wrap.innerHTML=`${!isMe?`<span style="font-size:10px;color:var(--muted);margin-left:4px">${m.senderName||''}${roleTag}</span>`:''}<div style="background:${isMe?'var(--or)':'var(--bg4)'};color:${isMe?'#fff':'var(--text)'};padding:8px 12px;border-radius:${isMe?'14px 14px 2px 14px':'14px 14px 14px 2px'};font-size:13px;max-width:75%;word-break:break-word">${m.text||''}</div>`;
+            container.appendChild(wrap);
+          });
+          container.scrollTop=container.scrollHeight;
+        }
       },
       (err) => {
         console.error('[Chat SA]', err);
@@ -5931,15 +5946,23 @@ window.sendChatMessage = async function(room) {
   const input = document.getElementById('chat-input-' + (room||'admin'));
   const msg = input?.value?.trim();
   if (!msg) return;
+  if(!window.CU?.uid){toast('Oturum hatası, yenileyin','err');return;}
   try {
     const fb = window._fb;
     await fb.addDoc(fb.collection(fb.db, `chats/${roomId}/messages`), {
-      text: msg, senderId: CU.uid, senderName: CU.name||CU.email||'Admin',
+      text: msg,
+      senderId: CU.uid,
+      senderName: CU.name||CU.email||'Süper Admin',
+      role: 'superadmin',
       createdAt: fb.serverTimestamp()
     });
     input.value = '';
-    await window.loadChatMessages(room);
-  } catch(e) { toast(e.message, 'err'); }
+    // onSnapshot listener zaten günceller
+    if(!window._chatUnsub) window.loadChatMessages(room);
+  } catch(e) {
+    console.error('[sendChatMessage]',e);
+    toast('Mesaj gönderilemedi: '+e.message,'err');
+  }
 };
 
 // ── Duyuru düzenleme ────────────────────────────────────────
@@ -6642,7 +6665,7 @@ function renderAdminSection(sec){
       <div id="banner-tab-clubs" style="display:none"><div id="page-banner-slots-clubs"></div></div>
       <div id="banner-tab-races" style="display:none"><div id="page-banner-slots-races"></div></div>
       <div id="banner-tab-blog" style="display:none"><div id="page-banner-slots-blog"></div>
-      <div id="banner-tab-community" style="display:none"><h3 style="font-size:13px;margin-bottom:12px;color:var(--muted)">Topluluk Sayfası Banner</h3><div id="page-banner-slots-community"></div></div>
+      <div id="banner-tab-community" style="display:none"><div id="page-banner-slots-community"></div></div>
       </div>`,
     popup:`<h2 style="margin-bottom:18px">💬 Popup</h2>
       <div class="card" style="padding:24px;max-width:520px">
@@ -7934,11 +7957,24 @@ window.gSendChat=async()=>{
   const room='admin-chat';
   const input=document.getElementById('g-chat-input');
   const msg=input?.value?.trim();if(!msg)return;
+  if(!window.CU?.uid){toast('Oturum hatası, yenileyin','err');return;}
   try{
     const fb=window._fb;
-    await fb.addDoc(fb.collection(fb.db,`chats/${room}/messages`),{text:msg,senderId:CU.uid,senderName:CU.name,createdAt:fb.serverTimestamp()});
-    input.value='';gLoadChat();
-  }catch(e){toast(e.message,'err');}
+    await fb.addDoc(fb.collection(fb.db,`chats/${room}/messages`),{
+      text:msg,
+      senderId:CU.uid,
+      senderName:CU.name||CU.email||'Grup Admin',
+      role:'groupadmin',
+      createdAt:fb.serverTimestamp()
+    });
+    input.value='';
+    // onSnapshot listener zaten günceller — gLoadChat() çağırmaya gerek yok
+    // Ama listener yoksa başlat
+    if(!window._gChatUnsub) gLoadChat();
+  }catch(e){
+    console.error('[gSendChat]',e);
+    toast('Mesaj gönderilemedi: '+e.message,'err');
+  }
 };
 
 

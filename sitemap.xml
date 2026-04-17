@@ -8,8 +8,14 @@
 
 
 <url>
-  <loc>https://www.runclubturkiye.com/</loc>
-  <lastmod>2026-04-03T20:05:22+00:00</lastmod>
+  <loc>https://runclubturkiye.com/</loc>
+  <lastmod>2026-04-17T20:56:33+00:00</lastmod>
+  <priority>1.00</priority>
+</url>
+<url>
+  <loc>https://runclubturkiye.com/cdn-cgi/l/email-protection</loc>
+  <lastmod>2026-04-17T20:56:34+00:00</lastmod>
+  <priority>0.80</priority>
 </url>
 
 

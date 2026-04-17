@@ -5913,7 +5913,11 @@ window.loadChatMessages = async function(room) {
   try{
     const snap0=await fb.getDocs(fb.collection(fb.db,`chats/${roomId}/messages`));
     const msgs0=[];snap0.forEach(d=>msgs0.push({id:d.id,...d.data()}));
-    msgs0.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+    msgs0.sort((a,b) => {
+  const timeA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : (a.createdAt?.toMillis ? a.createdAt.toMillis() : Date.now());
+  const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : (b.createdAt?.toMillis ? b.createdAt.toMillis() : Date.now());
+  return timeA - timeB;
+});
     if(typeof _renderChatMsgs==='function')_renderChatMsgs(container,msgs0,window.CU?.uid||'');
     else container.innerHTML='<p style="color:var(--muted);font-size:12px;text-align:center">Yükleniyor...</p>';
   }catch(e0){console.warn('[loadChatMessages] getDocs:',e0.message);}
@@ -5924,7 +5928,11 @@ window.loadChatMessages = async function(room) {
       (snap) => {
         const msgs = [];
         snap.forEach(d => msgs.push({id:d.id,...d.data()}));
-        msgs.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+        msgs.sort((a,b) => {
+  const timeA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : (a.createdAt?.toMillis ? a.createdAt.toMillis() : Date.now());
+  const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : (b.createdAt?.toMillis ? b.createdAt.toMillis() : Date.now());
+  return timeA - timeB;
+});
         if(typeof _renderChatMsgs==='function'){
           _renderChatMsgs(container, msgs, CU?.uid||'');
         } else {
@@ -6679,9 +6687,8 @@ function renderAdminSection(sec){
       <div id="banner-tab-events" style="display:none"><div id="page-banner-slots-events"></div></div>
       <div id="banner-tab-clubs" style="display:none"><div id="page-banner-slots-clubs"></div></div>
       <div id="banner-tab-races" style="display:none"><div id="page-banner-slots-races"></div></div>
-      <div id="banner-tab-blog" style="display:none"><div id="page-banner-slots-blog"></div>
-      <div id="banner-tab-community" style="display:none"><div id="page-banner-slots-community"></div></div>
-      </div>`,
+      <div id="banner-tab-blog" style="display:none"><div id="page-banner-slots-blog"></div></div>
+      <div id="banner-tab-community" style="display:none"><div id="page-banner-slots-community"></div></div>`,
     popup:`<h2 style="margin-bottom:18px">💬 Popup</h2>
       <div class="card" style="padding:24px;max-width:520px">
         ${imgUploadHtml('apu-img-input','Popup Görseli','480×200px')}
@@ -7947,7 +7954,11 @@ async function gLoadChat(){
   try{
     const snap0=await fb.getDocs(fb.collection(fb.db,`chats/${room}/messages`));
     const msgs0=[];snap0.forEach(d=>msgs0.push({id:d.id,...d.data()}));
-    msgs0.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+    msgs0.sort((a,b) => {
+  const timeA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : (a.createdAt?.toMillis ? a.createdAt.toMillis() : Date.now());
+  const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : (b.createdAt?.toMillis ? b.createdAt.toMillis() : Date.now());
+  return timeA - timeB;
+});
     if(typeof _renderChatMsgs==='function')_renderChatMsgs(container,msgs0,window.CU?.uid||'');
   }catch(e0){console.warn('[gLoadChat] getDocs:',e0.message);}
   // Sonra onSnapshot ile realtime dinle
@@ -7957,7 +7968,11 @@ async function gLoadChat(){
       (snap)=>{
         const msgs=[];
         snap.forEach(d=>msgs.push({id:d.id,...d.data()}));
-        msgs.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+        msgs.sort((a,b) => {
+  const timeA = a.createdAt?.seconds ? a.createdAt.seconds * 1000 : (a.createdAt?.toMillis ? a.createdAt.toMillis() : Date.now());
+  const timeB = b.createdAt?.seconds ? b.createdAt.seconds * 1000 : (b.createdAt?.toMillis ? b.createdAt.toMillis() : Date.now());
+  return timeA - timeB;
+});
         if(typeof _renderChatMsgs==='function') _renderChatMsgs(container,msgs,CU.uid);
         else {
           container.innerHTML='';
@@ -8296,7 +8311,7 @@ window.initPageBanners=initPageBanners;
 // Admin — Sayfa banner yönetim paneli
 function renderPageBannerAdmin(){
   const el=document.getElementById('page-banner-slots');if(!el)return;
-  const pages={events:{label:'Etkinlikler',ico:'📅'},clubs:{label:'Kulüpler',ico:'🤝'},races:{label:'Yarış Takvimi',ico:'🏆'},blog:{label:'Blog & Haberler',ico:'📰'}};
+  const pages={events:{label:'Etkinlikler',ico:'📅'},clubs:{label:'Kulüpler',ico:'🤝'},races:{label:'Yarış Takvimi',ico:'🏆'},blog:{label:'Blog & Haberler',ico:'📰'},community:{label:'Topluluk',ico:'🏃'}};
   el.innerHTML=Object.entries(pages).map(([page,info])=>{
     const b=window.PAGE_BANNERS[page];
     return`<div class="card" style="padding:20px;margin-bottom:14px;border-left:4px solid var(--or)">

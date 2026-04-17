@@ -3324,6 +3324,8 @@ window.savePageBanner=async(page)=>{
   try{await fb.setDoc(fb.doc(fb.db,'banners',page),{...data,updatedAt:fb.serverTimestamp()});}catch(e){toast('Hata: '+e.message,'err');return;}
   toast(`${page} banner kaydedildi ✓`,'ok');
   renderPageBanner(page);
+  // Aktif sekmeyi de yenile
+  if(typeof renderSinglePageBannerAdmin==='function') renderSinglePageBannerAdmin(page);
   renderPageBannerAdmin();
 };
 window.clearPageBanner=async(page)=>{
@@ -3333,6 +3335,7 @@ window.clearPageBanner=async(page)=>{
   try{await fb.deleteDoc(fb.doc(fb.db,'banners',page));}catch(e){}
   toast(`${page} banner silindi`,'ok');
   renderPageBanner(page);
+  if(typeof renderSinglePageBannerAdmin==='function') renderSinglePageBannerAdmin(page);
   renderPageBannerAdmin();
 };
 window.clearBannerSlot=async(i)=>{
@@ -5904,10 +5907,18 @@ window.loadChatMessages = async function(room) {
   const container = document.getElementById('chat-messages-' + (room||'admin'));
   if (!container) return;
   // Önceki listener'ı iptal et
-  if (window._chatUnsub) { try{window._chatUnsub();}catch(e){} }
+  if (window._chatUnsub) { try{window._chatUnsub();}catch(e){} window._chatUnsub=null; }
+  const fb = window._fb; if(!fb) return;
+  // Önce getDocs ile anlık mesajları göster
+  try{
+    const snap0=await fb.getDocs(fb.collection(fb.db,`chats/${roomId}/messages`));
+    const msgs0=[];snap0.forEach(d=>msgs0.push({id:d.id,...d.data()}));
+    msgs0.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+    if(typeof _renderChatMsgs==='function')_renderChatMsgs(container,msgs0,window.CU?.uid||'');
+    else container.innerHTML='<p style="color:var(--muted);font-size:12px;text-align:center">Yükleniyor...</p>';
+  }catch(e0){console.warn('[loadChatMessages] getDocs:',e0.message);}
+  // onSnapshot ile realtime
   try {
-    const fb = window._fb;
-    // onSnapshot ile realtime
     window._chatUnsub = fb.onSnapshot(
       fb.collection(fb.db, `chats/${roomId}/messages`),
       (snap) => {
@@ -5946,19 +5957,23 @@ window.sendChatMessage = async function(room) {
   const input = document.getElementById('chat-input-' + (room||'admin'));
   const msg = input?.value?.trim();
   if (!msg) return;
-  if(!window.CU?.uid){toast('Oturum hatası, yenileyin','err');return;}
+  const cu = window.CU;
+  if(!cu?.uid){toast('Oturum hatası, sayfayı yenileyin','err');return;}
   try {
     const fb = window._fb;
     await fb.addDoc(fb.collection(fb.db, `chats/${roomId}/messages`), {
       text: msg,
-      senderId: CU.uid,
-      senderName: CU.name||CU.email||'Süper Admin',
-      role: 'superadmin',
+      senderId: cu.uid,
+      senderName: cu.name||cu.email||'Süper Admin',
+      role: cu.role||'superadmin',
       createdAt: fb.serverTimestamp()
     });
     input.value = '';
-    // onSnapshot listener zaten günceller
-    if(!window._chatUnsub) window.loadChatMessages(room);
+    // Container hala DOM'da mı? Listener yoksa yenile
+    const container = document.getElementById('chat-messages-' + (room||'admin'));
+    if(!container||!window._chatUnsub){
+      window.loadChatMessages(room);
+    }
   } catch(e) {
     console.error('[sendChatMessage]',e);
     toast('Mesaj gönderilemedi: '+e.message,'err');
@@ -7926,9 +7941,17 @@ async function gLoadChat(){
   const container=document.getElementById('g-chat-box');
   if(!container){console.warn('[gLoadChat] g-chat-box bulunamadı');return;}
   // Önceki listener'ı iptal et
-  if(window._gChatUnsub){try{window._gChatUnsub();}catch(e){}}
+  if(window._gChatUnsub){try{window._gChatUnsub();}catch(e){} window._gChatUnsub=null;}
+  const fb=window._fb;if(!fb){console.error('[gLoadChat] _fb yok');return;}
+  // Önce getDocs ile hızlı yükle
   try{
-    const fb=window._fb;
+    const snap0=await fb.getDocs(fb.collection(fb.db,`chats/${room}/messages`));
+    const msgs0=[];snap0.forEach(d=>msgs0.push({id:d.id,...d.data()}));
+    msgs0.sort((a,b)=>(a.createdAt?.seconds||0)-(b.createdAt?.seconds||0));
+    if(typeof _renderChatMsgs==='function')_renderChatMsgs(container,msgs0,window.CU?.uid||'');
+  }catch(e0){console.warn('[gLoadChat] getDocs:',e0.message);}
+  // Sonra onSnapshot ile realtime dinle
+  try{
     window._gChatUnsub=fb.onSnapshot(
       fb.collection(fb.db,`chats/${room}/messages`),
       (snap)=>{
@@ -7957,23 +7980,30 @@ window.gSendChat=async()=>{
   const room='admin-chat';
   const input=document.getElementById('g-chat-input');
   const msg=input?.value?.trim();if(!msg)return;
-  if(!window.CU?.uid){toast('Oturum hatası, yenileyin','err');return;}
+  const cu=window.CU;
+  if(!cu?.uid){toast('Oturum hatası, sayfayı yenileyin','err');return;}
+  const btn=input.nextElementSibling;
+  if(btn)btn.disabled=true;
   try{
     const fb=window._fb;
     await fb.addDoc(fb.collection(fb.db,`chats/${room}/messages`),{
       text:msg,
-      senderId:CU.uid,
-      senderName:CU.name||CU.email||'Grup Admin',
+      senderId:cu.uid,
+      senderName:cu.name||cu.email||'Grup Admin',
       role:'groupadmin',
       createdAt:fb.serverTimestamp()
     });
     input.value='';
-    // onSnapshot listener zaten günceller — gLoadChat() çağırmaya gerek yok
-    // Ama listener yoksa başlat
-    if(!window._gChatUnsub) gLoadChat();
+    // Listener yoksa ya da container kaybolmuşsa yenile
+    const container=document.getElementById('g-chat-box');
+    if(!container||!window._gChatUnsub){
+      gLoadChat();
+    }
   }catch(e){
     console.error('[gSendChat]',e);
     toast('Mesaj gönderilemedi: '+e.message,'err');
+  }finally{
+    if(btn)btn.disabled=false;
   }
 };
 

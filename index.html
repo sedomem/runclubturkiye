@@ -4310,9 +4310,27 @@ function routerInit(){
   }
   // Prefix eşleşme — slug'ı ayıkla ve detay sayfasını aç
   const prefixMap=[
-    {prefix:'/etkinlik/', listNav:'events',     openFn: id=>{const tryOpen=()=>{const e=window.EVENTS&&window.EVENTS.find(x=>x.id===id||x.slug===id);if(e){window.openEvent(e.id);}else if(window.loadEventsFromDB){window.loadEventsFromDB().then(()=>{const e2=window.EVENTS.find(x=>x.id===id||x.slug===id);if(e2)window.openEvent(e2.id);});}};tryOpen();}},
-    {prefix:'/haber/',    listNav:'blog',       openFn: slug=>{const tryOpen=()=>{const p=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);if(p){window.openBlog(p.id);}else if(window.loadBlogFromDB){window.loadBlogFromDB().then(()=>{const p2=window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);if(p2)window.openBlog(p2.id);});}};tryOpen();}},
-    {prefix:'/yaris/',    listNav:'races',      openFn: id=>{const tryOpen=()=>{const r=window.RACES&&window.RACES.find(x=>x.id===id||x.slug===id);if(r){window.openRace(r.id);}else if(window.loadRacesFromDB){window.loadRacesFromDB().then(()=>{const r2=window.RACES.find(x=>x.id===id||x.slug===id);if(r2)window.openRace(r2.id);});}};tryOpen();}},
+    {prefix:'/etkinlik/', listNav:'events',     openFn: id=>{
+      if(typeof window.openEvent!=='function'){console.error('[Router] openEvent henüz yüklenmedi');return;}
+      const tryOpen=()=>{const e=window.EVENTS&&window.EVENTS.find(x=>x.id===id||x.slug===id);if(e){window.openEvent(e.id);}else if(window.loadEventsFromDB){window.loadEventsFromDB().then(()=>{const e2=window.EVENTS&&window.EVENTS.find(x=>x.id===id||x.slug===id);if(e2)window.openEvent(e2.id);});}};tryOpen();}},
+    {prefix:'/haber/',    listNav:'blog',       openFn: slug=>{
+      if(typeof window.openBlog!=='function'){console.error('[Router] openBlog henüz yüklenmedi');return;}
+      const tryOpen=()=>{
+        const p=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);
+        if(p){window.openBlog(p.id);}
+        else if(window.loadBlogFromDB){
+          window.loadBlogFromDB().then(()=>{
+            const p2=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);
+            if(p2)window.openBlog(p2.id);
+            else{console.warn('[Router] slug bulunamadı:',slug);}
+          });
+        }
+      };
+      tryOpen();
+    }},
+    {prefix:'/yaris/',    listNav:'races',      openFn: id=>{
+      if(typeof window.openRace!=='function'){console.error('[Router] openRace henüz yüklenmedi');return;}
+      const tryOpen=()=>{const r=window.RACES&&window.RACES.find(x=>x.id===id||x.slug===id);if(r){window.openRace(r.id);}else if(window.loadRacesFromDB){window.loadRacesFromDB().then(()=>{const r2=window.RACES&&window.RACES.find(x=>x.id===id||x.slug===id);if(r2)window.openRace(r2.id);});}};tryOpen();}},
     {prefix:'/kulup/',    listNav:'clubs',      openFn: id=>{window.nav('clubs');setTimeout(()=>window.openClub&&window.openClub(id),400);}},
     {prefix:'/firsat/',   listNav:'firsatlar',  openFn: id=>{window.nav('firsatlar');setTimeout(()=>window.openFirsatDetail&&window.openFirsatDetail(id),400);}},
   ];
@@ -4322,7 +4340,18 @@ function routerInit(){
       if(!slug){window.nav(listNav);return;}
       // Önce liste sayfasını göster, sonra detayı aç
       window.nav(listNav);
-      if(openFn)setTimeout(()=>openFn(slug),200);
+      if(openFn){
+        // DOMContentLoaded sonrası tüm fonksiyonların yüklenmesini bekle
+        let attempt=0;
+        const tryFn=()=>{
+          attempt++;
+          try{openFn(slug);}catch(err){
+            if(attempt<5)setTimeout(tryFn,300*attempt);
+            else console.error('[Router] openFn başarısız:',slug,err);
+          }
+        };
+        setTimeout(tryFn,250);
+      }
       return;
     }
   }
@@ -4833,8 +4862,9 @@ function blogCard(p){
   const katIcon=katIcons[p.kategori]||'📰';
   return`<div class="blog-card${p.featured?' featured-blog-card':''}" onclick="openBlog('${p.id}')"><div class="blog-img">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="400" height="180" loading="lazy"/>`:`<span style="position:relative;z-index:1;font-size:38px">${p.emoji||'\ud83d\udcf0'}</span>`}</div><div class="card-body"><div style="display:flex;gap:5px;flex-wrap:wrap;margin-bottom:5px">${p.kategori?`<span class="tag tag-or" style="font-size:10px;padding:2px 8px">${katIcon} ${p.kategori}</span>`:''} ${(p.tags||[]).slice(0,2).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div><h3>${p.title}</h3><p style="margin-top:4px">${(p.body||'').substring(0,70)}...</p><div style="display:flex;justify-content:space-between;align-items:center;margin-top:8px"><div style="font-size:11px;color:var(--muted)">\u270d\ufe0f ${p.authorName||'Edit\xf6r'}</div><div style="font-size:11px;color:var(--muted)">\u2764\ufe0f ${p.likes||0}</div></div></div></div>`;}
 window.openBlog=id=>{
-  const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;
-  const liked=CU&&localStorage.getItem(`blog_like_${p.id}_${CU.uid}`);
+  const p=BLOG_POSTS.find(x=>x.id===id);if(!p){console.warn('[openBlog] post bulunamadı:',id);return;}
+  const _cu=window.CU;
+  const liked=_cu&&localStorage.getItem(`blog_like_${p.id}_${_cu.uid}`);
   document.getElementById('blog-detail-content').innerHTML=`
     <div style="width:100%;padding-top:52.5%;border-radius:var(--r);overflow:hidden;margin-bottom:24px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;position:relative">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="820" height="430" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="font-size:70px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">${p.emoji||'\ud83d\udcf0'}</span>`}</div>
     <div style="display:flex;gap:6px;margin-bottom:10px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>

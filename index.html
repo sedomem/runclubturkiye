@@ -256,6 +256,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .admin-sb button.on{background:var(--or-soft);border-right:3px solid var(--or);color:var(--or)}
 .admin-sb .logout-btn{margin-top:auto;color:#c0392b!important;border-top:1.5px solid var(--border)}
 .admin-main{padding:26px;overflow:auto;background:var(--bg2)}
+.admin-main .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
 .admin-sec{display:none}.admin-sec.on{display:block;animation:fadeUp .3s var(--transition)}
 .a-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px}
 .a-stat{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;position:relative;box-shadow:var(--shadow-sm);transition:all var(--transition)}.a-stat:hover{transform:translateY(-2px);box-shadow:var(--shadow-md)}
@@ -741,6 +742,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
   /* Admin tablo scroll */
   #admin-main{overflow-x:auto}
+  .admin-main table{min-width:600px}
   .admin-wrap{min-height:auto}
 
 }
@@ -986,6 +988,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .admin-sb button{flex:1;min-width:100px;font-size:12px!important;padding:8px 6px!important;}
   .admin-main{padding:12px!important;}
   #panel-main table{font-size:11px;}
+#panel-main .table-wrap,#panel-main div[style*='overflow-x']{-webkit-overflow-scrolling:touch;}
   #panel-main th,#panel-main td{padding:5px 6px!important;}
 }
 </style>
@@ -1115,6 +1118,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
           <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Yönetim</div>
         </div>
         <button class="mdr-btn mdr-admin" onclick="goPanel();closeMasterDrawer()"><span class="mdr-ico">⭐</span><span id="mdr-panel-label">Admin Paneli</span></button>
+        <!-- Rol bazlı ek admin linkleri -->
+        <button class="mdr-btn mdr-admin" id="mdr-banner-btn" style="display:none" onclick="nav&&nav('admin');setTimeout(()=>aNav&&aNav('banners'),300);closeMasterDrawer()"><span class="mdr-ico">🖼</span>Banner Ayarları</button>
+        <button class="mdr-btn mdr-admin" id="mdr-members-btn" style="display:none" onclick="goPanel&&goPanel();setTimeout(()=>gNav&&gNav('members'),300);closeMasterDrawer()"><span class="mdr-ico">👥</span>Üye Listesi</button>
         <button class="mdr-btn mdr-admin" id="mdr-community-admin-btn" style="display:none" onclick="aNav&&aNav('community');goPanel();closeMasterDrawer()"><span class="mdr-ico">🏃</span><span>Topluluk Yönetimi</span></button>
       </div>
 
@@ -3318,8 +3324,12 @@ window.savePageBanner=async(page)=>{
   const imgInput=document.getElementById(`pb-file-${page}`);
   let imgUrl=document.getElementById(`pb-imgurl-${page}`)?.value||'';
   if(!imgUrl&&imgInput?.files[0])imgUrl=await handleImgUpload(imgInput,'banners')||'';
+  // Mobil görsel — pb-mobile-file / pb-mobileurl-{page}
+  const mobileInput=document.getElementById(`pb-mobile-file-${page}`);
+  let mobileImageUrl=document.getElementById(`pb-mobileurl-${page}`)?.value||'';
+  if(!mobileImageUrl&&mobileInput?.files[0])mobileImageUrl=await handleImgUpload(mobileInput,'banners')||'';
   const title=document.getElementById(`pb-title-${page}`)?.value||'';
-  const data={imgUrl,title,subtitle:document.getElementById(`pb-sub-${page}`)?.value||'',badge:document.getElementById(`pb-badge-${page}`)?.value||'',ctaText:document.getElementById(`pb-cta-${page}`)?.value||'',ctaUrl:document.getElementById(`pb-url-${page}`)?.value||'',active:true};
+  const data={imgUrl,mobileImageUrl,title,subtitle:document.getElementById(`pb-sub-${page}`)?.value||'',badge:document.getElementById(`pb-badge-${page}`)?.value||'',ctaText:document.getElementById(`pb-cta-${page}`)?.value||'',ctaUrl:document.getElementById(`pb-url-${page}`)?.value||'',active:true};
   window.PAGE_BANNERS[page]=data;
   try{await fb.setDoc(fb.doc(fb.db,'banners',page),{...data,updatedAt:fb.serverTimestamp()});}catch(e){toast('Hata: '+e.message,'err');return;}
   toast(`${page} banner kaydedildi ✓`,'ok');
@@ -5310,6 +5320,12 @@ window.syncMasterDrawer=function(){
     if(panelLabel)panelLabel.textContent=cu.role==='superadmin'?'Süper Admin Paneli':'Grup Admin Paneli';
     const commAdminBtn=document.getElementById('mdr-community-admin-btn');
     if(commAdminBtn)commAdminBtn.style.display=cu.role==='superadmin'?'block':'none';
+    // Banner: sadece superadmin görsün
+    const bannerBtn=document.getElementById('mdr-banner-btn');
+    if(bannerBtn)bannerBtn.style.display=cu.role==='superadmin'?'block':'none';
+    // Üye Listesi: groupadmin ve superadmin görsün
+    const membersBtn=document.getElementById('mdr-members-btn');
+    if(membersBtn)membersBtn.style.display=isAdmin?'block':'none';
   }else{
     if(guestH)guestH.style.display='block';
     if(userH)userH.style.display='none';
@@ -8324,12 +8340,26 @@ function renderPageBanner(page){
   if(!el)return;
   const custom=window.PAGE_BANNERS&&window.PAGE_BANNERS[page];
   const def=PAGE_BANNER_DEFAULTS[page];
+  if(!def)return; // defaults yoksa dur
   const d=custom||def;
   if(!d)return;
   const bgStyle='';
-  const stats=(d.stats||def.stats||[]).map(s=>`<div class="pb-stat-chip">${s.ico} <b>${s.val}</b> ${s.label}</div>`).join('');
+  // Stats: undefined koruması
+  const defStats=Array.isArray(def.stats)?def.stats:[];
+  const dStats=Array.isArray(d.stats)?d.stats:defStats;
+  const stats=dStats.map(s=>{
+    if(!s||typeof s!=='object')return '';
+    return `<div class="pb-stat-chip">${s.ico||''} <b>${s.val||''}</b> ${s.label||''}</div>`;
+  }).join('');
+  // Dual-banner: desktop + mobil görsel (picture tag)
+  const desktopUrl=d.imgUrl||'';
+  const mobileUrl=d.mobileImageUrl||desktopUrl;
+  const picTag=desktopUrl?`<picture style="position:absolute;inset:0;width:100%;height:100%;z-index:0">
+    ${mobileUrl!==desktopUrl?`<source media="(max-width:768px)" srcset="${mobileUrl}"/>`:''}
+    <img src="${desktopUrl}" alt="${d.title||page}" style="width:100%;height:100%;object-fit:cover;filter:brightness(1.05) saturate(1.1)" loading="lazy"/>
+  </picture>`:'';
   el.innerHTML=`
-    ${d.imgUrl?window.bannerPicture(d.imgUrl,'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(1.05) saturate(1.1)'):''}
+    ${picTag}
     <div class="pb-overlay"></div>
     <div class="pb-shapes">
       <div class="pb-shape"></div>
@@ -8417,7 +8447,12 @@ function renderSinglePageBannerAdmin(page){
       <div style="font-size:12px;color:var(--muted)">📁 Banner görseli yükle · Önerilen: 1440×320px</div>
       <img class="img-preview" id="pb-prev-${page}"/>
     </div>
-    <div class="form-grp" style="margin-top:10px"><label>Görsel URL</label><input type="text" id="pb-imgurl-${page}" value="${b?.imgUrl||''}" placeholder="https://..."/></div>
+    <div class="form-grp" style="margin-top:10px"><label>Görsel URL (Masaüstü)</label><input type="text" id="pb-imgurl-${page}" value="${b?.imgUrl||''}" placeholder="https://..."/></div>
+    <div class="form-grp"><label>📱 Mobil Görsel URL <span style="font-size:10px;color:var(--muted)">(max 768px — boş kalırsa masaüstü kullanılır)</span></label>
+      <input type="file" accept="image/*" id="pb-mobile-file-${page}" style="margin-bottom:6px" onchange="previewImg(this,'pb-mobile-prev-${page}')"/>
+      <input type="text" id="pb-mobileurl-${page}" value="${b?.mobileImageUrl||''}" placeholder="https://..."/>
+      <img class="img-preview" id="pb-mobile-prev-${page}" ${`${b?.mobileImageUrl||''}`?`src="${b?.mobileImageUrl}" style="display:block;max-height:70px;border-radius:6px;margin-top:6px"`:''}/>
+    </div>
     <div class="form-grp"><label>Rozet Metni</label><input type="text" id="pb-badge-${page}" value="${b?.badge||''}" placeholder="örn: 📅 Etkinlikler"/></div>
     <div class="form-row">
       <div class="form-grp"><label>Ana Başlık (HTML destekler)</label><input type="text" id="pb-title-${page}" value="${b?.title||''}" placeholder='örn: Koş, &lt;span style="color:#E8622A"&gt;Keşfet&lt;/span&gt;'/></div>

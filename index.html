@@ -3361,43 +3361,54 @@ window.saveBlogFromAdmin=async()=>{
 
 // Blog düzenleme formunu doldur
 window.openBlogForm=function(editData){
-  // Formu sıfırla
-  ['ab-title','ab-tags','ab-img-url','ab-meta-title','ab-meta-desc'].forEach(id=>{
-    const el=document.getElementById(id); if(el)el.value='';
-  });
-  const katEl=document.getElementById('ab-kategori'); if(katEl)katEl.value='Haber';
-  const featEl=document.getElementById('ab-featured'); if(featEl)featEl.checked=false;
-  const editIdEl=document.getElementById('ab-edit-id'); if(editIdEl)editIdEl.value='';
-  const titleEl=document.getElementById('ab-form-title');
-  const btnEl=document.getElementById('ab-save-btn');
-  const prevEl=document.getElementById('ab-img-preview-thumb');
-  if(prevEl)prevEl.style.display='none';
-  if(window._quillEditor)window._quillEditor.root.innerHTML='';
-  if(editData&&editData.id){
-    // DÜZENLEME MODU
-    if(editIdEl)editIdEl.value=editData.id;
-    if(titleEl)titleEl.textContent='✏️ Yazıyı Düzenle';
-    if(btnEl)btnEl.textContent='Güncelle';
-    const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
-    set('ab-title',editData.title);
-    set('ab-tags',(editData.tags||[]).join(', '));
-    set('ab-img-url',editData.coverUrl);
-    set('ab-meta-title',editData.metaTitle);
-    set('ab-meta-desc',editData.metaDesc);
-    if(katEl)katEl.value=editData.kategori||'Haber';
-    if(featEl)featEl.checked=!!editData.featured;
-    if(window._quillEditor&&editData.body)window._quillEditor.root.innerHTML=editData.body;
-    if(editData.coverUrl&&prevEl){prevEl.src=editData.coverUrl;prevEl.style.display='block';}
-  } else {
-    if(titleEl)titleEl.textContent='➕ Blog Yazısı Ekle';
-    if(btnEl)btnEl.textContent='Yayınla';
+  // Blog sekmesi açık değilse önce aç (renderAdminSection formu sıfırlar, o yüzden önce geç)
+  const currentSec=document.querySelector('.admin-sec.on');
+  const isBlogOpen=currentSec&&currentSec.id==='admin-sec-blog';
+  if(!isBlogOpen&&typeof renderAdminSection==='function'){
+    renderAdminSection('blog');
   }
-  // Blog sekmesine git ve forma scroll
-  if(typeof renderAdminSection==='function')renderAdminSection('blog');
-  setTimeout(()=>{
-    const formTop=document.getElementById('ab-title');
-    if(formTop)formTop.scrollIntoView({behavior:'smooth'});
-  },200);
+  // Formu doldur — renderAdminSection bittikten sonra (zaten sync, ama form elementleri hazır)
+  const doFill=()=>{
+    ['ab-title','ab-tags','ab-img-url','ab-meta-title','ab-meta-desc'].forEach(id=>{
+      const el=document.getElementById(id); if(el)el.value='';
+    });
+    const katEl=document.getElementById('ab-kategori'); if(katEl)katEl.value='Haber';
+    const featEl=document.getElementById('ab-featured'); if(featEl)featEl.checked=false;
+    const editIdEl=document.getElementById('ab-edit-id'); if(editIdEl)editIdEl.value='';
+    const titleEl=document.getElementById('ab-form-title');
+    const btnEl=document.getElementById('ab-save-btn');
+    const prevEl=document.getElementById('ab-img-preview-thumb');
+    if(prevEl)prevEl.style.display='none';
+    if(window._quillEditor)window._quillEditor.root.innerHTML='';
+    if(editData&&editData.id){
+      if(editIdEl)editIdEl.value=editData.id;
+      if(titleEl)titleEl.textContent='✏️ Yazıyı Düzenle';
+      if(btnEl)btnEl.textContent='Güncelle';
+      const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+      set('ab-title',editData.title);
+      set('ab-tags',(editData.tags||[]).join(', '));
+      set('ab-img-url',editData.coverUrl);
+      set('ab-meta-title',editData.metaTitle);
+      set('ab-meta-desc',editData.metaDesc);
+      if(katEl)katEl.value=editData.kategori||'Haber';
+      if(featEl)featEl.checked=!!editData.featured;
+      // Quill editör - DOM'da hazır olması için kısa bekle
+      setTimeout(()=>{
+        if(window._quillEditor&&editData.body)window._quillEditor.root.innerHTML=editData.body;
+      },50);
+      if(editData.coverUrl&&prevEl){prevEl.src=editData.coverUrl;prevEl.style.display='block';}
+    } else {
+      if(titleEl)titleEl.textContent='➕ Blog Yazısı Ekle';
+      if(btnEl)btnEl.textContent='Yayınla';
+    }
+    // Forma scroll
+    setTimeout(()=>{
+      const formTop=document.getElementById('ab-title');
+      if(formTop)formTop.scrollIntoView({behavior:'smooth',block:'start'});
+    },100);
+  };
+  // renderAdminSection sync'tir ama Quill init async olabilir — 0ms timeout yeterli
+  setTimeout(doFill,0);
 };
 
 // ── BANNERS ──

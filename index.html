@@ -1121,6 +1121,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
         <!-- Rol bazlı ek admin linkleri -->
         <button class="mdr-btn mdr-admin" id="mdr-banner-btn" style="display:none" onclick="nav&&nav('admin');setTimeout(()=>aNav&&aNav('banners'),300);closeMasterDrawer()"><span class="mdr-ico">🖼</span>Banner Ayarları</button>
         <button class="mdr-btn mdr-admin" id="mdr-members-btn" style="display:none" onclick="goPanel&&goPanel();setTimeout(()=>gNav&&gNav('members'),300);closeMasterDrawer()"><span class="mdr-ico">👥</span>Üye Listesi</button>
+        <button class="mdr-btn mdr-admin" id="mdr-events-btn" style="display:none" onclick="goPanel&&goPanel();setTimeout(()=>gNav&&gNav('events'),300);closeMasterDrawer()"><span class="mdr-ico">📅</span>Etkinlik Yönetimi</button>
         <button class="mdr-btn mdr-admin" id="mdr-community-admin-btn" style="display:none" onclick="aNav&&aNav('community');goPanel();closeMasterDrawer()"><span class="mdr-ico">🏃</span><span>Topluluk Yönetimi</span></button>
       </div>
 
@@ -5326,6 +5327,8 @@ window.syncMasterDrawer=function(){
     // Üye Listesi: groupadmin ve superadmin görsün
     const membersBtn=document.getElementById('mdr-members-btn');
     if(membersBtn)membersBtn.style.display=isAdmin?'block':'none';
+    const eventsBtn=document.getElementById('mdr-events-btn');
+    if(eventsBtn)eventsBtn.style.display=isAdmin?'block':'none';
   }else{
     if(guestH)guestH.style.display='block';
     if(userH)userH.style.display='none';
@@ -5396,9 +5399,17 @@ window.mdrDash=function(panelId){
 
 // ── Banner Picture Helper ─────────────────────────────────
 // GIF → PNG → JPEG önceliğiyle <picture> oluşturur
-window.bannerPicture=function(imgUrl, extraStyle){
+window.bannerPicture=function(imgUrl, mobileUrlOrStyle, extraStyle){
   if(!imgUrl) return '';
-  var style = extraStyle || 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(1.05) saturate(1.1)';
+  // Geriye dönük uyum: 2. parametre URL mi style mi?
+  var mobileUrl, style;
+  if(mobileUrlOrStyle && (mobileUrlOrStyle.startsWith('http')||mobileUrlOrStyle.startsWith('/')||mobileUrlOrStyle.startsWith('data:'))){
+    mobileUrl = mobileUrlOrStyle;
+    style = extraStyle || 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(1.05) saturate(1.1)';
+  } else {
+    mobileUrl = imgUrl; // fallback: masaüstü görseli kullan
+    style = mobileUrlOrStyle || extraStyle || 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover;z-index:0;filter:brightness(1.05) saturate(1.1)';
+  }
 
   // URL'den uzantıyı al
   var cleanUrl = imgUrl.split('?')[0]; // query string'i kaldır
@@ -5407,6 +5418,7 @@ window.bannerPicture=function(imgUrl, extraStyle){
   // Eğer GIF ise: GIF'i önce sun, fallback olarak jpg
   if(ext === 'gif'){
     return `<picture style="position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0">
+      ${mobileUrl&&mobileUrl!==imgUrl?`<source media="(max-width:768px)" srcset="${mobileUrl}"/>`:''}
       <source srcset="${imgUrl}" type="image/gif"/>
       <img src="${imgUrl}" style="${style}" alt="banner" loading="eager" decoding="async"/>
     </picture>`;
@@ -5428,6 +5440,7 @@ window.bannerPicture=function(imgUrl, extraStyle){
   var isFirebase = imgUrl.includes('firebasestorage.googleapis.com');
 
   return `<picture style="position:absolute;inset:0;width:100%;height:100%;display:block;z-index:0">
+    ${mobileUrl&&mobileUrl!==imgUrl?`<source media="(max-width:768px)" srcset="${mobileUrl}"/>`:''}
     ${isFirebase ? '' : `<source srcset="${baseUrl}.webp${hasQuery ? imgUrl.slice(imgUrl.indexOf('?')) : ''}" type="image/webp"/>`}
     <source srcset="${imgUrl}" type="image/${ext === 'jpg' ? 'jpeg' : ext}"/>
     <img src="${imgUrl}" style="${style}" alt="banner" loading="eager" decoding="async"/>
@@ -8351,13 +8364,11 @@ function renderPageBanner(page){
     if(!s||typeof s!=='object')return '';
     return `<div class="pb-stat-chip">${s.ico||''} <b>${s.val||''}</b> ${s.label||''}</div>`;
   }).join('');
-  // Dual-banner: desktop + mobil görsel (picture tag)
+  // Dual-banner: bannerPicture helper ile desktop + mobil
   const desktopUrl=d.imgUrl||'';
-  const mobileUrl=d.mobileImageUrl||desktopUrl;
-  const picTag=desktopUrl?`<picture style="position:absolute;inset:0;width:100%;height:100%;z-index:0">
-    ${mobileUrl!==desktopUrl?`<source media="(max-width:768px)" srcset="${mobileUrl}"/>`:''}
-    <img src="${desktopUrl}" alt="${d.title||page}" style="width:100%;height:100%;object-fit:cover;filter:brightness(1.05) saturate(1.1)" loading="lazy"/>
-  </picture>`:'';
+  const mobileUrl=d.mobileImageUrl||'';
+  // bannerPicture: webp/GIF/PNG otomatik + mobil source
+  const picTag=desktopUrl ? window.bannerPicture(desktopUrl, mobileUrl||desktopUrl) : '';
   el.innerHTML=`
     ${picTag}
     <div class="pb-overlay"></div>

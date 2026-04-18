@@ -3012,22 +3012,69 @@ window.loadFirsatlarFromDB=async()=>{
 
 // ── RACES ──
 window.saveRaceFromAdmin=async()=>{
+  const editId=document.getElementById('ar-edit-id')?.value||'';
   const imgInput=document.getElementById('ar-img-input');
   let imgUrl=document.getElementById('ar-img-url')?.value||'';
   if(!imgUrl&&imgInput?.files[0])imgUrl=await handleImgUpload(imgInput,'races')||'';
   const name=document.getElementById('ar-name').value.trim();
   if(!name){toast('Yarış adı gerekli','err');return;}
   const aboutVal=(window._quillRaceEditor?window._quillRaceEditor.root.innerHTML:document.getElementById('ar-about').value)||'';
-  const data={name,featured:document.getElementById('ar-featured')?.checked||false,date:document.getElementById('ar-date').value||'',location:document.getElementById('ar-loc').value||'',about:aboutVal,contact:document.getElementById('ar-contact').value||'',mapUrl:document.getElementById('ar-map').value||'',website:document.getElementById('ar-web').value||'',phone:document.getElementById('ar-phone').value||'',email:document.getElementById('ar-email').value||'',imgUrl,emoji:'🏆',likes:0,slug:name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const slug=name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  const data={name,featured:document.getElementById('ar-featured')?.checked||false,date:document.getElementById('ar-date').value||'',location:document.getElementById('ar-loc').value||'',about:aboutVal,contact:document.getElementById('ar-contact').value||'',mapUrl:document.getElementById('ar-map').value||'',website:document.getElementById('ar-web').value||'',phone:document.getElementById('ar-phone').value||'',email:document.getElementById('ar-email').value||'',imgUrl,emoji:'🏆',slug};
   toast('Kaydediliyor...','ok');
   try{
-    const {id:_,...dataNoId}=data;
-    const r=await addDoc(collection(db,'races'),{...dataNoId,createdAt:serverTimestamp()});
-    data.id=r.id;
-    window.RACES.unshift(data);
-    toast('Yarış eklendi ✓','ok');
+    if(editId){
+      // GÜNCELLEME MODU
+      await updateDoc(doc(db,'races',editId),{...data,updatedAt:serverTimestamp()});
+      const idx=window.RACES.findIndex(r=>r.id===editId);
+      if(idx>-1)Object.assign(window.RACES[idx],{id:editId,...data});
+      toast('Yarış güncellendi ✓','ok');
+    } else {
+      // EKLEME MODU
+      const {id:_,...dataNoId}=data;
+      const r=await addDoc(collection(db,'races'),{...dataNoId,likes:0,createdAt:serverTimestamp()});
+      data.id=r.id;
+      window.RACES.unshift(data);
+      toast('Yarış eklendi ✓','ok');
+    }
     renderRaceList();renderRacePreview();renderAdminSection('races');
   }catch(e){toast('Kaydedilemedi: '+e.message,'err');}
+};
+
+// Yarış düzenleme formunu doldur
+window.openRaceForm=function(editData){
+  // Formu sıfırla
+  ['ar-name','ar-date','ar-loc','ar-contact','ar-map','ar-web','ar-phone','ar-email','ar-img-url'].forEach(id=>{
+    const el=document.getElementById(id); if(el)el.value='';
+  });
+  const featEl=document.getElementById('ar-featured'); if(featEl)featEl.checked=false;
+  const editIdEl=document.getElementById('ar-edit-id'); if(editIdEl)editIdEl.value='';
+  const titleEl=document.getElementById('ar-form-title');
+  const btnEl=document.getElementById('ar-save-btn');
+  // Görsel önizlemeyi temizle
+  const prevEl=document.getElementById('ar-img-preview-thumb');
+  if(prevEl)prevEl.style.display='none';
+  if(editData&&editData.id){
+    // DÜZENLEME MODU — formu doldur
+    if(editIdEl)editIdEl.value=editData.id;
+    if(titleEl)titleEl.textContent='✏️ Yarışı Düzenle';
+    if(btnEl)btnEl.textContent='Güncelle';
+    const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+    set('ar-name',editData.name); set('ar-date',editData.date); set('ar-loc',editData.location);
+    set('ar-contact',editData.contact); set('ar-map',editData.mapUrl); set('ar-web',editData.website);
+    set('ar-phone',editData.phone); set('ar-email',editData.email); set('ar-img-url',editData.imgUrl);
+    if(featEl)featEl.checked=!!editData.featured;
+    if(window._quillRaceEditor&&editData.about)window._quillRaceEditor.root.innerHTML=editData.about;
+    // Görsel önizleme
+    if(editData.imgUrl&&prevEl){
+      prevEl.src=editData.imgUrl; prevEl.style.display='block';
+    }
+  } else {
+    // EKLEME MODU
+    if(titleEl)titleEl.textContent='➕ Yarış Ekle';
+    if(btnEl)btnEl.textContent='Kaydet';
+    if(window._quillRaceEditor)window._quillRaceEditor.root.innerHTML='';
+  }
 };
 
 // ── ✅ AI BLOG ASSISTANT ──
@@ -3284,6 +3331,7 @@ function showAiBlogManualMode(){
 
 // ── BLOG ──
 window.saveBlogFromAdmin=async()=>{
+  const editId=document.getElementById('ab-edit-id')?.value||'';
   const imgInput=document.getElementById('ab-img-input');
   let coverUrl=document.getElementById('ab-img-url')?.value||'';
   if(!coverUrl&&imgInput?.files[0])coverUrl=await handleImgUpload(imgInput,'blog')||'';
@@ -3291,21 +3339,65 @@ window.saveBlogFromAdmin=async()=>{
   if(!title){toast('Başlık gerekli','err');return;}
   const kategori=document.getElementById('ab-kategori')?.value||'Haber';
   const featured=document.getElementById('ab-featured')?.checked||false;
-  const data={id:'b'+Date.now(),title,kategori,featured,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:CU?.name||'RunClub Editör',status:'published',likes:0,publishedAt:new Date().toISOString().split('T')[0],slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
+  const slug=title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
+  const data={title,kategori,featured,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:CU?.name||'RunClub Editör',status:'published',publishedAt:new Date().toISOString().split('T')[0],slug};
   toast('Kaydediliyor...','ok');
   try{
-    // Önce Firestore'a kaydet — gerçek ID'yi al
-    const {id:_fbId,...dataNoId}=data;const r=await addDoc(collection(db,'blog'),{...dataNoId,createdAt:serverTimestamp()});
-    data.id=r.id;  // Gerçek Firestore ID
-    window.BLOG_POSTS.unshift(data);
-    toast('Yazı yayınlandı ✓','ok');
+    if(editId){
+      // GÜNCELLEME MODU
+      await updateDoc(doc(db,'blog',editId),{...data,updatedAt:serverTimestamp()});
+      const idx=window.BLOG_POSTS.findIndex(p=>p.id===editId);
+      if(idx>-1)Object.assign(window.BLOG_POSTS[idx],{id:editId,...data});
+      toast('Yazı güncellendi ✓','ok');
+    } else {
+      // EKLEME MODU
+      const r=await addDoc(collection(db,'blog'),{...data,likes:0,createdAt:serverTimestamp()});
+      window.BLOG_POSTS.unshift({id:r.id,...data,likes:0});
+      toast('Yazı yayınlandı ✓','ok');
+    }
     renderBlogList();renderBlogPreview();renderAdminSection('blog');
-  }catch(e){
-    // Firestore'a yazılamazsa geçici ID ile göster
-    window.BLOG_POSTS.unshift(data);
-    toast('Yazı kaydedildi (çevrimdışı)','ok');
-    renderBlogList();renderBlogPreview();renderAdminSection('blog');
+  }catch(e){toast('Kaydedilemedi: '+e.message,'err');}
+};
+
+// Blog düzenleme formunu doldur
+window.openBlogForm=function(editData){
+  // Formu sıfırla
+  ['ab-title','ab-tags','ab-img-url','ab-meta-title','ab-meta-desc'].forEach(id=>{
+    const el=document.getElementById(id); if(el)el.value='';
+  });
+  const katEl=document.getElementById('ab-kategori'); if(katEl)katEl.value='Haber';
+  const featEl=document.getElementById('ab-featured'); if(featEl)featEl.checked=false;
+  const editIdEl=document.getElementById('ab-edit-id'); if(editIdEl)editIdEl.value='';
+  const titleEl=document.getElementById('ab-form-title');
+  const btnEl=document.getElementById('ab-save-btn');
+  const prevEl=document.getElementById('ab-img-preview-thumb');
+  if(prevEl)prevEl.style.display='none';
+  if(window._quillEditor)window._quillEditor.root.innerHTML='';
+  if(editData&&editData.id){
+    // DÜZENLEME MODU
+    if(editIdEl)editIdEl.value=editData.id;
+    if(titleEl)titleEl.textContent='✏️ Yazıyı Düzenle';
+    if(btnEl)btnEl.textContent='Güncelle';
+    const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+    set('ab-title',editData.title);
+    set('ab-tags',(editData.tags||[]).join(', '));
+    set('ab-img-url',editData.coverUrl);
+    set('ab-meta-title',editData.metaTitle);
+    set('ab-meta-desc',editData.metaDesc);
+    if(katEl)katEl.value=editData.kategori||'Haber';
+    if(featEl)featEl.checked=!!editData.featured;
+    if(window._quillEditor&&editData.body)window._quillEditor.root.innerHTML=editData.body;
+    if(editData.coverUrl&&prevEl){prevEl.src=editData.coverUrl;prevEl.style.display='block';}
+  } else {
+    if(titleEl)titleEl.textContent='➕ Blog Yazısı Ekle';
+    if(btnEl)btnEl.textContent='Yayınla';
   }
+  // Blog sekmesine git ve forma scroll
+  if(typeof renderAdminSection==='function')renderAdminSection('blog');
+  setTimeout(()=>{
+    const formTop=document.getElementById('ab-title');
+    if(formTop)formTop.scrollIntoView({behavior:'smooth'});
+  },200);
 };
 
 // ── BANNERS ──
@@ -6633,7 +6725,8 @@ function renderAdminSection(sec){
     approvals:`<h2 style="margin-bottom:18px">✅ Etkinlik Onayları</h2><div id="admin-approvals-list"><div class="spinner" style="margin:20px auto"></div></div>`,
     races:`<h2 style="margin-bottom:18px">🏆 Yarış Takvimi</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
-        <h3 style="margin-bottom:14px;font-size:14px">Yeni Yarış Ekle</h3>
+        <h3 style="margin-bottom:14px;font-size:14px" id="ar-form-title">Yeni Yarış Ekle</h3>
+        <input type="hidden" id="ar-edit-id"/>
 
         <!-- ✅ AI YARIŞ ASSİSTANI -->
         <div class="ai-assistant-box" style="margin-bottom:18px">
@@ -6655,7 +6748,7 @@ function renderAdminSection(sec){
           <div class="ai-loading" id="ai-race-status" style="display:none"><div class="spinner"></div><span>AI yarış bilgilerini çözümlüyor...</span></div>
         </div>
 
-        ${imgUploadHtml('ar-img-input','Yarış Görseli','800×500px')}
+        ${imgUploadHtml('ar-img-input','Yarış Görseli','800×500px')+`<img id="ar-img-preview-thumb" src="" style="display:none;max-height:80px;border-radius:8px;margin:6px 0" />`}
         <div class="form-row"><div class="form-grp"><label>Yarış Adı</label><input id="ar-name"/></div><div class="form-grp"><label>Tarih</label><input id="ar-date" type="date"/></div></div>
         <div class="form-grp"><label>Konum</label><input id="ar-loc"/></div>
         <div class="form-grp">
@@ -6673,7 +6766,7 @@ function renderAdminSection(sec){
           </label>
           <span style="font-size:12px;color:var(--muted)">Yarış sayfasında öne çıkanlarda gösterilir</span>
         </div>
-        <button class="btn btn-or" onclick="saveRaceFromAdmin()">Yarış Ekle</button>
+        <button class="btn btn-or" id="ar-save-btn" onclick="saveRaceFromAdmin()">Yarış Ekle</button>
       </div>
       <table><thead><tr><th>Yarış</th><th>Tarih</th><th>Konum</th><th>İşlem</th></tr></thead>
       <tbody>${(window.RACES||[]).map(r=>{const exp=r.date&&new Date(r.date)<new Date();return'<tr'+(exp?' style="opacity:.55"':'')+'><td>'+(r.featured?'⭐ ':'')+escHtml(r.emoji||'🏆')+' '+escHtml(r.name)+(exp?' <b style="color:#e55;font-size:10px">[Geçti]</b>':'')+'</td><td>'+escHtml(r.date||'—')+'</td><td>'+escHtml(r.location||'—')+'</td><td class="action-btns"><button class="btn btn-ghost btn-sm" data-rid="'+r.id+'" onclick="editRace(this.dataset.rid)">✏️</button><button class="btn btn-red btn-sm" data-rid="'+r.id+'" onclick="deleteRace(this.dataset.rid)">🗑</button></td></tr>';}).join('')}</tbody></table>`,
@@ -6731,7 +6824,8 @@ function renderAdminSection(sec){
           <span style="font-size:12px;color:var(--muted)">Blog sayfasında öne çıkanlar bölümünde gösterilir</span>
         </div>
         ${seoHtml}
-        <button class="btn btn-or" onclick="saveBlogFromAdmin()">Yayınla</button>
+        <button class="btn btn-or" id="ab-save-btn" onclick="saveBlogFromAdmin()">Yayınla</button>
+      <input type="hidden" id="ab-edit-id"/><input type="hidden" id="ab-form-title-val"/>
       </div>
       <table><thead><tr><th>Yazı</th><th>Tarih</th><th>❤️</th><th>İşlem</th></tr></thead>
       <tbody>${BLOG_POSTS.map(p=>`<tr><td>${p.title}</td><td>${p.publishedAt||'—'}</td><td>${p.likes||0}</td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="editBlog('${p.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteBlogItem('${p.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
@@ -7219,7 +7313,7 @@ window.deleteEvent=async(id)=>{
     renderAdminSection('events');renderEvts(window.EVENTS,'events-list');renderHomeData();
   }catch(e){console.error('deleteEvent:',e);toast('Silinemedi: '+e.message,'err');}
 };
-window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;document.getElementById('edit-race-id').value=id;document.getElementById('edit-race-name').value=r.name;document.getElementById('edit-race-date').value=r.date||'';document.getElementById('edit-race-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
+window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;if(typeof window.openRaceForm==='function'){window.openRaceForm(r);return;}document.getElementById('edit-race-id').value=id;document.getElementById('edit-race-name').value=r.name;document.getElementById('edit-race-date').value=r.date||'';document.getElementById('edit-race-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
 window.saveRaceEdit=async()=>{
   const fb=window._fb;
   const id=document.getElementById('edit-race-id').value;
@@ -7239,7 +7333,7 @@ window.deleteRace=async(id)=>{
     toast('Silindi','ok');renderRaceList();renderRacePreview();renderAdminSection('races');
   }catch(e){toast(e.message,'err');}
 };
-window.editBlog=id=>{const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;document.getElementById('edit-blog-id').value=id;document.getElementById('edit-blog-title').value=p.title;document.getElementById('edit-blog-body').value=p.body;document.getElementById('edit-blog-tags').value=(p.tags||[]).join(', ');openModal('edit-blog-modal');};
+window.editBlog=id=>{const p=BLOG_POSTS.find(x=>x.id===id);if(!p)return;if(typeof window.openBlogForm==='function'){window.openBlogForm(p);return;}document.getElementById('edit-blog-id').value=id;document.getElementById('edit-blog-title').value=p.title;document.getElementById('edit-blog-body').value=p.body;document.getElementById('edit-blog-tags').value=(p.tags||[]).join(', ');openModal('edit-blog-modal');};
 window.saveBlogEdit=async()=>{
   const fb=window._fb;
   const id=document.getElementById('edit-blog-id').value;

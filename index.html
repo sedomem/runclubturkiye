@@ -3361,66 +3361,44 @@ window.saveBlogFromAdmin=async()=>{
 
 // Blog düzenleme formunu doldur
 window.openBlogForm=function(editData){
-  // 1. Blog sekmesine geç — bu admin-main'i sıfırlar ve Quill'i 200ms'de init eder
-  if(typeof renderAdminSection==='function') renderAdminSection('blog');
-  if(typeof aNav==='function') aNav('blog');
-
-  // 2. Quill init bekleniyor (initQuillEditor setTimeout 200ms) — biz 350ms bekleriz
-  const delay = editData ? 350 : 0;
-
+  if(typeof renderAdminSection==='function')renderAdminSection('blog');
+  if(typeof aNav==='function')aNav('blog');
+  window._quillEditor=null;
+  setTimeout(()=>{if(typeof initQuillEditor==='function')initQuillEditor();},220);
   setTimeout(()=>{
-    const set=(id,val)=>{const el=document.getElementById(id);if(el&&val!=null)el.value=val;};
-
-    // Formu temizle
-    ['ab-title','ab-tags','ab-img-url','ab-meta-title','ab-meta-desc']
-      .forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
-    const katEl=document.getElementById('ab-kategori'); if(katEl)katEl.value='Haber';
-    const featEl=document.getElementById('ab-featured'); if(featEl)featEl.checked=false;
-    const editIdEl=document.getElementById('ab-edit-id'); if(editIdEl)editIdEl.value='';
+    ['ab-title','ab-tags','ab-img-url','ab-meta-title','ab-meta-desc'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    const katEl=document.getElementById('ab-kategori');
+    const featEl=document.getElementById('ab-featured');
+    const editIdEl=document.getElementById('ab-edit-id');
     const titleEl=document.getElementById('ab-form-title');
     const btnEl=document.getElementById('ab-save-btn');
-    if(window._quillEditor) window._quillEditor.root.innerHTML='';
-
-    if(editData && editData.id){
-      // DÜZENLEME MODU
-      if(editIdEl) editIdEl.value=editData.id;
-      if(titleEl)  titleEl.textContent='✏️ Yazıyı Düzenle';
-      if(btnEl)    btnEl.textContent='Güncelle';
-
-      set('ab-title',    editData.title||'');
-      set('ab-tags',     (editData.tags||[]).join(', '));
-      set('ab-img-url',  editData.coverUrl||'');
-      set('ab-meta-title', editData.metaTitle||editData.title||'');
-      set('ab-meta-desc',  editData.metaDesc||'');
-      if(katEl)  katEl.value  = editData.kategori||'Haber';
-      if(featEl) featEl.checked = !!editData.featured;
-
-      // Görsel önizleme
-      const prevEl=document.getElementById('ar-img-preview-thumb');
-      if(editData.coverUrl){
-        // img-url input zaten dolduruldu; previewImg yoksa manuel göster
-        const imgPrev=document.getElementById('ab-img-url');
-        if(imgPrev) imgPrev.dispatchEvent(new Event('input'));
+    if(katEl)katEl.value='Haber';if(featEl)featEl.checked=false;if(editIdEl)editIdEl.value='';
+    if(window._quillEditor){try{window._quillEditor.root.innerHTML='';}catch(e){}}
+    if(editData&&editData.id){
+      const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||'';};
+      if(editIdEl)editIdEl.value=editData.id;
+      if(titleEl)titleEl.textContent='✏️ Yazıyı Düzenle';
+      if(btnEl)btnEl.textContent='Güncelle';
+      set('ab-title',editData.title);
+      set('ab-tags',(editData.tags||[]).join(', '));
+      set('ab-img-url',editData.coverUrl);
+      set('ab-meta-title',editData.metaTitle||editData.title);
+      set('ab-meta-desc',editData.metaDesc||'');
+      if(katEl)katEl.value=editData.kategori||'Haber';
+      if(featEl)featEl.checked=!!editData.featured;
+      if(editData.coverUrl&&typeof previewFromUrl==='function')previewFromUrl(editData.coverUrl,'ab-img-input-preview');
+      const body=editData.body||'';
+      if(body){
+        if(window._quillEditor){try{window._quillEditor.root.innerHTML=body;}catch(e){const tb=document.getElementById('ab-body');if(tb)tb.value=body;}}
+        else{const tb=document.getElementById('ab-body');if(tb){tb.value=body;tb.style.display='block';}}
       }
-
-      // Quill içeriği — Quill kesinlikle hazır
-      if(window._quillEditor && editData.body){
-        window._quillEditor.root.innerHTML = editData.body;
-        window._quillEditor.update();
-      } else if(editData.body){
-        // Quill yoksa fallback textarea
-        const tb=document.getElementById('ab-body');
-        if(tb) tb.value=editData.body;
-      }
-    } else {
-      if(titleEl) titleEl.textContent='➕ Blog Yazısı Ekle';
-      if(btnEl)   btnEl.textContent='Yayınla';
+    }else{
+      if(titleEl)titleEl.textContent='➕ Blog Yazısı Ekle';
+      if(btnEl)btnEl.textContent='Yayınla';
     }
-
-    // Forma scroll
     const formTop=document.getElementById('ab-title');
-    if(formTop) formTop.scrollIntoView({behavior:'smooth',block:'start'});
-  }, delay);
+    if(formTop)formTop.scrollIntoView({behavior:'smooth',block:'start'});
+  },400);
 };
 
 // ── BANNERS ──
@@ -8602,9 +8580,12 @@ window.renderSinglePageBannerAdmin=renderSinglePageBannerAdmin;
 // ── QUILL EDITOR INIT ──
 function initQuillEditor(){
   if(typeof Quill==='undefined')return;
-  if(window._quillEditor)return; // zaten başlatılmış
   const el=document.getElementById('ab-body-editor');
-  if(!el)return;
+  if(!el){window._quillEditor=null;return;}
+  if(window._quillEditor){
+    try{if(document.contains(window._quillEditor.root))return;}catch(e){}
+    window._quillEditor=null;
+  }
   window._quillEditor=new Quill('#ab-body-editor',{
     theme:'snow',
     modules:{

@@ -2209,6 +2209,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="gNav('announcements',this)">📢 Duyurular</button>
     <button onclick="gNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="gNav('profil',this)">👤 Profil Ayarları</button>
+    <button onclick="gNav('calendar',this)">🗓 Etkinlik Takvimi</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
     <button onclick="gNav('performances',this)">🏅 Performanslar</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
@@ -4430,6 +4431,154 @@ window.inviteFriend=function(){
   if(navigator.share){navigator.share({title:'RunClubTürkiye',text:'Seninle koşmak istiyorum! '+url,url}).catch(()=>{});}
   else{navigator.clipboard.writeText(url).then(()=>toast('Davet linki kopyalandı 🎉','ok')).catch(()=>prompt('Davet linkin:',url));}
 };
+
+// ── GA: Kulüp Etkinlik Takvimi CRUD ─────────────────────────
+window.gOpenClubEventForm=function(editData){
+  var isEdit=!!(editData&&editData.id);
+  var titleEl=document.getElementById('g-cal-form-title');
+  var editIdEl=document.getElementById('g-cal-edit-id');
+  if(titleEl)titleEl.textContent=isEdit?'✏️ Etkinliği Düzenle':'➕ Yeni Etkinlik';
+  if(editIdEl)editIdEl.value=isEdit?editData.id:'';
+  var set=function(id,v){var el=document.getElementById(id);if(el)el.value=v||'';};
+  set('g-cal-title',editData&&editData.title);
+  set('g-cal-date',editData&&editData.date);
+  set('g-cal-time',(editData&&editData.time)||'08:00');
+  set('g-cal-loc',editData&&editData.location);
+  set('g-cal-meet',editData&&editData.meetPoint);
+  set('g-cal-desc',editData&&editData.description);
+  var typeEl=document.getElementById('g-cal-type');
+  if(typeEl)typeEl.value=(editData&&editData.type)||'Koşu';
+  var form=document.getElementById('g-cal-form-wrap');
+  if(form){form.style.display='block';form.scrollIntoView({behavior:'smooth',block:'start'});}
+};
+window.gSaveClubEvent=async function(){
+  var fb=window._fb;
+  var editId=document.getElementById('g-cal-edit-id')&&document.getElementById('g-cal-edit-id').value||'';
+  var clubId=window.CU&&(window.CU.clubId||window.CU.uid)||'';
+  var title=document.getElementById('g-cal-title')&&document.getElementById('g-cal-title').value.trim()||'';
+  if(!title){toast('Başlık gerekli','err');return;}
+  var data={clubId:clubId,title:title,
+    date:document.getElementById('g-cal-date')&&document.getElementById('g-cal-date').value||'',
+    time:document.getElementById('g-cal-time')&&document.getElementById('g-cal-time').value||'',
+    location:document.getElementById('g-cal-loc')&&document.getElementById('g-cal-loc').value||'',
+    meetPoint:document.getElementById('g-cal-meet')&&document.getElementById('g-cal-meet').value||'',
+    description:document.getElementById('g-cal-desc')&&document.getElementById('g-cal-desc').value||'',
+    type:document.getElementById('g-cal-type')&&document.getElementById('g-cal-type').value||'Koşu',
+    clubName:window.CU&&(window.CU.clubName||window.CU.name)||''
+  };
+  toast('Kaydediliyor...','ok');
+  try{
+    if(editId){
+      await fb.updateDoc(fb.doc(fb.db,'club_events',editId),Object.assign({},data,{updatedAt:fb.serverTimestamp()}));
+      toast('Güncellendi ✓','ok');
+    }else{
+      await fb.addDoc(fb.collection(fb.db,'club_events'),Object.assign({},data,{createdAt:fb.serverTimestamp()}));
+      toast('Eklendi ✓','ok');
+    }
+    var form=document.getElementById('g-cal-form-wrap');
+    if(form)form.style.display='none';
+    if(window.gLoadClubCalendar)window.gLoadClubCalendar();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+window.gEditClubEvent=function(id){
+  var ev=window._gClubEvents&&window._gClubEvents.find(function(e){return e.id===id;});
+  if(ev)window.gOpenClubEventForm(ev);
+  else toast('Etkinlik bulunamadı','err');
+};
+window.gDeleteClubEvent=async function(id){
+  if(!confirm('Etkinlik silinecek?'))return;
+  try{
+    await window._fb.deleteDoc(window._fb.doc(window._fb.db,'club_events',id));
+    toast('Silindi','ok');
+    if(window.gLoadClubCalendar)window.gLoadClubCalendar();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+window.gRepeatClubEvent=function(id){
+  var ev=window._gClubEvents&&window._gClubEvents.find(function(e){return e.id===id;});
+  if(!ev)return;
+  var d=new Date(ev.date+'T00:00:00');
+  d.setDate(d.getDate()+7);
+  window.gOpenClubEventForm(Object.assign({},ev,{id:'',date:d.toISOString().split('T')[0]}));
+  toast('Yeni tarihi ayarlayın','ok');
+};
+window.gLoadClubCalendar=async function(){
+  var el=document.getElementById('g-club-cal-list');
+  if(!el||!window.CU)return;
+  el.innerHTML='<div class="spinner" style="margin:20px auto"></div>';
+  var clubId=window.CU.clubId||window.CU.uid;
+  var fb=window._fb;
+  try{
+    var today=new Date().toISOString().split('T')[0];
+    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',clubId),fb.orderBy('date','asc')));
+    window._gClubEvents=[];
+    snap.forEach(function(d){window._gClubEvents.push(Object.assign({id:d.id},d.data()));});
+    if(!window._gClubEvents.length){
+      el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Henüz etkinlik yok.</p>';
+      return;
+    }
+    var upcoming=window._gClubEvents.filter(function(e){return e.date>=today;});
+    var past=window._gClubEvents.filter(function(e){return e.date<today;});
+    var tbl='<div style="overflow-x:auto"><table style="min-width:560px"><thead><tr>'
+      +'<th>Tarih</th><th>Saat</th><th>Başlık</th><th>Tür</th><th>İşlem</th>'
+      +'</tr></thead><tbody>';
+    function row(e,isPast){
+      return '<tr style="'+(isPast?'opacity:.55':'')+'">'
+        +'<td>'+e.date+'</td><td>'+(e.time||'—')+'</td>'
+        +'<td><b>'+e.title+'</b></td>'
+        +'<td><span class="tag tag-or" style="font-size:10px">'+(e.type||'—')+'</span></td>'
+        +'<td class="action-btns">'
+        +'<button class="btn btn-ghost btn-sm" data-id="'+e.id+'" onclick="gEditClubEvent(this.dataset.id)">✏️</button>'
+        +'<button class="btn btn-sm" style="background:#f97316;color:#fff;border:none;padding:4px 8px;border-radius:6px;cursor:pointer;font-size:11px" data-id="'+e.id+'" onclick="gRepeatClubEvent(this.dataset.id)">🔁</button>'
+        +'<button class="btn btn-red btn-sm" data-id="'+e.id+'" onclick="gDeleteClubEvent(this.dataset.id)">🗑</button>'
+        +'</td></tr>';
+    }
+    if(upcoming.length)tbl+=upcoming.map(function(e){return row(e,false);}).join('');
+    if(past.length){
+      tbl+='<tr><td colspan="5" style="text-align:center;font-size:11px;color:var(--muted);padding:8px">— Geçmiş —</td></tr>';
+      tbl+=past.slice(0,5).map(function(e){return row(e,true);}).join('');
+    }
+    tbl+='</tbody></table></div>';
+    el.innerHTML=tbl;
+  }catch(e){el.innerHTML='<p style="color:var(--muted)">Yüklenemedi: '+e.message+'</p>';}
+};
+// renderClubTrainings - Haftalık koşu takvimi (openClub'dan çağrılır)
+if(!window.renderClubTrainings){
+  window.renderClubTrainings=async function(clubId){
+    var container=document.getElementById('club-training-schedule');
+    if(!container)return;
+    // Club events kullan
+    var fb=window._fb;
+    var todayStr=new Date().toISOString().split('T')[0];
+    try{
+      var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',clubId),fb.where('date','>=',todayStr),fb.orderBy('date','asc')));
+      var evs=[];snap.forEach(function(d){evs.push(Object.assign({id:d.id},d.data()));});
+      if(!evs.length){container.innerHTML='';return;}
+      var MO=window.MONTHS||['OCA','ŞUB','MAR','NİS','MAY','HAZ','TEM','AĞU','EYL','EKİ','KAS','ARA'];
+      var html='<div style="margin-top:8px"><h3 style="font-size:16px;margin-bottom:12px;font-family:var(--font-head)">🗓 Etkinlik Takvimi</h3><div style="display:flex;flex-direction:column;gap:10px">';
+      evs.slice(0,5).forEach(function(e){
+        var d=new Date(e.date+'T00:00:00');
+        var day=d.getDate();var mon=MO[d.getMonth()]||'';
+        var typeCol={Koşu:'#E8622A',Interval:'#3b82f6',Sosyal:'#22c55e',Tempo:'#a855f7'}[e.type]||'var(--or)';
+        var mUrl=e.meetPoint&&e.meetPoint.startsWith('http')?e.meetPoint:e.location?'https://maps.google.com/?q='+encodeURIComponent(e.location):'';
+        var evJ=JSON.stringify(e).replace(/"/g,'&quot;');
+        html+='<div style="display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px">'
+          +'<div style="min-width:48px;text-align:center;background:'+typeCol+';border-radius:10px;padding:6px 4px;flex-shrink:0">'
+          +'<div style="font-size:20px;font-weight:800;color:#fff;line-height:1">'+day+'</div>'
+          +'<div style="font-size:10px;color:rgba(255,255,255,.85);font-weight:700">'+mon+'</div></div>'
+          +'<div style="flex:1;min-width:0">'
+          +'<div style="font-size:13px;font-weight:700;color:var(--text)">'+e.title+'</div>'
+          +'<div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap">'
+          +(e.time?'<span style="font-size:11px;color:var(--muted)">🕐 '+e.time+'</span>':'')
+          +(mUrl?'<a href="'+mUrl+'" target="_blank" style="font-size:11px;color:var(--or);text-decoration:none">📍 '+(e.location||'Harita')+'</a>':'')
+          +'</div></div>'
+          +'<button onclick="event.stopPropagation();addToPersonalCalendar('+evJ+')" style="flex-shrink:0;padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--muted)">📅</button>'
+          +'</div>';
+      });
+      html+='</div></div>';
+      container.innerHTML=html;
+    }catch(e){container.innerHTML='';console.warn('renderClubTrainings:',e.message);}
+  };
+}
 window.cleanSlug = function(slug) {
   if (!slug) return '';
   return decodeURIComponent(slug)
@@ -4856,9 +5005,14 @@ window.openClub=async(id)=>{
         </div>
       </div>
     </div>
-    <div id="club-training-schedule" style="margin-top:20px;margin-bottom:20px;"></div>\`;
+    <div id="club-training-schedule" style="margin-top:20px;margin-bottom:20px;"></div>
+    <div style="margin-top:20px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:20px">
+      <h3 style="font-size:16px;font-family:var(--font-head);font-weight:700;margin-bottom:14px">📅 Etkinlik Takvimi</h3>
+      <div id="club-calendar-section"><div class="spinner" style="margin:12px auto"></div></div>
+    </div>`;
   nav('club-detail');
   if(typeof window.renderClubTrainings==='function') window.renderClubTrainings(c.id);
+  setTimeout(function(){var cc=document.getElementById('club-calendar-section');if(cc&&typeof window.renderClubTrainings==='function')window.renderClubTrainings(c.id);},400);
   if(typeof routerPush==='function')routerPush('club-detail', c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
 };
 

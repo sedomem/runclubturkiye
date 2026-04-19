@@ -5485,22 +5485,45 @@ window.loadPushSubscribers=async function(){
 };
 
 window.testPushSelf=async function(){
-  const token=localStorage.getItem('rct_fcm_token');
+  // Önce token var mı kontrol et / al
+  let token=localStorage.getItem('rct_fcm_token');
   if(!token){
     if(window.requestPushPermission){
-      const t=await window.requestPushPermission();
-      if(!t){toast('Önce bildirim izni ver','err');return;}
+      token=await window.requestPushPermission();
+      if(!token){toast('Önce bildirim izni ver','err');return;}
     } else {toast('Push SDK yüklenmedi','err');return;}
   }
-  toast('Test bildirimi gönderildi (ön planda toast görüntülenir)','ok');
-  // Gerçek FCM Cloud Message için backend gerekir
-  // Şimdilik browser Notification API ile test yapıyoruz
-  if(Notification.permission==='granted'){
-    new Notification('RunClubTürkiye 🏃',{
-      body: document.getElementById('pn-body')?.value||'Test bildirimi!',
-      icon: '/icon-192.png',
-      badge: '/icon-96.png'
-    });
+  // Gerçek test: kendi token'ına Firestore üzerinden push gönder
+  // Cloud Function'ı tetikler → firebase-messaging-sw.js yakalar → bildirim gelir
+  try{
+    const fb=window._fb;
+    const testData={
+      title:'🧪 Test Bildirimi',
+      body:document.getElementById('pn-body')?.value||'RunClubTürkiye push testi!',
+      url:'https://www.runclubturkiye.com/',
+      target:'self',
+      targetToken:token,
+      status:'pending',
+      sentBy:window.CU?.email||'test',
+      createdAt:fb.serverTimestamp()
+    };
+    const {id:_,...noId}=testData;
+    await fb.addDoc(fb.collection(fb.db,'pushNotifications'),noId);
+    toast('Test bildirimi kuyruğa alındı — Cloud Function işleyecek 🔔','ok');
+    document.getElementById('pn-status').innerHTML=
+      '<span style="color:var(--green)">✅ Test kuyruğa alındı. Birkaç saniye içinde bildirim gelecek.</span>';
+  }catch(e){
+    // Cloud Function yoksa browser Notification fallback
+    if(Notification.permission==='granted'){
+      new Notification('🧪 Test (Browser)',{
+        body:document.getElementById('pn-body')?.value||'Test bildirimi',
+        icon:'/icon-192.png',
+        badge:'/icon-192.png'
+      });
+      toast('Browser bildirimi gösterildi (Cloud Function deploy edilmeli)','ok');
+    } else {
+      toast('Hata: '+e.message,'err');
+    }
   }
 };
 
@@ -6179,8 +6202,10 @@ window.sendPushSegmented=async function(){
   try{
     const fb=window._fb;
     const doc_data={
-      title, body, url, image,
-      target,                    // 'all' | 'members' | 'groupadmins' | 'club'
+      title, body,
+      url: url||'https://www.runclubturkiye.com/',
+      image,
+      target,
       targetRole: target==='members'?'member': target==='groupadmins'?'groupadmin': '',
       targetClubId: target==='club'?clubId:'',
       status:'pending',

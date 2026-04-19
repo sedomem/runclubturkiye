@@ -9524,6 +9524,145 @@ window.renderAdminAnalytics = async () => {
   }
 };
 
+// ── KULÜP ETKİNLİK TAKVİMİ (CLUB EVENTS) ──
+window.manageClubEvents = function(clubId) {
+  let html = `
+    <div class="mb-4 flex items-center justify-between">
+       <h3 class="font-bold text-lg text-slate-800">Kulüp Etkinlikleri</h3>
+       <button onclick="openEventForm('${clubId}')" class="px-4 py-2 bg-orange-500 text-white text-sm font-bold rounded-lg hover:bg-orange-600 transition-colors">+ Yeni Etkinlik</button>
+    </div>
+    <div class="bg-white border rounded-xl overflow-hidden shadow-sm">
+      <table class="w-full text-left text-sm text-slate-600">
+        <thead class="bg-slate-50 border-b">
+          <tr>
+            <th class="p-3 font-semibold">Tarih/Saat</th>
+            <th class="p-3 font-semibold">Başlık</th>
+            <th class="p-3 font-semibold hidden md:table-cell">Tür</th>
+            <th class="p-3 font-semibold text-right">İşlemler</th>
+          </tr>
+        </thead>
+        <tbody id="admin-club-events-list">
+          <tr><td colspan="4" class="p-4 text-center text-slate-400 italic">Etkinlikler yükleniyor...</td></tr>
+        </tbody>
+      </table>
+    </div>
+  `;
+  const cont = document.getElementById('admin-sec-content');
+  if(cont) cont.innerHTML = html;
+};
+
+window.openEventForm = function(clubId, eventDataStr = null) {
+  const isEdit = !!eventDataStr;
+  const ev = isEdit ? JSON.parse(decodeURIComponent(eventDataStr)) : {};
+  const formHtml = `
+    <form id="clubEventForm" onsubmit="window.saveClubEvent(event, '${clubId}', '${ev.id || ""}')">
+      <div class="flex flex-col gap-3 mb-4">
+        <div>
+           <label class="block text-xs font-bold text-slate-500 mb-1">Etkinlik Başlığı</label>
+           <input type="text" id="evTitle" value="${ev.title || ''}" required class="w-full border border-slate-200 rounded-lg p-2 text-sm" placeholder="Örn: Pazar Uzun Koşusu">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+           <div>
+             <label class="block text-xs font-bold text-slate-500 mb-1">Tarih</label>
+             <input type="date" id="evDate" value="${ev.date || ''}" required class="w-full border border-slate-200 rounded-lg p-2 text-sm">
+           </div>
+           <div>
+             <label class="block text-xs font-bold text-slate-500 mb-1">Saat</label>
+             <input type="time" id="evTime" value="${ev.time || ''}" required class="w-full border border-slate-200 rounded-lg p-2 text-sm">
+           </div>
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+           <div>
+             <label class="block text-xs font-bold text-slate-500 mb-1">Tür</label>
+             <select id="evType" class="w-full border border-slate-200 rounded-lg p-2 text-sm">
+               <option ${ev.type=='Koşu'?'selected':''}>Koşu</option>
+               <option ${ev.type=='Interval'?'selected':''}>Interval</option>
+               <option ${ev.type=='Sosyal'?'selected':''}>Sosyal</option>
+             </select>
+           </div>
+           <div>
+             <label class="block text-xs font-bold text-slate-500 mb-1">Lokasyon Adı</label>
+             <input type="text" id="evLoc" value="${ev.location || ''}" class="w-full border border-slate-200 rounded-lg p-2 text-sm" placeholder="Örn: Caddebostan">
+           </div>
+        </div>
+        <div>
+           <label class="block text-xs font-bold text-slate-500 mb-1">Harita Linki (İsteğe Bağlı)</label>
+           <input type="url" id="evMap" value="${ev.meetPoint || ''}" class="w-full border border-slate-200 rounded-lg p-2 text-sm" placeholder="https://maps.google.com/...">
+        </div>
+        <div>
+           <label class="block text-xs font-bold text-slate-500 mb-1">Açıklama</label>
+           <textarea id="evDesc" rows="2" class="w-full border border-slate-200 rounded-lg p-2 text-sm text-slate-700">${ev.description || ''}</textarea>
+        </div>
+      </div>
+      <button type="submit" class="w-full py-2.5 bg-orange-500 text-white rounded-lg font-bold hover:bg-orange-600 transition-colors">${isEdit ? 'Güncelle' : 'Kaydet'}</button>
+    </form>
+  `;
+  if(window.openForm) window.openForm("Etkinlik " + (isEdit ? "Düzenle" : "Ekle"), formHtml);
+};
+
+window.renderClubCalendar = function(eventsArr) {
+  if (!eventsArr || eventsArr.length === 0) {
+    return `<div class="text-slate-500 text-sm py-4 italic">Yaklaşan etkinlik bulunmuyor.</div>`;
+  }
+  const now = new Date();
+  let html = `<div class="flex flex-col gap-4 mt-6 w-full">
+                <h3 class="text-lg font-bold text-slate-800 border-b border-slate-100 pb-2">Takvim</h3>`;
+
+  eventsArr.forEach(ev => {
+    const eventDateTime = new Date(`${ev.date}T${ev.time || "00:00"}`);
+    const isPast = eventDateTime < now;
+    const cardClass = isPast 
+       ? "bg-slate-50/50 grayscale opacity-60 pointer-events-none" 
+       : "bg-white/50 backdrop-blur-sm border-slate-100 shadow-sm hover:shadow-md border border-white hover:border-orange-100";
+
+    const dateObj = new Date(ev.date);
+    const day = dateObj.toLocaleDateString('tr-TR', { day: '2-digit' });
+    const month = dateObj.toLocaleDateString('tr-TR', { month: 'short' });
+
+    html += `
+      <div class="flex items-center gap-4 p-4 rounded-3xl transition-all duration-300 ${cardClass}">
+        <div class="flex flex-col items-center justify-center w-[60px] h-[60px] shrink-0 rounded-2xl ${isPast ? 'bg-slate-200 text-slate-500' : 'bg-orange-50 text-orange-600 shadow-inner'}">
+          <span class="text-xl font-extrabold leading-none">${day}</span>
+          <span class="text-[10px] font-bold uppercase tracking-wider mt-1">${month}</span>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2 mb-1">
+            <span class="px-2 py-0.5 text-[10px] font-bold rounded-full ${isPast ? 'bg-slate-200 text-slate-500' : 'bg-orange-100/50 text-orange-600'}">${ev.type || 'Etkinlik'}</span>
+            ${isPast ? '<span class="text-[10px] font-bold text-slate-400 uppercase">Tamamlandı</span>' : ''}
+          </div>
+          <h4 class="font-bold text-slate-800 truncate text-sm sm:text-base">${ev.title}</h4>
+          <div class="flex flex-col sm:flex-row sm:gap-4 text-[11px] sm:text-xs text-slate-500 mt-1 font-medium">
+             <span class="flex items-center gap-1">🕒 ${ev.time}</span>
+             ${ev.meetPoint 
+                ? `<a href="${ev.meetPoint}" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1 text-blue-500 hover:text-blue-600 hover:underline">📍 ${ev.location}</a>` 
+                : `<span class="flex items-center gap-1">📍 ${ev.location}</span>`}
+          </div>
+        </div>
+        <div class="shrink-0 pointer-events-auto">
+           ${!isPast ? `<button onclick='addToPersonalCalendar(${JSON.stringify(ev)})' class="p-2 sm:px-[14px] sm:py-[8px] rounded-xl bg-slate-800 text-white text-[11px] font-bold hover:bg-orange-500 transition-colors hidden sm:flex items-center gap-2 shadow-sm"><span class="text-sm">📅</span> Takvime Ekle</button>
+           <button onclick='addToPersonalCalendar(${JSON.stringify(ev)})' class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-orange-500 sm:hidden shadow-sm">📅</button>` : ''}
+        </div>
+      </div>`;
+  });
+  html += `</div>`;
+  return html;
+};
+
+window.addToPersonalCalendar = function(ev) {
+  if (typeof ev === 'string') ev = JSON.parse(ev);
+  const startDate = new Date(`${ev.date}T${ev.time || "09:00"}`);
+  const endDate = new Date(startDate.getTime() + (2 * 60 * 60 * 1000));
+  const formatGoogleDate = (date) => date.toISOString().replace(/-|:|\.\d\d\d/g, "");
+  const gCalUrl = new URL('https://calendar.google.com/calendar/render');
+  gCalUrl.searchParams.append('action', 'TEMPLATE');
+  gCalUrl.searchParams.append('text', ev.title);
+  gCalUrl.searchParams.append('dates', `${formatGoogleDate(startDate)}/${formatGoogleDate(endDate)}`);
+  gCalUrl.searchParams.append('details', (ev.description || '') + "\n\nEkleyen: RunClubTürkiye");
+  if (ev.meetPoint) gCalUrl.searchParams.append('location', ev.meetPoint);
+  else if (ev.location) gCalUrl.searchParams.append('location', ev.location);
+  window.open(gCalUrl.toString(), '_blank');
+};
+
 // ── MOBİL TABLO OPTİMİZASYONU ──
 window.optimizeTablesForMobile = () => {
   if (window.innerWidth <= 768) {

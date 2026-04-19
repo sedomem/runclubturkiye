@@ -1117,7 +1117,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
         <div style="padding:10px 16px 4px">
           <div style="font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.08em;text-transform:uppercase">Yönetim</div>
         </div>
-        <button class="mdr-btn mdr-admin" onclick="goPanel();closeMasterDrawer()"><span class="mdr-ico">⭐</span><span id="mdr-panel-label">Admin Paneli</span></button>
+        <button class="mdr-btn mdr-admin" id="mdr-panel-btn" onclick="goPanel();closeMasterDrawer()"><span class="mdr-ico" id="mdr-panel-ico">🔑</span><span id="mdr-panel-label">Admin Paneli</span></button>
         <!-- Rol bazlı ek admin linkleri -->
         <button class="mdr-btn mdr-admin" id="mdr-banner-btn" style="display:none" onclick="nav&&nav('admin');setTimeout(()=>aNav&&aNav('banners'),300);closeMasterDrawer()"><span class="mdr-ico">🖼</span>Banner Ayarları</button>
         <button class="mdr-btn mdr-admin" id="mdr-members-btn" style="display:none" onclick="goPanel&&goPanel();setTimeout(()=>gNav&&gNav('members'),300);closeMasterDrawer()"><span class="mdr-ico">👥</span>Üye Listesi</button>
@@ -2203,6 +2203,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="gNav('applications',this)" id="g-app-btn">📋 Başvurular<span id="g-app-badge" style="display:none;background:var(--or);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;margin-left:6px">0</span></button>
     <button onclick="gNav('announcements',this)">📢 Duyurular</button>
     <button onclick="gNav('chat',this)">💬 Mesajlaşma</button>
+    <button onclick="gNav('profil',this)">👤 Profil Ayarları</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
     <button onclick="gNav('performances',this)">🏅 Performanslar</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
@@ -2445,6 +2446,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#fff">Club</text>
   <text x="100" y="92" font-family="Raleway,sans-serif" font-size="14" fill="#8A7060" letter-spacing="5">TÜRKİYE</text>
 </svg><p style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;margin-top:8px">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:rgba(255,255,255,.35);margin-top:6px">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4133342f222d34233534332a28382401262c20282d6f222e2c">[email&#160;protected]</a></p></div>
+      <div class="footer-col"><h4>Kulüpler</h4><a onclick="nav('clubs')">Tüm Kulüpler</a><a onclick="nav('community')">Topluluk</a></div>
       <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a><a onclick="nav('sss')" style="color:var(--or)">SSS</a></div>
       <div class="footer-col"><h4>Yardım</h4><a onclick="nav('sss')">SSS</a><a onclick="nav('contact')">İletişim</a><a id="sa-footer-link" style="display:none;opacity:.35;font-size:10px;cursor:pointer" onclick="window.CU?.role==='superadmin'?nav('admin'):null">⚙</a></div>
       <div class="footer-col"><h4>Yasal</h4><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
@@ -3427,7 +3429,8 @@ window.savePageBanner=async(page)=>{
   let mobileImageUrl=document.getElementById(`pb-mobileurl-${page}`)?.value||'';
   if(!mobileImageUrl&&mobileInput?.files[0])mobileImageUrl=await handleImgUpload(mobileInput,'banners')||'';
   const title=document.getElementById(`pb-title-${page}`)?.value||'';
-  const data={imgUrl,mobileImageUrl,title,subtitle:document.getElementById(`pb-sub-${page}`)?.value||'',badge:document.getElementById(`pb-badge-${page}`)?.value||'',ctaText:document.getElementById(`pb-cta-${page}`)?.value||'',ctaUrl:document.getElementById(`pb-url-${page}`)?.value||'',active:true};
+  const bodyTxt=document.getElementById(`pb-body-${page}`)?.value||'';
+  const data={imgUrl,mobileImageUrl,title,subtitle:document.getElementById(`pb-sub-${page}`)?.value||'',badge:document.getElementById(`pb-badge-${page}`)?.value||'',body:bodyTxt,ctaText:document.getElementById(`pb-cta-${page}`)?.value||'',ctaUrl:document.getElementById(`pb-url-${page}`)?.value||'',active:true};
   window.PAGE_BANNERS[page]=data;
   try{await fb.setDoc(fb.doc(fb.db,'banners',page),{...data,updatedAt:fb.serverTimestamp()});}catch(e){toast('Hata: '+e.message,'err');return;}
   toast(`${page} banner kaydedildi ✓`,'ok');
@@ -5441,7 +5444,9 @@ window.syncMasterDrawer=function(){
     const isAdmin=cu.role==='superadmin'||cu.role==='groupadmin';
     if(adminSec)adminSec.style.display=isAdmin?'block':'none';
     const panelLabel=document.getElementById('mdr-panel-label');
+    const panelIco=document.getElementById('mdr-panel-ico');
     if(panelLabel)panelLabel.textContent=cu.role==='superadmin'?'Süper Admin Paneli':'Grup Admin Paneli';
+    if(panelIco)panelIco.textContent=cu.role==='superadmin'?'⭐':'🔑';
     const commAdminBtn=document.getElementById('mdr-community-admin-btn');
     if(commAdminBtn)commAdminBtn.style.display=cu.role==='superadmin'?'block':'none';
     // Banner: sadece superadmin görsün
@@ -7511,6 +7516,24 @@ function renderGroupSection(sec){
         <p style="font-size:13px;color:var(--muted)">Kulüp üyelerinin kaydettiği yarış sonuçları</p>
       </div>
       <div id="club-race-results-list"><div class="spinner" style="margin:20px auto"></div></div>`,
+    profil:`
+      <h2 style="margin-bottom:18px">👤 Profil Ayarları</h2>
+      <div class="card" style="padding:24px;max-width:520px">
+        <h3 style="margin-bottom:16px;font-size:15px">Hesap Bilgileri</h3>
+        <div class="form-grp"><label>Ad Soyad</label><input id="ga-pf-name" value="${window.CU?.name||''}"/></div>
+        <button class="btn btn-or" onclick="gaSaveProfile()">💾 Güncelle</button>
+        <div style="margin-top:24px;padding-top:20px;border-top:1.5px solid var(--border)">
+          <h3 style="margin-bottom:14px;font-size:15px">🔒 Şifre Değiştir</h3>
+          <div class="form-grp"><label>Mevcut Şifre</label><input type="password" id="ga-pf-oldpass"/></div>
+          <div class="form-grp"><label>Yeni Şifre</label><input type="password" id="ga-pf-newpass"/></div>
+          <div class="form-grp"><label>Tekrar</label><input type="password" id="ga-pf-newpass2"/></div>
+          <button class="btn btn-ghost" onclick="gaChangePassword()">🔒 Şifre Değiştir</button>
+        </div>
+        <div style="margin-top:24px;padding-top:16px;border-top:1.5px solid rgba(192,57,43,.2)">
+          <h4 style="font-size:13px;color:#c0392b;margin-bottom:10px">⚠️ Tehlikeli Bölge</h4>
+          <button class="btn btn-red btn-sm" onclick="if(confirm('Hesabınız kalıcı silinecek?'))window.deleteMyAccount&&deleteMyAccount()">🗑 Hesabımı Sil</button>
+        </div>
+      </div>`,
     settings:`
       <h2 style="margin-bottom:18px">⚙ Kulüp Ayarları</h2>
       <div class="card" style="padding:24px;max-width:560px">
@@ -8264,7 +8287,9 @@ async function loadMyNotifications(){
       const isRead=readSet.has(a.id);
       if(!isRead)unreadCount++;
       const date=a.createdAt?.toDate?.()?.toLocaleDateString('tr')||'';
-      html2+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:3px solid ${isRead?'var(--border)':'var(--or)'}">
+      const expMs=a.expiresAt?.seconds?a.expiresAt.seconds*1000:(a.expiry?new Date(a.expiry).getTime():0);
+      const isExpired=!!(expMs&&expMs<Date.now());
+      html2+=`<div class="card" style="padding:16px;margin-bottom:10px;border-left:3px solid ${isExpired?'var(--border2)':isRead?'var(--border)':'var(--or)'};${isExpired?'opacity:.5;pointer-events:none':''}">
         <div style="display:flex;justify-content:space-between;align-items:flex-start">
           <div style="flex:1">
             ${!isRead?'<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--or);margin-right:6px;vertical-align:middle"></span>':''}
@@ -8482,7 +8507,16 @@ const PAGE_BANNER_DEFAULTS = {
     ctaAction:"blog",
     bg:'pb-blog',
     stats:[{ico:'📝',val:'500+',label:'Makale'},{ico:'👁',val:'1M+',label:'Okuma'},{ico:'✍️',val:'50+',label:'Yazar'}],
-    shapes:'<svg viewBox="0 0 400 400" width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect x="60" y="80" width="280" height="20" rx="4" fill="rgba(255,255,255,.07)"/><rect x="60" y="120" width="200" height="16" rx="4" fill="rgba(255,255,255,.05)"/><rect x="60" y="155" width="240" height="16" rx="4" fill="rgba(255,255,255,.05)"/><rect x="60" y="190" width="180" height="16" rx="4" fill="rgba(232,98,42,.12)"/><rect x="60" y="240" width="280" height="120" rx="10" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.08)" stroke-width="1"/></svg>'
+    shapes:'<svg viewBox="0 0 400 400" width="400" height="400" xmlns="http://www.w3.org/2000/svg"><rect x="60" y="80" width="280" height="20" rx="4" fill="rgba(255,255,255,.07)"/><rect x="60" y="120" width="200" height="16" rx="4" fill="rgba(255,255,255,.05)"/><rect x="60" y="155" width="240" height="16" rx="4" fill="rgba(255,255,255,.05)"/><rect x="60" y="190" width="180" height="16" rx="4" fill="rgba(232,98,42,.12)"/><rect x="60" y="240" width="280" height="120" rx="10" fill="rgba(255,255,255,.04)" stroke="rgba(255,255,255,.08)" stroke-width="1"/></svg>',
+  community:{
+    badge:'🏃 Topluluk',
+    title:'Birlikte <span style="color:#E8622A">Koşuyoruz</span>',
+    subtitle:"Türkiye koşu topluluğuna katıl. Paylaş, motive et, büyü.",
+    ctaText:'Topluluğa Katıl',
+    bg:'pb-clubs',
+    stats:[{ico:'🏃',val:'10K+',label:'Koşucu'},{ico:'🤝',val:'200+',label:'Kulüp'},{ico:'💬',val:'5K+',label:'Gönderi'}],
+    shapes:''
+  }
   }
 };
 
@@ -8596,7 +8630,8 @@ function renderSinglePageBannerAdmin(page){
       <div style="font-size:12px;color:var(--muted)">📁 Banner görseli yükle · Önerilen: 1440×320px</div>
       <img class="img-preview" id="pb-prev-${page}"/>
     </div>
-    <div class="form-grp" style="margin-top:10px"><label>Görsel URL (Masaüstü)</label><input type="text" id="pb-imgurl-${page}" value="${b?.imgUrl||''}" placeholder="https://..."/></div>
+    <div class="form-grp" style="margin-top:10px"><label>İçerik Metni <span style="font-size:10px;color:var(--muted)">(opsiyonel)</span></label><textarea id="pb-body-${page}" rows="3" placeholder="Banner altına ek metin...">${b?.body||''}</textarea></div>
+    <div class="form-grp"><label>Görsel URL (Masaüstü)</label><input type="text" id="pb-imgurl-${page}" value="${b?.imgUrl||''}" placeholder="https://..."/></div>
     <div class="form-grp"><label>📱 Mobil Görsel URL <span style="font-size:10px;color:var(--muted)">(max 768px — boş kalırsa masaüstü kullanılır)</span></label>
       <input type="file" accept="image/*" id="pb-mobile-file-${page}" style="margin-bottom:6px" onchange="previewImg(this,'pb-mobile-prev-${page}')"/>
       <input type="text" id="pb-mobileurl-${page}" value="${b?.mobileImageUrl||''}" placeholder="https://..."/>

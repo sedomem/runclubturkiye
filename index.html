@@ -4855,8 +4855,10 @@ window.openClub=async(id)=>{
           }
         </div>
       </div>
-    </div>`;
+    </div>
+    <div id="club-training-schedule" style="margin-top:20px;margin-bottom:20px;"></div>\`;
   nav('club-detail');
+  if(typeof window.renderClubTrainings==='function') window.renderClubTrainings(c.id);
   if(typeof routerPush==='function')routerPush('club-detail', c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
 };
 
@@ -7443,7 +7445,10 @@ function renderGroupSection(sec){
     events:`
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
         <h2>📅 Etkinlik Yönetimi</h2>
-        <button class="btn btn-or btn-sm" onclick="gOpenAddEvent()">+ Etkinlik Ekle</button>
+        <div style="display:flex;gap:8px">
+            <button class="btn btn-sm" style="background:#292524;color:#fff;border:none;" onclick="window.openTrainingForm()">Koşu Takvimi Oluştur</button>
+            <button class="btn btn-or btn-sm" onclick="gOpenAddEvent()">+ Etkinlik Ekle</button>
+        </div>
       </div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Eklediğin etkinlikler Süper Admin onayından sonra sitede yayınlanır.</p>
       <div id="admin-analytics-container" style="margin-bottom:20px"></div>
@@ -9697,6 +9702,104 @@ window.addEventListener('resize', () => {
 });
 
 // ── INIT ──
+// --- Koşu Takvimi Modülü (Training Calendar) ---
+document.body.insertAdjacentHTML('beforeend', `
+<div id="training-modal" class="modal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center;">
+  <div class="modal-content" style="background:#fff;border-radius:16px;width:90%;max-width:400px;padding:24px;position:relative;box-shadow:0 10px 40px rgba(0,0,0,.2)">
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+      <h2 id="tr-modal-title" style="margin:0;font-size:18px">Koşu Takvimi Ekle</h2>
+      <button onclick="document.getElementById('training-modal').style.display='none'" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">&times;</button>
+    </div>
+    <div class="form-grp" style="margin-bottom:12px"><label style="display:block;font-size:12px;margin-bottom:4px">Başlık (örn: Salı İntervali)</label><input type="text" id="tr-title" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px"/></div>
+    <div style="display:flex;gap:10px;margin-bottom:12px">
+      <div class="form-grp" style="flex:1"><label style="display:block;font-size:12px;margin-bottom:4px">Tarih</label><input type="date" id="tr-date" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px"/></div>
+      <div class="form-grp" style="flex:1"><label style="display:block;font-size:12px;margin-bottom:4px">Saat</label><input type="time" id="tr-time" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px"/></div>
+    </div>
+    <div class="form-grp" style="margin-bottom:12px"><label style="display:block;font-size:12px;margin-bottom:4px">Konum</label><input type="text" id="tr-location" placeholder="Örn: Caddebostan" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px"/></div>
+    <div class="form-grp" style="margin-bottom:16px"><label style="display:block;font-size:12px;margin-bottom:4px">Pace / Mesafe</label><input type="text" id="tr-pace" placeholder="Örn: 5:30 Pace / 10K" style="width:100%;padding:8px;border:1px solid #ddd;border-radius:8px"/></div>
+    <input type="hidden" id="tr-id"/>
+    <button onclick="window.saveTraining()" style="background:#E8622A;color:#fff;border:none;width:100%;padding:10px;border-radius:8px;font-weight:bold;cursor:pointer;transition:.2s" onmouseover="this.style.opacity='.9'" onmouseout="this.style.opacity='1'">Kaydet</button>
+  </div>
+</div>`);
+
+window.openTrainingForm=function(editData=null){
+  document.getElementById('tr-id').value=editData?editData.id:'';
+  document.getElementById('tr-title').value=editData?editData.title:'';
+  document.getElementById('tr-date').value=editData?editData.date:'';
+  document.getElementById('tr-time').value=editData?editData.time:'';
+  document.getElementById('tr-location').value=editData?editData.location:'';
+  document.getElementById('tr-pace').value=editData?editData.pace:'';
+  document.getElementById('tr-modal-title').textContent=editData?'Antrenmanı Düzenle':'Yeni Antrenman';
+  document.getElementById('training-modal').style.display='flex';
+};
+
+window.saveTraining=async function(){
+  const fb=window._fb;
+  const club=window.CLUBS.find(c=>c.adminUid===window.CU?.uid);
+  if(!club){toast('Kulüp yetkiniz bulunamadı','err');return;}
+  const title=document.getElementById('tr-title').value;
+  const date=document.getElementById('tr-date').value;
+  const time=document.getElementById('tr-time').value;
+  const loc=document.getElementById('tr-location').value;
+  const pace=document.getElementById('tr-pace').value;
+  const id=document.getElementById('tr-id').value;
+  if(!title||!date||!time){toast('Başlık, Tarih ve Saat zorunludur!','err');return;}
+  const data={clubId:club.id, title, date, time, location:loc, pace, updatedAt:fb.serverTimestamp()};
+  try{
+    if(id){
+      await fb.updateDoc(fb.doc(fb.db,'club_trainings',id), data);
+    }else{
+      data.createdAt=fb.serverTimestamp();
+      await fb.addDoc(fb.collection(fb.db,'club_trainings'), data);
+    }
+    toast('Antrenman kaydedildi','ok');
+    document.getElementById('training-modal').style.display='none';
+  }catch(e){toast(e.message,'err');}
+};
+
+window.renderClubTrainings=async function(clubId){
+  const container=document.getElementById('club-training-schedule');
+  if(!container)return;
+  container.innerHTML='<div style="padding:20px;text-align:center;color:var(--muted)">Antrenmanlar yükleniyor...</div>';
+  try{
+    const fb=window._fb;
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'club_trainings'), fb.where('clubId','==',clubId)));
+    let trainings=[];
+    snap.forEach(d=>trainings.push({id:d.id,...d.data()}));
+    const todayStr=new Date().toISOString().split('T')[0];
+    trainings = trainings.filter(t=>t.date>=todayStr).sort((a,b)=>a.date.localeCompare(b.date)||a.time.localeCompare(b.time));
+    if(!trainings.length){
+      container.innerHTML=''; 
+      return;
+    }
+    let html='<h3 style="font-size:18px;margin-bottom:16px;">🏃 Haftalık Koşu Takvimi</h3>';
+    html+='<div style="position:relative;padding-left:16px;border-left:2px solid #E0D8CC;">';
+    trainings.forEach(t=>{
+      html+=\`
+      <div style="position:relative;background:rgba(255,255,255,0.6);backdrop-filter:blur(8px);border-radius:12px;padding:16px;box-shadow:0 2px 6px rgba(0,0,0,0.03);border:1px solid #f1f5f9;margin-bottom:16px;transition:all 0.3s" onmouseover="this.style.boxShadow='0 4px 12px rgba(0,0,0,0.08)'" onmouseout="this.style.boxShadow='0 2px 6px rgba(0,0,0,0.03)'">
+        <div style="position:absolute;left:-21px;top:20px;width:10px;height:10px;background:#E8622A;border-radius:50%;border:2px solid #fff;"></div>
+        <div style="position:absolute;left:-1px;top:10px;bottom:10px;width:3px;background:linear-gradient(to bottom, #E8622A, #FFB347);border-radius:4px;"></div>
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+          <div>
+            <h4 style="margin:0 0 6px 0;font-size:16px;color:#1e293b">\${t.title}</h4>
+            <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
+              <span style="background:#f1f5f9;color:#475569;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600">📅 \${t.date} · ⏰ \${t.time}</span>
+              \${t.location?\`<span style="background:#f1f5f9;color:#475569;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600">📍 \${t.location}</span>\`:\`\`}
+              \${t.pace?\`<span style="background:#fff6ed;color:#ea580c;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600">⚡ \${t.pace}</span>\`:\`\`}
+            </div>
+          </div>
+          \${(window.CU && window.CLUBS.find(c=>c.id===clubId)?.adminUid===window.CU.uid)? \`<button onclick='window.openTrainingForm(\${JSON.stringify(t).replace(/'/g, "&apos;")})' style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">✎</button>\` : ''}
+        </div>
+      </div>\`;
+    });
+    html+='</div>';
+    container.innerHTML=html;
+  }catch(e){
+    container.innerHTML=''; 
+    console.warn('Koşu takvimi yüklenemedi:',e.message);
+  }
+};
+
 try {
   document.getElementById('pg-home').classList.add('on');
   const _gf=document.getElementById('global-footer');if(_gf)_gf.style.display='block';

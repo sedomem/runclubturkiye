@@ -7677,6 +7677,38 @@ function renderGroupSection(sec){
       </div>
       <div id="g-events-list"><div class="spinner" style="margin:20px auto"></div></div>`,
 
+    calendar:`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h2>🗓 Kulüp Etkinlik Takvimi</h2>
+        <button class="btn btn-or btn-sm" onclick="gOpenClubEventForm()">+ Yeni Etkinlik</button>
+      </div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:18px">Kulübünüzün haftalık rutin antrenmanlarını ve özel kulüp etkinliklerini buradan yönetebilirsiniz. Bu etkinlikler kulüp sayfanızda takvim olarak listelenir.</p>
+      
+      <div class="card" id="g-cal-form-wrap" style="display:none;padding:24px;margin-bottom:24px;border-left:4px solid var(--or)">
+        <h3 id="g-cal-form-title" style="margin-bottom:16px;font-size:15px">➕ Yeni Etkinlik</h3>
+        <input type="hidden" id="g-cal-edit-id"/>
+        <div class="form-grp"><label>Etkinlik Başlığı</label><input id="g-cal-title" placeholder="Örn: Salı İnterval Koşusu"/></div>
+        <div class="form-row">
+          <div class="form-grp"><label>Tarih</label><input type="date" id="g-cal-date"/></div>
+          <div class="form-grp"><label>Saat</label><input type="time" id="g-cal-time" value="08:00"/></div>
+        </div>
+        <div class="form-row">
+          <div class="form-grp"><label>Buluşma Yeri</label><input id="g-cal-loc" placeholder="Örn: Bebek Starbucks Önü"/></div>
+          <div class="form-grp"><label>Tür</label>
+            <select id="g-cal-type"><option>Koşu</option><option>Interval</option><option>Tempo</option><option>Sosyal</option><option>Uzun Koşu</option></select>
+          </div>
+        </div>
+        <div class="form-grp"><label>Harita Linki (Opsiyonel)</label><input id="g-cal-meet" placeholder="https://maps.app.goo.gl/..."/></div>
+        <div class="form-grp"><label>Açıklama / Detaylar</label><textarea id="g-cal-desc" rows="3" placeholder="Pace bilgisi, parkur detayı vb..."></textarea></div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="btn btn-or" onclick="gSaveClubEvent()">💾 Kaydet</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('g-cal-form-wrap').style.display='none'">İptal</button>
+        </div>
+      </div>
+
+      <div id="g-club-cal-list"></div>
+    `,
+
     members:`
       <h2 style="margin-bottom:6px">👥 Kulüp Üyeleri</h2>
       <p style="font-size:12px;color:var(--muted);margin-bottom:18px">Kulübüne katılmış üyeler.</p>
@@ -7778,6 +7810,7 @@ function renderGroupSection(sec){
     setTimeout(gLoadEvents,100);
     setTimeout(()=>renderAdminAnalytics&&renderAdminAnalytics(),500);
   }
+  if(sec==='calendar')setTimeout(gLoadClubCalendar,100);
   if(sec==='members')setTimeout(gLoadMembers,100);
   if(sec==='announcements')setTimeout(gLoadAnnouncements,100);
   if(sec==='chat')setTimeout(gLoadChat,200);

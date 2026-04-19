@@ -7323,10 +7323,16 @@ window.deleteClub=async(id)=>{
   const fb=window._fb;
   if(!confirm('Sil?'))return;
   try{
-    await fb.deleteDoc(fb.doc(fb.db,'clubs',id));
-    const i=CLUBS.findIndex(x=>x.id===id);if(i>-1)CLUBS.splice(i,1);
-    toast('Silindi','ok');renderAdminSection('groups');
-    const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=CLUBS.map(clubCard).join('');
+    const c=CLUBS.find(x=>x.id===id);
+    try{ await fb.deleteDoc(fb.doc(fb.db,'clubs',id)); }catch(e){}
+    try{ await fb.updateDoc(fb.doc(fb.db,'users',id),{clubName:null,clubDesc:null,clubImg:null}); }catch(e){}
+    if(c && c.adminUid) {
+      try{ await fb.updateDoc(fb.doc(fb.db,'users',c.adminUid),{clubName:null,clubDesc:null,clubImg:null}); }catch(e){}
+    }
+    window.CLUBS = window.CLUBS.filter(x=>x.id!==id);
+    toast('Silindi','ok');
+    if(typeof renderAdminSection==='function') renderAdminSection('groups');
+    const cl=document.getElementById('clubs-list');if(cl)cl.innerHTML=window.CLUBS.map(clubCard).join('');
   }catch(e){toast(e.message,'err');}
 };
 window.openAddEventModal=()=>{document.getElementById('edit-event-id').value='';document.getElementById('edit-event-title-label').textContent='Yeni Etkinlik';['edit-ev-name','edit-ev-dist','edit-ev-desc','edit-ev-distances'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});document.querySelectorAll('#edit-ev-pace .pace-opt').forEach(b=>b.classList.remove('on'));openModal('edit-event-modal');};

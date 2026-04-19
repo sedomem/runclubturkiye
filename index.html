@@ -4536,9 +4536,14 @@ window.gLoadClubCalendar=async function(){
   if(!clubId){el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Kulüp bilgisi bulunamadı.</p>';return;}
   try{
     var today=new Date().toISOString().split('T')[0];
-    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',clubId),fb.orderBy('date','asc')));
+    // Index hatasını önlemek için orderBy'ı sorgudan çıkarıp JS ile sort yapıyoruz
+    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',clubId)));
     window._gClubEvents=[];
     snap.forEach(function(d){window._gClubEvents.push(Object.assign({id:d.id},d.data()));});
+    
+    // Client-side sorting
+    window._gClubEvents.sort(function(a,b){ return (a.date||'').localeCompare(b.date||''); });
+
     if(!window._gClubEvents.length){
       el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Henüz etkinlik yok.</p>';
       return;
@@ -4578,8 +4583,16 @@ if(!window.renderClubTrainings){
     var fb=window._fb;
     var todayStr=new Date().toISOString().split('T')[0];
     try{
-      var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',clubId),fb.where('date','>=',todayStr),fb.orderBy('date','asc')));
-      var evs=[];snap.forEach(function(d){evs.push(Object.assign({id:d.id},d.data()));});
+      // Index hatasını önlemek için filtreleri basitleştirip JS ile sıralıyoruz/filtreliyoruz
+      var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',clubId)));
+      var evs=[];
+      snap.forEach(function(d){
+        var data=d.data();
+        if(data.date >= todayStr) evs.push(Object.assign({id:d.id},data));
+      });
+      // Client-side sorting
+      evs.sort(function(a,b){ return (a.date||'').localeCompare(b.date||'') || (a.time||'').localeCompare(b.time||''); });
+      
       if(!evs.length){container.innerHTML='';return;}
       var MO=window.MONTHS||['OCA','ŞUB','MAR','NİS','MAY','HAZ','TEM','AĞU','EYL','EKİ','KAS','ARA'];
       var html='<div style="margin-top:8px"><h3 style="font-size:16px;margin-bottom:12px;font-family:var(--font-head)">🗓 Etkinlik Takvimi</h3><div style="display:flex;flex-direction:column;gap:10px">';

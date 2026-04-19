@@ -155,5 +155,10 @@ service cloud.firestore {
       allow update: if isAuth() && resource.data.userId == uid();
       allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == uid());
     }
+    match /club_events/{id} {
+      allow read: if true;
+      allow create, update: if isAuth() && (isSuperAdmin() || isGroupAdmin());
+      allow delete: if isAuth() && (isSuperAdmin() || isGroupAdmin());
+    }
   }
 }

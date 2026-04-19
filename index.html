@@ -2583,6 +2583,12 @@ onAuthStateChanged(auth,async user=>{
     const d=snap.exists()?snap.data():{};
     const role=user.email===SUPER_EMAIL?'superadmin':(d.role||'member');
     window.CU={uid:user.uid,email:user.email,name:d.name||user.displayName||user.email.split('@')[0],role,totalKm:d.totalKm||0,eventCount:d.eventCount||0,clubCount:d.clubCount||0,badges:d.badges||[],...d};
+    // GroupAdmin için clubId cache — memberships'ten al
+    if(role==='groupadmin'&&!window.CU.clubId){
+      getDocs(query(collection(db,'memberships'),where('userId','==',user.uid))).then(ms=>{
+        if(!ms.empty){const cid=ms.docs[0].data().clubId;if(cid)window.CU.clubId=cid;}
+      }).catch(()=>{});
+    };
     document.getElementById('nav-guest').style.display='none';
     document.getElementById('nav-user').style.display='flex';
     setupRoleBtn();buildDashboard();syncProfileUI();
@@ -4454,7 +4460,19 @@ window.gOpenClubEventForm=function(editData){
 window.gSaveClubEvent=async function(){
   var fb=window._fb;
   var editId=document.getElementById('g-cal-edit-id')&&document.getElementById('g-cal-edit-id').value||'';
-  var clubId=window.CU&&(window.CU.clubId||window.CU.uid)||'';
+  // clubId: önce CU.clubId, yoksa memberships'ten bul
+  var clubId=window.CU&&window.CU.clubId||'';
+  if(!clubId&&window.CU){
+    try{
+      var ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid),fb.where('role','==','admin')));
+      if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
+      if(!clubId){
+        var ms2=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',window.CU.uid)));
+        if(!ms2.empty)clubId=ms2.docs[0].data().clubId||'';
+      }
+    }catch(ex){console.warn('clubId fetch:',ex.message);}
+  }
+  if(!clubId){toast('Kulüp bilgisi bulunamadı','err');return;}
   var title=document.getElementById('g-cal-title')&&document.getElementById('g-cal-title').value.trim()||'';
   if(!title){toast('Başlık gerekli','err');return;}
   var data={clubId:clubId,title:title,
@@ -4505,8 +4523,17 @@ window.gLoadClubCalendar=async function(){
   var el=document.getElementById('g-club-cal-list');
   if(!el||!window.CU)return;
   el.innerHTML='<div class="spinner" style="margin:20px auto"></div>';
-  var clubId=window.CU.clubId||window.CU.uid;
   var fb=window._fb;
+  // clubId: CU.clubId yoksa memberships'ten bul
+  var clubId=window.CU.clubId||'';
+  if(!clubId){
+    try{
+      var ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid)));
+      if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
+      if(clubId)window.CU.clubId=clubId; // cache et
+    }catch(ex){console.warn('clubId:',ex.message);}
+  }
+  if(!clubId){el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Kulüp bilgisi bulunamadı.</p>';return;}
   try{
     var today=new Date().toISOString().split('T')[0];
     var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',clubId),fb.orderBy('date','asc')));
@@ -4544,7 +4571,8 @@ window.gLoadClubCalendar=async function(){
 // renderClubTrainings - Haftalık koşu takvimi (openClub'dan çağrılır)
 if(!window.renderClubTrainings){
   window.renderClubTrainings=async function(clubId){
-    var container=document.getElementById('club-training-schedule');
+    // club-calendar-section veya club-training-schedule — hangisi varsa
+    var container=document.getElementById('club-calendar-section')||document.getElementById('club-training-schedule');
     if(!container)return;
     // Club events kullan
     var fb=window._fb;
@@ -5012,7 +5040,6 @@ window.openClub=async(id)=>{
     </div>`;
   nav('club-detail');
   if(typeof window.renderClubTrainings==='function') window.renderClubTrainings(c.id);
-  setTimeout(function(){var cc=document.getElementById('club-calendar-section');if(cc&&typeof window.renderClubTrainings==='function')window.renderClubTrainings(c.id);},400);
   if(typeof routerPush==='function')routerPush('club-detail', c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
 };
 

@@ -1111,6 +1111,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <button class="mdr-btn" onclick="mdrDash('notifications')"><span class="mdr-ico">🔔</span><span>Bildirimler</span></button>
       <button class="mdr-btn" onclick="mdrDash('my-events')"><span class="mdr-ico">📅</span><span>Etkinliklerim</span></button>
       <button class="mdr-btn" onclick="mdrDash('my-clubs')"><span class="mdr-ico">🤝</span><span>Kulüplerim</span></button>
+      <button class="mdr-btn" onclick="mdrDash('club-events')"><span class="mdr-ico">🏟️</span><span>Kulüp Etkinlikleri</span></button>
       <button class="mdr-btn" onclick="mdrDash('my-km')"><span class="mdr-ico">🏃</span><span>KM Takibi</span></button>
       <button class="mdr-btn" onclick="mdrDash('badges')"><span class="mdr-ico">🏅</span><span>Rozetler</span></button>
       <button class="mdr-btn" onclick="mdrDash('profile-tab')"><span class="mdr-ico">⚙️</span><span>Profil Ayarları</span></button>
@@ -3986,6 +3987,13 @@ function renderHomeData(){
   if(hc){
     if(window.CLUBS&&window.CLUBS.length){
       hc.innerHTML=window.CLUBS.slice(0,4).map(clubCard).join('');
+      // Guest-only prompt
+      if(!window.CU){
+        hc.innerHTML += `<div style="grid-column:1/-1;text-align:center;margin-top:12px;padding:20px;background:rgba(255,107,0,0.05);border:1.5px dashed var(--or);border-radius:12px">
+          <p style="font-size:13px;color:var(--text);font-weight:700;margin-bottom:8px">🏟️ Kulüpleri görebilmeniz için üye olmanız gerekir</p>
+          <button class="btn btn-or btn-sm" onclick="openAuth('register')">Hemen Kaydol</button>
+        </div>`;
+      }
     } else {
       if(!window.CU){
         hc.innerHTML=`<div class="card" style="padding:32px 16px;text-align:center;background:rgba(255,107,0,0.04);border:1px dashed var(--or);border-radius:16px">
@@ -5056,6 +5064,17 @@ window.renderClubsPage=async()=>{
       return;
     }
     el.innerHTML=allClubs.map(clubCard).join('') + clubCtaCard();
+    if(!window.CU){
+      el.innerHTML += `<div style="grid-column:1/-1;text-align:center;margin-top:32px;padding:40px 20px;background:rgba(255,107,0,0.04);border:2px dashed var(--or);border-radius:20px">
+        <div style="font-size:48px;margin-bottom:16px">🤝</div>
+        <h3 style="font-size:18px;margin-bottom:8px">Kulüpleri görebilmeniz için üye olmanız gerekir</h3>
+        <p style="color:var(--muted);font-size:14px;max-width:440px;margin:0 auto 20px">Tüm kulüp detaylarına erişmek, etkinliklere kayıt olmak ve topluluğa katılmak için ücretsiz üye olun.</p>
+        <div style="display:flex;gap:12px;justify-content:center">
+          <button class="btn btn-or" onclick="openAuth('register')">Üye Ol</button>
+          <button class="btn btn-ghost" onclick="openAuth('login')">Giriş Yap</button>
+        </div>
+      </div>`;
+    }
   }catch(e){
     console.error('[renderClubsPage] HATA:',e.message);
     el.innerHTML='<p style="color:var(--muted);padding:20px">Kulüpler yüklenemedi: '+e.message+'</p>';
@@ -6345,6 +6364,8 @@ window.sendClubPush=async function(){
       targetRole:'',
       targetClubId:clubId,
       status:'pending',
+      processed: false,
+      platform: 'web',
       sentBy:cu.email||'groupadmin',
       createdAt:fb.serverTimestamp()
     });

@@ -10019,8 +10019,35 @@ window.openTrainingForm=function(editData=null){
 
 window.saveTraining=async function(){
   const fb=window._fb;
-  const club=window.CLUBS.find(c=>c.adminUid===window.CU?.uid);
-  if(!club){toast('Kulüp yetkiniz bulunamadı','err');return;}
+  if(!window.CU){toast('Oturum bulunamadı','err');return;}
+
+  // clubId tespiti: CU.clubId → CLUBS.adminUid → clubs koleksiyonu → uid
+  let clubId=window.CU.clubId||'';
+  let clubName=window.CU.clubName||window.CU.name||'';
+
+  if(!clubId){
+    // CLUBS dizisinde adminUid eşleşmesini dene
+    const found=window.CLUBS&&window.CLUBS.find(c=>c.adminUid===window.CU.uid);
+    if(found){clubId=found.id;clubName=found.name||clubName;}
+  }
+  if(!clubId){
+    // Firestore clubs koleksiyonundan çek
+    try{
+      const cs=await fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('adminUid','==',window.CU.uid)));
+      if(!cs.empty){clubId=cs.docs[0].id;clubName=cs.docs[0].data().name||clubName;}
+    }catch(ex){console.warn('saveTraining clubId:',ex.message);}
+  }
+  if(!clubId){
+    // memberships'ten dene
+    try{
+      const ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid)));
+      if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
+    }catch(ex){}
+  }
+  // Son çare: GA uid = clubs doc id
+  if(!clubId){clubId=window.CU.uid;}
+  window.CU.clubId=clubId; // cache
+
   const title=document.getElementById('tr-title').value;
   const date=document.getElementById('tr-date').value;
   const time=document.getElementById('tr-time').value;
@@ -10028,7 +10055,7 @@ window.saveTraining=async function(){
   const pace=document.getElementById('tr-pace').value;
   const id=document.getElementById('tr-id').value;
   if(!title||!date||!time){toast('Başlık, Tarih ve Saat zorunludur!','err');return;}
-  const data={clubId:club.id, title, date, time, location:loc, pace, updatedAt:fb.serverTimestamp()};
+  const data={clubId, clubName, title, date, time, location:loc, pace, updatedAt:fb.serverTimestamp()};
   try{
     if(id){
       await fb.updateDoc(fb.doc(fb.db,'club_trainings',id), data);
@@ -10036,9 +10063,11 @@ window.saveTraining=async function(){
       data.createdAt=fb.serverTimestamp();
       await fb.addDoc(fb.collection(fb.db,'club_trainings'), data);
     }
-    toast('Antrenman kaydedildi','ok');
+    toast('Antrenman kaydedildi ✓','ok');
     document.getElementById('training-modal').style.display='none';
-  }catch(e){toast(e.message,'err');}
+    // Kulüp sayfasındaki takvimi güncelle
+    if(window.renderClubTrainings)window.renderClubTrainings(clubId);
+  }catch(e){toast('Hata: '+e.message,'err');console.error('saveTraining:',e);}
 };
 
 window.renderClubTrainings=async function(clubId){

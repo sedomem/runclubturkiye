@@ -5085,7 +5085,36 @@ window.openClub=async(id)=>{
     </div>`;
   nav('club-detail');
   if(typeof window.renderClubTrainings==='function') window.renderClubTrainings(c.id);
+  if(typeof window.renderClubPublicEvents==='function') window.renderClubPublicEvents(c.id);
   if(typeof routerPush==='function')routerPush('club-detail', c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
+};
+
+window.renderClubPublicEvents = async function(clubId) {
+  const el = document.getElementById('club-calendar-section');
+  if(!el) return;
+  try {
+    const evts = window.EVENTS.filter(e => e.clubId === clubId && e.status === 'approved');
+    const today = new Date().toISOString().split('T')[0];
+    const upcoming = evts.filter(e => e.date >= today).sort((a,b) => a.date.localeCompare(b.date));
+    
+    if(upcoming.length === 0) {
+      el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:10px">Yakın zamanda planlanmış halka açık etkinlik bulunmuyor.</p>';
+      return;
+    }
+    
+    el.innerHTML = upcoming.map(e => {
+        const d = new Date(e.date);
+        return `
+        <div class="ev-card" style="margin-bottom:10px" onclick="openEvent('${e.id}')">
+          <div class="ev-date-box"><div class="day">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]||''}</div></div>
+          <div class="ev-info">
+            <span class="tag tag-or">${e.cat||''}</span>
+            <h3 style="font-size:14px">${e.title}</h3>
+            <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
+          </div>
+        </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<p style="color:var(--muted)">Yüklenemedi.</p>'; }
 };
 
 // ── RACES ──
@@ -6820,7 +6849,14 @@ function buildDashboard(){
   const roleLabels={superadmin:'⭐ Süper Admin',groupadmin:'🤝 Grup Admin',member:'🏃 Üye'};
   if(drawerRole)drawerRole.textContent=roleLabels[CU.role]||'Üye';
   document.getElementById('dash-nav').innerHTML=[
-    {id:'overview',ico:'🏠',l:'Genel'},{id:'notifications',ico:'🔔',l:'Bildirimler'},{id:'my-events',ico:'📅',l:'Etkinliklerim'},{id:'my-clubs',ico:'🤝',l:'Kulüplerim'},{id:'my-km',ico:'🏃',l:'KM Takibi'},{id:'badges',ico:'🏅',l:'Rozetler'},{id:'profile-tab',ico:'⚙',l:'Profil'},
+    {id:'overview',ico:'🏠',l:'Genel'},
+    {id:'notifications',ico:'🔔',l:'Bildirimler'},
+    {id:'club-events',ico:'🏟️',l:'Kulüp Etkinlikleri'},
+    {id:'my-events',ico:'📅',l:'Etkinliklerim'},
+    {id:'my-clubs',ico:'🤝',l:'Kulüplerim'},
+    {id:'my-km',ico:'🏃',l:'KM Takibi'},
+    {id:'badges',ico:'🏅',l:'Rozetler'},
+    {id:'profile-tab',ico:'⚙',l:'Profil'},
   ].map((n,i)=>`<button class="${i===0?'on':''}" id="dash-btn-${n.id}" onclick="showDash('${n.id}',this)">${n.ico} ${n.l}</button>`).join('')+'<button onclick="window.logout()" style="margin-top:12px;color:#f87171;background:transparent;border:none;cursor:pointer;font-size:14px;padding:8px 0;width:100%;text-align:left">🚪 Çıkış Yap</button>';
   const myBadges=CU.badges||[];
   const earnedBadges=BADGE_RULES.filter(r=>myBadges.includes(r.id));
@@ -6848,6 +6884,11 @@ function buildDashboard(){
         <button class="btn btn-ghost btn-sm" onclick="markAllNotifsRead()">Tümünü Okundu İşaretle</button>
       </div>
       <div id="dash-notifications-list"><div class="spinner" style="margin:20px auto"></div></div>
+    </div>
+    <div class="dash-content" id="dp-club-events">
+      <h2 style="margin-bottom:16px">🏟️ Kulüp Etkinlikleri</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Üyesi olduğun kulüplerin düzenlediği özel etkinlikler ve antrenman takvimi.</p>
+      <div id="dash-club-events-list"><div class="spinner" style="margin:20px auto"></div></div>
     </div>
     <div class="dash-content" id="dp-my-events">
       <h2 style="margin-bottom:16px">Etkinliklerim</h2>
@@ -6889,7 +6930,7 @@ function buildDashboard(){
     </div>
     <div class="dash-content" id="dp-profile-tab"><h2 style="margin-bottom:14px">Profil</h2><button class="btn btn-or btn-sm" onclick="nav('profile')">Profil Sayfasına Git →</button></div>`;
   // Kulüpleri ve etkinlikleri yükle
-  loadMyClubs();loadMyEvents();loadMyNotifications();loadKmEvents();loadOverviewRecent();
+  loadMyClubs();loadMyEvents();loadMyNotifications();loadKmEvents();loadOverviewRecent();loadClubEvents();
 }
 async function loadMyClubs(){
   const el=document.getElementById('dash-my-clubs-list');if(!el)return;
@@ -7785,7 +7826,10 @@ function renderGroupSection(sec){
       <div id="g-members-list"><div class="spinner" style="margin:20px auto"></div></div>`,
 
     announcements:`
-      <h2 style="margin-bottom:18px">📢 Duyurular</h2>
+      <div>
+        <h2 style="margin-bottom:4px">📢 Duyurular</h2>
+        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Bu duyurular Kulüp üyelerinize görünür.</p>
+      </div>
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Duyuru</h3>
         <div class="form-grp"><label>Başlık</label><input id="ga-ann-title" placeholder="Duyuru başlığı"/></div>
@@ -8150,9 +8194,13 @@ window.gEditEvent=async(eventId)=>{
 };
 
 window.gDeleteEvent=async(id)=>{
-  if(!confirm('Etkinlik silinsin mi?'))return;
-  try{const fb=window._fb;await fb.deleteDoc(fb.doc(fb.db,'events',id));toast('Silindi','ok');gLoadEvents();}
-  catch(e){toast(e.message,'err');}
+  if(!confirm('Bu etkinlik silinsin mi?'))return;
+  const fb=window._fb;
+  try{
+    await fb.updateDoc(fb.doc(fb.db,'events',id),{status:'deleted'});
+    toast('Silindi ✓','ok');
+    gLoadEvents();
+  }catch(e){toast('Hata: '+e.message,'err');}
 };
 
 async function gLoadMembers(){
@@ -10112,6 +10160,171 @@ window.renderClubTrainings=async function(clubId){
     console.warn('Koşu takvimi yüklenemedi:',e.message);
   }
 };
+
+// ── CLUB EVENTS FOR DASHBOARD ──
+window.loadClubEvents = async function() {
+  const el = document.getElementById('dash-club-events-list');
+  if(!el || !window.CU) return;
+  try {
+    const fb = window._fb;
+    // Kullanıcının üye olduğu kulüpleri bul
+    const [s1, s2] = await Promise.all([
+      fb.getDocs(fb.query(fb.collection(fb.db,'memberships'), fb.where('userId','==',window.CU.uid))),
+      fb.getDocs(fb.query(fb.collection(fb.db,'memberships'), fb.where('uid','==',window.CU.uid)))
+    ]);
+    const clubIds = new Set();
+    [...s1.docs, ...s2.docs].forEach(d => clubIds.add(d.data().clubId));
+
+    if(clubIds.size === 0) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Henüz bir kulübe üye değilsiniz.</p>';
+      return;
+    }
+
+    // Bu kulüplerin etkinliklerini ve koşu takvimlerini çek
+    const ids = Array.from(clubIds);
+    const [evtSnap, trSnap] = await Promise.all([
+      fb.getDocs(fb.query(fb.collection(fb.db,'events'), fb.where('clubId', 'in', ids.slice(0, 10)), fb.where('status', '==', 'approved'))),
+      fb.getDocs(fb.query(fb.collection(fb.db,'club_trainings'), fb.where('clubId', 'in', ids.slice(0, 10))))
+    ]);
+
+    let allItems = [];
+    evtSnap.forEach(d => allItems.push({type:'event', id:d.id, ...d.data()}));
+    trSnap.forEach(d => allItems.push({type:'training', id:d.id, ...d.data()}));
+
+    // Tarihe göre sırala
+    const today = new Date().toISOString().split('T')[0];
+    allItems = allItems.filter(i => (i.date||'') >= today).sort((a,b) => (a.date||'').localeCompare(b.date||''));
+
+    if(allItems.length === 0) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Yaklaşan kulüp etkinliği bulunamadı.</p>';
+      return;
+    }
+
+    el.innerHTML = allItems.map(i => {
+      const d = new Date(i.date);
+      return `
+      <div class="ev-card" style="margin-bottom:12px; border-left: 4px solid ${i.type==='event'?'#E8622A':'#2c3e50'}">
+        <div class="ev-date-box" style="background:${i.type==='event'?'var(--or)':'#2c3e50'}"><div class="day">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]||''}</div></div>
+        <div class="ev-info">
+          <span class="tag ${i.type==='event'?'tag-or':'tag-bl'}">${i.type==='event'?'Etkinlik':'Koşu Takvimi'}</span>
+          <h3 style="margin:4px 0">${i.title}</h3>
+          <div class="ev-meta">
+             <span class="meta">🏙 ${i.clubName||'Kulüp'}</span>
+             <span class="meta">📍 ${i.location||i.city||'—'}</span>
+             <span class="meta">⏰ ${i.time||'—'}</span>
+          </div>
+        </div>
+        ${i.type==='event'?`<button class="btn btn-or btn-sm" onclick="openEvent('${i.id}')">Detay</button>`:''}
+      </div>`;
+    }).join('');
+  } catch(e) {
+    el.innerHTML = '<p style="color:var(--muted)">Yüklenemedi: ' + e.message + '</p>';
+  }
+};
+
+// ── GROUP ADMIN CALENDAR CRUD ──
+window.gLoadClubCalendar = async function() {
+  const el = document.getElementById('g-club-cal-list');
+  if(!el) return;
+  el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  try {
+    const fb = window._fb;
+    const clubId = window.CU.clubId || window.CU.uid;
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'club_trainings'), fb.where('clubId','==',clubId)));
+    
+    if(snap.empty) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Henüz takvim girişi yapılmamış.</p>';
+      return;
+    }
+
+    let items = [];
+    snap.forEach(d => items.push({id:d.id, ...d.data()}));
+    items.sort((a,b) => b.date.localeCompare(a.date));
+
+    el.innerHTML = `<table>
+      <thead><tr><th>Etkinlik</th><th>Tarih</th><th>Saat</th><th>Konum</th><th>İşlem</th></tr></thead>
+      <tbody>${items.map(t => `
+        <tr>
+          <td><b>${t.title}</b></td>
+          <td>${t.date}</td>
+          <td>${t.time}</td>
+          <td>${t.location}</td>
+          <td class="action-btns">
+            <button class="btn btn-ghost btn-sm" onclick='window.gOpenClubEventForm(${JSON.stringify(t).replace(/'/g, "&apos;")})'>✏️</button>
+            <button class="btn btn-red btn-sm" onclick="window.gDeleteClubTraining('${t.id}')">🗑</button>
+          </td>
+        </tr>`).join('')}
+      </tbody></table>`;
+  } catch(e) { el.innerHTML = '<p style="color:var(--muted)">Hata: ' + e.message + '</p>'; }
+};
+
+window.gOpenClubEventForm = function(editData = null) {
+  const wrap = document.getElementById('g-cal-form-wrap');
+  if(!wrap) return;
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({behavior:'smooth'});
+  
+  document.getElementById('g-cal-form-title').textContent = editData ? '✏️ Etkinliği Düzenle' : '➕ Yeni Etkinlik';
+  document.getElementById('g-cal-edit-id').value = editData ? editData.id : '';
+  document.getElementById('g-cal-title').value = editData ? editData.title : '';
+  document.getElementById('g-cal-date').value = editData ? editData.date : '';
+  document.getElementById('g-cal-time').value = editData ? editData.time : '08:00';
+  document.getElementById('g-cal-loc').value = editData ? editData.location : '';
+  document.getElementById('g-cal-type').value = editData ? (editData.type||'Koşu') : 'Koşu';
+  document.getElementById('g-cal-desc').value = editData ? (editData.desc||editData.pace||'') : '';
+};
+
+window.gSaveClubEvent = async function() {
+  const fb = window._fb;
+  const clubId = window.CU.clubId || window.CU.uid;
+  const clubName = window.CU.clubName || window.CU.name || 'Kulüp';
+  const id = document.getElementById('g-cal-edit-id').value;
+  
+  const data = {
+    clubId, clubName,
+    title: document.getElementById('g-cal-title').value,
+    date: document.getElementById('g-cal-date').value,
+    time: document.getElementById('g-cal-time').value,
+    location: document.getElementById('g-cal-loc').value,
+    type: document.getElementById('g-cal-type').value,
+    pace: document.getElementById('g-cal-desc').value, // pace alanını açıklama/detay olarak kullanıyoruz
+    updatedAt: fb.serverTimestamp()
+  };
+
+  if(!data.title || !data.date) { toast('Başlık ve Tarih zorunludur!','err'); return; }
+
+  try {
+    if(id) {
+      await fb.updateDoc(fb.doc(fb.db,'club_trainings',id), data);
+    } else {
+      data.createdAt = fb.serverTimestamp();
+      await fb.addDoc(fb.collection(fb.db, 'club_trainings'), data);
+    }
+    toast('Takvim güncellendi ✓','ok');
+    document.getElementById('g-cal-form-wrap').style.display = 'none';
+    gLoadClubCalendar();
+  } catch(e) { toast('Hata: '+e.message,'err'); }
+};
+
+window.gDeleteClubTraining = async function(id) {
+  if(!confirm('Bu antrenman takviminden silinsin mi?')) return;
+  try {
+    const fb = window._fb;
+    await fb.deleteDoc(fb.doc(fb.db,'club_trainings',id));
+    toast('Silindi','ok');
+    gLoadClubCalendar();
+  } catch(e) { toast('Hata: '+e.message,'err'); }
+};
+
+// Mobile Clubs Fix - Ensure grid is properly handled and fetch is robust
+const styleFix = document.createElement('style');
+styleFix.innerHTML = `
+  @media(max-width:768px) {
+    #clubs-list { display: grid !important; grid-template-columns: 1fr !important; gap: 16px !important; }
+    .card { width: 100% !important; margin-bottom: 0 !important; }
+  }
+`;
+document.head.appendChild(styleFix);
 
 try {
   document.getElementById('pg-home').classList.add('on');

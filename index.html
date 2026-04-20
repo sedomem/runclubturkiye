@@ -4464,7 +4464,8 @@ window.gSaveClubEvent=async function(){
   var clubId=window.CU&&window.CU.clubId||'';
   if(!clubId&&window.CU){
     try{
-      var ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid),fb.where('role','==','admin')));
+      // role filtresi yok — userId veya uid ile direkt çek
+      var ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid)));
       if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
       if(!clubId){
         var ms2=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',window.CU.uid)));

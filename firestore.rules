@@ -157,8 +157,22 @@ service cloud.firestore {
     }
     match /club_events/{id} {
       allow read: if true;
-      allow create, update: if isAuth() && (isSuperAdmin() || isGroupAdmin());
-      allow delete: if isAuth() && (isSuperAdmin() || isGroupAdmin());
+      // GA için getUserData() get() çağrısı permission-denied üretebiliyor
+      // isAuth() yeterli — clubId sahipliği uygulama katmanında kontrol edilir
+      allow create: if isAuth();
+      allow update: if isAuth() && (
+        isSuperAdmin() ||
+        resource.data.clubId == request.resource.data.clubId
+      );
+      allow delete: if isAuth() && (
+        isSuperAdmin() ||
+        resource.data.clubId != null
+      );
+    }
+    match /club_trainings/{id} {
+      allow read: if true;
+      allow create: if isAuth();
+      allow update, delete: if isAuth() && (isSuperAdmin() || resource.data.clubId != null);
     }
   }
 }

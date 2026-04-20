@@ -28,8 +28,8 @@ service cloud.firestore {
 
     match /clubs/{id} {
       allow read: if true;
-      allow create: if isSuperAdmin();
-      allow update: if isSuperAdmin() || (isGroupAdmin() && resource.data.adminUid == uid());
+      allow create: if isSuperAdmin() || isAuth();
+      allow update: if isSuperAdmin() || (isAuth() && resource.data.adminUid == uid());
       allow delete: if isSuperAdmin();
     }
 
@@ -148,18 +148,19 @@ service cloud.firestore {
     }
 
     // Kulüp Etkinlik Takvimi
-    // isGroupAdmin() get() sorunu yerine isAuth() kullanıldı
     match /club_events/{id} {
       allow read: if true;
       allow create: if isAuth();
-      allow update: if isAuth() && (
-        isSuperAdmin() ||
-        resource.data.clubId == request.resource.data.clubId
-      );
-      allow delete: if isAuth() && (
-        isSuperAdmin() ||
-        resource.data.clubId != null
-      );
+      allow update: if isAuth() && (isSuperAdmin() || resource.data.clubId == request.resource.data.clubId);
+      allow delete: if isAuth() && (isSuperAdmin() || resource.data.clubId != null);
+    }
+
+    // Koşu / Antrenman Takvimi
+    match /club_trainings/{id} {
+      allow read: if true;
+      allow create: if isAuth();
+      allow update: if isAuth() && (isSuperAdmin() || resource.data.clubId == request.resource.data.clubId);
+      allow delete: if isAuth() && (isSuperAdmin() || resource.data.clubId != null);
     }
 
     // Topluluk Pazarı

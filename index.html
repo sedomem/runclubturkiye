@@ -2585,10 +2585,19 @@ onAuthStateChanged(auth,async user=>{
     window.CU={uid:user.uid,email:user.email,name:d.name||user.displayName||user.email.split('@')[0],role,totalKm:d.totalKm||0,eventCount:d.eventCount||0,clubCount:d.clubCount||0,badges:d.badges||[],...d};
     // GroupAdmin için clubId cache — memberships'ten al
     if(role==='groupadmin'&&!window.CU.clubId){
-      getDocs(query(collection(db,'memberships'),where('userId','==',user.uid))).then(ms=>{
-        if(!ms.empty){const cid=ms.docs[0].data().clubId;if(cid)window.CU.clubId=cid;}
-      }).catch(()=>{});
-    };
+      // Senkron yap — gNav açılmadan önce clubId hazır olsun
+      try{
+        const ms=await getDocs(query(collection(db,'memberships'),where('userId','==',user.uid)));
+        if(!ms.empty&&ms.docs[0].data().clubId){
+          window.CU.clubId=ms.docs[0].data().clubId;
+        } else {
+          // memberships yoksa clubs'tan bak
+          const cs=await getDocs(query(collection(db,'clubs'),where('adminUid','==',user.uid)));
+          if(!cs.empty)window.CU.clubId=cs.docs[0].id;
+          else window.CU.clubId=user.uid; // fallback: uid = clubId
+        }
+      }catch(e){window.CU.clubId=user.uid;}
+    }
     document.getElementById('nav-guest').style.display='none';
     document.getElementById('nav-user').style.display='flex';
     setupRoleBtn();buildDashboard();syncProfileUI();
@@ -4460,20 +4469,34 @@ window.gOpenClubEventForm=function(editData){
 window.gSaveClubEvent=async function(){
   var fb=window._fb;
   var editId=document.getElementById('g-cal-edit-id')&&document.getElementById('g-cal-edit-id').value||'';
-  // clubId: önce CU.clubId, yoksa memberships'ten bul
+  // clubId tespiti — 3 katmanlı güvenilir yöntem
   var clubId=window.CU&&window.CU.clubId||'';
   if(!clubId&&window.CU){
     try{
-      // role filtresi yok — userId veya uid ile direkt çek
+      // 1. memberships userId ile sorgula
       var ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid)));
       if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
+      // 2. memberships uid ile sorgula
       if(!clubId){
         var ms2=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',window.CU.uid)));
         if(!ms2.empty)clubId=ms2.docs[0].data().clubId||'';
       }
-    }catch(ex){console.warn('clubId fetch:',ex.message);}
+      // 3. clubs koleksiyonunda adminUid == CU.uid olan kaydı bul
+      if(!clubId){
+        var cs=await fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('adminUid','==',window.CU.uid)));
+        if(!cs.empty)clubId=cs.docs[0].id||'';
+      }
+      // 4. Son çare: GA uid'si = clubs doc id (sistem tasarımı)
+      if(!clubId)clubId=window.CU.uid;
+      // Gelecek çağrılar için cache et
+      if(clubId)window.CU.clubId=clubId;
+    }catch(ex){
+      console.warn('clubId fetch:',ex.message);
+      // Hata olsa bile GA uid ile devam et
+      clubId=window.CU.uid;
+    }
   }
-  if(!clubId){toast('Kulüp bilgisi bulunamadı','err');return;}
+  if(!clubId){toast('Oturum hatası — lütfen çıkıp tekrar giriş yapın','err');return;}
   var title=document.getElementById('g-cal-title')&&document.getElementById('g-cal-title').value.trim()||'';
   if(!title){toast('Başlık gerekli','err');return;}
   var data={clubId:clubId,title:title,
@@ -4525,14 +4548,22 @@ window.gLoadClubCalendar=async function(){
   if(!el||!window.CU)return;
   el.innerHTML='<div class="spinner" style="margin:20px auto"></div>';
   var fb=window._fb;
-  // clubId: CU.clubId yoksa memberships'ten bul
   var clubId=window.CU.clubId||'';
   if(!clubId){
     try{
       var ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid)));
       if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
-      if(clubId)window.CU.clubId=clubId; // cache et
-    }catch(ex){console.warn('clubId:',ex.message);}
+      if(!clubId){
+        var ms2=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',window.CU.uid)));
+        if(!ms2.empty)clubId=ms2.docs[0].data().clubId||'';
+      }
+      if(!clubId){
+        var cs=await fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('adminUid','==',window.CU.uid)));
+        if(!cs.empty)clubId=cs.docs[0].id||'';
+      }
+      if(!clubId)clubId=window.CU.uid;
+      if(clubId)window.CU.clubId=clubId;
+    }catch(ex){console.warn('clubId:',ex.message);clubId=window.CU.uid;}
   }
   if(!clubId){el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Kulüp bilgisi bulunamadı.</p>';return;}
   try{

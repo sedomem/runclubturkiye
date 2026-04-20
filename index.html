@@ -3987,7 +3987,19 @@ function renderHomeData(){
     if(window.CLUBS&&window.CLUBS.length){
       hc.innerHTML=window.CLUBS.slice(0,4).map(clubCard).join('');
     } else {
-      hc.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0">Henüz kulüp eklenmemiş.</p>';
+      if(!window.CU){
+        hc.innerHTML=`<div class="card" style="padding:32px 16px;text-align:center;background:rgba(255,107,0,0.04);border:1px dashed var(--or);border-radius:16px">
+          <div style="font-size:32px;margin-bottom:12px">🤝</div>
+          <div style="font-size:14px;font-weight:700;color:var(--text);margin-bottom:6px">Kulüpleri Görmek İçin Üye Olmalısın</div>
+          <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Şehrindeki koşu kulüplerine katılmak ve antrenmanlardan haberdar olmak için hemen ücretsiz üye ol.</p>
+          <div style="display:flex;gap:8px;justify-content:center">
+            <button class="btn btn-or btn-sm" onclick="openAuth('register')">Üye Ol</button>
+            <button class="btn btn-ghost btn-sm" onclick="openAuth('login')">Giriş Yap</button>
+          </div>
+        </div>`;
+      } else {
+        hc.innerHTML='<p style="color:var(--muted);font-size:13px;padding:20px 0">Henüz kulüp eklenmemiş veya görüntüleme yetkiniz yok.</p>';
+      }
     }
   }
   renderRacePreview();renderBlogPreview();renderHomeFirsatlar();
@@ -5027,7 +5039,20 @@ window.renderClubsPage=async()=>{
     window.CLUBS=allClubs;
     console.log('[renderClubsPage] toplam kulüp:',allClubs.length);
     if(!allClubs.length){
-      el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">🏃</div><p style="font-size:14px">Henüz kulüp eklenmemiş.</p></div>';
+      if(!window.CU){
+        el.innerHTML = `
+          <div class="container" style="padding:60px 20px;text-align:center">
+            <div style="font-size:64px;margin-bottom:20px">🤝</div>
+            <h2 style="margin-bottom:10px">Kulüpleri Görmek İçin Üye Olmalısın</h2>
+            <p style="color:var(--muted);max-width:400px;margin:0 auto 24px">Koşu kulüplerini listelemek, üye olmak ve etkinliklere katılmak için giriş yapmanız veya yeni hesap oluşturmanız gerekmektedir.</p>
+            <div style="display:flex;gap:12px;justify-content:center">
+              <button class="btn btn-or" onclick="openAuth('register')">Hemen Üye Ol</button>
+              <button class="btn btn-ghost" onclick="openAuth('login')">Giriş Yap</button>
+            </div>
+          </div>`;
+      } else {
+        el.innerHTML='<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">🏃</div><p style="font-size:14px">Henüz kulüp eklenmemiş veya yetkiniz yok.</p></div>';
+      }
       return;
     }
     el.innerHTML=allClubs.map(clubCard).join('') + clubCtaCard();
@@ -6279,15 +6304,24 @@ window.sendPushSegmented=async function(){
       targetRole: target==='members'?'member': target==='groupadmins'?'groupadmin': '',
       targetClubId: target==='club'?clubId:'',
       status:'pending',
+      processed: false,
       sentBy:window.CU?.email||'admin',
-      createdAt:fb.serverTimestamp()
+      createdAt:fb.serverTimestamp(),
+      platform: 'web'
     };
     const {id:_,...dataNoId}=doc_data;
-    await fb.addDoc(fb.collection(fb.db,'pushNotifications'),dataNoId);
+    const docRef = await fb.addDoc(fb.collection(fb.db,'pushNotifications'),dataNoId);
+    console.log('[Push] Notification queued with ID:', docRef.id);
     toast('Bildirim kuyruğa eklendi ✅','ok');
-    if(statusEl)statusEl.innerHTML='<span style="color:var(--green)">✅ Bildirim kuyruğa alındı. Cloud Function işleyecek.</span>';
-    if(Notification.permission==='granted') new Notification(title,{body,icon:'/icon-192.png'});
+    if(statusEl)statusEl.innerHTML='<span style="color:var(--green)">✅ Bildirim kuyruğa alındı. (ID: '+docRef.id+')</span>';
+    // Admin'e yerel bildirim (izin varsa)
+    if(Notification.permission==='granted'){
+      try {
+        new Notification(title,{body,icon:'/icon-192.png'});
+      } catch(e) { console.warn('Local notification error:', e.message); }
+    }
   }catch(e){
+    console.error('[Push] Send Error:', e);
     toast('Hata: '+e.message,'err');
     if(statusEl)statusEl.textContent='Hata: '+e.message;
   }
@@ -7837,7 +7871,9 @@ function renderGroupSection(sec){
     announcements:`
       <div>
         <h2 style="margin-bottom:4px">📢 Duyurular</h2>
-        <p style="font-size:12px;color:var(--muted);margin-bottom:12px">Bu duyurular Kulüp üyelerinize görünür.</p>
+        <div style="background:rgba(232,98,42,.08);margin-bottom:16px;padding:10px 14px;border-radius:8px;border-left:4px solid var(--or);font-size:12px;color:var(--text);line-height:1.4">
+          <b>ℹ BİLGİ:</b> Yayınladığınız her duyuru, kulübünüze üye olan tüm koşucuların dashboardunda anlık olarak listelenir ve onlara bildirim olarak gönderilir.
+        </div>
       </div>
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Duyuru</h3>

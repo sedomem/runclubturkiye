@@ -3760,6 +3760,10 @@ async function loadClubsFromDB(){
     }
     window.CLUBS=clubs;
     console.log('[loadClubsFromDB] loaded:',clubs.length,'clubs');
+    // UI Güncelleme — Mevcut sayfaya göre render tetikle
+    const pg=document.querySelector('.pg.on');
+    if(pg&&pg.id==='pg-home'&&typeof renderHomeData==='function')renderHomeData();
+    if(pg&&pg.id==='pg-clubs'&&typeof renderClubsPage==='function')renderClubsPage();
   }catch(e){console.warn('Clubs load error:',e.message);}
 }
 window.loadClubsFromDB=loadClubsFromDB;
@@ -10325,7 +10329,7 @@ window.gDeleteClubTraining = async function(id) {
 const styleFix = document.createElement('style');
 styleFix.innerHTML = `
   @media(max-width:768px) {
-    #clubs-list { display: grid !important; grid-template-columns: 1fr !important; gap: 16px !important; }
+    #clubs-list, #home-clubs { display: grid !important; grid-template-columns: 1fr !important; gap: 16px !important; }
     .card { width: 100% !important; margin-bottom: 0 !important; }
   }
 `;

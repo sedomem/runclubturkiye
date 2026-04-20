@@ -2775,6 +2775,7 @@ function syncProfileUI(){
   const pfBd=document.getElementById('pf-birthdate');if(pfBd)pfBd.value=CU.birthDate||'';
   const pfTs=document.getElementById('pf-tshirt');if(pfTs)pfTs.value=CU.tshirtSize||'';
 }
+window.syncProfileUI=syncProfileUI;
 window.saveProfile=async()=>{
   if(!CU)return;
   const pace=[];document.querySelectorAll('#pf-pace-sel .pace-opt.on').forEach(b=>pace.push(b.textContent.trim()));
@@ -3752,7 +3753,11 @@ async function loadClubsFromDB(){
           clubs.push({id:d.id,name:u.clubName,city:u.city||'',desc:u.clubDesc||'',imgUrl:u.clubImg||'',open:u.clubOpen!==false,members:u.clubMemberCount||0,adminUid:d.id,insta:u.clubInsta||'',strava:u.clubStrava||'',lat:u.lat||null,lng:u.lng||null});
         }
       });
-    }catch(e1){console.warn('users/groupadmin (auth gerekebilir):',e1.message);}
+    }catch(e1){
+      // users koleksiyonu korumalıdır, misafir kullanıcılar bu uyarıyı görebilir. 
+      // clubs koleksiyonundan gelen veriler zaten 'clubs' dizisine eklenmiştir.
+      console.log('[loadClubsFromDB] public clubs loaded, skipping private users query.');
+    }
     window.CLUBS=clubs;
     console.log('[loadClubsFromDB] loaded:',clubs.length,'clubs');
   }catch(e){console.warn('Clubs load error:',e.message);}

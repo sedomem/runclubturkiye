@@ -433,7 +433,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .banner-content{padding:0 22px}
   .banner-content h1{font-size:22px}
   #hero-banner{height:340px}
-  .grid.g2,.grid.g3{grid-template-columns:1fr}
+  .grid.g2,.grid.g3{grid-template-columns:1fr}.clubs-list-grid{display:grid!important;grid-template-columns:1fr!important;gap:14px}
   .newsletter-form{flex-direction:column}
   .sec{padding:40px 0}
   .container{padding:0 16px}
@@ -2585,19 +2585,10 @@ onAuthStateChanged(auth,async user=>{
     window.CU={uid:user.uid,email:user.email,name:d.name||user.displayName||user.email.split('@')[0],role,totalKm:d.totalKm||0,eventCount:d.eventCount||0,clubCount:d.clubCount||0,badges:d.badges||[],...d};
     // GroupAdmin için clubId cache — memberships'ten al
     if(role==='groupadmin'&&!window.CU.clubId){
-      // Senkron yap — gNav açılmadan önce clubId hazır olsun
-      try{
-        const ms=await getDocs(query(collection(db,'memberships'),where('userId','==',user.uid)));
-        if(!ms.empty&&ms.docs[0].data().clubId){
-          window.CU.clubId=ms.docs[0].data().clubId;
-        } else {
-          // memberships yoksa clubs'tan bak
-          const cs=await getDocs(query(collection(db,'clubs'),where('adminUid','==',user.uid)));
-          if(!cs.empty)window.CU.clubId=cs.docs[0].id;
-          else window.CU.clubId=user.uid; // fallback: uid = clubId
-        }
-      }catch(e){window.CU.clubId=user.uid;}
-    }
+      getDocs(query(collection(db,'memberships'),where('userId','==',user.uid))).then(ms=>{
+        if(!ms.empty){const cid=ms.docs[0].data().clubId;if(cid)window.CU.clubId=cid;}
+      }).catch(()=>{});
+    };
     document.getElementById('nav-guest').style.display='none';
     document.getElementById('nav-user').style.display='flex';
     setupRoleBtn();buildDashboard();syncProfileUI();
@@ -4469,34 +4460,20 @@ window.gOpenClubEventForm=function(editData){
 window.gSaveClubEvent=async function(){
   var fb=window._fb;
   var editId=document.getElementById('g-cal-edit-id')&&document.getElementById('g-cal-edit-id').value||'';
-  // clubId tespiti — 3 katmanlı güvenilir yöntem
+  // clubId: önce CU.clubId, yoksa memberships'ten bul
   var clubId=window.CU&&window.CU.clubId||'';
   if(!clubId&&window.CU){
     try{
-      // 1. memberships userId ile sorgula
+      // role filtresi yok — userId veya uid ile direkt çek
       var ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid)));
       if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
-      // 2. memberships uid ile sorgula
       if(!clubId){
         var ms2=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',window.CU.uid)));
         if(!ms2.empty)clubId=ms2.docs[0].data().clubId||'';
       }
-      // 3. clubs koleksiyonunda adminUid == CU.uid olan kaydı bul
-      if(!clubId){
-        var cs=await fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('adminUid','==',window.CU.uid)));
-        if(!cs.empty)clubId=cs.docs[0].id||'';
-      }
-      // 4. Son çare: GA uid'si = clubs doc id (sistem tasarımı)
-      if(!clubId)clubId=window.CU.uid;
-      // Gelecek çağrılar için cache et
-      if(clubId)window.CU.clubId=clubId;
-    }catch(ex){
-      console.warn('clubId fetch:',ex.message);
-      // Hata olsa bile GA uid ile devam et
-      clubId=window.CU.uid;
-    }
+    }catch(ex){console.warn('clubId fetch:',ex.message);}
   }
-  if(!clubId){toast('Oturum hatası — lütfen çıkıp tekrar giriş yapın','err');return;}
+  if(!clubId){toast('Kulüp bilgisi bulunamadı','err');return;}
   var title=document.getElementById('g-cal-title')&&document.getElementById('g-cal-title').value.trim()||'';
   if(!title){toast('Başlık gerekli','err');return;}
   var data={clubId:clubId,title:title,
@@ -4519,7 +4496,37 @@ window.gSaveClubEvent=async function(){
     }
     var form=document.getElementById('g-cal-form-wrap');
     if(form)form.style.display='none';
-    if(window.gLoadClubCalendar)window.gLoadClubCalendar();
+    if(
+window.gLoadTrainings=async function(){
+  const el=document.getElementById("ga-training-list");
+  if(!el||!window.CU)return;
+  const fb=window._fb;const clubId=window.CU.clubId||window.CU.uid;
+  const today=new Date().toISOString().split("T")[0];
+  try{
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,"club_trainings"),fb.where("clubId","==",clubId),fb.orderBy("date","asc")));
+    if(snap.empty){el.innerHTML='<p style="color:var(--muted);padding:14px;text-align:center">Henüz antrenman yok.</p>';return;}
+    let h='<table><thead><tr><th>Tarih</th><th>Saat</th><th>Başlık</th><th>İşlem</th></tr></thead><tbody>';
+    snap.forEach(d=>{const t={id:d.id,...d.data()};const ip=t.date<today;
+      h+=`<tr style="${ip?"opacity:.55":""}"><td>${t.date||"—"}</td><td>${t.time||"—"}</td><td><b>${t.title}</b></td>`
+        +'<td class="action-btns">'
+        +`<button class="btn btn-ghost btn-sm" data-id="${t.id}" onclick='openTrainingForm(${JSON.stringify(t).replace(/'/g,"&apos;")})'>✏️</button>`
+        +`<button class="btn btn-red btn-sm" data-id="${t.id}" onclick="gDeleteTraining(this.dataset.id)">🗑</button>`
+        +"</td></tr>";
+    });
+    el.innerHTML=h+"</tbody></table>";
+  }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
+};
+window.gDeleteTraining=async function(id){
+  if(!confirm("Antrenman silinsin mi?"))return;
+  try{
+    await window._fb.deleteDoc(window._fb.doc(window._fb.db,"club_trainings",id));
+    toast("Silindi","ok");
+    if(window.gLoadTrainings)window.gLoadTrainings();
+    const cid=window.CU&&(window.CU.clubId||window.CU.uid);
+    if(cid&&window.renderClubTrainings)window.renderClubTrainings(cid);
+  }catch(e){toast("Hata: "+e.message,"err");}
+};
+window.gLoadClubCalendar)window.gLoadClubCalendar();
   }catch(e){toast('Hata: '+e.message,'err');}
 };
 window.gEditClubEvent=function(id){
@@ -4548,22 +4555,14 @@ window.gLoadClubCalendar=async function(){
   if(!el||!window.CU)return;
   el.innerHTML='<div class="spinner" style="margin:20px auto"></div>';
   var fb=window._fb;
+  // clubId: CU.clubId yoksa memberships'ten bul
   var clubId=window.CU.clubId||'';
   if(!clubId){
     try{
       var ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid)));
       if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
-      if(!clubId){
-        var ms2=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',window.CU.uid)));
-        if(!ms2.empty)clubId=ms2.docs[0].data().clubId||'';
-      }
-      if(!clubId){
-        var cs=await fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('adminUid','==',window.CU.uid)));
-        if(!cs.empty)clubId=cs.docs[0].id||'';
-      }
-      if(!clubId)clubId=window.CU.uid;
-      if(clubId)window.CU.clubId=clubId;
-    }catch(ex){console.warn('clubId:',ex.message);clubId=window.CU.uid;}
+      if(clubId)window.CU.clubId=clubId; // cache et
+    }catch(ex){console.warn('clubId:',ex.message);}
   }
   if(!clubId){el.innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Kulüp bilgisi bulunamadı.</p>';return;}
   try{
@@ -7701,6 +7700,10 @@ function renderGroupSection(sec){
             <button class="btn btn-or btn-sm" onclick="gOpenAddEvent()">+ Etkinlik Ekle</button>
         </div>
       </div>
+      <div style="margin-bottom:14px">
+        <h3 style="font-size:14px;margin-bottom:10px;color:var(--muted)">📋 Kulübünüzün Etkinlikleri</h3>
+        <div id="ga-events-list"><div class="spinner" style="margin:12px auto"></div></div>
+      </div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Eklediğin etkinlikler Süper Admin onayından sonra sitede yayınlanır.</p>
       <div id="admin-analytics-container" style="margin-bottom:20px"></div>
       <div class="card" style="padding:20px;margin-bottom:18px;display:none" id="g-add-event-form">
@@ -7777,6 +7780,13 @@ function renderGroupSection(sec){
       </div>
 
       <div id="g-club-cal-list"></div>
+      <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border)">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <h3 style="font-size:15px">🏃 Koşu / Antrenman Takvimi</h3>
+          <button class="btn btn-or btn-sm" onclick="openTrainingForm(null)">+ Antrenman Ekle</button>
+        </div>
+        <div id="ga-training-list"><div class="spinner" style="margin:12px auto"></div></div>
+      </div>
     `,
 
     members:`
@@ -7786,6 +7796,7 @@ function renderGroupSection(sec){
 
     announcements:`
       <h2 style="margin-bottom:18px">📢 Duyurular</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;border-left:3px solid var(--or);padding:8px 12px;background:rgba(232,98,42,.07);border-radius:0 6px 6px 0">📣 Bu duyurular <b>kulüp üyelerinize</b> görünür.</p>
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Duyuru</h3>
         <div class="form-grp"><label>Başlık</label><input id="ga-ann-title" placeholder="Duyuru başlığı"/></div>
@@ -8149,6 +8160,25 @@ window.gEditEvent=async(eventId)=>{
   }catch(err){toast('Yüklenemedi: '+err.message,'err');}
 };
 
+
+window.gLoadEvents=async function(){
+  const el=document.getElementById("ga-events-list");
+  if(!el||!window.CU)return;
+  const fb=window._fb;const clubId=window.CU.clubId||window.CU.uid;
+  try{
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,"events"),fb.where("clubId","==",clubId)));
+    if(snap.empty){el.innerHTML='<p style="color:var(--muted);padding:14px;text-align:center">Henüz etkinlik yok.</p>';return;}
+    let h='<table><thead><tr><th>Etkinlik</th><th>Tarih</th><th>Mesafe</th><th>İşlem</th></tr></thead><tbody>';
+    snap.forEach(d=>{const e={id:d.id,...d.data()};
+      h+=`<tr><td>${e.emoji||"🏃"} ${e.title}</td><td>${e.date||"—"}</td><td>${e.dist||"—"}</td>`
+        +'<td class="action-btns">'
+        +`<button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">✏️</button>`
+        +`<button class="btn btn-red btn-sm" onclick="gDeleteEvent('${e.id}')">🗑</button>`
+        +"</td></tr>";
+    });
+    el.innerHTML=h+"</tbody></table>";
+  }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
+};
 window.gDeleteEvent=async(id)=>{
   if(!confirm('Etkinlik silinsin mi?'))return;
   try{const fb=window._fb;await fb.deleteDoc(fb.doc(fb.db,'events',id));toast('Silindi','ok');gLoadEvents();}
@@ -8579,6 +8609,14 @@ async function loadMyNotifications(){
     allAnns.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     const hiddenSet=new Set(JSON.parse(localStorage.getItem('notif_hidden_'+CU.uid)||'[]'));
     allAnns=allAnns.filter(a=>!hiddenSet.has(a.id));
+    for(const cid of clubIds.slice(0,5)){
+      try{
+        const es=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',cid),fb.orderBy('date','asc')));
+        es.forEach(d=>{const ev=d.data();if(ev.date>=new Date().toISOString().split('T')[0])allAnns.push({id:'ev_'+d.id,title:'📅 '+ev.title,body:(ev.time||'')+(ev.location?' · '+ev.location:''),clubName:ev.clubName||'',createdAt:ev.createdAt});});
+        const ts=await fb.getDocs(fb.query(fb.collection(fb.db,'club_trainings'),fb.where('clubId','==',cid),fb.orderBy('date','asc')));
+        ts.forEach(d=>{const tr=d.data();if(tr.date>=new Date().toISOString().split('T')[0])allAnns.push({id:'tr_'+d.id,title:'🏃 '+tr.title,body:(tr.time||'')+(tr.location?' · '+tr.location:''),clubName:tr.clubName||'',createdAt:tr.createdAt});});
+      }catch(ex){}
+    }
     if(!allAnns.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:36px">🔔</div><p>Henüz duyuru yok.</p></div>';return;}
     const readSet=new Set(JSON.parse(localStorage.getItem('notif_read_'+CU.uid)||'[]'));
     let unreadCount=0;
@@ -10019,35 +10057,8 @@ window.openTrainingForm=function(editData=null){
 
 window.saveTraining=async function(){
   const fb=window._fb;
-  if(!window.CU){toast('Oturum bulunamadı','err');return;}
-
-  // clubId tespiti: CU.clubId → CLUBS.adminUid → clubs koleksiyonu → uid
-  let clubId=window.CU.clubId||'';
-  let clubName=window.CU.clubName||window.CU.name||'';
-
-  if(!clubId){
-    // CLUBS dizisinde adminUid eşleşmesini dene
-    const found=window.CLUBS&&window.CLUBS.find(c=>c.adminUid===window.CU.uid);
-    if(found){clubId=found.id;clubName=found.name||clubName;}
-  }
-  if(!clubId){
-    // Firestore clubs koleksiyonundan çek
-    try{
-      const cs=await fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('adminUid','==',window.CU.uid)));
-      if(!cs.empty){clubId=cs.docs[0].id;clubName=cs.docs[0].data().name||clubName;}
-    }catch(ex){console.warn('saveTraining clubId:',ex.message);}
-  }
-  if(!clubId){
-    // memberships'ten dene
-    try{
-      const ms=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',window.CU.uid)));
-      if(!ms.empty)clubId=ms.docs[0].data().clubId||'';
-    }catch(ex){}
-  }
-  // Son çare: GA uid = clubs doc id
-  if(!clubId){clubId=window.CU.uid;}
-  window.CU.clubId=clubId; // cache
-
+  const club=window.CLUBS.find(c=>c.adminUid===window.CU?.uid);
+  if(!club){toast('Kulüp yetkiniz bulunamadı','err');return;}
   const title=document.getElementById('tr-title').value;
   const date=document.getElementById('tr-date').value;
   const time=document.getElementById('tr-time').value;
@@ -10055,7 +10066,7 @@ window.saveTraining=async function(){
   const pace=document.getElementById('tr-pace').value;
   const id=document.getElementById('tr-id').value;
   if(!title||!date||!time){toast('Başlık, Tarih ve Saat zorunludur!','err');return;}
-  const data={clubId, clubName, title, date, time, location:loc, pace, updatedAt:fb.serverTimestamp()};
+  const data={clubId:club.id, title, date, time, location:loc, pace, updatedAt:fb.serverTimestamp()};
   try{
     if(id){
       await fb.updateDoc(fb.doc(fb.db,'club_trainings',id), data);
@@ -10063,11 +10074,9 @@ window.saveTraining=async function(){
       data.createdAt=fb.serverTimestamp();
       await fb.addDoc(fb.collection(fb.db,'club_trainings'), data);
     }
-    toast('Antrenman kaydedildi ✓','ok');
+    toast('Antrenman kaydedildi','ok');
     document.getElementById('training-modal').style.display='none';
-    // Kulüp sayfasındaki takvimi güncelle
-    if(window.renderClubTrainings)window.renderClubTrainings(clubId);
-  }catch(e){toast('Hata: '+e.message,'err');console.error('saveTraining:',e);}
+  }catch(e){toast(e.message,'err');}
 };
 
 window.renderClubTrainings=async function(clubId){

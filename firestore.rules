@@ -39,7 +39,6 @@ service cloud.firestore {
       allow update: if isSuperAdmin() || (isGroupAdmin() && (resource.data.adminUid == uid() || resource.data.clubId == getUserData().clubId));
       allow delete: if isSuperAdmin();
 
-      // QR Check-in: sadece SA ve GA yazabilir
       match /attendees/{userId} {
         allow read: if isAuth();
         allow create, update: if isAuth() && (
@@ -50,15 +49,8 @@ service cloud.firestore {
       }
     }
 
-    match /races/{id} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-    }
-
-    match /blog/{id} {
-      allow read: if true;
-      allow write: if isSuperAdmin();
-    }
+    match /races/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    match /blog/{id} { allow read: if true; allow write: if isSuperAdmin(); }
 
     match /blog_comments/{id} {
       allow read: if true;
@@ -67,11 +59,11 @@ service cloud.firestore {
       allow delete: if isSuperAdmin() || (isAuth() && uid() == resource.data.userUid);
     }
 
-    match /popup/{id} { allow read: if true; allow write: if isSuperAdmin(); }
-    match /banners/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    match /popup/{id}    { allow read: if true; allow write: if isSuperAdmin(); }
+    match /banners/{id}  { allow read: if true; allow write: if isSuperAdmin(); }
     match /sponsors/{id} { allow read: if true; allow write: if isSuperAdmin(); }
-    match /firsatlar/{id} { allow read: if true; allow write: if isSuperAdmin(); }
-    match /ticker/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    match /firsatlar/{id}{ allow read: if true; allow write: if isSuperAdmin(); }
+    match /ticker/{id}   { allow read: if true; allow write: if isSuperAdmin(); }
 
     match /rsvps/{id} {
       allow read: if true;
@@ -144,7 +136,6 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
-    // Yarış performans verileri
     match /raceResults/{id} {
       allow read: if isAuth() && (
         resource.data.userId == uid() ||
@@ -155,10 +146,11 @@ service cloud.firestore {
       allow update: if isAuth() && resource.data.userId == uid();
       allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == uid());
     }
+
+    // Kulüp Etkinlik Takvimi
+    // isGroupAdmin() get() sorunu yerine isAuth() kullanıldı
     match /club_events/{id} {
       allow read: if true;
-      // GA için getUserData() get() çağrısı permission-denied üretebiliyor
-      // isAuth() yeterli — clubId sahipliği uygulama katmanında kontrol edilir
       allow create: if isAuth();
       allow update: if isAuth() && (
         isSuperAdmin() ||
@@ -169,10 +161,26 @@ service cloud.firestore {
         resource.data.clubId != null
       );
     }
-    match /club_trainings/{id} {
+
+    // Topluluk Pazarı
+    match /marketplace_items/{id} {
       allow read: if true;
       allow create: if isAuth();
-      allow update, delete: if isAuth() && (isSuperAdmin() || resource.data.clubId != null);
+      allow update: if isSuperAdmin() || (isAuth() && resource.data.userId == uid());
+      allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == uid());
     }
+
+    // Dahili Mesajlaşma
+    match /conversations/{id} {
+      allow read, update: if isAuth() && (uid() in resource.data.participants || isSuperAdmin());
+      allow create: if isAuth();
+      allow delete: if isSuperAdmin();
+    }
+
+    match /messages/{id} {
+      allow read, create: if isAuth();
+      allow update, delete: if isSuperAdmin();
+    }
+
   }
 }

@@ -10546,14 +10546,35 @@ window.loadClubRacesForUser = async function() {
   if(!el || !window.CU) return;
   try {
     const fb = window._fb;
-    const ms = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'), fb.where('userId','==',window.CU.uid)));
-    const clubIds = ms.docs.map(d => d.data().clubId);
+    // Kullanıcının üye olduğu kulüpleri bul (hem userId hem uid kontrolü ile en sağlam hali)
+    const [ms1, ms2] = await Promise.all([
+      fb.getDocs(fb.query(fb.collection(fb.db,'memberships'), fb.where('userId','==',window.CU.uid))),
+      fb.getDocs(fb.query(fb.collection(fb.db,'memberships'), fb.where('uid','==',window.CU.uid)))
+    ]);
+    const clubIds = [...new Set([...ms1.docs, ...ms2.docs].map(d => d.data().clubId))];
     
     if(!clubIds.length) {
       el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Kulüp Yarışlarını görmek için bir kulübe üye olmalısın.</p>';
       return;
     }
 
+    // Bu kulüplerin yarışlarını çek
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'club_races'), fb.where('clubId', 'in', clubIds.slice(0,10))));
+    const today = new Date().toISOString().split('T')[0];
+    const currentYear = new Date().getFullYear();
+    let races = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if(data.date && new Date(data.date).getFullYear() === currentYear) races.push({id:d.id, ...data});
+    });
+    races.sort((a,b) => a.date.localeCompare(b.date));
+
+    if(!races.length) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Yakın zamanda planlanmış kulüp yarışı bulunmuyor.</p>';
+      return;
+    }
+
+    // Katılım durumlarını çek
     const myRsvpsSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'), fb.where('uid','==',window.CU.uid), fb.where('type','==','club_race')));
     const myJoinedIds = new Set();
     myRsvpsSnap.forEach(d => myJoinedIds.add(d.data().raceId));

@@ -2211,6 +2211,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="gNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="gNav('profil',this)">👤 Profil Ayarları</button>
     <button onclick="gNav('calendar',this)">🗓 Etkinlik Takvimi</button>
+    <button onclick="gNav('club_races',this)">🏆 Kulüp Yarış Takvimi</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
     <button onclick="gNav('performances',this)">🏅 Performanslar</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
@@ -5132,6 +5133,10 @@ window.openClub=async(id)=>{
       </div>
     </div>
     <div id="club-training-schedule" style="margin-top:20px;margin-bottom:20px;"></div>
+    <div style="margin-top:20px;background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:20px">
+      <h3 style="font-size:16px;font-family:var(--font-head);font-weight:700;margin-bottom:14px">🏆 Kulüp Yarış Takvimi</h3>
+      <div id="club-race-calendar-section"><div class="spinner" style="margin:12px auto"></div></div>
+    </div>
     <div style="margin-top:20px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:20px">
       <h3 style="font-size:16px;font-family:var(--font-head);font-weight:700;margin-bottom:14px">📅 Etkinlik Takvimi</h3>
       <div id="club-calendar-section"><div class="spinner" style="margin:12px auto"></div></div>
@@ -5139,6 +5144,7 @@ window.openClub=async(id)=>{
   nav('club-detail');
   if(typeof window.renderClubTrainings==='function') window.renderClubTrainings(c.id);
   if(typeof window.renderClubPublicEvents==='function') window.renderClubPublicEvents(c.id);
+  if(typeof window.renderClubRaces==='function') window.renderClubRaces(c.id);
   if(typeof routerPush==='function')routerPush('club-detail', c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
 };
 
@@ -6916,6 +6922,7 @@ function buildDashboard(){
     {id:'overview',ico:'🏠',l:'Genel'},
     {id:'notifications',ico:'🔔',l:'Bildirimler'},
     {id:'club-events',ico:'🏟️',l:'Kulüp Etkinlikleri'},
+    {id:'club-races',ico:'🏆',l:'Kulüp Yarış Takvimi'},
     {id:'my-events',ico:'📅',l:'Etkinliklerim'},
     {id:'my-clubs',ico:'🤝',l:'Kulüplerim'},
     {id:'my-km',ico:'🏃',l:'KM Takibi'},
@@ -6953,6 +6960,11 @@ function buildDashboard(){
       <h2 style="margin-bottom:16px">🏟️ Kulüp Etkinlikleri</h2>
       <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Üyesi olduğun kulüplerin düzenlediği özel etkinlikler ve antrenman takvimi.</p>
       <div id="dash-club-events-list"><div class="spinner" style="margin:20px auto"></div></div>
+    </div>
+    <div class="dash-content" id="dp-club-races">
+      <h2 style="margin-bottom:16px">🏆 Kulüp Yarış Takvimi</h2>
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Üyesi olduğun kulüplerin toplu olarak katılacağı yarışlar.</p>
+      <div id="dash-club-races-list"><div class="spinner" style="margin:20px auto"></div></div>
     </div>
     <div class="dash-content" id="dp-my-events">
       <h2 style="margin-bottom:16px">Etkinliklerim</h2>
@@ -6994,7 +7006,7 @@ function buildDashboard(){
     </div>
     <div class="dash-content" id="dp-profile-tab"><h2 style="margin-bottom:14px">Profil</h2><button class="btn btn-or btn-sm" onclick="nav('profile')">Profil Sayfasına Git →</button></div>`;
   // Kulüpleri ve etkinlikleri yükle
-  loadMyClubs();loadMyEvents();loadMyNotifications();loadKmEvents();loadOverviewRecent();loadClubEvents();
+  loadMyClubs();loadMyEvents();loadMyNotifications();loadKmEvents();loadOverviewRecent();loadClubEvents();loadClubRacesForUser();
 }
 async function loadMyClubs(){
   const el=document.getElementById('dash-my-clubs-list');if(!el)return;
@@ -7982,6 +7994,30 @@ function renderGroupSection(sec){
           <div style="font-size:13px;color:var(--muted);display:flex;flex-direction:column;gap:6px" id="g-admin-info"></div>
         </div>
       </div>`,
+    club_races:`
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h2>🏆 Kulüp Yarış Takvimi</h2>
+        <button class="btn btn-or btn-sm" onclick="gOpenClubRaceForm()">+ Yeni Yarış Ekle</button>
+      </div>
+      <p style="color:var(--muted);font-size:12px;margin-bottom:18px">Kulübünüzün toplu katılacağı yarışları buradan yönetin. Üyeleriniz randevu alabilir.</p>
+      
+      <div class="card" id="g-club-race-form-wrap" style="display:none;padding:24px;margin-bottom:24px;border-left:4px solid #4a1d96">
+        <h3 id="g-club-race-form-title" style="margin-bottom:16px;font-size:15px">🏆 Yeni Yarış</h3>
+        <input type="hidden" id="g-club-race-edit-id"/>
+        <div class="form-grp"><label>Yarış Adı</label><input id="gr-name" placeholder="Örn: İstanbul Maratonu 2024"/></div>
+        <div class="form-row">
+          <div class="form-grp"><label>Tarih</label><input type="date" id="gr-date"/></div>
+          <div class="form-grp"><label>Konum</label><input id="gr-loc" placeholder="Şehir / Mekan"/></div>
+        </div>
+        <div class="form-grp"><label>Yarış Linki (Kayıt vb.)</label><input id="gr-url" placeholder="https://..."/></div>
+        <div style="display:flex;gap:10px;margin-top:10px">
+          <button class="btn btn-or" style="background:#4a1d96" onclick="gSaveClubRace()">💾 Kaydet</button>
+          <button class="btn btn-ghost" onclick="document.getElementById('g-club-race-form-wrap').style.display='none'">İptal</button>
+        </div>
+      </div>
+
+      <div id="g-club-races-list"></div>
+    `,
   };
 
   main.innerHTML=sections[sec]||sections['events'];
@@ -10380,6 +10416,197 @@ window.gDeleteClubTraining = async function(id) {
     toast('Silindi','ok');
     gLoadClubCalendar();
   } catch(e) { toast('Hata: '+e.message,'err'); }
+};
+
+// ── CLUB RACES CRUD ──
+window.gLoadClubRaces = async function() {
+  const el = document.getElementById('g-club-races-list');
+  if(!el) return;
+  el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  try {
+    const fb = window._fb;
+    const clubId = window.CU.clubId || window.CU.uid;
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'club_races'), fb.where('clubId','==',clubId)));
+    
+    if(snap.empty) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Henüz yarış girişi yapılmamış.</p>';
+      return;
+    }
+
+    const currentYear = new Date().getFullYear();
+    let items = [];
+    snap.forEach(d => {
+      const data = d.data();
+      const rYear = data.date ? new Date(data.date).getFullYear() : 0;
+      if(rYear === currentYear) items.push({id:d.id, ...data});
+    });
+    
+    items.sort((a,b) => a.date.localeCompare(b.date));
+    const today = new Date().toISOString().split('T')[0];
+
+    el.innerHTML = `<table>
+      <thead><tr><th>Yarış</th><th>Tarih</th><th>Konum</th><th>İşlem</th></tr></thead>
+      <tbody>${items.map(r => {
+        const isPast = r.date < today;
+        return `
+        <tr style="${isPast?'opacity:0.5;filter:grayscale(1);background:#f9fafb':''}">
+          <td><b>${r.name}</b></td>
+          <td>${r.date}</td>
+          <td>${r.location}</td>
+          <td class="action-btns">
+            <button class="btn btn-ghost btn-sm" ${isPast?'disabled':''} onclick='window.gOpenClubRaceForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️</button>
+            <button class="btn btn-red btn-sm" onclick="window.gDeleteClubRace('${r.id}')">🗑</button>
+          </td>
+        </tr>`;
+      }).join('')}
+      </tbody></table>`;
+  } catch(e) { el.innerHTML = '<p style="color:var(--muted)">Hata: ' + e.message + '</p>'; }
+};
+
+window.gOpenClubRaceForm = function(editData = null) {
+  const wrap = document.getElementById('g-club-race-form-wrap');
+  if(!wrap) return;
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({behavior:'smooth'});
+  
+  document.getElementById('g-club-race-form-title').textContent = editData ? '✏️ Yarışı Düzenle' : '🏆 Yeni Yarış';
+  document.getElementById('g-club-race-edit-id').value = editData ? editData.id : '';
+  document.getElementById('gr-name').value = editData ? editData.name : '';
+  document.getElementById('gr-date').value = editData ? editData.date : '';
+  document.getElementById('gr-loc').value = editData ? editData.location : '';
+  document.getElementById('gr-url').value = editData ? editData.url : '';
+};
+
+window.gSaveClubRace = async function() {
+  const fb = window._fb;
+  const clubId = window.CU.clubId || window.CU.uid;
+  const id = document.getElementById('g-club-race-edit-id').value;
+  
+  const data = {
+    clubId,
+    name: document.getElementById('gr-name').value,
+    date: document.getElementById('gr-date').value,
+    location: document.getElementById('gr-loc').value,
+    url: document.getElementById('gr-url').value,
+    updatedAt: fb.serverTimestamp()
+  };
+
+  if(!data.name || !data.date) { toast('Ad ve Tarih zorunludur!','err'); return; }
+
+  try {
+    if(id) {
+      await fb.updateDoc(fb.doc(fb.db,'club_races',id), data);
+    } else {
+      data.createdAt = fb.serverTimestamp();
+      await fb.addDoc(fb.collection(fb.db, 'club_races'), data);
+    }
+    
+    // Bildirim Tetikleyici (Announcement)
+    await fb.addDoc(fb.collection(fb.db,'announcements'), {
+      clubId,
+      title: '🏆 Kulüp yarış takviminde değişiklik yapıldı!',
+      body: `${data.name} yarışı takvime ${id?'güncellendi':'eklendi'}. Detaylara kulüp sayfasından bakabilirsiniz.`,
+      createdAt: fb.serverTimestamp()
+    });
+
+    toast('Yarış takvimi güncellendi ✓','ok');
+    document.getElementById('g-club-race-form-wrap').style.display = 'none';
+    gLoadClubRaces();
+  } catch(e) { toast('Hata: '+e.message,'err'); }
+};
+
+window.gDeleteClubRace = async function(id) {
+  if(!confirm('Bu yarışı takvimden silmek istediğinize emin misiniz?')) return;
+  try {
+    const fb = window._fb;
+    await fb.deleteDoc(fb.doc(fb.db,'club_races',id));
+    toast('Silindi','ok');
+    gLoadClubRaces();
+  } catch(e) { toast('Hata: '+e.message,'err'); }
+};
+
+// ── MEMBER DASHBOARD & PUBLIC VIEW ──
+window.loadClubRacesForUser = async function() {
+  const el = document.getElementById('dash-club-races-list');
+  if(!el || !window.CU) return;
+  try {
+    const fb = window._fb;
+    const ms = await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'), fb.where('userId','==',window.CU.uid)));
+    const clubIds = ms.docs.map(d => d.data().clubId);
+    
+    if(!clubIds.length) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Kulüp Yarışlarını görmek için bir kulübe üye olmalısın.</p>';
+      return;
+    }
+
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'club_races'), fb.where('clubId', 'in', clubIds.slice(0,10))));
+    const today = new Date().toISOString().split('T')[0];
+    const currentYear = new Date().getFullYear();
+    let races = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if(data.date && new Date(data.date).getFullYear() === currentYear) races.push({id:d.id, ...data});
+    });
+    
+    races.sort((a,b) => a.date.localeCompare(b.date));
+
+    if(!races.length) {
+      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Yakın zamanda planlanmış kulüp yarışı bulunmuyor.</p>';
+      return;
+    }
+
+    el.innerHTML = races.map(r => {
+      const isPast = r.date < today;
+      return `
+      <div class="card" style="padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;${isPast?'opacity:0.5;filter:grayscale(1);background:#f9fafb':''}">
+        <div>
+          <h4 style="margin:0 0 4px 0;font-size:15px">${r.name}</h4>
+          <div style="font-size:12px;color:var(--muted)">📅 ${r.date} · 📍 ${r.location}</div>
+        </div>
+        ${r.url ? `<button class="btn btn-or btn-sm" ${isPast?'disabled':''} onclick="window.open('${r.url}','_blank')">Detaylar</button>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<p style="color:var(--muted)">Yüklenemedi.</p>'; }
+};
+
+window.renderClubRaces = async function(clubId) {
+  const el = document.getElementById('club-race-calendar-section');
+  if(!el) return;
+  try {
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'club_races'), fb.where('clubId','==',clubId)));
+    const today = new Date().toISOString().split('T')[0];
+    const currentYear = new Date().getFullYear();
+    let races = [];
+    snap.forEach(d => {
+      const data = d.data();
+      if(data.date && new Date(data.date).getFullYear() === currentYear) races.push({id:d.id, ...data});
+    });
+
+    if(!races.length) {
+      el.innerHTML = '<p style="color:var(--muted);font-size:13px;text-align:center;padding:10px">Bu yıl için planlanmış kulüp yarışı bulunmuyor.</p>';
+      return;
+    }
+
+    races.sort((a,b) => a.date.localeCompare(b.date));
+
+    el.innerHTML = races.map(r => {
+      const d = new Date(r.date);
+      const isPast = r.date < today;
+      return `
+      <div style="display:flex;align-items:center;gap:12px;background:white;border-radius:16px;padding:12px 16px;box-shadow:0 1px 3px rgba(0,0,0,0.05);margin-bottom:10px;${isPast?'opacity:0.5;filter:grayscale(1);background:#f9fafb':''}">
+        <div style="width:48px;height:48px;background:${isPast?'#e2e8f0':'#fef3c7'};border-radius:12px;display:flex;flex-direction:column;align-items:center;justify-content:center;flex-shrink:0">
+          <div style="font-size:14px;font-weight:800;color:${isPast?'#64748b':'#d97706'}">${d.getDate()}</div>
+          <div style="font-size:9px;font-weight:700;text-transform:uppercase;color:${isPast?'#94a3b8':'#f59e0b'}">${MONTHS[d.getMonth()]||''}</div>
+        </div>
+        <div style="flex:1">
+          <h4 style="margin:0;font-size:14px;color:#1e293b">${r.name}</h4>
+          <div style="font-size:11px;color:#64748b">📍 ${r.location}</div>
+        </div>
+        ${r.url ? `<button class="btn btn-sm" style="background:#4a1d96;color:white;border:none" ${isPast?'disabled':''} onclick="window.open('${r.url}','_blank')">Kayıt/Bilgi</button>` : ''}
+      </div>`;
+    }).join('');
+  } catch(e) { el.innerHTML = '<p style="color:var(--muted)">Yüklenemedi.</p>'; }
 };
 
 // Mobile Clubs Fix - Ensure grid is properly handled and fetch is robust

@@ -1028,6 +1028,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="nav('firsatlar')" id="nb-firsatlar">🎁 Fırsatlar</button>
     <button onclick="nav('blog')" id="nb-blog">Blog</button>
     <button onclick="nav('community')" id="nb-community">🏃 Topluluk</button>
+    <button onclick="nav('about')" id="nb-about">Hakkımızda</button>
     <button onclick="nav('contact')" id="nb-contact">İletişim</button>
   </div>
   <div class="nav-right">
@@ -1097,6 +1098,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button class="mdr-btn" onclick="nav('community');closeMasterDrawer()"><span class="mdr-ico">🏃</span><span>Topluluk Akışı</span></button>
     <button class="mdr-btn" onclick="nav('firsatlar');closeMasterDrawer()"><span class="mdr-ico">🎁</span><span>Fırsatlar</span></button>
     <button class="mdr-btn" onclick="nav('blog');closeMasterDrawer()"><span class="mdr-ico">📰</span><span>Blog</span></button>
+    <button class="mdr-btn py-3" onclick="nav('about');closeMasterDrawer()"><span class="mdr-ico">ℹ️</span><span>Hakkımızda</span></button>
 
     <!-- Divider -->
     <div style="height:1px;background:var(--border);margin:8px 16px"></div>
@@ -2452,6 +2454,43 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     </div>
     <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.7);display:none"></p>
   </div></div>
+
+  <!-- HAKKIMIZDA SAYFASI -->
+  <div id="pg-about" class="pg">
+    <div class="page-banner">
+      <div class="pb-bg" style="background-image:url('https://images.unsplash.com/photo-1552674605-15caff8d635c?auto=format&fit=crop&q=80');"></div>
+      <div class="pb-overlay"></div>
+      <div class="pb-content container">
+        <h1>Hakkı<span>mızda</span></h1>
+        <p class="pb-sub">Türkiye'nin en aktif ve büyüyen koşu topluluğunun arkasındaki vizyon.</p>
+      </div>
+    </div>
+    <div class="container sec">
+      <div class="flex flex-col space-y-6 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
+        <div class="bg-white/40 backdrop-blur-lg rounded-3xl p-5 md:p-10 border-[1.5px] border-[#E0D8CC] shadow-sm hover:shadow-md transition-all">
+          <h2 class="text-orange-500 font-bold text-2xl mb-4 font-['Raleway']">Misyonumuz</h2>
+          <p class="text-slate-700 leading-relaxed text-sm md:text-base">
+            Türkiye genelindeki tüm koşucuları ve kulüpleri tek bir çatı altında toplayarak, sporun birleştirici gücüyle sağlıklı bir yaşam kültürünü yaygınlaştırmak. Koşuyu sadece bir spor değil, bir yaşam tarzı haline getirmeyi hedefliyoruz.
+          </p>
+        </div>
+        <div class="bg-white/40 backdrop-blur-lg rounded-3xl p-5 md:p-10 border-[1.5px] border-[#E0D8CC] shadow-sm hover:shadow-md transition-all">
+          <h2 class="text-orange-500 font-bold text-2xl mb-4 font-['Raleway']">Vizyonumuz</h2>
+          <p class="text-slate-700 leading-relaxed text-sm md:text-base">
+            Sadece Türkiye'nin değil, Avrupa'nın da en interaktif, kapsayıcı ve teknoloji odaklı koşu platformu olmak. Her seviyeden koşucunun kendini geliştirebileceği, destek bulabileceği ve sosyalleşebileceği yegane adres olmak.
+          </p>
+        </div>
+        <div class="md:col-span-2 bg-white/40 backdrop-blur-lg rounded-3xl p-5 md:p-10 border-[1.5px] border-[#E0D8CC] shadow-sm hover:shadow-md transition-all mt-6 md:mt-0">
+          <h2 class="text-orange-500 font-bold text-2xl mb-4 font-['Raleway']">Değerlerimiz</h2>
+          <ul class="text-slate-700 leading-relaxed text-sm md:text-base list-disc list-inside space-y-2">
+            <li><strong>Kapsayıcılık:</strong> Yeni başlayanlardan ultra maratonculara kadar herkese kapımız açık.</li>
+            <li><strong>Topluluk Ruhu:</strong> Birlikte daha güçlüyüz, birbirimizi motive ederiz.</li>
+            <li><strong>Sürekli Gelişim:</strong> Hem bireysel sınırlarımızı hem de platformumuzu her gün bir adım ileri taşırız.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <footer><div class="container">
     <div class="footer-grid">
       <div class="footer-col"><svg width="240" height="56" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
@@ -2469,7 +2508,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 </svg><p style="font-size:12px;color:rgba(255,255,255,.45);line-height:1.6;margin-top:8px">Türkiye'nin koşu topluluğu platformu.</p><p style="font-size:12px;color:rgba(255,255,255,.35);margin-top:6px">📧 <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="4133342f222d34233534332a28382401262c20282d6f222e2c">[email&#160;protected]</a></p></div>
       <div class="footer-col"><h4>Kulüpler</h4><a onclick="nav('clubs')">Topluluklar/Kulüpler</a><a onclick="nav('community')">Topluluk Akışı</a></div>
       <div class="footer-col"><h4>Platform</h4><a onclick="nav('events')">Etkinlikler</a><a onclick="nav('clubs')">Topluluklar/Kulüpler</a><a onclick="nav('races')">Yarış Takvimi</a><a onclick="nav('firsatlar')">Fırsatlar</a><a onclick="nav('blog')">Blog</a><a onclick="nav('sss')" style="color:var(--or)">SSS</a></div>
-      <div class="footer-col"><h4>Yardım</h4><a onclick="nav('sss')">SSS</a><a onclick="nav('contact')">İletişim</a><a id="sa-footer-link" style="display:none;opacity:.35;font-size:10px;cursor:pointer" onclick="window.CU?.role==='superadmin'?nav('admin'):null">⚙</a></div>
+      <div class="footer-col"><h4>Yardım</h4><a onclick="nav('sss')">SSS</a><a onclick="nav('about')">Hakkımızda</a><a onclick="nav('contact')">İletişim</a><a id="sa-footer-link" style="display:none;opacity:.35;font-size:10px;cursor:pointer" onclick="window.CU?.role==='superadmin'?nav('admin'):null">⚙</a></div>
       <div class="footer-col"><h4>Yasal</h4><a onclick="nav('kvkk')">KVKK</a><a onclick="nav('gizlilik')">Gizlilik</a><a onclick="nav('kosullar')">Kullanım Koşulları</a><a onclick="nav('riza')">Açık Rıza</a><a onclick="nav('cerez')">Çerez Politikası</a></div>
       <div class="footer-col"><h4>Sosyal</h4><a>Instagram</a><a>Strava</a><a>YouTube</a></div>
     </div>
@@ -4413,6 +4452,7 @@ const ROUTES = {
   "races":         {path:"/yaris-takvimi",       title:"Yarış Takvimi — RunClubTürkiye",               desc:"Türkiye maraton, trail ve ultra yarışları. Tüm yarış takvimi."},
   "blog":          {path:"/haberler",            title:"Koşu Haberleri — RunClubTürkiye",              desc:"Koşu haberleri, antrenman ipuçları ve yarış rehberleri."},
   "firsatlar":     {path:"/firsatlar",           title:"Fırsatlar — RunClubTürkiye",                   desc:"Koşu ekipmanı ve beslenme markalarından özel indirimler."},
+  "about":         {path:"/hakkimizda",          title:"Hakkımızda — RunClubTürkiye",                  desc:"RunClubTürkiye'nin misyon, vizyon ve değerleri."},
   "contact":       {path:"/iletisim",            title:"İletişim — RunClubTürkiye",                    desc:"RunClubTürkiye ile iletişime geç."},
   "sss":           {path:"/sss",                 title:"SSS — RunClubTürkiye",                         desc:"Sıkça sorulan sorular ve cevapları."},
   "kvkk":          {path:"/kvkk",                title:"KVKK — RunClubTürkiye",                        desc:"KVKK kapsamında bilgilendirme metni."},

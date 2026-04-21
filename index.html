@@ -2457,6 +2457,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
   <!-- HAKKIMIZDA SAYFASI -->
   <div id="pg-about" class="pg">
+    <!-- Sayfa Hero Banner -->
     <div class="page-banner">
       <div class="pb-bg" style="background-image:url('https://images.unsplash.com/photo-1552674605-15caff8d635c?auto=format&fit=crop&q=80');"></div>
       <div class="pb-overlay"></div>
@@ -2465,27 +2466,77 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
         <p class="pb-sub">Türkiye'nin en aktif ve büyüyen koşu topluluğunun arkasındaki vizyon.</p>
       </div>
     </div>
+
+    <!-- Intro Block with Image background + Glassmorphism -->
     <div class="container sec">
-      <div class="flex flex-col space-y-6 md:grid md:grid-cols-2 md:gap-8 md:space-y-0">
-        <div class="bg-white/40 backdrop-blur-lg rounded-3xl p-5 md:p-10 border-[1.5px] border-[#E0D8CC] shadow-sm hover:shadow-md transition-all">
-          <h2 class="text-orange-500 font-bold text-2xl mb-4 font-['Raleway']">Misyonumuz</h2>
-          <p class="text-slate-700 leading-relaxed text-sm md:text-base">
-            Türkiye genelindeki tüm koşucuları ve kulüpleri tek bir çatı altında toplayarak, sporun birleştirici gücüyle sağlıklı bir yaşam kültürünü yaygınlaştırmak. Koşuyu sadece bir spor değil, bir yaşam tarzı haline getirmeyi hedefliyoruz.
+      <div class="relative rounded-[2rem] overflow-hidden mb-12 shadow-lg">
+        <img src="https://images.unsplash.com/photo-1530549387789-4c1017266635?auto=format&fit=crop&q=80" alt="Koşucular" class="absolute inset-0 w-full h-full object-cover" />
+        <div class="absolute inset-0 bg-black/40"></div>
+        <div class="relative z-10 p-6 md:p-12 lg:p-16">
+          <div class="bg-white/10 backdrop-blur-xl border border-white/20 rounded-3xl p-6 md:p-10 shadow-2xl max-w-3xl">
+            <h2 class="text-white font-bold text-2xl md:text-3xl mb-6 font-['Raleway']">Koşunun Yeni Dijital Evine Hoş Geldiniz!</h2>
+            <p class="text-white/90 leading-relaxed text-sm md:text-base mb-4 font-['Open_Sans']">
+              RunClub Türkiye; koşuyu sadece bir spor değil, bir yaşam tarzı olarak görenlerin dijital buluşma noktasıdır. Türkiye'nin dört bir yanındaki parkurlarda, ormanlarda ve sahillerde atılan her adımı, tek ve güçlü bir ekosistemde bir araya getirmek için yola çıktık.
+            </p>
+            <p class="text-white/90 leading-relaxed text-sm md:text-base mb-4 font-['Open_Sans']">
+              Bizler de sizin gibi koşucuyuz. Antrenman duyurularının mesaj gruplarında kaybolduğu, yarış tarihlerinin gözden kaçtığı ve doğru ekipmana ulaşmanın zor olduğu günleri hepimiz yaşadık. İşte RunClub Türkiye, bu karmaşaya son vermek; koşu kulüplerini profesyonel bir altyapıya kavuştururken, her seviyeden koşucuya pürüzsüz, güvenli ve modern bir dijital deneyim sunmak için tasarlandı.
+            </p>
+            <p class="text-white/90 leading-relaxed text-sm md:text-base font-['Open_Sans'] font-semibold">
+              İster ilk 5K koşunuza hazırlanan yeni bir serüvenci olun, ister sınırları zorlayan bir ultra maratoncu... Ayakkabılarınızı bağlayın; çünkü burada hiçbir adımı yalnız atmayacaksınız.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Misyon & Vizyon -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8 mb-12">
+        <!-- Misyon -->
+        <div class="bg-white/60 backdrop-blur-lg rounded-3xl p-6 md:p-10 border-[1.5px] border-[#E0D8CC] shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+          <div class="absolute -right-10 -top-10 w-40 h-40 bg-[#E8622A]/10 rounded-full blur-3xl group-hover:bg-[#E8622A]/20 transition-all"></div>
+          <h2 class="text-orange-500 font-bold text-2xl mb-4 font-['Raleway'] relative z-10 flex items-center gap-3"><span class="text-3xl">🎯</span> Misyonumuz</h2>
+          <p class="text-slate-700 leading-relaxed text-sm md:text-base relative z-10">
+            Türkiye’deki tüm koşu topluluklarını, bireysel sporcuları ve yarış organizasyonlarını modern ve tek bir dijital çatı altında toplamak. Koşu kulüplerine sürdürülebilir, profesyonel yönetim araçları sunarken; koşuculara güncel yarış takvimleri, yeni kulüp keşifleri ve KVKK uyumlu güvenli "Topluluk Pazarı" ile uçtan uca eksiksiz bir koşu deneyimi yaşatmak.
           </p>
         </div>
-        <div class="bg-white/40 backdrop-blur-lg rounded-3xl p-5 md:p-10 border-[1.5px] border-[#E0D8CC] shadow-sm hover:shadow-md transition-all">
-          <h2 class="text-orange-500 font-bold text-2xl mb-4 font-['Raleway']">Vizyonumuz</h2>
-          <p class="text-slate-700 leading-relaxed text-sm md:text-base">
-            Sadece Türkiye'nin değil, Avrupa'nın da en interaktif, kapsayıcı ve teknoloji odaklı koşu platformu olmak. Her seviyeden koşucunun kendini geliştirebileceği, destek bulabileceği ve sosyalleşebileceği yegane adres olmak.
+
+        <!-- Vizyon -->
+        <div class="bg-white/60 backdrop-blur-lg rounded-3xl p-6 md:p-10 border-[1.5px] border-[#E0D8CC] shadow-sm hover:shadow-md transition-all relative overflow-hidden group">
+          <div class="absolute -left-10 -bottom-10 w-40 h-40 bg-[#2C3E50]/10 rounded-full blur-3xl group-hover:bg-[#2C3E50]/20 transition-all"></div>
+          <h2 class="text-orange-500 font-bold text-2xl mb-4 font-['Raleway'] relative z-10 flex items-center gap-3"><span class="text-3xl">🔭</span> Vizyonumuz</h2>
+          <p class="text-slate-700 leading-relaxed text-sm md:text-base relative z-10">
+            Sadece bir platform değil, Türkiye'de "koşu" denildiğinde akla gelen ilk ve en güvenilir dijital sporcu ekosistemi olmak. Sporun birleştirici gücünü yenilikçi teknolojiyle harmanlayarak, WhatsApp gruplarının sınırlarını aşan, herkesin dijital sporcu kimliğiyle gururla yer aldığı ulusal bir koşu kültürü standardı yaratmak.
           </p>
         </div>
-        <div class="md:col-span-2 bg-white/40 backdrop-blur-lg rounded-3xl p-5 md:p-10 border-[1.5px] border-[#E0D8CC] shadow-sm hover:shadow-md transition-all mt-6 md:mt-0">
-          <h2 class="text-orange-500 font-bold text-2xl mb-4 font-['Raleway']">Değerlerimiz</h2>
-          <ul class="text-slate-700 leading-relaxed text-sm md:text-base list-disc list-inside space-y-2">
-            <li><strong>Kapsayıcılık:</strong> Yeni başlayanlardan ultra maratonculara kadar herkese kapımız açık.</li>
-            <li><strong>Topluluk Ruhu:</strong> Birlikte daha güçlüyüz, birbirimizi motive ederiz.</li>
-            <li><strong>Sürekli Gelişim:</strong> Hem bireysel sınırlarımızı hem de platformumuzu her gün bir adım ileri taşırız.</li>
-          </ul>
+      </div>
+
+      <!-- Değerlerimiz -->
+      <div class="mb-8">
+        <div class="text-center mb-8">
+          <h2 class="text-3xl font-bold font-['Raleway'] text-[#2C1810]">Değerlerimiz</h2>
+          <div class="w-16 h-1 bg-orange-500 rounded-full mx-auto mt-3"></div>
+        </div>
+        
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+          <div class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-sm rounded-2xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+            <div class="w-12 h-12 bg-orange-100 text-orange-500 rounded-xl flex items-center justify-center text-2xl mb-4 shadow-sm">🤝</div>
+            <h3 class="font-bold text-[#2C1810] mb-2 font-['Raleway']">Topluluk Odaklılık</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Birlikte koşmanın ve dayanışmanın gücüne inanıyoruz. Bizim için her koşucu, bu büyük ailenin çok değerli bir parçasıdır.</p>
+          </div>
+          <div class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-sm rounded-2xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+            <div class="w-12 h-12 bg-blue-100 text-blue-600 rounded-xl flex items-center justify-center text-2xl mb-4 shadow-sm">💡</div>
+            <h3 class="font-bold text-[#2C1810] mb-2 font-['Raleway']">Yenilikçilik</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Koşu dünyasının ihtiyaçlarını modern teknolojilerle çözüyoruz. Sıkıcı tabloları reddediyor; pratik ve akılcı araçlar geliştiriyoruz.</p>
+          </div>
+          <div class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-sm rounded-2xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+            <div class="w-12 h-12 bg-green-100 text-green-600 rounded-xl flex items-center justify-center text-2xl mb-4 shadow-sm">🌍</div>
+            <h3 class="font-bold text-[#2C1810] mb-2 font-['Raleway']">Kapsayıcılık</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Temponuz, mesafeniz veya deneyiminiz ne olursa olsun; parkurda herkese yer var. Spora gönül veren herkesi kucaklıyoruz.</p>
+          </div>
+          <div class="bg-white/70 backdrop-blur-xl border border-white/60 shadow-sm rounded-2xl p-6 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
+            <div class="w-12 h-12 bg-purple-100 text-purple-600 rounded-xl flex items-center justify-center text-2xl mb-4 shadow-sm">🛡️</div>
+            <h3 class="font-bold text-[#2C1810] mb-2 font-['Raleway']">Güven ve Şeffaflık</h3>
+            <p class="text-sm text-slate-600 leading-relaxed">Kişisel verilerinizi her şeyin üstünde tutuyoruz. Her alanda güvenilir ve yasal standartlara (KVKK) tam uyumlu ortam sağlıyoruz.</p>
+          </div>
         </div>
       </div>
     </div>

@@ -2344,6 +2344,19 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   </div>
 </div>
 
+<!-- RACE PARTICIPANTS MODAL -->
+<div class="overlay" id="race-participants-modal">
+  <div class="modal" style="max-width:440px">
+    <button class="close-x" onclick="closeModal('race-participants-modal')">×</button>
+    <h3 id="rpm-title" style="margin-bottom:4px;font-size:18px">🏃 Katılımcılar</h3>
+    <p id="rpm-subtitle" style="font-size:12px;color:var(--muted);margin-bottom:16px"></p>
+    <div id="rpm-list" style="max-height:360px;overflow-y:auto;border-top:1px solid var(--border)"></div>
+    <div style="margin-top:16px;text-align:right">
+      <button class="btn btn-ghost" onclick="closeModal('race-participants-modal')">Kapat</button>
+    </div>
+  </div>
+</div>
+
 <!-- EDIT MODALS -->
 <div class="overlay" id="edit-club-modal">
   <div class="modal"><button class="close-x" onclick="closeModal('edit-club-modal')">×</button>
@@ -10446,7 +10459,7 @@ window.gLoadClubRaces = async function() {
     const today = new Date().toISOString().split('T')[0];
 
     el.innerHTML = `<table>
-      <thead><tr><th>Yarış</th><th>Tarih</th><th>Konum</th><th>İşlem</th></tr></thead>
+      <thead><tr><th>Yarış</th><th>Tarih</th><th>Konum</th><th>Katılımcılar</th><th>İşlem</th></tr></thead>
       <tbody>${items.map(r => {
         const isPast = r.date < today;
         return `
@@ -10454,6 +10467,7 @@ window.gLoadClubRaces = async function() {
           <td><b>${r.name}</b></td>
           <td>${r.date}</td>
           <td>${r.location}</td>
+          <td><button class="btn btn-ghost btn-sm" onclick="gShowRaceParticipants('${r.id}','${r.name.replace(/'/g,"\\'")}')">👥 Gör</button></td>
           <td class="action-btns">
             <button class="btn btn-ghost btn-sm" ${isPast?'disabled':''} onclick='window.gOpenClubRaceForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️</button>
             <button class="btn btn-red btn-sm" onclick="window.gDeleteClubRace('${r.id}')">🗑</button>
@@ -10540,31 +10554,26 @@ window.loadClubRacesForUser = async function() {
       return;
     }
 
-    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'club_races'), fb.where('clubId', 'in', clubIds.slice(0,10))));
-    const today = new Date().toISOString().split('T')[0];
-    const currentYear = new Date().getFullYear();
-    let races = [];
-    snap.forEach(d => {
-      const data = d.data();
-      if(data.date && new Date(data.date).getFullYear() === currentYear) races.push({id:d.id, ...data});
-    });
-    
-    races.sort((a,b) => a.date.localeCompare(b.date));
-
-    if(!races.length) {
-      el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Yakın zamanda planlanmış kulüp yarışı bulunmuyor.</p>';
-      return;
-    }
+    const myRsvpsSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'), fb.where('uid','==',window.CU.uid), fb.where('type','==','club_race')));
+    const myJoinedIds = new Set();
+    myRsvpsSnap.forEach(d => myJoinedIds.add(d.data().raceId));
 
     el.innerHTML = races.map(r => {
       const isPast = r.date < today;
+      const isJoined = myJoinedIds.has(r.id);
       return `
       <div class="card" style="padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;${isPast?'opacity:0.5;filter:grayscale(1);background:#f9fafb':''}">
-        <div>
+        <div style="flex:1">
           <h4 style="margin:0 0 4px 0;font-size:15px">${r.name}</h4>
           <div style="font-size:12px;color:var(--muted)">📅 ${r.date} · 📍 ${r.location}</div>
         </div>
-        ${r.url ? `<button class="btn btn-or btn-sm" ${isPast?'disabled':''} onclick="window.open('${r.url}','_blank')">Detaylar</button>` : ''}
+        <div style="display:flex;gap:8px">
+          ${!isPast ? `
+            <button class="btn ${isJoined?'btn-ghost':'btn-or'} btn-sm" onclick="toggleClubRaceRSVP('${r.id}','${r.name.replace(/'/g,"\\'")}')">
+              ${isJoined?'✓ Katıldın (Vazgeç)':'Katıl'}
+            </button>` : ''}
+          ${r.url ? `<button class="btn btn-ghost btn-sm" onclick="window.open('${r.url}','_blank')">Detaylar</button>` : ''}
+        </div>
       </div>`;
     }).join('');
   } catch(e) { el.innerHTML = '<p style="color:var(--muted)">Yüklenemedi.</p>'; }
@@ -10655,6 +10664,64 @@ try {
   try{document.getElementById('pg-home').classList.add('on');}catch(e){}
   try{const l=document.getElementById('loading');if(l)l.style.display='none';}catch(e){}
 }
+window.toggleClubRaceRSVP = async function(raceId, raceName) {
+  if(!window.CU) return;
+  try {
+    const fb = window._fb;
+    const q = fb.query(fb.collection(fb.db,'rsvps'), fb.where('uid','==',window.CU.uid), fb.where('raceId','==',raceId), fb.where('type','==','club_race'));
+    const snap = await fb.getDocs(q);
+    
+    if(!snap.empty) {
+      // Ayrıl
+      await fb.deleteDoc(fb.doc(fb.db, 'rsvps', snap.docs[0].id));
+      toast('Yarış listesinden ayrıldın.','ok');
+    } else {
+      // Katıl
+      await fb.addDoc(fb.collection(fb.db,'rsvps'), {
+        uid: window.CU.uid,
+        userName: window.CU.name || 'Sporcu',
+        raceId,
+        raceName,
+        type: 'club_race',
+        createdAt: fb.serverTimestamp()
+      });
+      toast('Yarışa katıldın! 🏆','ok');
+    }
+    loadClubRacesForUser();
+  } catch(e) { toast('Hata: '+e.message,'err'); }
+};
+
+window.gShowRaceParticipants = async function(raceId, raceName) {
+  const listEl = document.getElementById('rpm-list');
+  const subEl = document.getElementById('rpm-subtitle');
+  if(!listEl) return;
+  
+  subEl.textContent = raceName;
+  listEl.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+  openModal('race-participants-modal');
+  
+  try {
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'), fb.where('raceId','==',raceId), fb.where('type','==','club_race')));
+    
+    if(snap.empty) {
+      listEl.innerHTML = '<p style="padding:20px;text-align:center;color:var(--muted)">Henüz katılan kimse yok.</p>';
+      return;
+    }
+    
+    listEl.innerHTML = snap.docs.map(d => {
+      const u = d.data();
+      return `
+      <div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:0.5px solid var(--border)">
+        <div style="width:36px;height:36px;background:var(--or);color:white;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:700">
+          ${(u.userName||'S')[0].toUpperCase()}
+        </div>
+        <div style="font-size:14px;font-weight:600">${u.userName || 'Sporcu'}</div>
+      </div>`;
+    }).join('');
+  } catch(e) { listEl.innerHTML = '<p style="color:var(--muted)">Yüklenemedi: '+e.message+'</p>'; }
+};
+
 // URL routing — sayfa yüklenince mevcut URL'yi kontrol et
 setTimeout(()=>{try{if(typeof routerInit==='function')routerInit();}catch(e){}},300);
 </script>

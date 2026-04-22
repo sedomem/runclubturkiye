@@ -3919,6 +3919,22 @@ window.subscribeNewsletter=async()=>{
   catch(e){toast('Teşekkürler! 📬','ok');document.getElementById('nl-email').value='';}
 };
 
+// ── ADMIN: TOTAL USER COUNT ──
+window.loadTotalUserCount = async function() {
+  const el = document.getElementById('stat-total-users');
+  if(!el) return;
+  
+  try {
+    const fb = window._fb;
+    const snapshot = await fb.getCountFromServer(fb.collection(fb.db, 'users'));
+    const count = snapshot.data().count;
+    el.textContent = count;
+  } catch(e) {
+    console.error('[Admin] Total user count error:', e);
+    el.textContent = '—';
+  }
+};
+
 // ── ADMIN: USERS ──
 window.loadAdminUsers=async()=>{
   const el=document.getElementById('admin-users-content');if(!el)return;
@@ -7606,10 +7622,10 @@ function renderAdminSection(sec){
   const sections={
     dashboard:`<h2 style="margin-bottom:18px">📊 Dashboard</h2>
       <div class="a-stats">
+        <div class="a-stat"><div class="l">Toplam Üyeler</div><div class="n" id="stat-total-users">...</div><div class="t">↑ Kayıtlı</div></div>
         <div class="a-stat"><div class="l">Etkinlikler</div><div class="n">${EVENTS.length}</div><div class="t">↑ Aktif</div></div>
         <div class="a-stat"><div class="l">Kulüpler</div><div class="n">${CLUBS.length}</div><div class="t">↑ Aktif</div></div>
         <div class="a-stat"><div class="l">Yarışlar</div><div class="n">${RACES.length}</div><div class="t">↑ Takvimde</div></div>
-        <div class="a-stat"><div class="l">Fırsatlar</div><div class="n">${FIRSATLAR.length}</div><div class="t">↑ Aktif</div></div>
       </div>
       ${window._adminMsgCount>0?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between"><div>🔴 <b>${window._adminMsgCount}</b> okunmamış mesaj var</div><button class="btn btn-or btn-sm" onclick="aNav('messages',null)">Mesajlara Git →</button></div>`:''}
       ${window._adminAppCount>0?`<div style="background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between"><div>🟠 <b>${window._adminAppCount}</b> bekleyen başvuru var</div><button class="btn btn-or btn-sm" onclick="aNav('applications',null)">Başvurulara Git →</button></div>`:''}
@@ -7828,6 +7844,7 @@ function renderAdminSection(sec){
   main.innerHTML=sections[sec]||sections['dashboard'];
   if(sec==='users')setTimeout(()=>loadAdminUsers&&loadAdminUsers(),100);
   if(sec==='dashboard'){
+    setTimeout(()=>loadTotalUserCount&&loadTotalUserCount(),100);
     setTimeout(()=>updatePendingBadge&&updatePendingBadge(),300);
     setTimeout(()=>renderAdminAnalytics&&renderAdminAnalytics(),500);
   }

@@ -2,7 +2,13 @@
 // Firebase Cloud Messaging Service Worker
 // Dosya: public/firebase-messaging-sw.js
 // RunClubTürkiye - Background Push Notifications (DATA-ONLY Support)
+// VERSION: 2.0.0 - CACHE BUSTING ENABLED
 // ═══════════════════════════════════════════════════════════════════════════
+
+const SW_VERSION = '2.0.0';
+const CACHE_NAME = 'fcm-sw-v2.0.0';
+
+console.log(`[SW] Version ${SW_VERSION} loading...`);
 
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
@@ -130,15 +136,58 @@ self.addEventListener('push', (event) => {
 });
 
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SERVICE WORKER LIFECYCLE
+// SERVICE WORKER LIFECYCLE - CACHE BUSTING & FORCE UPDATE
 // ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
 
 self.addEventListener('install', (event) => {
-  console.log('[SW] Service Worker installing...');
-  self.skipWaiting(); // Hemen aktif et
+  console.log(`[SW] Installing version ${SW_VERSION}...`);
+  
+  // FORCE UPDATE: Eski SW'yi beklemeden hemen aktif et
+  self.skipWaiting();
+  
+  console.log('[SW] ✅ Installed and skipped waiting');
 });
 
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Service Worker activated');
-  event.waitUntil(clients.claim()); // Hemen client'ları kontrol et
+  console.log(`[SW] Activating version ${SW_VERSION}...`);
+  
+  event.waitUntil(
+    // Eski cache'leri temizle
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames
+          .filter((cacheName) => cacheName !== CACHE_NAME)
+          .map((cacheName) => {
+            console.log('[SW] 🗑️ Deleting old cache:', cacheName);
+            return caches.delete(cacheName);
+          })
+      );
+    })
+    .then(() => {
+      console.log('[SW] ✅ Old caches cleared');
+      // Tüm client'ları hemen kontrol et
+      return clients.claim();
+    })
+    .then(() => {
+      console.log('[SW] ✅ All clients claimed');
+      // Tüm client'lara güncelleme mesajı gönder
+      return clients.matchAll({ type: 'window' });
+    })
+    .then((clients) => {
+      clients.forEach((client) => {
+        client.postMessage({
+          type: 'SW_UPDATED',
+          version: SW_VERSION
+        });
+      });
+    })
+  );
+});
+
+// Message event - Client'tan gelen mesajları dinle
+self.addEventListener('message', (event) => {
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    console.log('[SW] Client requested skip waiting');
+    self.skipWaiting();
+  }
 });

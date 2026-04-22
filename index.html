@@ -594,7 +594,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   #bottom-nav{display:flex}
   body{padding-bottom:66px}
   .dash-wrap,.admin-wrap{grid-template-columns:1fr}
-  .sidebar{display:none}
+  .sidebar{display:block; padding:0; border:none; background:transparent; box-shadow:none; position:relative; top:0; border-bottom:1.5px solid var(--border); margin-bottom:12px; border-radius:0;}
+  .sb-user{display:none;}
   .admin-sb{flex-direction:row;overflow-x:auto;padding:6px;border-right:none;border-bottom:1.5px solid var(--border)}
   .admin-sb button{white-space:nowrap;font-size:11px;padding:7px 11px}
   .admin-sb .sb-title{display:none}
@@ -1086,7 +1087,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     padding:12px 0;
   }
   #dash-sidebar{
-    display:none!important;
+    display:block!important;
   }
   #dash-mobile-topbar{
     display:flex!important;
@@ -1143,7 +1144,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .mdr-ico{font-size:18px;width:26px;text-align:center;flex-shrink:0}
 /* Dash sidebar desktop'ta görünür, mobilden gizlenir */
 @media(max-width:768px){
-  #dash-sidebar{display:none!important}
+  #dash-sidebar{display:block!important}
   .dash-wrap{grid-template-columns:1fr!important;gap:0!important;padding:12px 0!important}
   
   /* ── Dashboard Mobile Drawer Navigation ── */
@@ -1169,6 +1170,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     white-space:nowrap!important;
   }
   .sb-nav button[onclick*="logout"]{display:none!important}
+  #dash-btn-overview { order: -2 !important; }
+  #dash-btn-club-races { order: -1 !important; }
 }
 
 /* ── Mobile Responsive ─────────────────────────────────── */

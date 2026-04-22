@@ -1145,6 +1145,30 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 @media(max-width:768px){
   #dash-sidebar{display:none!important}
   .dash-wrap{grid-template-columns:1fr!important;gap:0!important;padding:12px 0!important}
+  
+  /* ── Dashboard Mobile Drawer Navigation ── */
+  .sb-nav{
+    display:flex!important;
+    flex-direction:row!important;
+    overflow-x:auto!important;
+    overflow-y:hidden!important;
+    gap:8px!important;
+    padding:12px 16px!important;
+    -webkit-overflow-scrolling:touch;
+    scrollbar-width:none;
+    white-space:nowrap;
+  }
+  .sb-nav::-webkit-scrollbar{display:none}
+  .sb-nav button{
+    flex-shrink:0!important;
+    width:auto!important;
+    min-width:max-content!important;
+    padding:10px 16px!important;
+    margin-bottom:0!important;
+    font-size:13px!important;
+    white-space:nowrap!important;
+  }
+  .sb-nav button[onclick*="logout"]{display:none!important}
 }
 
 /* ── Mobile Responsive ─────────────────────────────────── */
@@ -10912,9 +10936,15 @@ window.loadClubRacesForUser = async function() {
     ]);
     const clubIds = [...new Set([...ms1.docs, ...ms2.docs].map(d => d.data().clubId))];
     
+    // Sekme butonunu kontrol et
+    const tabBtn = document.getElementById('dash-btn-club-races');
+    
     if(!clubIds.length) {
+      if(tabBtn) tabBtn.style.display = 'none'; // Kulüp üyesi değilse sekmeyi gizle
       el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Kulüp Yarışlarını görmek için bir kulübe üye olmalısın.</p>';
       return;
+    } else {
+      if(tabBtn) tabBtn.style.display = ''; // Kulüp üyesiyse sekmeyi göster
     }
 
     // Bu kulüplerin yarışlarını çek

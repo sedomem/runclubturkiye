@@ -1,63 +1,144 @@
+// ═══════════════════════════════════════════════════════════════════════════
+// Firebase Cloud Messaging Service Worker
+// Dosya: public/firebase-messaging-sw.js
+// RunClubTürkiye - Background Push Notifications (DATA-ONLY Support)
+// ═══════════════════════════════════════════════════════════════════════════
+
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-firebase.initializeApp({
-  apiKey:           "AIzaSyDWFv6jtbCvSH7ky0n8v5DYPtJX5hpFxiY",
-  authDomain:       "runclubturkiye.firebaseapp.com",
-  projectId:        "runclubturkiye",
-  storageBucket:    "runclubturkiye.appspot.com",
-  messagingSenderId:"1040984820849",
-  appId:            "1:1040984820849:web:06869a5b74b74e17cbbecf"
-});
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// FIREBASE CONFIG
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+const firebaseConfig = {
+  apiKey: "AIzaSyDJGIl9f_nHo2aB0pCGhXLSF8q-aQbZ0XY",
+  authDomain: "one-question-8e3bc.firebaseapp.com",
+  projectId: "one-question-8e3bc",
+  storageBucket: "one-question-8e3bc.firebasestorage.app",
+  messagingSenderId: "690128633859",
+  appId: "1:690128633859:web:27c50bde1621c1b8783f2d"
+};
 
+firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-// ── DATA-ONLY payload yakalama ──────────────────────────────────
-messaging.onBackgroundMessage(function(payload) {
-  console.log('[FCM-SW] Payload:', payload);
+console.log('[SW] Firebase Messaging initialized');
 
-  const data  = payload.data || {};
-  const title = data.title || 'RunClubTürkiye';
-  const body  = data.body  || '';
-  const icon  = data.icon  || '/icon-192.png';
-  const image = data.image || '';
-  // clickTarget: Cloud Function'ın gönderdiği key
-  const clickUrl = data.clickTarget || data.url || 'https://www.runclubturkiye.com/';
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// BACKGROUND MESSAGE HANDLER — DATA-ONLY PAYLOAD
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Cloud Function sadece 'data' field gönderiyor (notification field yok)
+// Bu handler manuel olarak notification gösterir
 
-  const options = {
-    body,
-    icon,
-    badge: '/icon-192.png',
-    ...(image ? { image } : {}),
-    data: { clickTarget: clickUrl },   // notificationclick'e taşı
+messaging.onBackgroundMessage((payload) => {
+  console.log('[SW] Background message received:', payload);
+
+  // DATA payload'dan bilgileri al (notification değil!)
+  const data = payload.data || {};
+  
+  const notificationTitle = data.title || 'RunClubTürkiye';
+  const notificationOptions = {
+    body: data.body || '',
+    icon: data.icon || 'https://www.runclubturkiye.com/icon-192.png',
+    badge: 'https://www.runclubturkiye.com/icon-192.png',
+    image: data.image || null,
+    data: {
+      clickTarget: data.clickTarget || 'https://www.runclubturkiye.com/',
+      timestamp: data.timestamp || Date.now()
+    },
     requireInteraction: false,
-    silent: false,
-    tag: 'rct-push',                   // aynı tag → yeni bildirim eskiyi replace eder
+    tag: 'runclub-notification',
     vibrate: [200, 100, 200],
-    // ❌ actions: [] — KALDIRILD I. Chrome'un "URL kopyala" butonunu engelliyor
+    timestamp: parseInt(data.timestamp) || Date.now()
   };
 
-  return self.registration.showNotification(title, options);
+  console.log('[SW] Showing notification:', notificationTitle, notificationOptions);
+
+  // Notification göster
+  return self.registration.showNotification(notificationTitle, notificationOptions);
 });
 
-// ── Bildirime tıklanma ──────────────────────────────────────────
-self.addEventListener('notificationclick', function(event) {
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// NOTIFICATION CLICK HANDLER
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked');
+  
   event.notification.close();
 
-  const targetUrl = (event.notification.data && event.notification.data.clickTarget)
-    || 'https://www.runclubturkiye.com/';
+  const clickTarget = event.notification.data?.clickTarget || 'https://www.runclubturkiye.com/';
 
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(function(clientList) {
-      for (var i = 0; i < clientList.length; i++) {
-        var client = clientList[i];
-        if (client.url.includes('runclubturkiye.com') && 'focus' in client) {
-          client.focus();
-          if (targetUrl !== client.url) client.navigate(targetUrl);
-          return;
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
+      // Aynı URL zaten açıksa focus et
+      for (const client of clientList) {
+        if (client.url === clickTarget && 'focus' in client) {
+          console.log('[SW] Focusing existing tab');
+          return client.focus();
         }
       }
-      if (clients.openWindow) return clients.openWindow(targetUrl);
+      
+      // Yoksa yeni tab aç
+      if (clients.openWindow) {
+        console.log('[SW] Opening new window:', clickTarget);
+        return clients.openWindow(clickTarget);
+      }
     })
   );
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// PUSH EVENT LISTENER (Fallback)
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// Bazı durumlarda onBackgroundMessage yerine push eventi tetiklenebilir
+
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push event received');
+  
+  if (!event.data) {
+    console.log('[SW] No data in push event');
+    return;
+  }
+
+  let data;
+  try {
+    data = event.data.json();
+    console.log('[SW] Push data:', data);
+  } catch (e) {
+    console.log('[SW] Could not parse push data:', e);
+    return;
+  }
+
+  // data payload varsa göster
+  if (data.data) {
+    const payload = data.data;
+    const title = payload.title || 'RunClubTürkiye';
+    const options = {
+      body: payload.body || '',
+      icon: payload.icon || 'https://www.runclubturkiye.com/icon-192.png',
+      badge: 'https://www.runclubturkiye.com/icon-192.png',
+      data: {
+        clickTarget: payload.clickTarget || 'https://www.runclubturkiye.com/'
+      }
+    };
+
+    event.waitUntil(
+      self.registration.showNotification(title, options)
+    );
+  }
+});
+
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+// SERVICE WORKER LIFECYCLE
+// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+self.addEventListener('install', (event) => {
+  console.log('[SW] Service Worker installing...');
+  self.skipWaiting(); // Hemen aktif et
+});
+
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Service Worker activated');
+  event.waitUntil(clients.claim()); // Hemen client'ları kontrol et
 });

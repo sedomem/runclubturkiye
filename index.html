@@ -3411,7 +3411,19 @@ window.editSponsorModal=id=>{
 window.saveFirsatFromAdmin=async()=>{
   const imgInput=document.getElementById('fr-img-input');
   let imgUrl=document.getElementById('fr-img-url')?.value||'';
-  if(!imgUrl&&imgInput?.files[0])imgUrl=await handleImgUpload(imgInput,'firsatlar')||'';
+  
+  console.log('[Admin Fırsat] Görsel input:', imgInput?.files[0]?.name || 'Yok');
+  
+  if(!imgUrl&&imgInput?.files[0]){
+    console.log('[Admin Fırsat] Görsel yükleniyor...');
+    imgUrl=await handleImgUpload(imgInput,'firsatlar')||'';
+    if(imgUrl){
+      console.log('[Admin Fırsat] ✅ Görsel yüklendi:', imgUrl);
+    } else {
+      console.error('[Admin Fırsat] ❌ Görsel yüklenemedi!');
+    }
+  }
+  
   const baslik=document.getElementById('fr-baslik').value.trim();
   if(!baslik){toast('Başlık gerekli','err');return;}
   const data={
@@ -3425,15 +3437,22 @@ window.saveFirsatFromAdmin=async()=>{
     imgUrl,aktif:true,
     id:'f'+Date.now(),slug:baslik.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
   };
+  
+  console.log('[Admin Fırsat] Kaydedilecek data:', data);
+  
   toast('Kaydediliyor...','ok');
   try{
     const {id:_,...dataNoId}=data;
     const r=await addDoc(collection(db,'firsatlar'),{...dataNoId,createdAt:serverTimestamp()});
     data.id=r.id;
     window.FIRSATLAR.unshift(data);
+    console.log('[Admin Fırsat] ✅ Firestore\'a kaydedildi, ID:', r.id);
     toast('Fırsat eklendi ✓','ok');
     renderFirsatlar();renderHomeFirsatlar();renderAdminSection('firsatlar');
-  }catch(e){toast('Kaydedilemedi: '+e.message,'err');}
+  }catch(e){
+    console.error('[Admin Fırsat] ❌ Firestore hatası:', e);
+    toast('Kaydedilemedi: '+e.message,'err');
+  }
 };
 window.deleteFirsat=async(id)=>{
   if(!confirm('Sil?'))return;
@@ -4519,7 +4538,7 @@ function renderHomeFirsatlar(){
   el.innerHTML=items.map(f=>`
     <div class="firsat-card" onclick="openFirsatDetail('${f.id}')">
       ${f.indirim?`<div class="firsat-badge">${f.indirim}</div>`:''}
-      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" width="400" height="180" loading="lazy"/>`:'<span style="font-size:48px">🎁</span>'}</div>
+      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="font-size:48px">🎁</span>'}</div>
       <div class="firsat-body">
         <span class="tag tag-pu">${f.kategori||'Genel'}</span>
         <h3>${f.baslik}</h3>
@@ -6025,7 +6044,7 @@ function renderFirsatlar(list){
   el.innerHTML=items.map(f=>`
     <div class="firsat-card" onclick="openFirsatDetail('${f.id}')">
       ${f.indirim?`<div class="firsat-badge">${f.indirim} İNDİRİM</div>`:''}
-      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" width="400" height="180" loading="lazy"/>`:'<span style="font-size:48px">🎁</span>'}</div>
+      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="font-size:48px">🎁</span>'}</div>
       <div class="firsat-body">
         <span class="tag tag-pu">${f.kategori||'Genel'}</span>
         <h3>${f.baslik}</h3>
@@ -7097,11 +7116,24 @@ window.renderSponsors=renderSponsors;
 
 // ── ✅ FIRSAT DETAY SAYFASI ──
 window.openFirsatDetail=id=>{
-  const f=window.FIRSATLAR.find(x=>x.id===id);if(!f)return;
+  const f=window.FIRSATLAR.find(x=>x.id===id);
+  if(!f){
+    console.error('[Fırsat] Fırsat bulunamadı:', id);
+    return;
+  }
+  
+  // Debug: Görsel kontrolü
+  if(!f.imgUrl){
+    console.warn('[Fırsat] ⚠️ Bu fırsatta görsel YOK:', f.baslik);
+    console.log('[Fırsat] Fırsat objesi:', f);
+  } else {
+    console.log('[Fırsat] ✅ Görsel URL:', f.imgUrl);
+  }
+  
   const isLoggedIn=!!window.CU;
   document.getElementById('firsat-detail-content').innerHTML=`
-    <div class="firsat-detail-hero" style="${f.imgUrl?`background:linear-gradient(135deg,#1a0500,#3d1000)`:'background:linear-gradient(135deg,#1a0500,#2a0800)'}">
-      ${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" width="820" height="290" loading="lazy"/><div class="hero-overlay"></div>`:''}
+    <div class="firsat-detail-hero" style="${f.imgUrl?'':'background:linear-gradient(135deg,#1a0500,#2a0800)'}">
+      ${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="hero-overlay"></div>`:''}
       <div class="hero-inner" style="position:relative;z-index:1;text-align:center">
         ${f.indirim?`<div style="background:var(--or);color:#fff;padding:6px 16px;border-radius:20px;font-size:15px;font-weight:700;display:inline-block;margin-bottom:12px">${f.indirim} İNDİRİM</div>`:'<div style="font-size:60px;margin-bottom:12px">🎁</div>'}
         <h1 style="font-size:clamp(20px,3vw,32px);font-weight:700;color:#fff;margin-bottom:8px">${f.baslik}</h1>

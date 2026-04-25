@@ -1367,7 +1367,13 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="ticker-track" id="ticker-track"></div>
   </div>
   <div class="sec"><div class="container">
-    <div class="sec-head"><h2>🏃 Öne Çıkan Etkinlikler</h2><button class="btn btn-ghost btn-sm" onclick="nav('events')">Tümünü Gör →</button></div>
+    <div class="sec-head">
+      <div>
+        <h2>🏃 Yakındaki Etkinlikler</h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:4px">Koşu kulüpleriyle buluş, arkadaşlar edin</p>
+      </div>
+      <button class="btn btn-or" onclick="nav('events')" style="font-weight:600">Tüm Etkinlikleri Gör →</button>
+    </div>
     <div class="grid g2" id="home-events"></div>
   </div></div>
   <div class="divider"></div>
@@ -4596,7 +4602,7 @@ function evtCard(e){
       <div class="fomo-bar" style="margin-top:6px"><div class="fomo-bar-fill ${barColor}" style="width:${Math.min(pct,100)}%"></div></div>
       <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px">
         <div>${fomoTags}</div>
-        <span style="font-size:10px;color:var(--muted)">${isFull?'Kapasite Doldu':`${reg}/${cap}`}</span>
+        <span style="font-size:10px;color:var(--muted);font-weight:${isAlmostFull||isFull?'700':'400'}">${isFull?'❌ Kapasite Dolu':isAlmostFull?`⚠️ Son ${remaining} yer!`:`✓ ${remaining} boş yer`}</span>
       </div>
     </div>
   </div>`;
@@ -4639,6 +4645,14 @@ window.openEvent=id=>{
           </div>
           <div id="fomo-participants-list"><div class="spinner" style="margin:10px auto"></div></div>
         </div>
+        ${e.location?`
+        <!-- Konum -->
+        <div class="card" style="padding:20px;margin-top:14px">
+          <h3 style="font-size:15px;margin-bottom:10px">📍 Buluşma Noktası</h3>
+          <p style="font-size:13px;color:var(--muted);margin-bottom:10px">${e.location}</p>
+          <iframe src="https://www.google.com/maps?q=${encodeURIComponent(e.location)}&output=embed" width="100%" height="200" style="border:0;border-radius:8px" loading="lazy"></iframe>
+          <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}" target="_blank" class="btn btn-ghost btn-sm btn-full" style="margin-top:10px">Yol Tarifi Al →</a>
+        </div>`:''}
       </div>
       <div>
         <div class="card" style="padding:18px" id="fomo-detail-card">
@@ -8359,7 +8373,7 @@ function renderGroupSection(sec){
         </div>
       </div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Eklediğin etkinlikler Süper Admin onayından sonra sitede yayınlanır.</p>
-      <div id="admin-analytics-container" style="margin-bottom:20px"></div>
+      <div id="ga-analytics-container" style="margin-bottom:20px"></div>
       <div class="card" style="padding:20px;margin-bottom:18px;display:none" id="g-add-event-form">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Etkinlik</h3>
         <div class="form-row">
@@ -8564,7 +8578,7 @@ function renderGroupSection(sec){
 
   if(sec==='events'){
     setTimeout(gLoadEvents,100);
-    setTimeout(()=>renderAdminAnalytics&&renderAdminAnalytics(),500);
+    setTimeout(()=>loadGAAnalytics&&loadGAAnalytics(),200);
   }
   if(sec==='calendar')setTimeout(gLoadClubCalendar,100);
   if(sec==='club_races')setTimeout(gLoadClubRaces,100);
@@ -8768,6 +8782,26 @@ window.gSaveSettings=async()=>{
     }
     if(window.renderHomeData)window.renderHomeData();
   }catch(e){toast('Hata: '+e.message,'err');}
+};
+
+// ── GROUP ADMIN ANALYTICS ──
+window.loadGAAnalytics=async function(){
+  const el=document.getElementById('ga-analytics-container');
+  if(!el||!window.CU?.uid)return;
+  try{
+    const fb=window._fb;
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'events'),fb.where('groupAdminUid','==',window.CU.uid)));
+    const events=[];
+    snap.forEach(d=>events.push({id:d.id,...d.data()}));
+    const totalEvents=events.length;
+    const totalReg=events.reduce((sum,e)=>sum+(e.reg||0),0);
+    const avgReg=totalEvents>0?Math.round(totalReg/totalEvents):0;
+    const approvedCount=events.filter(e=>e.status==='approved').length;
+    el.innerHTML=`<div class="a-stats">
+      <div class="a-stat"><div class="l">Toplam Etkinlik</div><div class="n">${totalEvents}</div><div class="t">${approvedCount} onaylı</div></div>
+      <div class="a-stat"><div class="l">Toplam Katılımcı</div><div class="n">${totalReg}</div><div class="t">Ort. ${avgReg}/etkinlik</div></div>
+    </div>`;
+  }catch(e){el.innerHTML='<p style="color:var(--muted);font-size:12px">İstatistikler yüklenemedi.</p>';}
 };
 
 async function gLoadEvents(){

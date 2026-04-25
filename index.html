@@ -2582,6 +2582,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <div style="margin:10px 0">
         <div class="chk-row"><input type="checkbox" id="chk-kvkk"/><span>KVKK Aydınlatma Metni'ni okudum ve kabul ediyorum.</span></div>
         <div class="chk-row"><input type="checkbox" id="chk-terms"/><span>Kullanım Koşulları'nı kabul ediyorum.</span></div>
+        <div class="chk-row"><input type="checkbox" id="chk-push" checked/><span>🔔 Yaklaşan yarış, etkinlik ve takip ettiğim kulüplerden bildirim almak istiyorum.</span></div>
       </div>
       <button class="btn btn-or btn-full" style="margin-bottom:10px" onclick="doRegister()">Üye Ol</button>
       <div class="div-or">veya</div>
@@ -3090,8 +3091,14 @@ window.doRegister=async()=>{
   if(pass.length<6){toast('Şifre en az 6 karakter','err');return;}
   try{
     const cred=await createUserWithEmailAndPassword(auth,email,pass);
-    await setDoc(doc(db,'users',cred.user.uid),{name:name+' '+sname,email,role:'member',totalKm:0,eventCount:0,clubCount:0,badges:[],createdAt:serverTimestamp()});
+    const pushEnabled=document.getElementById('chk-push')?.checked||false;
+    await setDoc(doc(db,'users',cred.user.uid),{name:name+' '+sname,email,role:'member',pushEnabled,totalKm:0,eventCount:0,clubCount:0,badges:[],createdAt:serverTimestamp()});
     toast('Hoş geldin '+name+'! 🎉','ok');
+    if(pushEnabled){
+      setTimeout(()=>{
+        if(window.requestPushPermission)window.requestPushPermission();
+      },2000);
+    }
     document.getElementById('club-select-area').style.display='block';
   }catch(e){const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı'};toast(m[e.code]||e.message,'err');}
 };
@@ -7949,7 +7956,8 @@ function renderAdminSection(sec){
         </div>
       </div>
       <div class="card" style="padding:20px;margin-bottom:18px;border-left:4px solid var(--or)">
-        <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Kayıtlı kullanıcılara anlık push bildirimi gönder. Tüm kullanıcılara veya belirli bir kullanıcıya gönderebilirsin.</p>
+        <p style="font-size:13px;color:var(--muted);margin-bottom:8px">Kayıt sırasında bildirim izni veren kullanıcılara push gönderilir.</p>
+        <p style="font-size:12px;color:var(--muted2);margin-bottom:16px">💡 Kullanıcı kaydolurken "🔔 Yaklaşan yarış, etkinlik ve takip ettiğim kulüplerden bildirim almak istiyorum" seçeneğini işaretlemişse listeye dahildir.</p>
         <div class="form-grp"><label>Bildirim Başlığı</label><input id="pn-title" placeholder="örn: Yeni Yarış Eklendi 🏆"/></div>
         <div class="form-grp"><label>Bildirim Mesajı</label><textarea id="pn-body" rows="3" placeholder="örn: İstanbul Maratonu kayıtları açıldı! Hemen başvur."></textarea></div>
         <div class="form-grp"><label>Tıklama URL (opsiyonel)</label><input id="pn-url" placeholder="https://www.runclubturkiye.com/#races"/></div>

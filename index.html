@@ -4172,7 +4172,12 @@ async function loadEventsFromDB(){
   try{
     const snap=await getDocs(collection(db,'events'));
     const evts=[];
-    snap.forEach(d=>{const {id:_,...rest}=d.data();const e={id:d.id,...rest};if(!e.status||e.status==='approved')evts.push(e);});
+    const today=new Date().toISOString().split('T')[0];
+    snap.forEach(d=>{
+      const {id:_,...rest}=d.data();
+      const e={id:d.id,...rest};
+      if((!e.status||e.status==='approved')&&e.date>=today)evts.push(e);
+    });
     evts.sort((a,b)=>new Date(b.date||0)-new Date(a.date||0));
     if(evts.length>0)window.EVENTS=evts;
   }catch(e){console.warn('Events load:',e.message);}
@@ -4601,6 +4606,7 @@ window.filterEvts=q=>renderEvts(EVENTS.filter(e=>e.title.toLowerCase().includes(
 window.filterEvtCat=(cat,btn)=>{document.querySelectorAll('#pg-events .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderEvts(cat==='tüm'?EVENTS:EVENTS.filter(e=>e.cat===cat),'events-list');};
 window.openEvent=id=>{
   const e=EVENTS.find(x=>x.id===id);if(!e)return;
+  const club=e.clubId?window.CLUBS.find(c=>c.id===e.clubId):null;
   const reg=e.reg||0; const cap=e.cap||100;
   const pct=Math.round(reg/cap*100);
   const remaining=cap-reg;
@@ -4613,7 +4619,9 @@ window.openEvent=id=>{
       <div style="position:absolute;right:30px;top:50%;transform:translateY(-50%);font-size:70px;opacity:.1">${e.emoji||'🏃'}</div>
       <span class="tag tag-or">${e.cat}</span>
       <h1 style="font-size:clamp(18px,4vw,26px);margin:8px 0;color:#fff;line-height:1.2">${e.emoji||'🏃'} ${e.title}</h1>
+      ${club?`<div style="color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;margin-bottom:8px">🤝 ${club.name}</div>`:''}
       <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
+      ${e.desc?`<p style="color:rgba(255,255,255,0.8);font-size:13px;line-height:1.6;margin-top:12px">${e.desc}</p>`:''}
       <div class="fomo-countdown-wrap" id="ev-cd"></div>
     </div>
     <div style="" class="ev-detail-grid">

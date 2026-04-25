@@ -9299,7 +9299,12 @@ async function loadMyNotifications(){
   try{
     const fb=window._fb;
     const memSnap=await fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',CU.uid)));
-    const clubIds=[];memSnap.forEach(d=>clubIds.push(d.data().clubId));
+    const clubMap={};
+    memSnap.forEach(d=>{
+      const data=d.data();
+      clubMap[data.clubId]={joinedAt:data.joinedAt?.seconds||0};
+    });
+    const clubIds=Object.keys(clubMap);
     if(!clubIds.length){
       el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:36px">🔔</div><p>Katıldığın kulüpten henüz duyuru yok.</p></div>';
       return;
@@ -9307,7 +9312,14 @@ async function loadMyNotifications(){
     let allAnns=[];
     for(const clubId of clubIds.slice(0,10)){
       const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'announcements'),fb.where('clubId','==',clubId)));
-      snap.forEach(d=>allAnns.push({id:d.id,...d.data()}));
+      snap.forEach(d=>{
+        const ann={id:d.id,...d.data()};
+        const annCreatedAt=ann.createdAt?.seconds||0;
+        const joinedAt=clubMap[clubId].joinedAt;
+        if(annCreatedAt>=joinedAt){
+          allAnns.push(ann);
+        }
+      });
     }
     allAnns.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     const hiddenSet=new Set(JSON.parse(localStorage.getItem('notif_hidden_'+CU.uid)||'[]'));

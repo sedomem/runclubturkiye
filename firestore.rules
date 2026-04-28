@@ -163,6 +163,12 @@ service cloud.firestore {
       allow delete: if isAuth() && (isSuperAdmin() || resource.data.clubId != null);
     }
 
+    // Kulüp Yarış Takvimi
+    match /club_races/{id} { 
+      allow read: if true; 
+      allow write: if isSuperOrGroup(); 
+    }
+
     // Topluluk Pazarı
     match /marketplace_items/{id} {
       allow read: if true;
@@ -181,6 +187,18 @@ service cloud.firestore {
     match /messages/{id} {
       allow read, create: if isAuth();
       allow update, delete: if isSuperAdmin();
+    }
+
+    // Yarış Tartışmaları (Faz 1)
+    match /discussions/{id} {
+      allow read: if true;
+      allow create: if isAuth() && request.resource.data.userId == uid();
+      allow update: if isSuperAdmin() || (isAuth() && (
+        resource.data.userId == uid() ||
+        // Sadece upvotes alanını güncellemeye izin ver (giriş yapmış herkes)
+        request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes'])
+      ));
+      allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == uid());
     }
 
   }

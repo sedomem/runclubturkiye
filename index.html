@@ -617,6 +617,20 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   th,td{padding:8px 9px}
 }
 
+/* ━━ TARTIŞMA MERKEZİ ━━ */
+.disc-hub-grid{display:grid;grid-template-columns:280px 1fr;gap:20px}
+.disc-sidebar{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;position:sticky;top:80px;align-self:start;max-height:calc(100vh - 100px);overflow-y:auto}
+.disc-main{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:20px;min-height:400px}
+.disc-race-item{display:flex;flex-direction:column;gap:4px;padding:10px 12px;border-radius:8px;cursor:pointer;margin-bottom:6px;border:1px solid transparent;transition:all .2s}
+.disc-race-item:hover{background:var(--bg2);border-color:var(--border)}
+.disc-race-item.active{background:rgba(255,107,0,.1);border-color:var(--or)}
+.disc-race-item .name{font-size:13px;font-weight:600;color:var(--text)}
+.disc-race-item .meta{font-size:11px;color:var(--muted)}
+@media(max-width:768px){
+  .disc-hub-grid{grid-template-columns:1fr}
+  .disc-sidebar{position:relative;top:0;max-height:300px}
+}
+
 /* ━━ PAGE BANNER ━━ */
 .page-banner{position:relative;overflow:hidden;height:320px;background:#f97316}
 .page-banner.pb-events{background:linear-gradient(135deg,#0d1b2a,#1a3a5c)}
@@ -1220,6 +1234,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="nav('events')" id="nb-events" aria-label="Koşu Etkinlikleri">Etkinlikler</button>
     <button onclick="nav('clubs')" id="nb-clubs" aria-label="Koşu Kulüpleri ve Topluluklar">Topluluklar/Kulüpler</button>
     <button onclick="nav('races')" id="nb-races" aria-label="Yarış Takvimi ve Maratonlar">Yarış Takvimi</button>
+    <button onclick="nav('discussions')" id="nb-discussions" aria-label="Yarış Tartışma Merkezi">💬 Tartışmalar</button>
     <button onclick="nav('firsatlar')" id="nb-firsatlar" aria-label="Koşu Ekipmanı Fırsatları">🎁 Fırsatlar</button>
     <button onclick="nav('blog')" id="nb-blog" aria-label="Koşu Blog ve Yazılar">Blog</button>
     <button onclick="nav('community')" id="nb-community" aria-label="Topluluk Akışı">🏃 Topluluk</button>
@@ -1540,6 +1555,36 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <div class="grid g3" id="races-list"></div>
 </div></div>
 <div class="pg" id="pg-race-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('races')" style="margin-bottom:18px">← Geri</button><div id="race-detail-content"></div></div></div>
+
+<!-- TARTIŞMA MERKEZİ -->
+<div class="pg" id="pg-discussions">
+  <div class="container sec">
+    <h2 style="margin-bottom:8px">💬 Yarış Tartışma Merkezi</h2>
+    <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Yarış deneyimlerini paylaş, başka koşuculardan ipuçları al.</p>
+    <div class="disc-hub-grid">
+      <!-- SOL: Yarış Listesi -->
+      <aside class="disc-sidebar">
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <input type="text" id="disc-search" placeholder="🔍 Yarış ara..." oninput="filterDiscRaces()" style="flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:13px"/>
+        </div>
+        <div id="disc-admin-add" style="display:none;margin-bottom:12px">
+          <button class="btn btn-or btn-sm btn-full" onclick="toggleDiscRaceForm()">+ Yeni Yarış Başlığı</button>
+          <div id="disc-race-form" style="display:none;margin-top:10px;padding:12px;background:var(--bg2);border-radius:8px">
+            <input type="text" id="new-disc-race-name" placeholder="Yarış adı" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <input type="date" id="new-disc-race-date" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <input type="text" id="new-disc-race-loc" placeholder="Konum" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <button class="btn btn-or btn-sm btn-full" onclick="addDiscRace()">Ekle</button>
+          </div>
+        </div>
+        <div id="disc-races-list"><div class="spinner" style="margin:20px auto"></div></div>
+      </aside>
+      <!-- SAĞ: Tartışma Alanı -->
+      <main class="disc-main">
+        <div id="disc-content"><div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:14px">💬</div><p>Sol taraftan bir yarış seç ve tartışmaları gör.</p></div></div>
+      </main>
+    </div>
+  </div>
+</div>
 
 <!-- FIRSATLAR LİSTESİ -->
 <div class="pg" id="pg-firsatlar">
@@ -4408,6 +4453,7 @@ window.nav=id=>{
   if(id==='events'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('events');}catch(e){}; if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
   if(id==='clubs'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('clubs');}catch(e){}; if(window.loadClubsFromDB)window.loadClubsFromDB().then(()=>renderClubsPage()).catch(()=>renderClubsPage());else renderClubsPage();}
   if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.RACES&&window.RACES.length){renderRaceList();}else if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
+  if(id==='discussions'){if(typeof renderDiscHub==='function')renderDiscHub();}
   if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
@@ -4945,6 +4991,7 @@ const ROUTES = {
   "clubs":         {path:"/kulupler",            title:"Koşu Kulüpleri — RunClubTürkiye",              desc:"Türkiye koşu kulüplerini keşfet, katıl veya kendi kulübünü kur."},
   "community":     {path:"/topluluk",            title:"Topluluk — RunClubTürkiye",                  desc:"Koşu topluluğu akışı, liderlik sıralaması ve aktif sporcular."},
   "races":         {path:"/yaris-takvimi",       title:"Yarış Takvimi — RunClubTürkiye",               desc:"Türkiye maraton, trail ve ultra yarışları. Tüm yarış takvimi."},
+  "discussions":   {path:"/tartismalar",         title:"Yarış Tartışma Merkezi — RunClubTürkiye",      desc:"Yarış deneyimlerini paylaş, koşuculardan ipuçları al."},
   "blog":          {path:"/haberler",            title:"Koşu Haberleri — RunClubTürkiye",              desc:"Koşu haberleri, antrenman ipuçları ve yarış rehberleri."},
   "firsatlar":     {path:"/firsatlar",           title:"Fırsatlar — RunClubTürkiye",                   desc:"Koşu ekipmanı ve beslenme markalarından özel indirimler."},
   "contact":       {path:"/iletisim",            title:"İletişim — RunClubTürkiye",                    desc:"RunClubTürkiye ile iletişime geç."},
@@ -5970,7 +6017,7 @@ window.postDiscussion = async function(raceId, raceName){
   const ta = document.getElementById('disc-input-'+raceId);
   const comment = ta?.value.trim();
   if(!comment){ toast('Yorum boş olamaz','err'); return; }
-  if(comment.length>1000){ toast('En fazla 1000 karakter','err'); return; }
+  if(comment.length>1500){ toast('En fazla 1500 karakter','err'); return; }
   const tags = [...document.querySelectorAll('.disc-tag-'+raceId+':checked')].map(c=>c.value);
   try{
     const fb = window._fb;
@@ -6088,6 +6135,116 @@ window.loadAdminDiscussions = async function(){
         </td>
       </tr>`).join('') + '</tbody></table></div>';
   }catch(e){ el.innerHTML='<p style="color:var(--muted)">'+e.message+'</p>'; }
+};
+
+// ════════════════════════════════════════════════════════════════════
+// TARTIŞMA MERKEZİ (2 sütunlu)
+// ════════════════════════════════════════════════════════════════════
+window._selectedDiscRaceId = null;
+
+window.renderDiscHub = function(){
+  renderDiscRacesList();
+  const adminEl = document.getElementById('disc-admin-add');
+  if(adminEl) adminEl.style.display = (window.CU?.role === 'superadmin') ? 'block' : 'none';
+};
+
+window.renderDiscRacesList = function(){
+  const el = document.getElementById('disc-races-list');
+  if(!el) return;
+  const q = (document.getElementById('disc-search')?.value||'').toLowerCase().trim();
+  let races = window.RACES || [];
+  if(q) races = races.filter(r => (r.name||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q));
+  if(!races.length){ el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px;font-size:12px">Yarış bulunamadı.</p>'; return; }
+  el.innerHTML = races.map(r => {
+    const active = window._selectedDiscRaceId === r.id ? 'active' : '';
+    return `<div class="disc-race-item ${active}" onclick="selectDiscRace('${r.id}')">
+      <div class="name">🏆 ${r.name||'Yarış'}</div>
+      <div class="meta">${r.date||''} · ${r.location||''}</div>
+    </div>`;
+  }).join('');
+};
+
+window.filterDiscRaces = function(){ renderDiscRacesList(); };
+
+window.selectDiscRace = function(raceId){
+  window._selectedDiscRaceId = raceId;
+  renderDiscRacesList();
+  const r = (window.RACES||[]).find(x=>x.id===raceId);
+  if(!r) return;
+  const main = document.getElementById('disc-content');
+  if(!main) return;
+  main.innerHTML = `
+    <div style="border-bottom:1px solid var(--border);padding-bottom:14px;margin-bottom:16px">
+      <h2 style="font-size:18px;margin-bottom:4px">🏆 ${r.name}</h2>
+      <div style="font-size:12px;color:var(--muted)">📅 ${r.date||'—'} · 📍 ${r.location||'—'}</div>
+      <span id="disc-count-${r.id}" style="font-size:11px;color:var(--muted);margin-top:6px;display:inline-block">Yükleniyor...</span>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
+      <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
+      <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
+      <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
+      <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
+      <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
+      <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
+    </div>
+    ${window.CU?`
+    <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+      <textarea id="disc-input-${r.id}" rows="3" maxlength="1500" placeholder="Bu yarış hakkındaki deneyimini paylaş..." oninput="updateDiscCharCount('${r.id}')" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card);color:var(--text)"></textarea>
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:11px;color:var(--muted)">
+        <span>Hashtag seç:</span>
+        <span id="disc-char-${r.id}">0 / 1500</span>
+      </div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
+        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
+        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
+        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
+        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
+      </div>
+      <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
+    </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
+    <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+  `;
+  loadDiscussions(raceId);
+};
+
+window.updateDiscCharCount = function(raceId){
+  const ta = document.getElementById('disc-input-'+raceId);
+  const lbl = document.getElementById('disc-char-'+raceId);
+  if(ta && lbl){
+    const len = ta.value.length;
+    lbl.textContent = len + ' / 1500';
+    lbl.style.color = len > 1400 ? 'var(--or)' : 'var(--muted)';
+  }
+};
+
+window.toggleDiscRaceForm = function(){
+  const form = document.getElementById('disc-race-form');
+  if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+};
+
+window.addDiscRace = async function(){
+  if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
+  const name = document.getElementById('new-disc-race-name').value.trim();
+  const date = document.getElementById('new-disc-race-date').value;
+  const loc = document.getElementById('new-disc-race-loc').value.trim();
+  if(!name){ toast('Yarış adı gerekli','err'); return; }
+  try{
+    const fb = window._fb;
+    const r = await fb.addDoc(fb.collection(fb.db,'races'), {
+      name, date: date||'', location: loc||'',
+      slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
+      createdAt: fb.serverTimestamp()
+    });
+    if(!window.RACES) window.RACES = [];
+    window.RACES.unshift({id:r.id, name, date:date||'', location:loc||''});
+    document.getElementById('new-disc-race-name').value='';
+    document.getElementById('new-disc-race-date').value='';
+    document.getElementById('new-disc-race-loc').value='';
+    toggleDiscRaceForm();
+    renderDiscRacesList();
+    toast('Yarış başlığı eklendi ✓','ok');
+  }catch(e){ toast('Hata: '+e.message,'err'); }
 };
 
 window.filterBlogCat=function(cat,btn){

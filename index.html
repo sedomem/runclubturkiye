@@ -2514,6 +2514,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button onclick="aNav('community',this)">🏃 Topluluk</button>
     <button onclick="aNav('performances',this)">🏅 Performanslar</button>
     <button onclick="aNav('pushnotif',this)">🔔 Bildirimler</button>
+    <button onclick="aNav('discussions',this)">💬 Yorum Moderasyon</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
   </div>
@@ -5834,9 +5835,40 @@ window.openRace=id=>{
           </div>
         </div>
       </div>
+    </div>
+    <!-- ── TARTIŞMA MODÜLÜ ── -->
+    <div class="card" style="padding:24px;margin-top:20px">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;flex-wrap:wrap;gap:10px">
+        <h2 style="font-size:18px;margin:0">💬 Yarış Tartışmaları</h2>
+        <span style="font-size:12px;color:var(--muted)" id="disc-count-${r.id}">Yükleniyor...</span>
+      </div>
+      <!-- Tag Filtreleme -->
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
+        <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
+      </div>
+      <!-- Yorum Yazma -->
+      ${window.CU?`
+      <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+        <textarea id="disc-input-${r.id}" rows="3" placeholder="Bu yarış hakkındaki deneyimini paylaş..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card)"></textarea>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
+        </div>
+        <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
+      </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
+      <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
     </div>`;
   nav('race-detail');
   if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'');
+  setTimeout(()=>loadDiscussions&&loadDiscussions(r.id),100);
 };
 
 // ── BLOG ──
@@ -5856,6 +5888,208 @@ function renderBlogList(catFilter){
   const filtered=catFilter?posts.filter(p=>p.kategori===catFilter):posts;
   el.innerHTML=filtered.map(blogCard).join('')||'<p style="color:var(--muted);padding:20px">Yazı bulunamadı.</p>';
 }
+// ════════════════════════════════════════════════════════════════════
+// YARIŞ TARTIŞMA MODÜLÜ (Faz 1)
+// ════════════════════════════════════════════════════════════════════
+window._discussionsByRace = {};
+window._discussionUnsubs = {};
+
+window.loadDiscussions = function(raceId){
+  const fb = window._fb;
+  if(!fb || !raceId) return;
+  if(window._discussionUnsubs[raceId]){ try{window._discussionUnsubs[raceId]();}catch(e){} }
+  const q = fb.query(fb.collection(fb.db,'discussions'), fb.where('raceId','==',raceId));
+  window._discussionUnsubs[raceId] = fb.onSnapshot(q, (snap)=>{
+    const items = [];
+    snap.forEach(d => { const {id:_,...rest} = d.data(); items.push({id:d.id, ...rest}); });
+    window._discussionsByRace[raceId] = items;
+    renderDiscussions(raceId);
+  }, (err)=>{ console.warn('[Disc] listener:',err.message); });
+};
+
+window.renderDiscussions = function(raceId){
+  const el = document.getElementById('discussions-list-'+raceId);
+  const cnt = document.getElementById('disc-count-'+raceId);
+  if(!el) return;
+  const activeTag = el.dataset.activeTag || '';
+  let items = (window._discussionsByRace[raceId]||[]).filter(d => d.isApproved !== false);
+  if(activeTag) items = items.filter(d => (d.tags||[]).includes(activeTag));
+  items.sort((a,b)=>{
+    if((b.isPinned?1:0) !== (a.isPinned?1:0)) return (b.isPinned?1:0) - (a.isPinned?1:0);
+    const av=(a.upvotes||[]).length, bv=(b.upvotes||[]).length;
+    if(av!==bv) return bv-av;
+    return (b.timestamp?.seconds||0) - (a.timestamp?.seconds||0);
+  });
+  if(cnt) cnt.textContent = items.length + ' yorum';
+  if(!items.length){ el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz yorum yok. İlk yorumu sen yap!</p>'; return; }
+  const isAdmin = window.CU?.role === 'superadmin';
+  const myUid = window.CU?.uid;
+  el.innerHTML = items.map(d=>{
+    const upvotes = d.upvotes||[];
+    const hasVoted = myUid && upvotes.includes(myUid);
+    const tags = (d.tags||[]).map(t=>`<span class="tag tag-gy" style="font-size:10px">#${t}</span>`).join(' ');
+    const date = d.timestamp?.toDate?.()?.toLocaleDateString('tr')||'';
+    return `<div class="card" style="padding:14px;margin-bottom:10px;${d.isPinned?'border-left:3px solid var(--or);background:rgba(255,107,0,.04)':''}">
+      ${d.isPinned?'<div style="font-size:11px;color:var(--or);font-weight:700;margin-bottom:6px">📌 SABİTLENMİŞ</div>':''}
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px">
+        <div style="flex:1;min-width:0">
+          <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
+            <b style="font-size:13px">${d.userName||'Kullanıcı'}</b>
+            ${d.isVerifiedFinisher?'<span style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">✓ DOĞRULANMIŞ</span>':''}
+            <span style="font-size:11px;color:var(--muted)">${date}</span>
+          </div>
+          <p style="font-size:13px;line-height:1.6;margin-bottom:8px;white-space:pre-wrap">${(d.comment||'').replace(/</g,'&lt;')}</p>
+          ${tags?`<div style="display:flex;gap:4px;flex-wrap:wrap">${tags}</div>`:''}
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;align-items:center;margin-top:10px;padding-top:10px;border-top:1px solid var(--border);flex-wrap:wrap">
+        <button class="btn btn-ghost btn-sm" onclick="upvoteDiscussion('${d.id}')" style="font-size:11px;${hasVoted?'background:var(--or);color:#fff':''}">▲ ${upvotes.length}</button>
+        ${isAdmin?`
+          <button class="btn btn-ghost btn-sm" onclick="pinDiscussion('${d.id}',${!d.isPinned})" style="font-size:11px">${d.isPinned?'📌 Çıkar':'📌 Sabitle'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="verifyDiscussionUser('${d.id}','${d.userId}',${!d.isVerifiedFinisher})" style="font-size:11px">${d.isVerifiedFinisher?'✗ Rozet Kaldır':'✓ Doğrula'}</button>
+          <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑</button>
+        `:''}
+        ${!isAdmin && d.userId===myUid?`<button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>`:''}
+      </div>
+    </div>`;
+  }).join('');
+};
+
+window.filterDiscussions = function(raceId, tag, btn){
+  const el = document.getElementById('discussions-list-'+raceId);
+  if(!el) return;
+  el.dataset.activeTag = tag;
+  const parent = btn?.parentElement;
+  if(parent) parent.querySelectorAll('.filt').forEach(b=>b.classList.remove('on'));
+  if(btn) btn.classList.add('on');
+  renderDiscussions(raceId);
+};
+
+window.postDiscussion = async function(raceId, raceName){
+  if(!window.CU){ openAuth('login'); return; }
+  const ta = document.getElementById('disc-input-'+raceId);
+  const comment = ta?.value.trim();
+  if(!comment){ toast('Yorum boş olamaz','err'); return; }
+  if(comment.length>1000){ toast('En fazla 1000 karakter','err'); return; }
+  const tags = [...document.querySelectorAll('.disc-tag-'+raceId+':checked')].map(c=>c.value);
+  try{
+    const fb = window._fb;
+    await fb.addDoc(fb.collection(fb.db,'discussions'),{
+      raceId, raceName: raceName||'',
+      userId: window.CU.uid,
+      userName: window.CU.name||window.CU.email||'Kullanıcı',
+      comment, tags,
+      upvotes: [],
+      isPinned: false,
+      isApproved: true,
+      isVerifiedFinisher: false,
+      timestamp: fb.serverTimestamp()
+    });
+    ta.value=''; document.querySelectorAll('.disc-tag-'+raceId).forEach(c=>c.checked=false);
+    toast('Yorum paylaşıldı ✓','ok');
+  }catch(e){ toast('Hata: '+e.message,'err'); }
+};
+
+window.upvoteDiscussion = async function(discId){
+  if(!window.CU){ openAuth('login'); return; }
+  try{
+    const fb = window._fb;
+    const ref = fb.doc(fb.db,'discussions',discId);
+    const snap = await fb.getDoc(ref);
+    if(!snap.exists()) return;
+    const upvotes = snap.data().upvotes||[];
+    const uid = window.CU.uid;
+    const newUpvotes = upvotes.includes(uid) ? upvotes.filter(u=>u!==uid) : [...upvotes,uid];
+    await fb.updateDoc(ref, { upvotes: newUpvotes });
+  }catch(e){ toast('Hata: '+e.message,'err'); }
+};
+
+window.pinDiscussion = async function(discId, pin){
+  if(window.CU?.role !== 'superadmin') return;
+  try{
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'discussions',discId), { isPinned: pin });
+    toast(pin?'Sabitlendi 📌':'Sabitleme kaldırıldı','ok');
+  }catch(e){ toast('Hata: '+e.message,'err'); }
+};
+
+window.verifyDiscussionUser = async function(discId, userId, verify){
+  if(window.CU?.role !== 'superadmin') return;
+  try{
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'discussions',discId), { isVerifiedFinisher: verify });
+    toast(verify?'Doğrulandı ✓':'Rozet kaldırıldı','ok');
+  }catch(e){ toast('Hata: '+e.message,'err'); }
+};
+
+window.deleteDiscussion = async function(discId){
+  if(!confirm('Bu yorumu silmek istediğine emin misin?')) return;
+  try{
+    const fb = window._fb;
+    await fb.deleteDoc(fb.doc(fb.db,'discussions',discId));
+    toast('Silindi','ok');
+  }catch(e){ toast('Hata: '+e.message,'err'); }
+};
+
+window.loadMyDiscussions = async function(){
+  const el = document.getElementById('dash-my-discussions');
+  if(!el || !window.CU) return;
+  try{
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.query(fb.collection(fb.db,'discussions'), fb.where('userId','==',window.CU.uid)));
+    const items = [];
+    snap.forEach(d=>items.push({id:d.id, ...d.data()}));
+    items.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+    const totalUpvotes = items.reduce((sum,i)=>sum+((i.upvotes||[]).length),0);
+    const uniqueRaces = new Set(items.map(i=>i.raceId)).size;
+    el.innerHTML = `
+      <div class="a-stats" style="margin-bottom:16px">
+        <div class="a-stat"><div class="l">Yorumlarım</div><div class="n">${items.length}</div></div>
+        <div class="a-stat"><div class="l">Aldığım Beğeni</div><div class="n">${totalUpvotes}</div></div>
+        <div class="a-stat"><div class="l">Tartışma</div><div class="n">${uniqueRaces}</div></div>
+      </div>
+      ${items.length?items.map(d=>`
+        <div class="card" style="padding:14px;margin-bottom:10px">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;flex-wrap:wrap;gap:6px">
+            <b style="font-size:13px">🏆 ${d.raceName||'Yarış'}</b>
+            <span style="font-size:11px;color:var(--muted)">${d.timestamp?.toDate?.()?.toLocaleDateString('tr')||''}</span>
+          </div>
+          <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px">${(d.comment||'').substring(0,150)}${d.comment?.length>150?'...':''}</p>
+          <div style="display:flex;justify-content:space-between;align-items:center">
+            <span style="font-size:11px;color:var(--or);font-weight:700">▲ ${(d.upvotes||[]).length} beğeni</span>
+            ${d.isVerifiedFinisher?'<span style="font-size:10px;background:#10b981;color:#fff;padding:2px 8px;border-radius:10px">✓ DOĞRULANMIŞ</span>':''}
+          </div>
+        </div>`).join(''):'<p style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz yorum yapmadın.</p>'}
+    `;
+  }catch(e){ el.innerHTML='<p style="color:var(--muted)">Yüklenemedi.</p>'; }
+};
+
+window.loadAdminDiscussions = async function(){
+  const el = document.getElementById('admin-discussions-list');
+  if(!el) return;
+  try{
+    const fb = window._fb;
+    const snap = await fb.getDocs(fb.collection(fb.db,'discussions'));
+    const items = [];
+    snap.forEach(d=>items.push({id:d.id, ...d.data()}));
+    items.sort((a,b)=>(b.timestamp?.seconds||0)-(a.timestamp?.seconds||0));
+    if(!items.length){ el.innerHTML='<p style="color:var(--muted);padding:20px">Henüz yorum yok.</p>'; return; }
+    el.innerHTML = `<div style="overflow-x:auto"><table class="a-table"><thead><tr><th>Yarış</th><th>Kullanıcı</th><th>Yorum</th><th>▲</th><th>Durum</th><th>İşlem</th></tr></thead><tbody>` +
+      items.map(d=>`<tr>
+        <td style="font-size:11px">${d.raceName||'—'}</td>
+        <td style="font-size:11px">${d.userName||'—'}${d.isVerifiedFinisher?' ✓':''}</td>
+        <td style="font-size:11px;max-width:280px"><div style="max-height:60px;overflow:auto">${(d.comment||'').replace(/</g,'&lt;').substring(0,200)}</div></td>
+        <td style="font-size:11px">${(d.upvotes||[]).length}</td>
+        <td style="font-size:11px">${d.isPinned?'📌':''} ${d.isApproved===false?'🚫':'✓'}</td>
+        <td class="action-btns">
+          <button class="btn btn-ghost btn-sm" onclick="pinDiscussion('${d.id}',${!d.isPinned});setTimeout(loadAdminDiscussions,300)" style="font-size:10px">${d.isPinned?'Çıkar':'Sabitle'}</button>
+          <button class="btn btn-ghost btn-sm" onclick="verifyDiscussionUser('${d.id}','${d.userId}',${!d.isVerifiedFinisher});setTimeout(loadAdminDiscussions,300)" style="font-size:10px">${d.isVerifiedFinisher?'Rozeti Kaldır':'Doğrula'}</button>
+          <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}');setTimeout(loadAdminDiscussions,500)" style="font-size:10px">🗑</button>
+        </td>
+      </tr>`).join('') + '</tbody></table></div>';
+  }catch(e){ el.innerHTML='<p style="color:var(--muted)">'+e.message+'</p>'; }
+};
+
 window.filterBlogCat=function(cat,btn){
   document.querySelectorAll('#blog-cat-strip .filt').forEach(b=>b.classList.remove('on'));
   if(btn)btn.classList.add('on');
@@ -7486,6 +7720,7 @@ function buildDashboard(){
     {id:'my-events',ico:'📅',l:'Etkinliklerim'},
     {id:'my-clubs',ico:'🤝',l:'Kulüplerim'},
     {id:'my-km',ico:'🏃',l:'KM Takibi'},
+    {id:'my-discussions',ico:'💬',l:'Yorumlarım'},
     {id:'badges',ico:'🏅',l:'Rozetler'},
     {id:'profile-tab',ico:'⚙',l:'Profil'},
   ].map((n,i)=>`<button class="${i===0?'on':''}" id="dash-btn-${n.id}" onclick="showDash('${n.id}',this)">${n.ico} ${n.l}</button>`).join('')+'<button onclick="window.logout()" style="margin-top:12px;color:#f87171;background:transparent;border:none;cursor:pointer;font-size:14px;padding:8px 0;width:100%;text-align:left">🚪 Çıkış Yap</button>';
@@ -7564,9 +7799,12 @@ function buildDashboard(){
     <div class="dash-content" id="dp-badges"><h2 style="margin-bottom:16px">Rozetlerim</h2>
       <div class="badge-grid">${BADGE_RULES.map(b=>`<div class="badge-it ${myBadges.includes(b.id)?'earned':''}"><div class="bi">${myBadges.includes(b.id)?b.ico:'🔒'}</div><div class="bn">${b.name}</div><div class="bd">${b.desc}</div></div>`).join('')}</div>
     </div>
+    <div class="dash-content" id="dp-my-discussions"><h2 style="margin-bottom:16px">💬 Yorumlarım</h2>
+      <div id="dash-my-discussions"><div class="spinner" style="margin:20px auto"></div></div>
+    </div>
     <div class="dash-content" id="dp-profile-tab"><h2 style="margin-bottom:14px">Profil</h2><button class="btn btn-or btn-sm" onclick="nav('profile')">Profil Sayfasına Git →</button></div>`;
   // Kulüpleri ve etkinlikleri yükle
-  loadMyClubs();loadMyEvents();loadMyNotifications();loadKmEvents();loadOverviewRecent();loadClubEvents();loadClubRacesForUser();
+  loadMyClubs();loadMyEvents();loadMyNotifications();loadKmEvents();loadOverviewRecent();loadClubEvents();loadClubRacesForUser();loadMyDiscussions();
 }
 async function loadMyClubs(){
   const el=document.getElementById('dash-my-clubs-list');if(!el)return;
@@ -7940,6 +8178,15 @@ function renderAdminSection(sec){
     return;
   }
   if(sec==='ticker')setTimeout(()=>loadTickerAdmin(),100);
+  if(sec==='discussions'){
+    main.innerHTML=`<h2 style="margin-bottom:18px">💬 Yorum Moderasyon</h2>
+      <div class="card" style="padding:20px">
+        <p style="font-size:13px;color:var(--muted);margin-bottom:14px">Tüm yarış yorumlarını yönet. Sabitle, doğrulanmış koşucu rozeti ver veya sil.</p>
+        <div id="admin-discussions-list"><div class="spinner" style="margin:20px auto"></div></div>
+      </div>`;
+    setTimeout(()=>loadAdminDiscussions&&loadAdminDiscussions(),100);
+    return;
+  }
   if(sec==='pushnotif'){
     main.innerHTML=`<h2 style="margin-bottom:18px">🔔 Push Bildirim Gönder</h2>
 

@@ -1570,9 +1570,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
         <div id="disc-admin-add" style="display:none;margin-bottom:12px">
           <button class="btn btn-or btn-sm btn-full" onclick="toggleDiscRaceForm()">+ Yeni Yarış Başlığı</button>
           <div id="disc-race-form" style="display:none;margin-top:10px;padding:12px;background:var(--bg2);border-radius:8px">
-            <input type="text" id="new-disc-race-name" placeholder="Yarış adı" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
-            <input type="date" id="new-disc-race-date" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
-            <input type="text" id="new-disc-race-loc" placeholder="Konum" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <input type="text" id="new-disc-race-name" placeholder="Yarış adı *" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <input type="date" id="new-disc-race-date" placeholder="Tarih (opsiyonel)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <input type="text" id="new-disc-race-loc" placeholder="Konum (opsiyonel)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
             <button class="btn btn-or btn-sm btn-full" onclick="addDiscRace()">Ekle</button>
           </div>
         </div>
@@ -6226,18 +6226,23 @@ window.toggleDiscRaceForm = function(){
 window.addDiscRace = async function(){
   if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
   const name = document.getElementById('new-disc-race-name').value.trim();
-  const date = document.getElementById('new-disc-race-date').value;
+  let date = document.getElementById('new-disc-race-date').value;
   const loc = document.getElementById('new-disc-race-loc').value.trim();
   if(!name){ toast('Yarış adı gerekli','err'); return; }
+  // Tarih yoksa bugünün tarihi
+  if(!date){
+    const today = new Date();
+    date = today.toISOString().split('T')[0];
+  }
   try{
     const fb = window._fb;
     const r = await fb.addDoc(fb.collection(fb.db,'races'), {
-      name, date: date||'', location: loc||'',
+      name, date, location: loc||'',
       slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
       createdAt: fb.serverTimestamp()
     });
     if(!window.RACES) window.RACES = [];
-    window.RACES.unshift({id:r.id, name, date:date||'', location:loc||''});
+    window.RACES.unshift({id:r.id, name, date, location:loc||''});
     document.getElementById('new-disc-race-name').value='';
     document.getElementById('new-disc-race-date').value='';
     document.getElementById('new-disc-race-loc').value='';

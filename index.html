@@ -2875,7 +2875,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,writeBatch}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getStorage,ref,uploadBytes,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import{getMessaging,getToken,onMessage}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
@@ -3045,7 +3045,7 @@ window.resetServiceWorker = async function() {
 const storage=getStorage(app);
 const gp=new GoogleAuthProvider();
 const SUPER_EMAIL='sedomem@gmail.com';
-window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
+window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,writeBatch,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
 
 onAuthStateChanged(auth,async user=>{
   // Auth state geldi — loading'i HEMEN kapat
@@ -6319,10 +6319,12 @@ window.deleteDiscRace = async function(raceId){
     const fb = window._fb;
     // Önce yarışa ait tartışmaları sil
     const discSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'discussions'), fb.where('raceId','==',raceId)));
-    const batch = fb.writeBatch(fb.db);
-    discSnap.forEach(d => batch.delete(d.ref));
-    await batch.commit();
-    console.log('[deleteDiscRace] Tartışmalar silindi:', discSnap.size);
+    if(discSnap.size > 0){
+      const batch = fb.writeBatch(fb.db);
+      discSnap.forEach(d => batch.delete(d.ref));
+      await batch.commit();
+      console.log('[deleteDiscRace] Tartışmalar silindi:', discSnap.size);
+    }
     // Yarışı sil
     await fb.deleteDoc(fb.doc(fb.db,'races',raceId));
     console.log('[deleteDiscRace] Yarış silindi:', raceId);

@@ -4287,17 +4287,18 @@ async function loadRacesFromDB(){
     const todayStr=new Date().toISOString().split('T')[0];
     let snap;
     try{
-      snap=await getDocs(query(collection(db,'races'),where('date','>=',todayStr),orderBy('date','asc')));
-    }catch(idxErr){
-      console.warn('[Races] Index yok, tümü çekiliyor:',idxErr.message);
+      // TÜM yarışları çek (geçmiş + gelecek)
       snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
+    }catch(idxErr){
+      console.warn('[Races] Index hatası:',idxErr.message);
+      snap=await getDocs(collection(db,'races'));
     }
     const races=[];
     snap.forEach(d=>{const {id:_,...rest}=d.data();races.push({id:d.id,...rest});});
     const today=new Date();today.setHours(0,0,0,0);
     const upcoming=races.filter(r=>!r.date||new Date(r.date)>=today);
     window.RACES=[...upcoming,...races.filter(r=>r.date&&new Date(r.date)<today)];
-    console.log('[Races] loaded:',upcoming.length,'upcoming,',races.length-upcoming.length,'past');
+    console.log('[Races] loaded:',upcoming.length,'upcoming,',races.length-upcoming.length,'past, TOTAL:',races.length);
   }catch(e){console.warn('Races load:',e.message);}
 }
 window.loadRacesFromDB=loadRacesFromDB;
@@ -6240,7 +6241,16 @@ window.updateDiscCharCount = function(raceId){
 
 window.toggleDiscRaceForm = function(){
   const form = document.getElementById('disc-race-form');
-  if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if(!form) return;
+  if(form.style.display === 'none'){
+    form.style.display = 'block';
+    // Bugünün tarihini default olarak ekle
+    const today = new Date().toISOString().split('T')[0];
+    const dateInput = document.getElementById('new-disc-race-date');
+    if(dateInput && !dateInput.value) dateInput.value = today;
+  } else {
+    form.style.display = 'none';
+  }
 };
 
 window.addDiscRace = async function(){

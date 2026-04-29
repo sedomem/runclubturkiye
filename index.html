@@ -6143,7 +6143,18 @@ window.loadAdminDiscussions = async function(){
 window._selectedDiscRaceId = null;
 
 window.renderDiscHub = function(){
-  renderDiscRacesList();
+  // Yarışlar yüklenmemişse önce yükle
+  if(!window.RACES || window.RACES.length === 0){
+    const el = document.getElementById('disc-races-list');
+    if(el) el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
+    if(window.loadRacesFromDB){
+      window.loadRacesFromDB().then(()=>{
+        renderDiscRacesList();
+      });
+    }
+  } else {
+    renderDiscRacesList();
+  }
   const adminEl = document.getElementById('disc-admin-add');
   if(adminEl) adminEl.style.display = (window.CU?.role === 'superadmin') ? 'block' : 'none';
 };
@@ -6236,20 +6247,25 @@ window.addDiscRace = async function(){
   }
   try{
     const fb = window._fb;
-    const r = await fb.addDoc(fb.collection(fb.db,'races'), {
+    await fb.addDoc(fb.collection(fb.db,'races'), {
       name, date, location: loc||'',
       slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
       createdAt: fb.serverTimestamp()
     });
-    if(!window.RACES) window.RACES = [];
-    window.RACES.unshift({id:r.id, name, date, location:loc||''});
     document.getElementById('new-disc-race-name').value='';
     document.getElementById('new-disc-race-date').value='';
     document.getElementById('new-disc-race-loc').value='';
     toggleDiscRaceForm();
-    renderDiscRacesList();
     toast('Yarış başlığı eklendi ✓','ok');
-  }catch(e){ toast('Hata: '+e.message,'err'); }
+    // Firestore'dan tekrar yükle
+    if(window.loadRacesFromDB){
+      await window.loadRacesFromDB();
+      renderDiscRacesList();
+    }
+  }catch(e){ 
+    console.error('[addDiscRace]', e);
+    toast('Hata: '+e.message,'err'); 
+  }
 };
 
 window.filterBlogCat=function(cat,btn){

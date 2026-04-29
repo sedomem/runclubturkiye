@@ -626,6 +626,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .disc-race-item.active{background:rgba(255,107,0,.1);border-color:var(--or)}
 .disc-race-item .name{font-size:13px;font-weight:600;color:var(--text)}
 .disc-race-item .meta{font-size:11px;color:var(--muted)}
+.disc-item-actions{display:flex;gap:4px;margin-top:6px}
 @media(max-width:768px){
   .disc-hub-grid{grid-template-columns:1fr}
   .disc-sidebar{position:relative;top:0;max-height:300px}
@@ -1573,7 +1574,10 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
             <input type="text" id="new-disc-race-name" placeholder="Yarış adı *" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
             <input type="date" id="new-disc-race-date" placeholder="Tarih (opsiyonel)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
             <input type="text" id="new-disc-race-loc" placeholder="Konum (opsiyonel)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
-            <button class="btn btn-or btn-sm btn-full" onclick="addDiscRace()">Ekle</button>
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-or btn-sm" style="flex:1" id="disc-race-submit-btn" onclick="addDiscRace()">Ekle</button>
+              <button class="btn btn-ghost btn-sm" onclick="cancelDiscRaceForm()">İptal</button>
+            </div>
           </div>
         </div>
         <div id="disc-races-list"><div class="spinner" style="margin:20px auto"></div></div>
@@ -6175,11 +6179,16 @@ window.renderDiscRacesList = function(){
     console.log('[renderDiscRacesList] Boş liste gösterildi');
     return; 
   }
+  const isAdmin = window.CU?.role === 'superadmin';
   el.innerHTML = races.map(r => {
     const active = window._selectedDiscRaceId === r.id ? 'active' : '';
     return `<div class="disc-race-item ${active}" onclick="selectDiscRace('${r.id}')">
       <div class="name">🏆 ${r.name||'Yarış'}</div>
       <div class="meta">${r.date||''} · ${r.location||''}</div>
+      ${isAdmin?`<div class="disc-item-actions" onclick="event.stopPropagation()">
+        <button class="btn btn-ghost btn-sm" onclick="editDiscRace('${r.id}')" style="font-size:10px;padding:2px 6px">✏️</button>
+        <button class="btn btn-red btn-sm" onclick="deleteDiscRace('${r.id}')" style="font-size:10px;padding:2px 6px">🗑</button>
+      </div>`:''}
     </div>`;
   }).join('');
   console.log('[renderDiscRacesList] HTML render edildi');
@@ -6298,6 +6307,105 @@ window.addDiscRace = async function(){
     console.error('[addDiscRace] Error code:', e.code);
     console.error('[addDiscRace] Error message:', e.message);
     toast('Hata: '+e.message,'err'); 
+  }
+};
+
+window.deleteDiscRace = async function(raceId){
+  if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
+  const r = (window.RACES||[]).find(x=>x.id===raceId);
+  if(!r) return;
+  if(!confirm(`"${r.name}" yarışını silmek istediğine emin misin?\n\nBu yarışa ait tüm tartışmalar da silinecek!`)) return;
+  try{
+    const fb = window._fb;
+    // Önce yarışa ait tartışmaları sil
+    const discSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'discussions'), fb.where('raceId','==',raceId)));
+    const batch = fb.writeBatch(fb.db);
+    discSnap.forEach(d => batch.delete(d.ref));
+    await batch.commit();
+    console.log('[deleteDiscRace] Tartışmalar silindi:', discSnap.size);
+    // Yarışı sil
+    await fb.deleteDoc(fb.doc(fb.db,'races',raceId));
+    console.log('[deleteDiscRace] Yarış silindi:', raceId);
+    toast('Yarış silindi ✓','ok');
+    // Seçili yarış silindiyse temizle
+    if(window._selectedDiscRaceId === raceId){
+      window._selectedDiscRaceId = null;
+      const main = document.getElementById('disc-content');
+      if(main) main.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:14px">💬</div><p>Sol taraftan bir yarış seç ve tartışmaları gör.</p></div>';
+    }
+    // Liste güncelle
+    if(window.loadRacesFromDB){
+      await window.loadRacesFromDB();
+      renderDiscRacesList();
+    }
+  }catch(e){
+    console.error('[deleteDiscRace]', e);
+    toast('Hata: '+e.message,'err');
+  }
+};
+
+window.editDiscRace = function(raceId){
+  if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
+  const r = (window.RACES||[]).find(x=>x.id===raceId);
+  if(!r) return;
+  // Formu aç ve doldur
+  const form = document.getElementById('disc-race-form');
+  if(form) form.style.display = 'block';
+  document.getElementById('new-disc-race-name').value = r.name||'';
+  document.getElementById('new-disc-race-date').value = r.date||'';
+  document.getElementById('new-disc-race-loc').value = r.location||'';
+  // Buton metnini değiştir
+  const btn = document.getElementById('disc-race-submit-btn');
+  if(btn){
+    btn.textContent = 'Güncelle';
+    btn.onclick = () => updateDiscRace(raceId);
+  }
+};
+
+window.cancelDiscRaceForm = function(){
+  const form = document.getElementById('disc-race-form');
+  if(form) form.style.display = 'none';
+  document.getElementById('new-disc-race-name').value='';
+  document.getElementById('new-disc-race-date').value='';
+  document.getElementById('new-disc-race-loc').value='';
+  // Buton metnini geri al
+  const btn = document.getElementById('disc-race-submit-btn');
+  if(btn){
+    btn.textContent = 'Ekle';
+    btn.onclick = () => addDiscRace();
+  }
+};
+
+window.updateDiscRace = async function(raceId){
+  if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
+  const name = document.getElementById('new-disc-race-name').value.trim();
+  let date = document.getElementById('new-disc-race-date').value;
+  const loc = document.getElementById('new-disc-race-loc').value.trim();
+  if(!name){ toast('Yarış adı gerekli','err'); return; }
+  if(!date){
+    const today = new Date();
+    date = today.toISOString().split('T')[0];
+  }
+  try{
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'races',raceId), {
+      name, date, location: loc||'',
+      slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
+    });
+    cancelDiscRaceForm();
+    toast('Yarış güncellendi ✓','ok');
+    // Liste güncelle
+    if(window.loadRacesFromDB){
+      await window.loadRacesFromDB();
+      renderDiscRacesList();
+      // Seçili yarış güncellendiyse yeniden yükle
+      if(window._selectedDiscRaceId === raceId){
+        selectDiscRace(raceId);
+      }
+    }
+  }catch(e){
+    console.error('[updateDiscRace]', e);
+    toast('Hata: '+e.message,'err');
   }
 };
 

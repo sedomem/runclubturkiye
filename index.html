@@ -591,7 +591,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 /* ━━ RESPONSIVE ━━ */
 @media(max-width:768px){
-  #bottom-nav{display:flex}
+  #bottom-nav{display:flex;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;justify-content:flex-start;scrollbar-width:none}
+  #bottom-nav::-webkit-scrollbar{display:none}
+  #bottom-nav .bn-item{min-width:68px;flex:0 0 auto}
   body{padding-bottom:66px}
   .dash-wrap,.admin-wrap{grid-template-columns:1fr}
   .sidebar{display:none}
@@ -628,7 +630,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .disc-race-item .meta{font-size:11px;color:var(--muted)}
 @media(max-width:768px){
   .disc-hub-grid{grid-template-columns:1fr}
-  .disc-sidebar{position:relative;top:0;max-height:300px}
+  .disc-sidebar{position:relative;top:0;max-height:max-content;display:flex;flex-direction:row;overflow-x:auto;white-space:nowrap;padding-bottom:10px;margin-bottom:15px;border-bottom:1.5px solid var(--border);-webkit-overflow-scrolling:touch;}
+  .disc-race-item{min-width:200px;margin-right:10px;margin-bottom:0;}
+  .disc-main{padding:14px;min-height:300px;}
 }
 
 /* ━━ PAGE BANNER ━━ */
@@ -1308,6 +1312,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button class="mdr-btn" onclick="nav('community');closeMasterDrawer()"><span class="mdr-ico">🏃</span><span>Topluluk Akışı</span></button>
     <button class="mdr-btn" onclick="nav('firsatlar');closeMasterDrawer()"><span class="mdr-ico">🎁</span><span>Fırsatlar</span></button>
     <button class="mdr-btn" onclick="nav('blog');closeMasterDrawer()"><span class="mdr-ico">📰</span><span>Blog</span></button>
+    <button class="mdr-btn" onclick="nav('discussions');closeMasterDrawer()"><span class="mdr-ico">💬</span><span>Yarış Tartışma Merkezi</span></button>
     <button class="mdr-btn" onclick="nav('hakkimizda');closeMasterDrawer()"><span class="mdr-ico">ℹ️</span><span>Hakkımızda</span></button>
 
     <!-- Divider -->
@@ -1325,6 +1330,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <button class="mdr-btn" onclick="mdrDash('my-clubs')"><span class="mdr-ico">🤝</span><span>Kulüplerim</span></button>
       <button class="mdr-btn" onclick="mdrDash('club-events')"><span class="mdr-ico">🏟️</span><span>Kulüp Etkinlikleri</span></button>
       <button class="mdr-btn" onclick="mdrDash('my-km')"><span class="mdr-ico">🏃</span><span>KM Takibi</span></button>
+      <button class="mdr-btn" onclick="mdrDash('my-discussions')"><span class="mdr-ico">💬</span><span>Yorumlarım</span></button>
       <button class="mdr-btn" onclick="mdrDash('badges')"><span class="mdr-ico">🏅</span><span>Rozetler</span></button>
       <button class="mdr-btn" onclick="mdrDash('profile-tab')"><span class="mdr-ico">⚙️</span><span>Profil Ayarları</span></button>
 
@@ -1365,6 +1371,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <button class="bn-item" onclick="nav('events')"><div class="bi">📅</div><span>Etkinlik</span></button>
   <button class="bn-item" onclick="nav('firsatlar')"><div class="bi">🎁</div><span>Fırsatlar</span></button>
   <button class="bn-item" onclick="nav('races')"><div class="bi">🏆</div><span>Yarış</span></button>
+  <button class="bn-item" onclick="nav('discussions')"><div class="bi">💬</div><span>Tartışma</span></button>
   <button class="bn-item" onclick="nav('community')"><div class="bi">🏃</div><span>Topluluk</span></button>
   <button class="bn-item" onclick="nav('dashboard')"><div class="bi">👤</div><span>Profil</span></button>
 </div>
@@ -4287,10 +4294,10 @@ async function loadRacesFromDB(){
     const todayStr=new Date().toISOString().split('T')[0];
     let snap;
     try{
-      snap=await getDocs(query(collection(db,'races'),where('date','>=',todayStr),orderBy('date','asc')));
+      snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
     }catch(idxErr){
       console.warn('[Races] Index yok, tümü çekiliyor:',idxErr.message);
-      snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
+      snap=await getDocs(collection(db,'races'));
     }
     const races=[];
     snap.forEach(d=>{const {id:_,...rest}=d.data();races.push({id:d.id,...rest});});
@@ -4752,7 +4759,7 @@ window.openEvent=id=>{
               ?`<button class="btn btn-ghost btn-full" onclick="leaveEvent('${e.id}')">✗ Etkinlikten Ayrıl</button>`
               :`<button class="btn btn-or btn-full" id="rsvp-btn" onclick="rsvpEvent('${e.id}','${e.fee}')">🏃 Etkinliğe Kaydol</button>`
           }
-          <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(e))}">📅 Takvime Ekle</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick='addToCalendar(${JSON.stringify(e).replace(/'/g, "&#39;")})'>📅 Takvime Ekle</button>
           ${e.qr?`<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showQR('${e.id}','${e.title}')">📲 QR Check-in</button>`:''}
         </div>
       </div>
@@ -5996,7 +6003,10 @@ window.renderDiscussions = function(raceId){
           <button class="btn btn-ghost btn-sm" onclick="verifyDiscussionUser('${d.id}','${d.userId}',${!d.isVerifiedFinisher})" style="font-size:11px">${d.isVerifiedFinisher?'✗ Rozet Kaldır':'✓ Doğrula'}</button>
           <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑</button>
         `:''}
-        ${!isAdmin && d.userId===myUid?`<button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>`:''}
+        ${(!isAdmin && d.userId===myUid)?`
+          <button class="btn btn-ghost btn-sm" onclick="editMyDiscussion('${d.id}', '${(d.comment||'').replace(/'/g,"\\'")}')" style="font-size:11px">✏️ Düzenle</button>
+          <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>
+        `:''}
       </div>
     </div>`;
   }).join('');
@@ -6021,9 +6031,11 @@ window.postDiscussion = async function(raceId, raceName){
   const tags = [...document.querySelectorAll('.disc-tag-'+raceId+':checked')].map(c=>c.value);
   try{
     const fb = window._fb;
+    // Hata yakalama ve async await tam uyumlu, auth.currentUser.uid güvenliği
+    const uid = window.CU.uid; 
     await fb.addDoc(fb.collection(fb.db,'discussions'),{
       raceId, raceName: raceName||'',
-      userId: window.CU.uid,
+      userId: uid,
       userName: window.CU.name||window.CU.email||'Kullanıcı',
       comment, tags,
       upvotes: [],
@@ -6033,8 +6045,30 @@ window.postDiscussion = async function(raceId, raceName){
       timestamp: fb.serverTimestamp()
     });
     ta.value=''; document.querySelectorAll('.disc-tag-'+raceId).forEach(c=>c.checked=false);
+    updateDiscCharCount(raceId);
     toast('Yorum paylaşıldı ✓','ok');
-  }catch(e){ toast('Hata: '+e.message,'err'); }
+  }catch(e){ 
+    console.error(e);
+    toast('Hata: '+e.message,'err'); 
+  }
+};
+
+window.editMyDiscussion = async function(discId, currentComment) {
+  let newComment = prompt("Yorumunuzu düzenleyin (Maksimum 1500 karakter):", currentComment);
+  if (newComment === null) return;
+  newComment = newComment.trim();
+  if (!newComment) return toast("Yorum boş olamaz.", "err");
+  if (newComment.length > 1500) return toast("1500 karakter sınırını aştınız.", "err");
+  try {
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db, 'discussions', discId), {
+      comment: newComment,
+      timestamp: fb.serverTimestamp() // Güncellenme zamanı
+    });
+    toast('Yorum güncellendi ✓', 'ok');
+    if (window._selectedDiscRaceId) loadDiscussions(window._selectedDiscRaceId);
+    if (document.getElementById('dash-my-discussions')) loadMyDiscussions();
+  } catch(e) { toast('Hata: '+e.message, 'err'); }
 };
 
 window.upvoteDiscussion = async function(discId){
@@ -6075,6 +6109,17 @@ window.deleteDiscussion = async function(discId){
     const fb = window._fb;
     await fb.deleteDoc(fb.doc(fb.db,'discussions',discId));
     toast('Silindi','ok');
+    if(window._selectedDiscRaceId) loadDiscussions(window._selectedDiscRaceId);
+    if(document.getElementById('dash-my-discussions')) loadMyDiscussions();
+  }catch(e){ toast('Hata: '+e.message,'err'); }
+};
+
+window.toggleApproveDiscussion = async function(discId, approve){
+  if(window.CU?.role !== 'superadmin' && window.CU?.role !== 'admin') return;
+  try{
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'discussions',discId), { isApproved: approve });
+    toast(approve?'Yorum onaylandı':'Yorum gizlendi','ok');
   }catch(e){ toast('Hata: '+e.message,'err'); }
 };
 
@@ -6101,10 +6146,13 @@ window.loadMyDiscussions = async function(){
             <b style="font-size:13px">🏆 ${d.raceName||'Yarış'}</b>
             <span style="font-size:11px;color:var(--muted)">${d.timestamp?.toDate?.()?.toLocaleDateString('tr')||''}</span>
           </div>
-          <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px">${(d.comment||'').substring(0,150)}${d.comment?.length>150?'...':''}</p>
-          <div style="display:flex;justify-content:space-between;align-items:center">
+          <p style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px">${(d.comment||'').replace(/</g,'&lt;')}</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
             <span style="font-size:11px;color:var(--or);font-weight:700">▲ ${(d.upvotes||[]).length} beğeni</span>
-            ${d.isVerifiedFinisher?'<span style="font-size:10px;background:#10b981;color:#fff;padding:2px 8px;border-radius:10px">✓ DOĞRULANMIŞ</span>':''}
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="editMyDiscussion('${d.id}', '${(d.comment||'').replace(/'/g,"\\'")}')" style="font-size:11px">✏️ Düzenle</button>
+              <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>
+            </div>
           </div>
         </div>`).join(''):'<p style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz yorum yapmadın.</p>'}
     `;
@@ -6127,9 +6175,10 @@ window.loadAdminDiscussions = async function(){
         <td style="font-size:11px">${d.userName||'—'}${d.isVerifiedFinisher?' ✓':''}</td>
         <td style="font-size:11px;max-width:280px"><div style="max-height:60px;overflow:auto">${(d.comment||'').replace(/</g,'&lt;').substring(0,200)}</div></td>
         <td style="font-size:11px">${(d.upvotes||[]).length}</td>
-        <td style="font-size:11px">${d.isPinned?'📌':''} ${d.isApproved===false?'🚫':'✓'}</td>
+        <td style="font-size:11px">${d.isPinned?'📌':''} <span class="pill ${d.isApproved===false?'pill-re':'pill-gr'}">${d.isApproved===false?'🚫 Gizli':'✓ Onaylı'}</span></td>
         <td class="action-btns">
           <button class="btn btn-ghost btn-sm" onclick="pinDiscussion('${d.id}',${!d.isPinned});setTimeout(loadAdminDiscussions,300)" style="font-size:10px">${d.isPinned?'Çıkar':'Sabitle'}</button>
+          <button class="btn ${d.isApproved===false?'btn-green':'btn-ghost'} btn-sm" onclick="toggleApproveDiscussion('${d.id}',${d.isApproved===false});setTimeout(loadAdminDiscussions,300)" style="font-size:10px">${d.isApproved===false?'Onayla':'Gizle'}</button>
           <button class="btn btn-ghost btn-sm" onclick="verifyDiscussionUser('${d.id}','${d.userId}',${!d.isVerifiedFinisher});setTimeout(loadAdminDiscussions,300)" style="font-size:10px">${d.isVerifiedFinisher?'Rozeti Kaldır':'Doğrula'}</button>
           <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}');setTimeout(loadAdminDiscussions,500)" style="font-size:10px">🗑</button>
         </td>
@@ -6155,13 +6204,52 @@ window.renderDiscRacesList = function(){
   let races = window.RACES || [];
   if(q) races = races.filter(r => (r.name||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q));
   if(!races.length){ el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px;font-size:12px">Yarış bulunamadı.</p>'; return; }
+  const isAdmin = window.CU?.role === 'superadmin' || window.CU?.role === 'admin';
   el.innerHTML = races.map(r => {
     const active = window._selectedDiscRaceId === r.id ? 'active' : '';
-    return `<div class="disc-race-item ${active}" onclick="selectDiscRace('${r.id}')">
-      <div class="name">🏆 ${r.name||'Yarış'}</div>
-      <div class="meta">${r.date||''} · ${r.location||''}</div>
+    return `<div class="disc-race-item ${active}">
+      <div onclick="selectDiscRace('${r.id}')" style="flex:1">
+        <div class="name">🏆 ${r.name||'Yarış'}</div>
+        <div class="meta">${r.date||''} · ${r.location||''}</div>
+      </div>
+      ${isAdmin ? `
+      <div style="display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+        <button class="btn btn-ghost btn-sm" onclick="editDiscRace('${r.id}')" style="font-size:10px;padding:4px 8px">✏️</button>
+        <button class="btn btn-red btn-sm" onclick="deleteDiscRace('${r.id}')" style="font-size:10px;padding:4px 8px">🗑</button>
+      </div>
+      ` : ''}
     </div>`;
   }).join('');
+};
+
+window.editDiscRace = async function(id) {
+  if (window.CU?.role !== 'superadmin' && window.CU?.role !== 'admin') return;
+  const r = (window.RACES||[]).find(x=>x.id===id);
+  if (!r) return;
+  let newName = prompt("Yarış Başlığını Düzenle:", r.name);
+  if (!newName) return;
+  let newDate = prompt("Tarihi Düzenle (YYYY-AA-GG):", r.date);
+  let newLoc = prompt("Konumu Düzenle:", r.location);
+  try {
+    await window._fb.updateDoc(window._fb.doc(window._fb.db, 'races', id), {
+      name: newName, date: newDate||'', location: newLoc||''
+    });
+    toast("Başlık güncellendi", "ok");
+    r.name = newName; r.date = newDate; r.location = newLoc;
+    renderDiscRacesList();
+  } catch(e) { toast("Hata: "+e.message, "err"); }
+};
+
+window.deleteDiscRace = async function(id) {
+  if (window.CU?.role !== 'superadmin' && window.CU?.role !== 'admin') return;
+  if (!confirm("Bu yarış başlığını kalıcı olarak silmek istediğinize emin misiniz?")) return;
+  try {
+    await window._fb.deleteDoc(window._fb.doc(window._fb.db, 'races', id));
+    toast("Başlık silindi", "ok");
+    window.RACES = (window.RACES||[]).filter(x=>x.id!==id);
+    if(window._selectedDiscRaceId === id) { window._selectedDiscRaceId = null; document.getElementById('disc-content').innerHTML = '<p class="empty-state" style="padding:40px"><span class="empty-ico">💬</span><br/>Sol taraftan bir yarış seç ve tartışmaları gör.</p>'; }
+    renderDiscRacesList();
+  } catch(e) { toast("Hata: "+e.message, "err"); }
 };
 
 window.filterDiscRaces = function(){ renderDiscRacesList(); };
@@ -11088,8 +11176,8 @@ window.renderClubCalendar = function(eventsArr) {
           </div>
         </div>
         <div class="shrink-0 pointer-events-auto">
-           ${!isPast ? `<button onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(ev))}" class="p-2 sm:px-[14px] sm:py-[8px] rounded-xl bg-slate-800 text-white text-[11px] font-bold hover:bg-orange-500 transition-colors hidden sm:flex items-center gap-2 shadow-sm"><span class="text-sm">📅</span> Takvime Ekle</button>
-           <button onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(ev))}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-orange-500 sm:hidden shadow-sm">📅</button>` : ''}
+           ${!isPast ? `<button onclick='addToPersonalCalendar(${JSON.stringify(ev)})' class="p-2 sm:px-[14px] sm:py-[8px] rounded-xl bg-slate-800 text-white text-[11px] font-bold hover:bg-orange-500 transition-colors hidden sm:flex items-center gap-2 shadow-sm"><span class="text-sm">📅</span> Takvime Ekle</button>
+           <button onclick='addToPersonalCalendar(${JSON.stringify(ev)})' class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-orange-500 sm:hidden shadow-sm">📅</button>` : ''}
         </div>
       </div>`;
   });
@@ -11250,7 +11338,7 @@ window.renderClubTrainings=async function(clubId){
               ${t.pace?`<span style="background:#fff6ed;color:#ea580c;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600">⚡ ${t.pace}</span>`:''}
             </div>
           </div>
-          ${(window.CU && window.CLUBS.find(c=>c.id===clubId)?.adminUid===window.CU.uid)? `<button onclick="window._trainClick(this)" data-id="${t.id}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">✎</button>` : ''}
+          ${(window.CU && window.CLUBS.find(c=>c.id===clubId)?.adminUid===window.CU.uid)? `<button onclick='window.openTrainingForm(${JSON.stringify(t).replace(/'/g, "&apos;")})' style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">✎</button>` : ''}
         </div>
       </div>`;
     });
@@ -11351,7 +11439,7 @@ window.gLoadClubCalendar = async function() {
           <td>${t.time}</td>
           <td>${t.location}</td>
           <td class="action-btns">
-            <button class="btn btn-ghost btn-sm" onclick="window._clubEvClick(this)" data-id="${t.id}">✏️</button>
+            <button class="btn btn-ghost btn-sm" onclick='window.gOpenClubEventForm(${JSON.stringify(t).replace(/'/g, "&apos;")})'>✏️</button>
             <button class="btn btn-red btn-sm" onclick="window.gDeleteClubTraining('${t.id}')">🗑</button>
           </td>
         </tr>`).join('')}
@@ -11454,7 +11542,7 @@ window.gLoadClubRaces = async function() {
           <td>${r.location}</td>
           <td><button class="btn btn-ghost btn-sm" onclick="gShowRaceParticipants('${r.id}','${r.name.replace(/'/g,"\\'")}')">👥 Gör</button></td>
           <td class="action-btns">
-            <button class="btn btn-ghost btn-sm" ${isPast?'disabled':''} onclick="window._raceFormClick(this)" data-id="${r.id}">✏️</button>
+            <button class="btn btn-ghost btn-sm" ${isPast?'disabled':''} onclick='window.gOpenClubRaceForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️</button>
             <button class="btn btn-red btn-sm" onclick="window.gDeleteClubRace('${r.id}')">🗑</button>
           </td>
         </tr>`;

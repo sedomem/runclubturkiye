@@ -4752,7 +4752,7 @@ window.openEvent=id=>{
               ?`<button class="btn btn-ghost btn-full" onclick="leaveEvent('${e.id}')">✗ Etkinlikten Ayrıl</button>`
               :`<button class="btn btn-or btn-full" id="rsvp-btn" onclick="rsvpEvent('${e.id}','${e.fee}')">🏃 Etkinliğe Kaydol</button>`
           }
-          <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick='addToCalendar(${JSON.stringify(e).replace(/'/g, "&#39;")})'>📅 Takvime Ekle</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(e))}">📅 Takvime Ekle</button>
           ${e.qr?`<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showQR('${e.id}','${e.title}')">📲 QR Check-in</button>`:''}
         </div>
       </div>
@@ -11088,8 +11088,8 @@ window.renderClubCalendar = function(eventsArr) {
           </div>
         </div>
         <div class="shrink-0 pointer-events-auto">
-           ${!isPast ? `<button onclick='addToPersonalCalendar(${JSON.stringify(ev)})' class="p-2 sm:px-[14px] sm:py-[8px] rounded-xl bg-slate-800 text-white text-[11px] font-bold hover:bg-orange-500 transition-colors hidden sm:flex items-center gap-2 shadow-sm"><span class="text-sm">📅</span> Takvime Ekle</button>
-           <button onclick='addToPersonalCalendar(${JSON.stringify(ev)})' class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-orange-500 sm:hidden shadow-sm">📅</button>` : ''}
+           ${!isPast ? `<button onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(ev))}" class="p-2 sm:px-[14px] sm:py-[8px] rounded-xl bg-slate-800 text-white text-[11px] font-bold hover:bg-orange-500 transition-colors hidden sm:flex items-center gap-2 shadow-sm"><span class="text-sm">📅</span> Takvime Ekle</button>
+           <button onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(ev))}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-orange-500 sm:hidden shadow-sm">📅</button>` : ''}
         </div>
       </div>`;
   });
@@ -11250,7 +11250,7 @@ window.renderClubTrainings=async function(clubId){
               ${t.pace?`<span style="background:#fff6ed;color:#ea580c;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600">⚡ ${t.pace}</span>`:''}
             </div>
           </div>
-          ${(window.CU && window.CLUBS.find(c=>c.id===clubId)?.adminUid===window.CU.uid)? `<button onclick='window.openTrainingForm(${JSON.stringify(t).replace(/'/g, "&apos;")})' style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">✎</button>` : ''}
+          ${(window.CU && window.CLUBS.find(c=>c.id===clubId)?.adminUid===window.CU.uid)? `<button onclick="window._trainClick(this)" data-id="${t.id}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">✎</button>` : ''}
         </div>
       </div>`;
     });
@@ -11351,7 +11351,7 @@ window.gLoadClubCalendar = async function() {
           <td>${t.time}</td>
           <td>${t.location}</td>
           <td class="action-btns">
-            <button class="btn btn-ghost btn-sm" onclick='window.gOpenClubEventForm(${JSON.stringify(t).replace(/'/g, "&apos;")})'>✏️</button>
+            <button class="btn btn-ghost btn-sm" onclick="window._clubEvClick(this)" data-id="${t.id}">✏️</button>
             <button class="btn btn-red btn-sm" onclick="window.gDeleteClubTraining('${t.id}')">🗑</button>
           </td>
         </tr>`).join('')}
@@ -11454,7 +11454,7 @@ window.gLoadClubRaces = async function() {
           <td>${r.location}</td>
           <td><button class="btn btn-ghost btn-sm" onclick="gShowRaceParticipants('${r.id}','${r.name.replace(/'/g,"\\'")}')">👥 Gör</button></td>
           <td class="action-btns">
-            <button class="btn btn-ghost btn-sm" ${isPast?'disabled':''} onclick='window.gOpenClubRaceForm(${JSON.stringify(r).replace(/'/g, "&apos;")})'>✏️</button>
+            <button class="btn btn-ghost btn-sm" ${isPast?'disabled':''} onclick="window._raceFormClick(this)" data-id="${r.id}">✏️</button>
             <button class="btn btn-red btn-sm" onclick="window.gDeleteClubRace('${r.id}')">🗑</button>
           </td>
         </tr>`;

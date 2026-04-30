@@ -1580,6 +1580,25 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
             <input type="text" id="new-disc-race-name" placeholder="Yarış adı" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
             <input type="date" id="new-disc-race-date" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
             <input type="text" id="new-disc-race-loc" placeholder="Konum" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase">Yarış Değerlendirme Raporu (Opsiyonel)</div>
+            <select id="new-disc-race-parkur" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
+              <option value="">Parkur Puanı (1-5)</option>
+              <option value="1">⭐ 1 - Çok Kötü</option>
+              <option value="2">⭐⭐ 2 - Kötü</option>
+              <option value="3">⭐⭐⭐ 3 - Orta</option>
+              <option value="4">⭐⭐⭐⭐ 4 - İyi</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+            </select>
+            <select id="new-disc-race-org" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
+              <option value="">Organizasyon Puanı (1-5)</option>
+              <option value="1">⭐ 1 - Çok Kötü</option>
+              <option value="2">⭐⭐ 2 - Kötü</option>
+              <option value="3">⭐⭐⭐ 3 - Orta</option>
+              <option value="4">⭐⭐⭐⭐ 4 - İyi</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+            </select>
+            <input type="text" id="new-disc-race-teknik" placeholder="Teknik Detaylar (Örn: Çamurlu, Bol Yokuşlu)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <textarea id="new-disc-race-ozet" placeholder="Kısa Özet / Değerlendirme" rows="3" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px;resize:vertical"></textarea>
             <button class="btn btn-or btn-sm btn-full" onclick="addDiscRace()">Ekle</button>
           </div>
         </div>
@@ -5902,33 +5921,81 @@ window.openRace=id=>{
         <h2 style="font-size:18px;margin:0">💬 Yarış Tartışmaları</h2>
         <span style="font-size:12px;color:var(--muted)" id="disc-count-${r.id}">Yükleniyor...</span>
       </div>
-      <!-- Tag Filtreleme -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
-        <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Organizasyon',this)">#Organizasyon</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Ölçüm',this)">#Ölçüm</button>
+
+      <!-- TABS -->
+      <div style="display:flex; border-bottom:1px solid var(--border); margin-bottom:16px;">
+        <button id="btn-ozet-${r.id}" onclick="switchDiscTab('ozet', '${r.id}')" style="flex:1; padding:10px; background:none; border:none; border-bottom:2px solid var(--or); color:var(--or); font-weight:bold; cursor:pointer;">📋 Yarış Özeti</button>
+        <button id="btn-tartisma-${r.id}" onclick="switchDiscTab('tartisma', '${r.id}')" style="flex:1; padding:10px; background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-weight:bold; cursor:pointer;">💬 Tartışmalar</button>
       </div>
-      <!-- Yorum Yazma -->
-      ${window.CU?`
-      <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
-        <textarea id="disc-input-${r.id}" rows="3" placeholder="Bu yarış hakkındaki deneyimini paylaş..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card)"></textarea>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Organizasyon"/> Organizasyon</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ölçüm"/> Ölçüm</label>
+
+      <!-- TAB 1: ÖZET -->
+      <div id="tab-ozet-${r.id}" style="display:block;">
+        ${r.report ? `
+          <div class="card" style="padding:18px; margin-bottom:16px; border-left:4px solid var(--or); background:var(--bg2);">
+            <h3 style="margin-top:0; margin-bottom:16px; font-size:15px; color:var(--text);">Resmi Değerlendirme Raporu</h3>
+            <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
+                <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Parkur Puanı</div>
+                <div style="font-size:16px; margin-top:6px;">${'⭐'.repeat(r.report.parkurPuan || 0)}${'☆'.repeat(5-(r.report.parkurPuan || 0))}</div>
+              </div>
+              <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
+                <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Organizasyon</div>
+                <div style="font-size:16px; margin-top:6px;">${'⭐'.repeat(r.report.orgPuan || 0)}${'☆'.repeat(5-(r.report.orgPuan || 0))}</div>
+              </div>
+            </div>
+            ${r.report.teknik ? `<div style="margin-bottom:12px; background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Teknik Detaylar:</strong> <span style="font-size:13px; color:var(--muted);">${r.report.teknik}</span></div>` : ''}
+            ${r.report.ozet ? `<div style="background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Kısa Özet:</strong> <p style="font-size:13px; color:var(--muted); margin:0; line-height:1.5;">${r.report.ozet}</p></div>` : ''}
+          </div>
+        ` : `
+          <div style="text-align:center; padding:40px 10px; color:var(--muted); background:var(--bg2); border-radius:10px; margin-bottom:16px;">
+            <div style="font-size:36px; margin-bottom:12px; opacity:0.5">📋</div>
+            <p style="font-size:13px;">Bu yarış için henüz admin değerlendirme raporu oluşturulmamış.</p>
+          </div>
+        `}
+      </div>
+
+      <!-- TAB 2: TARTIŞMALAR -->
+      <div id="tab-tartisma-${r.id}" style="display:none;">
+        <!-- Tag Filtreleme -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
+          <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Organizasyon',this)">#Organizasyon</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Ölçüm',this)">#Ölçüm</button>
         </div>
-        <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
-      </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
-      <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+        <!-- Yorum Yazma -->
+        ${window.CU?`
+        <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+          <textarea id="disc-input-${r.id}" rows="3" maxlength="1500" placeholder="Bu yarış hakkındaki deneyimini paylaş..." oninput="updateDiscCharCount('${r.id}')" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card);color:var(--text);margin-bottom:8px;"></textarea>
+          <select id="disc-user-rating-${r.id}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
+            <option value="">Kendi Puanım (1-5) - Opsiyonel</option>
+            <option value="1">⭐ 1 - Çok Kötü</option>
+            <option value="2">⭐⭐ 2 - Kötü</option>
+            <option value="3">⭐⭐⭐ 3 - Orta</option>
+            <option value="4">⭐⭐⭐⭐ 4 - İyi</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+          </select>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)">
+            <span>Hashtag seç:</span>
+            <span id="disc-char-${r.id}">0 / 1500</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Organizasyon"/> Organizasyon</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ölçüm"/> Ölçüm</label>
+          </div>
+          <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
+        </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
+        <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+      </div>
     </div>`;
   nav('race-detail');
   if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'');
@@ -6000,6 +6067,7 @@ window.renderDiscussions = function(raceId){
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
             <b style="font-size:13px">${d.userName||'Kullanıcı'}</b>
             ${d.isVerifiedFinisher?'<span style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">✓ DOĞRULANMIŞ</span>':''}
+            ${d.userRating ? `<span style="font-size:11px;color:var(--or)" title="Kullanıcının Puanı: ${d.userRating}/5">${'⭐'.repeat(d.userRating)}</span>` : ''}
             <span style="font-size:11px;color:var(--muted)">${date}</span>
           </div>
           <p style="font-size:13px;line-height:1.6;margin-bottom:8px;white-space:pre-wrap">${(d.comment||'').replace(/</g,'&lt;')}</p>
@@ -6035,26 +6103,30 @@ window.filterDiscussions = function(raceId, tag, btn){
 window.postDiscussion = async function(raceId, raceName){
   if(!window.CU){ openAuth('login'); return; }
   const ta = document.getElementById('disc-input-'+raceId);
+  const ratingEl = document.getElementById('disc-user-rating-'+raceId);
   const comment = ta?.value.trim();
+  const userRating = ratingEl ? ratingEl.value : '';
   if(!comment){ toast('Yorum boş olamaz','err'); return; }
   if(comment.length>1500){ toast('En fazla 1500 karakter','err'); return; }
   const tags = [...document.querySelectorAll('.disc-tag-'+raceId+':checked')].map(c=>c.value);
   try{
     const fb = window._fb;
-    // Hata yakalama ve async await tam uyumlu, auth.currentUser.uid güvenliği
     const uid = window.CU.uid; 
     await fb.addDoc(fb.collection(fb.db,'discussions'),{
       raceId, raceName: raceName||'',
       userId: uid,
       userName: window.CU.name||window.CU.email||'Kullanıcı',
       comment, tags,
+      userRating: userRating,
       upvotes: [],
       isPinned: false,
       isApproved: true,
       isVerifiedFinisher: false,
       timestamp: fb.serverTimestamp()
     });
-    ta.value=''; document.querySelectorAll('.disc-tag-'+raceId).forEach(c=>c.checked=false);
+    ta.value=''; 
+    if(ratingEl) ratingEl.value='';
+    document.querySelectorAll('.disc-tag-'+raceId).forEach(c=>c.checked=false);
     updateDiscCharCount(raceId);
     toast('Yorum paylaşıldı ✓','ok');
   }catch(e){ 
@@ -6264,6 +6336,17 @@ window.deleteDiscRace = async function(id) {
 
 window.filterDiscRaces = function(){ renderDiscRacesList(); };
 
+window.switchDiscTab = function(tab, id) {
+  const t1 = document.getElementById('tab-ozet-'+id);
+  const t2 = document.getElementById('tab-tartisma-'+id);
+  const b1 = document.getElementById('btn-ozet-'+id);
+  const b2 = document.getElementById('btn-tartisma-'+id);
+  if(t1) t1.style.display = tab==='ozet' ? 'block' : 'none';
+  if(t2) t2.style.display = tab==='tartisma' ? 'block' : 'none';
+  if(b1) { b1.style.borderBottom = tab==='ozet' ? '2px solid var(--or)' : '2px solid transparent'; b1.style.color = tab==='ozet' ? 'var(--or)' : 'var(--muted)'; }
+  if(b2) { b2.style.borderBottom = tab==='tartisma' ? '2px solid var(--or)' : '2px solid transparent'; b2.style.color = tab==='tartisma' ? 'var(--or)' : 'var(--muted)'; }
+};
+
 window.selectDiscRace = function(raceId){
   window._selectedDiscRaceId = raceId;
   renderDiscRacesList();
@@ -6277,35 +6360,79 @@ window.selectDiscRace = function(raceId){
       <div style="font-size:12px;color:var(--muted)">📅 ${r.date||'—'} · 📍 ${r.location||'—'}</div>
       <span id="disc-count-${r.id}" style="font-size:11px;color:var(--muted);margin-top:6px;display:inline-block">Yükleniyor...</span>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
-      <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Organizasyon',this)">#Organizasyon</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Ölçüm',this)">#Ölçüm</button>
+
+    <!-- TABS -->
+    <div style="display:flex; border-bottom:1px solid var(--border); margin-bottom:16px;">
+      <button id="btn-ozet-${r.id}" onclick="switchDiscTab('ozet', '${r.id}')" style="flex:1; padding:10px; background:none; border:none; border-bottom:2px solid var(--or); color:var(--or); font-weight:bold; cursor:pointer;">📋 Yarış Özeti</button>
+      <button id="btn-tartisma-${r.id}" onclick="switchDiscTab('tartisma', '${r.id}')" style="flex:1; padding:10px; background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-weight:bold; cursor:pointer;">💬 Tartışmalar</button>
     </div>
-    ${window.CU?`
-    <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
-      <textarea id="disc-input-${r.id}" rows="3" maxlength="1500" placeholder="Bu yarış hakkındaki deneyimini paylaş..." oninput="updateDiscCharCount('${r.id}')" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card);color:var(--text)"></textarea>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:11px;color:var(--muted)">
-        <span>Hashtag seç:</span>
-        <span id="disc-char-${r.id}">0 / 1500</span>
+
+    <!-- TAB 1: ÖZET -->
+    <div id="tab-ozet-${r.id}" style="display:block;">
+      ${r.report ? `
+        <div class="card" style="padding:18px; margin-bottom:16px; border-left:4px solid var(--or); background:var(--bg2);">
+          <h3 style="margin-top:0; margin-bottom:16px; font-size:15px; color:var(--text);">Resmi Değerlendirme Raporu</h3>
+          <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
+              <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Parkur Puanı</div>
+              <div style="font-size:16px; margin-top:6px;">${'⭐'.repeat(r.report.parkurPuan || 0)}${'☆'.repeat(5-(r.report.parkurPuan || 0))}</div>
+            </div>
+            <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
+              <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Organizasyon</div>
+              <div style="font-size:16px; margin-top:6px;">${'⭐'.repeat(r.report.orgPuan || 0)}${'☆'.repeat(5-(r.report.orgPuan || 0))}</div>
+            </div>
+          </div>
+          ${r.report.teknik ? `<div style="margin-bottom:12px; background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Teknik Detaylar:</strong> <span style="font-size:13px; color:var(--muted);">${r.report.teknik}</span></div>` : ''}
+          ${r.report.ozet ? `<div style="background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Kısa Özet:</strong> <p style="font-size:13px; color:var(--muted); margin:0; line-height:1.5;">${r.report.ozet}</p></div>` : ''}
+        </div>
+      ` : `
+        <div style="text-align:center; padding:40px 10px; color:var(--muted); background:var(--bg2); border-radius:10px; margin-bottom:16px;">
+          <div style="font-size:36px; margin-bottom:12px; opacity:0.5">📋</div>
+          <p style="font-size:13px;">Bu yarış için henüz admin değerlendirme raporu oluşturulmamış.</p>
+        </div>
+      `}
+    </div>
+
+    <!-- TAB 2: TARTIŞMALAR -->
+    <div id="tab-tartisma-${r.id}" style="display:none;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
+        <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Organizasyon',this)">#Organizasyon</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Ölçüm',this)">#Ölçüm</button>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Organizasyon"/> Organizasyon</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ölçüm"/> Ölçüm</label>
-      </div>
-      <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
-    </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
-    <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+      ${window.CU?`
+      <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+        <textarea id="disc-input-${r.id}" rows="3" maxlength="1500" placeholder="Bu yarış hakkındaki deneyimini paylaş..." oninput="updateDiscCharCount('${r.id}')" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card);color:var(--text);margin-bottom:8px;"></textarea>
+        <select id="disc-user-rating-${r.id}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
+          <option value="">Kendi Puanım (1-5) - Opsiyonel</option>
+          <option value="1">⭐ 1 - Çok Kötü</option>
+          <option value="2">⭐⭐ 2 - Kötü</option>
+          <option value="3">⭐⭐⭐ 3 - Orta</option>
+          <option value="4">⭐⭐⭐⭐ 4 - İyi</option>
+          <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+        </select>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)">
+          <span>Hashtag seç:</span>
+          <span id="disc-char-${r.id}">0 / 1500</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Organizasyon"/> Organizasyon</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ölçüm"/> Ölçüm</label>
+        </div>
+        <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
+      </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
+      <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+    </div>
   `;
   loadDiscussions(raceId);
 };
@@ -6330,23 +6457,32 @@ window.addDiscRace = async function(){
   const name = document.getElementById('new-disc-race-name').value.trim();
   const date = document.getElementById('new-disc-race-date').value;
   const loc = document.getElementById('new-disc-race-loc').value.trim();
+  const parkurPuan = document.getElementById('new-disc-race-parkur').value;
+  const orgPuan = document.getElementById('new-disc-race-org').value;
+  const teknik = document.getElementById('new-disc-race-teknik').value.trim();
+  const ozet = document.getElementById('new-disc-race-ozet').value.trim();
   if(!name){ toast('Yarış adı gerekli','err'); return; }
   try{
     const fb = window._fb;
     const r = await fb.addDoc(fb.collection(fb.db,'races'), {
       name, date: date||'', location: loc||'',
       userId: window.CU.uid,
+      report: { parkurPuan, orgPuan, teknik, ozet },
       slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
       createdAt: fb.serverTimestamp()
     });
     if(!window.RACES) window.RACES = [];
-    window.RACES.unshift({id:r.id, name, date:date||'', location:loc||''});
+    window.RACES.unshift({id:r.id, name, date:date||'', location:loc||'', report: { parkurPuan, orgPuan, teknik, ozet }});
     document.getElementById('new-disc-race-name').value='';
     document.getElementById('new-disc-race-date').value='';
     document.getElementById('new-disc-race-loc').value='';
+    document.getElementById('new-disc-race-parkur').value='';
+    document.getElementById('new-disc-race-org').value='';
+    document.getElementById('new-disc-race-teknik').value='';
+    document.getElementById('new-disc-race-ozet').value='';
     toggleDiscRaceForm();
     renderDiscRacesList();
-    toast('Yarış başlığı eklendi ✓','ok');
+    toast('Yarış başlığı ve rapor eklendi ✓','ok');
   }catch(e){ toast('Hata: '+e.message,'err'); }
 };
 

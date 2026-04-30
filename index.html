@@ -4120,7 +4120,7 @@ window.openEvent=id=>{
               ?`<button class="btn btn-ghost btn-full" onclick="leaveEvent('${e.id}')">✗ Etkinlikten Ayrıl</button>`
               :`<button class="btn btn-or btn-full" id="rsvp-btn" onclick="rsvpEvent('${e.id}','${e.fee}')">🏃 Etkinliğe Kaydol</button>`
           }
-          <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick='addToCalendar(${JSON.stringify(e).replace(/'/g, "&#39;")})'>📅 Takvime Ekle</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(e))}">📅 Takvime Ekle</button>
           ${e.qr?`<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showQR('${e.id}','${e.title}')">📲 QR Check-in</button>`:''}
         </div>
       </div>
@@ -4496,25 +4496,48 @@ window.gSaveClubEvent=async function(){
     }
     var form=document.getElementById('g-cal-form-wrap');
     if(form)form.style.display='none';
-    if(
+    if(window.gLoadClubCalendar)window.gLoadClubCalendar();
+  }catch(e){toast('Hata: '+e.message,'err');}
+};
+window.gEditClubEvent=function(id){
+  var ev=window._gClubEvents&&window._gClubEvents.find(function(e){return e.id===id;});
+  if(ev)window.gOpenClubEventForm(ev);
+  else toast('Etkinlik bulunamadı','err');
+};
+
+window._calClick=function(btn){
+  try{var ev=JSON.parse(decodeURIComponent(btn.dataset.ev||"{}"));
+    if(window.addToPersonalCalendar)window.addToPersonalCalendar(ev);
+    else if(window.addToCalendar)window.addToCalendar(ev);
+  }catch(e){console.warn("calClick:",e);}
+};
+window._trainClick=function(btn){
+  var id=btn.dataset.id;
+  var t=window._gTrainings&&window._gTrainings.find(function(x){return x.id===id;});
+  if(t&&window.openTrainingForm)window.openTrainingForm(t);
+  else toast("Bulunamadı","err");
+};
+
 window.gLoadTrainings=async function(){
-  const el=document.getElementById("ga-training-list");
+  var el=document.getElementById("ga-training-list");
   if(!el||!window.CU)return;
-  const fb=window._fb;const clubId=window.CU.clubId||window.CU.uid;
-  const today=new Date().toISOString().split("T")[0];
+  var fb=window._fb;var clubId=window.CU.clubId||window.CU.uid;
+  var today=new Date().toISOString().split("T")[0];
+  window._gTrainings=[];
   try{
-    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,"club_trainings"),fb.where("clubId","==",clubId),fb.orderBy("date","asc")));
+    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,"club_trainings"),fb.where("clubId","==",clubId),fb.orderBy("date","asc")));
     if(snap.empty){el.innerHTML='<p style="color:var(--muted);padding:14px;text-align:center">Henüz antrenman yok.</p>';return;}
-    let h='<table><thead><tr><th>Tarih</th><th>Saat</th><th>Başlık</th><th>İşlem</th></tr></thead><tbody>';
-    snap.forEach(d=>{const t={id:d.id,...d.data()};const ip=t.date<today;
-      h+=`<tr style="${ip?"opacity:.55":""}"><td>${t.date||"—"}</td><td>${t.time||"—"}</td><td><b>${t.title}</b></td>`
+    var h='<table><thead><tr><th>Tarih</th><th>Saat</th><th>Başlık</th><th>İşlem</th></tr></thead><tbody>';
+    snap.forEach(function(d){var t=Object.assign({id:d.id},d.data());window._gTrainings.push(t);var ip=t.date<today;
+      h+='<tr style="'+(ip?"opacity:.55":"")+'">'
+        +'<td>'+(t.date||"—")+'</td><td>'+(t.time||"—")+'</td><td><b>'+t.title+'</b></td>'
         +'<td class="action-btns">'
-        +`<button class="btn btn-ghost btn-sm" data-id="${t.id}" onclick='openTrainingForm(${JSON.stringify(t).replace(/'/g,"&apos;")})'>✏️</button>`
-        +`<button class="btn btn-red btn-sm" data-id="${t.id}" onclick="gDeleteTraining(this.dataset.id)">🗑</button>`
-        +"</td></tr>";
+        +'<button class="btn btn-ghost btn-sm" data-id="'+t.id+'" onclick="window._trainClick(this)">✏️</button>'
+        +'<button class="btn btn-red btn-sm" data-id="'+t.id+'" onclick="gDeleteTraining(this.dataset.id)">🗑</button>'
+        +'</td></tr>';
     });
     el.innerHTML=h+"</tbody></table>";
-  }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
+  }catch(e){el.innerHTML='<p style="color:var(--muted)">Yüklenemedi: '+e.message+'</p>';}
 };
 window.gDeleteTraining=async function(id){
   if(!confirm("Antrenman silinsin mi?"))return;
@@ -4522,17 +4545,9 @@ window.gDeleteTraining=async function(id){
     await window._fb.deleteDoc(window._fb.doc(window._fb.db,"club_trainings",id));
     toast("Silindi","ok");
     if(window.gLoadTrainings)window.gLoadTrainings();
-    const cid=window.CU&&(window.CU.clubId||window.CU.uid);
+    var cid=window.CU&&(window.CU.clubId||window.CU.uid);
     if(cid&&window.renderClubTrainings)window.renderClubTrainings(cid);
   }catch(e){toast("Hata: "+e.message,"err");}
-};
-window.gLoadClubCalendar)window.gLoadClubCalendar();
-  }catch(e){toast('Hata: '+e.message,'err');}
-};
-window.gEditClubEvent=function(id){
-  var ev=window._gClubEvents&&window._gClubEvents.find(function(e){return e.id===id;});
-  if(ev)window.gOpenClubEventForm(ev);
-  else toast('Etkinlik bulunamadı','err');
 };
 window.gDeleteClubEvent=async function(id){
   if(!confirm('Etkinlik silinecek?'))return;
@@ -5303,13 +5318,7 @@ window.loadBlogComments=async(postId)=>{
   try{
     const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'blog_comments'),fb.where('postId','==',postId)));
     const comments=[];
-    snap.forEach(d=>{
-      const raw=d.data();
-      if(raw.comment&&typeof raw.comment!=='string')raw.comment='';
-      if(raw.text&&typeof raw.text!=='string')raw.text=typeof raw.text==='object'?'':String(raw.text);
-      const {id:_,...rest}=raw;
-      comments.push({id:d.id,...rest});
-    });
+    snap.forEach(d=>{const {id:_,...rest}=d.data();comments.push({id:d.id,...rest});});
     comments.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     if(!comments.length){
       el.innerHTML='<p style="color:var(--muted);font-size:13px;text-align:center;padding:16px">Henüz yorum yok. İlk yorumu sen yap!</p>';
@@ -7706,10 +7715,6 @@ function renderGroupSection(sec){
             <button class="btn btn-or btn-sm" onclick="gOpenAddEvent()">+ Etkinlik Ekle</button>
         </div>
       </div>
-      <div style="margin-bottom:14px">
-        <h3 style="font-size:14px;margin-bottom:10px;color:var(--muted)">📋 Kulübünüzün Etkinlikleri</h3>
-        <div id="ga-events-list"><div class="spinner" style="margin:12px auto"></div></div>
-      </div>
       <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Eklediğin etkinlikler Süper Admin onayından sonra sitede yayınlanır.</p>
       <div id="admin-analytics-container" style="margin-bottom:20px"></div>
       <div class="card" style="padding:20px;margin-bottom:18px;display:none" id="g-add-event-form">
@@ -7786,13 +7791,6 @@ function renderGroupSection(sec){
       </div>
 
       <div id="g-club-cal-list"></div>
-      <div style="margin-top:22px;padding-top:18px;border-top:1px solid var(--border)">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-          <h3 style="font-size:15px">🏃 Koşu / Antrenman Takvimi</h3>
-          <button class="btn btn-or btn-sm" onclick="openTrainingForm(null)">+ Antrenman Ekle</button>
-        </div>
-        <div id="ga-training-list"><div class="spinner" style="margin:12px auto"></div></div>
-      </div>
     `,
 
     members:`
@@ -7802,7 +7800,6 @@ function renderGroupSection(sec){
 
     announcements:`
       <h2 style="margin-bottom:18px">📢 Duyurular</h2>
-      <p style="font-size:13px;color:var(--muted);margin-bottom:14px;border-left:3px solid var(--or);padding:8px 12px;background:rgba(232,98,42,.07);border-radius:0 6px 6px 0">📣 Bu duyurular <b>kulüp üyelerinize</b> görünür.</p>
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Duyuru</h3>
         <div class="form-grp"><label>Başlık</label><input id="ga-ann-title" placeholder="Duyuru başlığı"/></div>
@@ -8166,25 +8163,6 @@ window.gEditEvent=async(eventId)=>{
   }catch(err){toast('Yüklenemedi: '+err.message,'err');}
 };
 
-
-window.gLoadEvents=async function(){
-  const el=document.getElementById("ga-events-list");
-  if(!el||!window.CU)return;
-  const fb=window._fb;const clubId=window.CU.clubId||window.CU.uid;
-  try{
-    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,"events"),fb.where("clubId","==",clubId)));
-    if(snap.empty){el.innerHTML='<p style="color:var(--muted);padding:14px;text-align:center">Henüz etkinlik yok.</p>';return;}
-    let h='<table><thead><tr><th>Etkinlik</th><th>Tarih</th><th>Mesafe</th><th>İşlem</th></tr></thead><tbody>';
-    snap.forEach(d=>{const e={id:d.id,...d.data()};
-      h+=`<tr><td>${e.emoji||"🏃"} ${e.title}</td><td>${e.date||"—"}</td><td>${e.dist||"—"}</td>`
-        +'<td class="action-btns">'
-        +`<button class="btn btn-ghost btn-sm" onclick="editEvent('${e.id}')">✏️</button>`
-        +`<button class="btn btn-red btn-sm" onclick="gDeleteEvent('${e.id}')">🗑</button>`
-        +"</td></tr>";
-    });
-    el.innerHTML=h+"</tbody></table>";
-  }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi: ${e.message}</p>`;}
-};
 window.gDeleteEvent=async(id)=>{
   if(!confirm('Etkinlik silinsin mi?'))return;
   try{const fb=window._fb;await fb.deleteDoc(fb.doc(fb.db,'events',id));toast('Silindi','ok');gLoadEvents();}
@@ -8615,14 +8593,6 @@ async function loadMyNotifications(){
     allAnns.sort((a,b)=>(b.createdAt?.seconds||0)-(a.createdAt?.seconds||0));
     const hiddenSet=new Set(JSON.parse(localStorage.getItem('notif_hidden_'+CU.uid)||'[]'));
     allAnns=allAnns.filter(a=>!hiddenSet.has(a.id));
-    for(const cid of clubIds.slice(0,5)){
-      try{
-        const es=await fb.getDocs(fb.query(fb.collection(fb.db,'club_events'),fb.where('clubId','==',cid),fb.orderBy('date','asc')));
-        es.forEach(d=>{const ev=d.data();if(ev.date>=new Date().toISOString().split('T')[0])allAnns.push({id:'ev_'+d.id,title:'📅 '+ev.title,body:(ev.time||'')+(ev.location?' · '+ev.location:''),clubName:ev.clubName||'',createdAt:ev.createdAt});});
-        const ts=await fb.getDocs(fb.query(fb.collection(fb.db,'club_trainings'),fb.where('clubId','==',cid),fb.orderBy('date','asc')));
-        ts.forEach(d=>{const tr=d.data();if(tr.date>=new Date().toISOString().split('T')[0])allAnns.push({id:'tr_'+d.id,title:'🏃 '+tr.title,body:(tr.time||'')+(tr.location?' · '+tr.location:''),clubName:tr.clubName||'',createdAt:tr.createdAt});});
-      }catch(ex){}
-    }
     if(!allAnns.length){el.innerHTML='<div style="text-align:center;padding:30px;color:var(--muted)"><div style="font-size:36px">🔔</div><p>Henüz duyuru yok.</p></div>';return;}
     const readSet=new Set(JSON.parse(localStorage.getItem('notif_read_'+CU.uid)||'[]'));
     let unreadCount=0;
@@ -9236,15 +9206,7 @@ function renderPostCard(p) {
 }
 
 
-function escHtml(s){
-  if(s===null||s===undefined)return '';
-  // Firestore Timestamp veya Object gelebilir — güvenli dönüştür
-  if(typeof s==='object'){
-    if(s.seconds!==undefined)return ''; // Timestamp
-    try{s=JSON.stringify(s);}catch(e){return '';}
-  }
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+function escHtml(s){ return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function timeAgo(date) {
   const diff = (Date.now()-date.getTime())/1000;
@@ -9296,12 +9258,7 @@ window.loadComments = async function(pid) {
       fb.orderBy('createdAt','asc')
     ));
     const cmts = [];
-    snap.forEach(d => {
-    const raw=d.data();
-    if(raw.comment&&typeof raw.comment!=='string')raw.comment='';
-    if(raw.text&&typeof raw.text!=='string')raw.text=typeof raw.text==='object'?'':String(raw.text||'');
-    cmts.push({id:d.id,...raw});
-  });
+    snap.forEach(d => cmts.push({id:d.id,...d.data()}));
     renderComments(pid, cmts);
     wrap.dataset.loaded = '1';
   } catch(e) {
@@ -9996,8 +9953,8 @@ window.renderClubCalendar = function(eventsArr) {
           </div>
         </div>
         <div class="shrink-0 pointer-events-auto">
-           ${!isPast ? `<button onclick='addToPersonalCalendar(${JSON.stringify(ev)})' class="p-2 sm:px-[14px] sm:py-[8px] rounded-xl bg-slate-800 text-white text-[11px] font-bold hover:bg-orange-500 transition-colors hidden sm:flex items-center gap-2 shadow-sm"><span class="text-sm">📅</span> Takvime Ekle</button>
-           <button onclick='addToPersonalCalendar(${JSON.stringify(ev)})' class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-orange-500 sm:hidden shadow-sm">📅</button>` : ''}
+           ${!isPast ? `<button onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(ev))}" class="p-2 sm:px-[14px] sm:py-[8px] rounded-xl bg-slate-800 text-white text-[11px] font-bold hover:bg-orange-500 transition-colors hidden sm:flex items-center gap-2 shadow-sm"><span class="text-sm">📅</span> Takvime Ekle</button>
+           <button onclick="window._calClick(this)" data-ev="${encodeURIComponent(JSON.stringify(ev))}" class="w-10 h-10 flex items-center justify-center rounded-xl bg-slate-800 text-white hover:bg-orange-500 sm:hidden shadow-sm">📅</button>` : ''}
         </div>
       </div>`;
   });
@@ -10129,7 +10086,7 @@ window.renderClubTrainings=async function(clubId){
               ${t.pace?`<span style="background:#fff6ed;color:#ea580c;border-radius:20px;padding:4px 10px;font-size:12px;font-weight:600">⚡ ${t.pace}</span>`:''}
             </div>
           </div>
-          ${(window.CU && window.CLUBS.find(c=>c.id===clubId)?.adminUid===window.CU.uid)? `<button onclick='window.openTrainingForm(${JSON.stringify(t).replace(/'/g, "&apos;")})' style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">✎</button>` : ''}
+          ${(window.CU && window.CLUBS.find(c=>c.id===clubId)?.adminUid===window.CU.uid)? `<button onclick="window._trainClick(this)" data-id="${t.id}" style="background:none;border:none;cursor:pointer;color:var(--muted);font-size:14px">✎</button>` : ''}
         </div>
       </div>`;
     });

@@ -1204,6 +1204,11 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 #panel-main .table-wrap,#panel-main div[style*='overflow-x']{-webkit-overflow-scrolling:touch;}
   #panel-main th,#panel-main td{padding:5px 6px!important;}
 }
+.disc-report-body{line-height:1.85;font-size:14px;color:var(--text)}
+.disc-report-body p{margin:0 0 10px}
+.disc-report-body ul,.disc-report-body ol{margin:0 0 10px;padding-left:20px}
+.disc-report-body li{margin-bottom:4px}
+.disc-report-body strong{font-weight:700}
 </style>
 </head>
 <body>
@@ -1600,7 +1605,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
               <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
             </select>
             <input type="text" id="new-disc-race-teknik" placeholder="Teknik Detaylar (Örn: Çamurlu, Bol Yokuşlu)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
-            <textarea id="new-disc-race-ozet" placeholder="Kısa Özet / Değerlendirme" rows="3" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px;resize:vertical"></textarea>
+            <div id="new-disc-race-ozet-editor" style="background:var(--card);color:var(--text);border-radius:6px;margin-bottom:8px;min-height:100px;font-size:13px"></div><input type="hidden" id="new-disc-race-ozet"/>
             <button class="btn btn-or btn-sm btn-full" onclick="addDiscRace()">Ekle</button>
           </div>
         </div>
@@ -3168,6 +3173,30 @@ window.doRegister=async()=>{
     const pushEnabled=document.getElementById('chk-push')?.checked||false;
     await setDoc(doc(db,'users',cred.user.uid),{name:name+' '+sname,email,role:'member',pushEnabled,totalKm:0,eventCount:0,clubCount:0,badges:[],createdAt:serverTimestamp()});
     toast('Hoş geldin '+name+'! 🎉','ok');
+    // Hoşgeldin push bildirimi kuyruğa ekle (Cloud Function işler)
+    try{
+      await addDoc(collection(db,'announcements'),{
+        title:'🎉 RunClub Türkiye\'ye Hoş Geldin!',
+        body:'Merhaba '+name+'! Türkiye\'nin en büyük koşu topluluğuna katıldın. Yakındaki kulüpleri keşfet, etkinliklere katıl ve koşu arkadaşları bul.',
+        authorUid:'system',
+        authorName:'RunClub Türkiye',
+        targetUid:cred.user.uid,
+        isWelcome:true,
+        createdAt:serverTimestamp()
+      });
+      if(pushEnabled){
+        await addDoc(collection(db,'pushNotifications'),{
+          title:'🎉 Hoş Geldin '+name+'!',
+          body:'RunClub Türkiye\'ye katıldığın için teşekkürler. Hadi bir kulübe katıl! 🏃',
+          url:'https://www.runclubturkiye.com/',
+          target:'single',
+          targetUid:cred.user.uid,
+          status:'pending',
+          sentBy:'system-welcome',
+          createdAt:serverTimestamp()
+        });
+      }
+    }catch(_){/* hoşgeldin push isteğe bağlı */}
     if(pushEnabled){
       setTimeout(()=>{
         if(window.requestPushPermission)window.requestPushPermission();
@@ -4487,7 +4516,7 @@ window.nav=id=>{
   if(id==='events'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('events');}catch(e){}; if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
   if(id==='clubs'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('clubs');}catch(e){}; if(window.loadClubsFromDB)window.loadClubsFromDB().then(()=>renderClubsPage()).catch(()=>renderClubsPage());else renderClubsPage();}
   if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.RACES&&window.RACES.length){renderRaceList();}else if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
-  if(id==='discussions'){if(typeof renderDiscHub==='function')renderDiscHub();}
+  if(id==='discussions'){if(typeof renderDiscHub==='function')renderDiscHub();setTimeout(()=>window.initDiscQuill&&window.initDiscQuill(),300);}
   if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
@@ -5934,7 +5963,10 @@ window.openRace=id=>{
       <div id="tab-ozet-${r.id}" style="display:block;">
         ${r.report ? `
           <div class="card" style="padding:18px; margin-bottom:16px; border-left:4px solid var(--or); background:var(--bg2);">
-            <h3 style="margin-top:0; margin-bottom:16px; font-size:15px; color:var(--text);">Resmi Değerlendirme Raporu</h3>
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <h3 style="margin:0; font-size:15px; color:var(--text);">Resmi Değerlendirme Raporu</h3>
+              ${window.CU?.role==='superadmin'?`<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="editDiscReport('${r.id}')">✏️ Raporu Düzenle</button>`:''}
+            </div>
             <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
               <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
                 <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Parkur Puanı</div>
@@ -5946,7 +5978,7 @@ window.openRace=id=>{
               </div>
             </div>
             ${r.report.teknik ? `<div style="margin-bottom:12px; background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Teknik Detaylar:</strong> <span style="font-size:13px; color:var(--muted);">${r.report.teknik}</span></div>` : ''}
-            ${r.report.ozet ? `<div style="background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Kısa Özet:</strong> <p style="font-size:13px; color:var(--muted); margin:0; line-height:1.5;">${r.report.ozet}</p></div>` : ''}
+            ${r.report.ozet ? `<div style="background:var(--card); padding:14px 16px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:8px">Kısa Özet:</strong><div class="disc-report-body">${r.report.ozet}</div></div>` : ''}
           </div>
         ` : `
           <div style="text-align:center; padding:40px 10px; color:var(--muted); background:var(--bg2); border-radius:10px; margin-bottom:16px;">
@@ -6454,6 +6486,127 @@ window.toggleDiscRaceForm = function(){
   if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
 };
 
+
+// Tartışma formu Quill editörü başlat
+window.initDiscQuill = function() {
+  if(window._discQuill || !window.Quill) return;
+  const el = document.getElementById('new-disc-race-ozet-editor');
+  if(!el) return;
+  window._discQuill = new Quill('#new-disc-race-ozet-editor', {
+    theme: 'snow',
+    modules: { toolbar: [['bold','italic',{list:'ordered'},{list:'bullet'},'clean']] },
+    placeholder: 'Kısa özet ve değerlendirme...'
+  });
+};
+
+
+// ── Rapor düzenleme ─────────────────────────────────────────────
+window.editDiscReport = async function(raceId) {
+  const r = (window.RACES||[]).find(x => x.id === raceId);
+  if(!r) return;
+  const rep = r.report || {};
+
+  // Mevcut değerlendirme raporu düzenleme modalı
+  const existing = document.getElementById('disc-report-edit-modal');
+  if(existing) existing.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'disc-report-edit-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px';
+  modal.innerHTML = `
+    <div style="background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:560px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+        <h3 style="margin:0;font-size:16px">✏️ Raporu Düzenle</h3>
+        <button onclick="document.getElementById('disc-report-edit-modal').remove()" style="background:none;border:none;font-size:20px;cursor:pointer;color:var(--muted)">×</button>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Parkur Puanı</label>
+          <select id="edit-rep-parkur" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:13px">
+            <option value="">-</option>
+            <option value="1" ${rep.parkurPuan=='1'?'selected':''}>⭐ 1</option>
+            <option value="2" ${rep.parkurPuan=='2'?'selected':''}>⭐⭐ 2</option>
+            <option value="3" ${rep.parkurPuan=='3'?'selected':''}>⭐⭐⭐ 3</option>
+            <option value="4" ${rep.parkurPuan=='4'?'selected':''}>⭐⭐⭐⭐ 4</option>
+            <option value="5" ${rep.parkurPuan=='5'?'selected':''}>⭐⭐⭐⭐⭐ 5</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Organizasyon</label>
+          <select id="edit-rep-org" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:13px">
+            <option value="">-</option>
+            <option value="1" ${rep.orgPuan=='1'?'selected':''}>⭐ 1</option>
+            <option value="2" ${rep.orgPuan=='2'?'selected':''}>⭐⭐ 2</option>
+            <option value="3" ${rep.orgPuan=='3'?'selected':''}>⭐⭐⭐ 3</option>
+            <option value="4" ${rep.orgPuan=='4'?'selected':''}>⭐⭐⭐⭐ 4</option>
+            <option value="5" ${rep.orgPuan=='5'?'selected':''}>⭐⭐⭐⭐⭐ 5</option>
+          </select>
+        </div>
+      </div>
+      <div style="margin-bottom:14px">
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Teknik Detaylar</label>
+        <input id="edit-rep-teknik" value="${(rep.teknik||'').replace(/"/g,'&quot;')}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--bg2);color:var(--text);font-size:13px"/>
+      </div>
+      <div style="margin-bottom:18px">
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px">Kısa Özet / Değerlendirme (Quill editör)</label>
+        <div id="edit-rep-ozet-editor" style="background:var(--bg2);border-radius:6px;min-height:120px;font-size:13px"></div>
+      </div>
+      <div style="display:flex;gap:10px;justify-content:flex-end">
+        <button onclick="document.getElementById('disc-report-edit-modal').remove()" class="btn btn-ghost btn-sm">İptal</button>
+        <button onclick="updateDiscReport('${raceId}')" class="btn btn-or btn-sm">💾 Kaydet</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  // Edit Quill editörü başlat
+  setTimeout(() => {
+    if(window.Quill) {
+      window._editRepQuill = new Quill('#edit-rep-ozet-editor', {
+        theme: 'snow',
+        modules: { toolbar: [[{header:[1,2,false]}],'bold','italic',{list:'ordered'},{list:'bullet'},'clean'] },
+        placeholder: 'Kısa özet ve değerlendirme...'
+      });
+      // Mevcut HTML içeriği yükle
+      if(rep.ozet) {
+        window._editRepQuill.root.innerHTML = rep.ozet;
+      }
+    }
+  }, 100);
+};
+
+window.updateDiscReport = async function(raceId) {
+  const parkurPuan = document.getElementById('edit-rep-parkur')?.value || '';
+  const orgPuan    = document.getElementById('edit-rep-org')?.value    || '';
+  const teknik     = document.getElementById('edit-rep-teknik')?.value.trim() || '';
+  const ozet       = window._editRepQuill ? window._editRepQuill.root.innerHTML : '';
+  const ozetText   = window._editRepQuill ? window._editRepQuill.getText().trim() : '';
+
+  if(!ozetText && !parkurPuan) { toast('En az bir alan doldurun','err'); return; }
+
+  try {
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db, 'races', raceId), {
+      'report.parkurPuan': parkurPuan,
+      'report.orgPuan':    orgPuan,
+      'report.teknik':     teknik,
+      'report.ozet':       ozet,
+    });
+    // Local RACES cache güncelle
+    const race = (window.RACES||[]).find(x => x.id === raceId);
+    if(race) {
+      if(!race.report) race.report = {};
+      race.report.parkurPuan = parkurPuan;
+      race.report.orgPuan    = orgPuan;
+      race.report.teknik     = teknik;
+      race.report.ozet       = ozet;
+    }
+    toast('Rapor güncellendi ✓','ok');
+    document.getElementById('disc-report-edit-modal')?.remove();
+    // Sayfayı yenile
+    if(window._selectedDiscRaceId === raceId) openRace(raceId);
+  } catch(e) { toast('Hata: '+e.message,'err'); }
+};
+
 window.addDiscRace = async function(){
   if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
   const name = document.getElementById('new-disc-race-name').value.trim();
@@ -6462,7 +6615,9 @@ window.addDiscRace = async function(){
   const parkurPuan = document.getElementById('new-disc-race-parkur').value;
   const orgPuan = document.getElementById('new-disc-race-org').value;
   const teknik = document.getElementById('new-disc-race-teknik').value.trim();
-  const ozet = document.getElementById('new-disc-race-ozet').value.trim();
+  const ozetEl = document.getElementById('new-disc-race-ozet');
+  const ozet = (window._discQuill ? window._discQuill.root.innerHTML : ozetEl?.value||'').trim();
+  const ozetText = window._discQuill ? window._discQuill.getText().trim() : ozet;
   if(!name){ toast('Yarış adı gerekli','err'); return; }
   try{
     const fb = window._fb;
@@ -6482,6 +6637,7 @@ window.addDiscRace = async function(){
     document.getElementById('new-disc-race-org').value='';
     document.getElementById('new-disc-race-teknik').value='';
     document.getElementById('new-disc-race-ozet').value='';
+    if(window._discQuill) window._discQuill.setText('');
     toggleDiscRaceForm();
     renderDiscRacesList();
     toast('Yarış başlığı ve rapor eklendi ✓','ok');

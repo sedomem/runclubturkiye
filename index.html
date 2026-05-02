@@ -6360,16 +6360,16 @@ window.editDiscRace = async function(id) {
 
       <div style="margin-bottom:12px">
         <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Yarış Adı</label>
-        <input id="edit-race-name" value="${(r.name||'').replace(/"/g,'&quot;')}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
+        <input id="disc-edit-name" value="${(r.name||'').replace(/"/g,'&quot;')}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
       </div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Tarih</label>
-          <input id="edit-race-date" type="date" value="${r.date||''}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
+          <input id="disc-edit-date" type="date" value="${r.date||''}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
         </div>
         <div>
           <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Konum</label>
-          <input id="edit-race-loc" value="${(r.location||'').replace(/"/g,'&quot;')}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
+          <input id="disc-edit-loc" value="${(r.location||'').replace(/"/g,'&quot;')}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
         </div>
       </div>
 
@@ -6430,9 +6430,9 @@ window.editDiscRace = async function(id) {
 };
 
 window.saveDiscRaceEdit = async function(id) {
-  const name   = document.getElementById('edit-race-name')?.value.trim();
-  const date   = document.getElementById('edit-race-date')?.value || '';
-  const loc    = document.getElementById('edit-race-loc')?.value.trim() || '';
+  const name   = document.getElementById('disc-edit-name')?.value.trim();
+  const date   = document.getElementById('disc-edit-date')?.value || '';
+  const loc    = document.getElementById('disc-edit-loc')?.value.trim() || '';
   const parkurPuan = document.getElementById('edit-rep-parkur')?.value || '';
   const orgPuan    = document.getElementById('edit-rep-org')?.value    || '';
   const teknik     = document.getElementById('edit-rep-teknik')?.value.trim() || '';
@@ -9103,11 +9103,11 @@ window.deleteEvent=async(id)=>{
     renderAdminSection('events');renderEvts(window.EVENTS,'events-list');renderHomeData();
   }catch(e){console.error('deleteEvent:',e);toast('Silinemedi: '+e.message,'err');}
 };
-window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;if(typeof window.openRaceForm==='function'){window.openRaceForm(r);return;}document.getElementById('edit-race-id').value=id;document.getElementById('edit-race-name').value=r.name;document.getElementById('edit-race-date').value=r.date||'';document.getElementById('edit-race-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
+window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;if(typeof window.openRaceForm==='function'){window.openRaceForm(r);return;}document.getElementById('edit-race-id').value=id;document.getElementById('disc-edit-name').value=r.name;document.getElementById('disc-edit-date').value=r.date||'';document.getElementById('disc-edit-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
 window.saveRaceEdit=async()=>{
   const fb=window._fb;
   const id=document.getElementById('edit-race-id').value;
-  const data={name:document.getElementById('edit-race-name').value,date:document.getElementById('edit-race-date').value,location:document.getElementById('edit-race-loc').value,about:document.getElementById('edit-race-about').value,phone:document.getElementById('edit-race-phone').value,email:document.getElementById('edit-race-email').value,website:document.getElementById('edit-race-web').value,mapUrl:document.getElementById('edit-race-map').value};
+  const data={name:document.getElementById('disc-edit-name').value,date:document.getElementById('disc-edit-date').value,location:document.getElementById('disc-edit-loc').value,about:document.getElementById('edit-race-about').value,phone:document.getElementById('edit-race-phone').value,email:document.getElementById('edit-race-email').value,website:document.getElementById('edit-race-web').value,mapUrl:document.getElementById('edit-race-map').value};
   try{
     await fb.setDoc(fb.doc(fb.db,'races',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
     const r=RACES.find(x=>x.id===id);if(r)Object.assign(r,data);

@@ -4074,7 +4074,7 @@ window.loadTotalUserCount = async function() {
 window.loadAdminUsers=async()=>{
   const el=document.getElementById('admin-users-content');if(!el)return;
   try{
-    const snap=await getDocs(query(collection(db,'users'),orderBy('createdAt','desc')));
+    const snap=await getDocs(collection(db,'users'));
     const users=[];snap.forEach(d=>{users.push({id:d.id,...d.data()});});
     window._adminUsers=users;
     const roleLabel=r=>r==='superadmin'?'⭐ Süper Admin':r==='groupadmin'?'🔑 Grup Admin':r==='pending_groupadmin'?'⏳ Bekleyen':r==='subadmin'?'🔑 Sub Admin':'👤 Üye';
@@ -4083,7 +4083,7 @@ window.loadAdminUsers=async()=>{
       <span style="font-size:13px;color:var(--muted)">${users.length} kullanıcı</span>
       <button class="btn btn-green btn-sm" onclick="exportUsersExcel()">⬇ Excel İndir</button>
     </div>
-    <div style="overflow-x:auto"><table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Doğum</th><th>Tişört</th><th>Rol</th><th>km</th><th>Kayıt Tarihi</th><th>İşlem</th></tr></thead><tbody>`;
+    <div style="overflow-x:auto"><table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Doğum</th><th>Tişört</th><th>Rol</th><th>km</th><th>İşlem</th></tr></thead><tbody>`;
     users.forEach((u,i)=>{
       html+=`<tr>
         <td><b>${u.name||'—'}</b></td>
@@ -4094,7 +4094,6 @@ window.loadAdminUsers=async()=>{
         <td style="font-size:11px">${u.tshirtSize||'—'}</td>
         <td><span class="pill ${rolePill(u.role)}" style="font-size:10px">${roleLabel(u.role)}</span></td>
         <td>${u.totalKm||0}</td>
-        <td style="font-size:11px;white-space:nowrap">${u.createdAt&&u.createdAt.toDate?u.createdAt.toDate().toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'}):'—'}</td>
         <td class="action-btns">
           <button class="btn btn-ghost btn-sm" onclick="showUserProfile(${i})">👁</button>
           <button class="btn btn-ghost btn-sm" onclick="adminAddKm('${u.id}')">+km</button>
@@ -6453,9 +6452,7 @@ window.saveDiscRaceEdit = async function(id) {
     const r = (window.RACES||[]).find(x=>x.id===id);
     if(r){
       r.name=name; r.date=date; r.location=loc;
-      if(!r.report) r.report={};
-      r.report.parkurPuan=parkurPuan; r.report.orgPuan=orgPuan;
-      r.report.teknik=teknik; r.report.ozet=ozet;
+      r.report = {parkurPuan, orgPuan, teknik, ozet};
     }
     toast('Güncellendi ✓','ok');
     document.getElementById('disc-race-edit-modal')?.remove();
@@ -6511,9 +6508,12 @@ window.selectDiscRace = function(raceId){
 
     <!-- TAB 1: ÖZET -->
     <div id="tab-ozet-${r.id}" style="display:block;">
-      ${r.report ? `
+      ${r.report && (r.report.ozet || r.report.parkurPuan || r.report.teknik) ? `
         <div class="card" style="padding:18px; margin-bottom:16px; border-left:4px solid var(--or); background:var(--bg2);">
-          <h3 style="margin-top:0; margin-bottom:16px; font-size:15px; color:var(--text);">Resmi Değerlendirme Raporu</h3>
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+            <h3 style="margin:0; font-size:15px; color:var(--text);">📋 Resmi Değerlendirme Raporu</h3>
+            ${window.CU?.role==='superadmin'?`<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="editDiscRace('${r.id}')">✏️ Düzenle</button>`:''}
+          </div>
           <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
             <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
               <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Parkur Puanı</div>
@@ -6531,6 +6531,7 @@ window.selectDiscRace = function(raceId){
         <div style="text-align:center; padding:40px 10px; color:var(--muted); background:var(--bg2); border-radius:10px; margin-bottom:16px;">
           <div style="font-size:36px; margin-bottom:12px; opacity:0.5">📋</div>
           <p style="font-size:13px;">Bu yarış için henüz admin değerlendirme raporu oluşturulmamış.</p>
+          ${window.CU?.role==='superadmin'?`<button class="btn btn-or btn-sm" style="margin-top:8px" onclick="editDiscRace('${r.id}')">+ Rapor Ekle</button>`:''}
         </div>
       `}
     </div>

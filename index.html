@@ -591,7 +591,9 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 /* ━━ RESPONSIVE ━━ */
 @media(max-width:768px){
-  #bottom-nav{display:flex}
+  #bottom-nav{display:flex;overflow-x:auto;white-space:nowrap;-webkit-overflow-scrolling:touch;justify-content:flex-start;scrollbar-width:none}
+  #bottom-nav::-webkit-scrollbar{display:none}
+  #bottom-nav .bn-item{min-width:68px;flex:0 0 auto}
   body{padding-bottom:66px}
   .dash-wrap,.admin-wrap{grid-template-columns:1fr}
   .sidebar{display:none}
@@ -626,10 +628,11 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .disc-race-item.active{background:rgba(255,107,0,.1);border-color:var(--or)}
 .disc-race-item .name{font-size:13px;font-weight:600;color:var(--text)}
 .disc-race-item .meta{font-size:11px;color:var(--muted)}
-.disc-item-actions{display:flex;gap:4px;margin-top:6px}
 @media(max-width:768px){
   .disc-hub-grid{grid-template-columns:1fr}
-  .disc-sidebar{position:relative;top:0;max-height:300px}
+  .disc-sidebar{position:relative;top:0;max-height:max-content;display:flex;flex-direction:row;overflow-x:auto;white-space:nowrap;padding-bottom:10px;margin-bottom:15px;border-bottom:1.5px solid var(--border);-webkit-overflow-scrolling:touch;}
+  .disc-race-item{min-width:200px;margin-right:10px;margin-bottom:0;}
+  .disc-main{padding:14px;min-height:300px;}
 }
 
 /* ━━ PAGE BANNER ━━ */
@@ -1201,6 +1204,11 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 #panel-main .table-wrap,#panel-main div[style*='overflow-x']{-webkit-overflow-scrolling:touch;}
   #panel-main th,#panel-main td{padding:5px 6px!important;}
 }
+.disc-report-body{line-height:1.85;font-size:14px;color:var(--text)}
+.disc-report-body p{margin:0 0 10px}
+.disc-report-body ul,.disc-report-body ol{margin:0 0 10px;padding-left:20px}
+.disc-report-body li{margin-bottom:4px}
+.disc-report-body strong{font-weight:700}
 </style>
 </head>
 <body>
@@ -1309,6 +1317,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button class="mdr-btn" onclick="nav('community');closeMasterDrawer()"><span class="mdr-ico">🏃</span><span>Topluluk Akışı</span></button>
     <button class="mdr-btn" onclick="nav('firsatlar');closeMasterDrawer()"><span class="mdr-ico">🎁</span><span>Fırsatlar</span></button>
     <button class="mdr-btn" onclick="nav('blog');closeMasterDrawer()"><span class="mdr-ico">📰</span><span>Blog</span></button>
+    <button class="mdr-btn" onclick="nav('discussions');closeMasterDrawer()"><span class="mdr-ico">💬</span><span>Yarış Tartışma Merkezi</span></button>
     <button class="mdr-btn" onclick="nav('hakkimizda');closeMasterDrawer()"><span class="mdr-ico">ℹ️</span><span>Hakkımızda</span></button>
 
     <!-- Divider -->
@@ -1322,10 +1331,13 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       </div>
       <button class="mdr-btn" onclick="mdrDash('overview')"><span class="mdr-ico">🏠</span><span>Genel Bakış</span></button>
       <button class="mdr-btn" onclick="mdrDash('notifications')"><span class="mdr-ico">🔔</span><span>Bildirimler</span></button>
+      <button class="mdr-btn" onclick="mdrDash('club-races')"><span class="mdr-ico">🏆</span><span>Kulüp Yarış Takvimi</span></button>
+
       <button class="mdr-btn" onclick="mdrDash('my-events')"><span class="mdr-ico">📅</span><span>Etkinliklerim</span></button>
       <button class="mdr-btn" onclick="mdrDash('my-clubs')"><span class="mdr-ico">🤝</span><span>Kulüplerim</span></button>
       <button class="mdr-btn" onclick="mdrDash('club-events')"><span class="mdr-ico">🏟️</span><span>Kulüp Etkinlikleri</span></button>
       <button class="mdr-btn" onclick="mdrDash('my-km')"><span class="mdr-ico">🏃</span><span>KM Takibi</span></button>
+      <button class="mdr-btn" onclick="mdrDash('my-discussions')"><span class="mdr-ico">💬</span><span>Yorumlarım</span></button>
       <button class="mdr-btn" onclick="mdrDash('badges')"><span class="mdr-ico">🏅</span><span>Rozetler</span></button>
       <button class="mdr-btn" onclick="mdrDash('profile-tab')"><span class="mdr-ico">⚙️</span><span>Profil Ayarları</span></button>
 
@@ -1366,6 +1378,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <button class="bn-item" onclick="nav('events')"><div class="bi">📅</div><span>Etkinlik</span></button>
   <button class="bn-item" onclick="nav('firsatlar')"><div class="bi">🎁</div><span>Fırsatlar</span></button>
   <button class="bn-item" onclick="nav('races')"><div class="bi">🏆</div><span>Yarış</span></button>
+  <button class="bn-item" onclick="nav('discussions')"><div class="bi">💬</div><span>Tartışma</span></button>
   <button class="bn-item" onclick="nav('community')"><div class="bi">🏃</div><span>Topluluk</span></button>
   <button class="bn-item" onclick="nav('dashboard')"><div class="bi">👤</div><span>Profil</span></button>
 </div>
@@ -1571,13 +1584,29 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
         <div id="disc-admin-add" style="display:none;margin-bottom:12px">
           <button class="btn btn-or btn-sm btn-full" onclick="toggleDiscRaceForm()">+ Yeni Yarış Başlığı</button>
           <div id="disc-race-form" style="display:none;margin-top:10px;padding:12px;background:var(--bg2);border-radius:8px">
-            <input type="text" id="new-disc-race-name" placeholder="Yarış adı *" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
-            <input type="date" id="new-disc-race-date" placeholder="Tarih (opsiyonel)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
-            <input type="text" id="new-disc-race-loc" placeholder="Konum (opsiyonel)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
-            <div style="display:flex;gap:6px">
-              <button class="btn btn-or btn-sm" style="flex:1" id="disc-race-submit-btn" onclick="addDiscRace()">Ekle</button>
-              <button class="btn btn-ghost btn-sm" onclick="cancelDiscRaceForm()">İptal</button>
-            </div>
+            <input type="text" id="new-disc-race-name" placeholder="Yarış adı" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <input type="date" id="new-disc-race-date" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <input type="text" id="new-disc-race-loc" placeholder="Konum" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase">Yarış Değerlendirme Raporu (Opsiyonel)</div>
+            <select id="new-disc-race-parkur" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
+              <option value="">Parkur Puanı (1-5)</option>
+              <option value="1">⭐ 1 - Çok Kötü</option>
+              <option value="2">⭐⭐ 2 - Kötü</option>
+              <option value="3">⭐⭐⭐ 3 - Orta</option>
+              <option value="4">⭐⭐⭐⭐ 4 - İyi</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+            </select>
+            <select id="new-disc-race-org" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
+              <option value="">Organizasyon Puanı (1-5)</option>
+              <option value="1">⭐ 1 - Çok Kötü</option>
+              <option value="2">⭐⭐ 2 - Kötü</option>
+              <option value="3">⭐⭐⭐ 3 - Orta</option>
+              <option value="4">⭐⭐⭐⭐ 4 - İyi</option>
+              <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+            </select>
+            <input type="text" id="new-disc-race-teknik" placeholder="Teknik Detaylar (Örn: Çamurlu, Bol Yokuşlu)" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+            <div id="new-disc-race-ozet-editor" style="background:var(--card);color:var(--text);border-radius:6px;margin-bottom:8px;min-height:100px;font-size:13px"></div><input type="hidden" id="new-disc-race-ozet"/>
+            <button class="btn btn-or btn-sm btn-full" onclick="addDiscRace()">Ekle</button>
           </div>
         </div>
         <div id="disc-races-list"><div class="spinner" style="margin:20px auto"></div></div>
@@ -2875,7 +2904,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,writeBatch}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getStorage,ref,uploadBytes,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import{getMessaging,getToken,onMessage}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
@@ -3045,7 +3074,7 @@ window.resetServiceWorker = async function() {
 const storage=getStorage(app);
 const gp=new GoogleAuthProvider();
 const SUPER_EMAIL='sedomem@gmail.com';
-window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,writeBatch,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
+window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
 
 onAuthStateChanged(auth,async user=>{
   // Auth state geldi — loading'i HEMEN kapat
@@ -3144,6 +3173,30 @@ window.doRegister=async()=>{
     const pushEnabled=document.getElementById('chk-push')?.checked||false;
     await setDoc(doc(db,'users',cred.user.uid),{name:name+' '+sname,email,role:'member',pushEnabled,totalKm:0,eventCount:0,clubCount:0,badges:[],createdAt:serverTimestamp()});
     toast('Hoş geldin '+name+'! 🎉','ok');
+    // Hoşgeldin push bildirimi kuyruğa ekle (Cloud Function işler)
+    try{
+      await addDoc(collection(db,'announcements'),{
+        title:'🎉 RunClub Türkiye\'ye Hoş Geldin!',
+        body:'Merhaba '+name+'! Türkiye\'nin en büyük koşu topluluğuna katıldın. Yakındaki kulüpleri keşfet, etkinliklere katıl ve koşu arkadaşları bul.',
+        authorUid:'system',
+        authorName:'RunClub Türkiye',
+        targetUid:cred.user.uid,
+        isWelcome:true,
+        createdAt:serverTimestamp()
+      });
+      if(pushEnabled){
+        await addDoc(collection(db,'pushNotifications'),{
+          title:'🎉 Hoş Geldin '+name+'!',
+          body:'RunClub Türkiye\'ye katıldığın için teşekkürler. Hadi bir kulübe katıl! 🏃',
+          url:'https://www.runclubturkiye.com/',
+          target:'single',
+          targetUid:cred.user.uid,
+          status:'pending',
+          sentBy:'system-welcome',
+          createdAt:serverTimestamp()
+        });
+      }
+    }catch(_){/* hoşgeldin push isteğe bağlı */}
     if(pushEnabled){
       setTimeout(()=>{
         if(window.requestPushPermission)window.requestPushPermission();
@@ -4021,18 +4074,11 @@ window.loadTotalUserCount = async function() {
 window.loadAdminUsers=async()=>{
   const el=document.getElementById('admin-users-content');if(!el)return;
   try{
-    let snap;
-    try{
-      snap=await getDocs(query(collection(db,'users'),orderBy('createdAt','desc')));
-    }catch(idxErr){
-      console.warn('[Users] Index yok, sırasız çekiliyor:',idxErr.message);
-      snap=await getDocs(collection(db,'users'));
-    }
+    const snap=await getDocs(query(collection(db,'users'),orderBy('createdAt','desc')));
     const users=[];snap.forEach(d=>{users.push({id:d.id,...d.data()});});
     window._adminUsers=users;
     const roleLabel=r=>r==='superadmin'?'⭐ Süper Admin':r==='groupadmin'?'🔑 Grup Admin':r==='pending_groupadmin'?'⏳ Bekleyen':r==='subadmin'?'🔑 Sub Admin':'👤 Üye';
     const rolePill=r=>r==='superadmin'?'pill-or':r==='groupadmin'||r==='subadmin'?'pill-bl':r==='pending_groupadmin'?'pill-re':'pill-gr';
-    const fmtDate=u=>{try{const d=u.createdAt?.toDate?.();if(!d)return'—';const dd=String(d.getDate()).padStart(2,'0');const mm=String(d.getMonth()+1).padStart(2,'0');const yy=d.getFullYear();return dd+'.'+mm+'.'+yy;}catch(e){return'—';}};
     let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <span style="font-size:13px;color:var(--muted)">${users.length} kullanıcı</span>
       <button class="btn btn-green btn-sm" onclick="exportUsersExcel()">⬇ Excel İndir</button>
@@ -4048,7 +4094,7 @@ window.loadAdminUsers=async()=>{
         <td style="font-size:11px">${u.tshirtSize||'—'}</td>
         <td><span class="pill ${rolePill(u.role)}" style="font-size:10px">${roleLabel(u.role)}</span></td>
         <td>${u.totalKm||0}</td>
-        <td style="font-size:11px;white-space:nowrap">${fmtDate(u)}</td>
+        <td style="font-size:11px;white-space:nowrap">${u.createdAt&&u.createdAt.toDate?u.createdAt.toDate().toLocaleDateString('tr-TR',{day:'2-digit',month:'2-digit',year:'numeric'}):'—'}</td>
         <td class="action-btns">
           <button class="btn btn-ghost btn-sm" onclick="showUserProfile(${i})">👁</button>
           <button class="btn btn-ghost btn-sm" onclick="adminAddKm('${u.id}')">+km</button>
@@ -4299,18 +4345,23 @@ async function loadRacesFromDB(){
     const todayStr=new Date().toISOString().split('T')[0];
     let snap;
     try{
-      // TÜM yarışları çek (geçmiş + gelecek)
       snap=await getDocs(query(collection(db,'races'),orderBy('date','asc')));
     }catch(idxErr){
-      console.warn('[Races] Index hatası:',idxErr.message);
+      console.warn('[Races] Index yok, tümü çekiliyor:',idxErr.message);
       snap=await getDocs(collection(db,'races'));
     }
     const races=[];
     snap.forEach(d=>{const {id:_,...rest}=d.data();races.push({id:d.id,...rest});});
     const today=new Date();today.setHours(0,0,0,0);
-    const upcoming=races.filter(r=>!r.date||new Date(r.date)>=today);
-    window.RACES=[...upcoming,...races.filter(r=>r.date&&new Date(r.date)<today)];
-    console.log('[Races] loaded:',upcoming.length,'upcoming,',races.length-upcoming.length,'past, TOTAL:',races.length);
+    const upcoming=[]; const past=[];
+    races.forEach(r=>{
+      if(!r.date) { upcoming.push(r); return; }
+      const d=new Date(r.date);
+      if(isNaN(d.getTime()) || d>=today) upcoming.push(r);
+      else past.push(r);
+    });
+    window.RACES=[...upcoming,...past];
+    console.log('[Races] loaded:',upcoming.length,'upcoming,',races.length-upcoming.length,'past');
   }catch(e){console.warn('Races load:',e.message);}
 }
 window.loadRacesFromDB=loadRacesFromDB;
@@ -4466,7 +4517,7 @@ window.nav=id=>{
   if(id==='events'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('events');}catch(e){}; if(window.loadEventsFromDB)window.loadEventsFromDB().then(()=>renderEvts(window.EVENTS,'events-list'));}
   if(id==='clubs'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('clubs');}catch(e){}; if(window.loadClubsFromDB)window.loadClubsFromDB().then(()=>renderClubsPage()).catch(()=>renderClubsPage());else renderClubsPage();}
   if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.RACES&&window.RACES.length){renderRaceList();}else if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
-  if(id==='discussions'){if(typeof renderDiscHub==='function')renderDiscHub();}
+  if(id==='discussions'){if(typeof renderDiscHub==='function')renderDiscHub();setTimeout(()=>window.initDiscQuill&&window.initDiscQuill(),300);}
   if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
   if(id==='firsatlar')renderFirsatlar();
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
@@ -5902,29 +5953,84 @@ window.openRace=id=>{
         <h2 style="font-size:18px;margin:0">💬 Yarış Tartışmaları</h2>
         <span style="font-size:12px;color:var(--muted)" id="disc-count-${r.id}">Yükleniyor...</span>
       </div>
-      <!-- Tag Filtreleme -->
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
-        <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
-        <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
+
+      <!-- TABS -->
+      <div style="display:flex; border-bottom:1px solid var(--border); margin-bottom:16px;">
+        <button id="btn-ozet-${r.id}" onclick="switchDiscTab('ozet', '${r.id}')" style="flex:1; padding:10px; background:none; border:none; border-bottom:2px solid var(--or); color:var(--or); font-weight:bold; cursor:pointer;">📋 Yarış Özeti</button>
+        <button id="btn-tartisma-${r.id}" onclick="switchDiscTab('tartisma', '${r.id}')" style="flex:1; padding:10px; background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-weight:bold; cursor:pointer;">💬 Tartışmalar</button>
       </div>
-      <!-- Yorum Yazma -->
-      ${window.CU?`
-      <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
-        <textarea id="disc-input-${r.id}" rows="3" placeholder="Bu yarış hakkındaki deneyimini paylaş..." style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card)"></textarea>
-        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
-          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
+
+      <!-- TAB 1: ÖZET -->
+      <div id="tab-ozet-${r.id}" style="display:block;">
+        ${r.report ? `
+          <div class="card" style="padding:18px; margin-bottom:16px; border-left:4px solid var(--or); background:var(--bg2);">
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+              <h3 style="margin:0; font-size:15px; color:var(--text);">Resmi Değerlendirme Raporu</h3>
+              ${window.CU?.role==='superadmin'?`<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="editDiscRace('${r.id}')">✏️ Raporu Düzenle</button>`:''}
+            </div>
+            <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+              <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
+                <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Parkur Puanı</div>
+                <div style="font-size:16px; margin-top:6px;">${'⭐'.repeat(r.report.parkurPuan || 0)}${'☆'.repeat(5-(r.report.parkurPuan || 0))}</div>
+              </div>
+              <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
+                <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Organizasyon</div>
+                <div style="font-size:16px; margin-top:6px;">${'⭐'.repeat(r.report.orgPuan || 0)}${'☆'.repeat(5-(r.report.orgPuan || 0))}</div>
+              </div>
+            </div>
+            ${r.report.teknik ? `<div style="margin-bottom:12px; background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Teknik Detaylar:</strong> <span style="font-size:13px; color:var(--muted);">${r.report.teknik}</span></div>` : ''}
+            ${r.report.ozet ? `<div style="background:var(--card); padding:14px 16px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:8px">Kısa Özet:</strong><div class="disc-report-body">${r.report.ozet}</div></div>` : ''}
+          </div>
+        ` : `
+          <div style="text-align:center; padding:40px 10px; color:var(--muted); background:var(--bg2); border-radius:10px; margin-bottom:16px;">
+            <div style="font-size:36px; margin-bottom:12px; opacity:0.5">📋</div>
+            <p style="font-size:13px;">Bu yarış için henüz admin değerlendirme raporu oluşturulmamış.</p>
+          </div>
+        `}
+      </div>
+
+      <!-- TAB 2: TARTIŞMALAR -->
+      <div id="tab-tartisma-${r.id}" style="display:none;">
+        <!-- Tag Filtreleme -->
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
+          <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Organizasyon',this)">#Organizasyon</button>
+          <button class="filt" onclick="filterDiscussions('${r.id}','Ölçüm',this)">#Ölçüm</button>
         </div>
-        <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
-      </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
-      <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+        <!-- Yorum Yazma -->
+        ${window.CU?`
+        <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+          <textarea id="disc-input-${r.id}" rows="3" maxlength="1500" placeholder="Bu yarış hakkındaki deneyimini paylaş..." oninput="updateDiscCharCount('${r.id}')" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card);color:var(--text);margin-bottom:8px;"></textarea>
+          <select id="disc-user-rating-${r.id}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
+            <option value="">Kendi Puanım (1-5) - Opsiyonel</option>
+            <option value="1">⭐ 1 - Çok Kötü</option>
+            <option value="2">⭐⭐ 2 - Kötü</option>
+            <option value="3">⭐⭐⭐ 3 - Orta</option>
+            <option value="4">⭐⭐⭐⭐ 4 - İyi</option>
+            <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+          </select>
+          <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)">
+            <span>Hashtag seç:</span>
+            <span id="disc-char-${r.id}">0 / 1500</span>
+          </div>
+          <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Organizasyon"/> Organizasyon</label>
+            <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ölçüm"/> Ölçüm</label>
+          </div>
+          <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
+        </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
+        <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+      </div>
     </div>`;
   nav('race-detail');
   if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'');
@@ -5996,6 +6102,7 @@ window.renderDiscussions = function(raceId){
           <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:6px">
             <b style="font-size:13px">${d.userName||'Kullanıcı'}</b>
             ${d.isVerifiedFinisher?'<span style="background:linear-gradient(135deg,#10b981,#059669);color:#fff;font-size:10px;padding:2px 8px;border-radius:10px;font-weight:700">✓ DOĞRULANMIŞ</span>':''}
+            ${d.userRating ? `<span style="font-size:11px;color:var(--or)" title="Kullanıcının Puanı: ${d.userRating}/5">${'⭐'.repeat(d.userRating)}</span>` : ''}
             <span style="font-size:11px;color:var(--muted)">${date}</span>
           </div>
           <p style="font-size:13px;line-height:1.6;margin-bottom:8px;white-space:pre-wrap">${(d.comment||'').replace(/</g,'&lt;')}</p>
@@ -6009,7 +6116,10 @@ window.renderDiscussions = function(raceId){
           <button class="btn btn-ghost btn-sm" onclick="verifyDiscussionUser('${d.id}','${d.userId}',${!d.isVerifiedFinisher})" style="font-size:11px">${d.isVerifiedFinisher?'✗ Rozet Kaldır':'✓ Doğrula'}</button>
           <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑</button>
         `:''}
-        ${!isAdmin && d.userId===myUid?`<button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>`:''}
+        ${(!isAdmin && d.userId===myUid)?`
+          <button class="btn btn-ghost btn-sm" onclick="editMyDiscussion('${d.id}', '${(d.comment||'').replace(/'/g,"\\'")}')" style="font-size:11px">✏️ Düzenle</button>
+          <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>
+        `:''}
       </div>
     </div>`;
   }).join('');
@@ -6028,26 +6138,54 @@ window.filterDiscussions = function(raceId, tag, btn){
 window.postDiscussion = async function(raceId, raceName){
   if(!window.CU){ openAuth('login'); return; }
   const ta = document.getElementById('disc-input-'+raceId);
+  const ratingEl = document.getElementById('disc-user-rating-'+raceId);
   const comment = ta?.value.trim();
+  const userRating = ratingEl ? ratingEl.value : '';
   if(!comment){ toast('Yorum boş olamaz','err'); return; }
   if(comment.length>1500){ toast('En fazla 1500 karakter','err'); return; }
   const tags = [...document.querySelectorAll('.disc-tag-'+raceId+':checked')].map(c=>c.value);
   try{
     const fb = window._fb;
+    const uid = window.CU.uid; 
     await fb.addDoc(fb.collection(fb.db,'discussions'),{
       raceId, raceName: raceName||'',
-      userId: window.CU.uid,
+      userId: uid,
       userName: window.CU.name||window.CU.email||'Kullanıcı',
       comment, tags,
+      userRating: userRating,
       upvotes: [],
       isPinned: false,
       isApproved: true,
       isVerifiedFinisher: false,
       timestamp: fb.serverTimestamp()
     });
-    ta.value=''; document.querySelectorAll('.disc-tag-'+raceId).forEach(c=>c.checked=false);
+    ta.value=''; 
+    if(ratingEl) ratingEl.value='';
+    document.querySelectorAll('.disc-tag-'+raceId).forEach(c=>c.checked=false);
+    updateDiscCharCount(raceId);
     toast('Yorum paylaşıldı ✓','ok');
-  }catch(e){ toast('Hata: '+e.message,'err'); }
+  }catch(e){ 
+    console.error(e);
+    toast('Hata: '+e.message,'err'); 
+  }
+};
+
+window.editMyDiscussion = async function(discId, currentComment) {
+  let newComment = prompt("Yorumunuzu düzenleyin (Maksimum 1500 karakter):", currentComment);
+  if (newComment === null) return;
+  newComment = newComment.trim();
+  if (!newComment) return toast("Yorum boş olamaz.", "err");
+  if (newComment.length > 1500) return toast("1500 karakter sınırını aştınız.", "err");
+  try {
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db, 'discussions', discId), {
+      comment: newComment,
+      timestamp: fb.serverTimestamp() // Güncellenme zamanı
+    });
+    toast('Yorum güncellendi ✓', 'ok');
+    if (window._selectedDiscRaceId) loadDiscussions(window._selectedDiscRaceId);
+    if (document.getElementById('dash-my-discussions')) loadMyDiscussions();
+  } catch(e) { toast('Hata: '+e.message, 'err'); }
 };
 
 window.upvoteDiscussion = async function(discId){
@@ -6088,6 +6226,17 @@ window.deleteDiscussion = async function(discId){
     const fb = window._fb;
     await fb.deleteDoc(fb.doc(fb.db,'discussions',discId));
     toast('Silindi','ok');
+    if(window._selectedDiscRaceId) loadDiscussions(window._selectedDiscRaceId);
+    if(document.getElementById('dash-my-discussions')) loadMyDiscussions();
+  }catch(e){ toast('Hata: '+e.message,'err'); }
+};
+
+window.toggleApproveDiscussion = async function(discId, approve){
+  if(window.CU?.role !== 'superadmin' && window.CU?.role !== 'admin') return;
+  try{
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'discussions',discId), { isApproved: approve });
+    toast(approve?'Yorum onaylandı':'Yorum gizlendi','ok');
   }catch(e){ toast('Hata: '+e.message,'err'); }
 };
 
@@ -6114,10 +6263,13 @@ window.loadMyDiscussions = async function(){
             <b style="font-size:13px">🏆 ${d.raceName||'Yarış'}</b>
             <span style="font-size:11px;color:var(--muted)">${d.timestamp?.toDate?.()?.toLocaleDateString('tr')||''}</span>
           </div>
-          <p style="font-size:12px;color:var(--muted);line-height:1.5;margin-bottom:8px">${(d.comment||'').substring(0,150)}${d.comment?.length>150?'...':''}</p>
-          <div style="display:flex;justify-content:space-between;align-items:center">
+          <p style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px">${(d.comment||'').replace(/</g,'&lt;')}</p>
+          <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
             <span style="font-size:11px;color:var(--or);font-weight:700">▲ ${(d.upvotes||[]).length} beğeni</span>
-            ${d.isVerifiedFinisher?'<span style="font-size:10px;background:#10b981;color:#fff;padding:2px 8px;border-radius:10px">✓ DOĞRULANMIŞ</span>':''}
+            <div style="display:flex;gap:6px">
+              <button class="btn btn-ghost btn-sm" onclick="editMyDiscussion('${d.id}', '${(d.comment||'').replace(/'/g,"\\'")}')" style="font-size:11px">✏️ Düzenle</button>
+              <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>
+            </div>
           </div>
         </div>`).join(''):'<p style="color:var(--muted);text-align:center;padding:20px;font-size:13px">Henüz yorum yapmadın.</p>'}
     `;
@@ -6140,9 +6292,10 @@ window.loadAdminDiscussions = async function(){
         <td style="font-size:11px">${d.userName||'—'}${d.isVerifiedFinisher?' ✓':''}</td>
         <td style="font-size:11px;max-width:280px"><div style="max-height:60px;overflow:auto">${(d.comment||'').replace(/</g,'&lt;').substring(0,200)}</div></td>
         <td style="font-size:11px">${(d.upvotes||[]).length}</td>
-        <td style="font-size:11px">${d.isPinned?'📌':''} ${d.isApproved===false?'🚫':'✓'}</td>
+        <td style="font-size:11px">${d.isPinned?'📌':''} <span class="pill ${d.isApproved===false?'pill-re':'pill-gr'}">${d.isApproved===false?'🚫 Gizli':'✓ Onaylı'}</span></td>
         <td class="action-btns">
           <button class="btn btn-ghost btn-sm" onclick="pinDiscussion('${d.id}',${!d.isPinned});setTimeout(loadAdminDiscussions,300)" style="font-size:10px">${d.isPinned?'Çıkar':'Sabitle'}</button>
+          <button class="btn ${d.isApproved===false?'btn-green':'btn-ghost'} btn-sm" onclick="toggleApproveDiscussion('${d.id}',${d.isApproved===false});setTimeout(loadAdminDiscussions,300)" style="font-size:10px">${d.isApproved===false?'Onayla':'Gizle'}</button>
           <button class="btn btn-ghost btn-sm" onclick="verifyDiscussionUser('${d.id}','${d.userId}',${!d.isVerifiedFinisher});setTimeout(loadAdminDiscussions,300)" style="font-size:10px">${d.isVerifiedFinisher?'Rozeti Kaldır':'Doğrula'}</button>
           <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}');setTimeout(loadAdminDiscussions,500)" style="font-size:10px">🗑</button>
         </td>
@@ -6156,53 +6309,185 @@ window.loadAdminDiscussions = async function(){
 window._selectedDiscRaceId = null;
 
 window.renderDiscHub = function(){
-  // Yarışlar yüklenmemişse önce yükle
-  if(!window.RACES || window.RACES.length === 0){
-    const el = document.getElementById('disc-races-list');
-    if(el) el.innerHTML = '<div class="spinner" style="margin:20px auto"></div>';
-    if(window.loadRacesFromDB){
-      window.loadRacesFromDB().then(()=>{
-        renderDiscRacesList();
-      });
-    }
-  } else {
-    renderDiscRacesList();
-  }
+  renderDiscRacesList();
   const adminEl = document.getElementById('disc-admin-add');
   if(adminEl) adminEl.style.display = (window.CU?.role === 'superadmin') ? 'block' : 'none';
 };
 
 window.renderDiscRacesList = function(){
-  console.log('[renderDiscRacesList] START');
   const el = document.getElementById('disc-races-list');
-  if(!el){ console.error('[renderDiscRacesList] Element BULUNAMADI!'); return; }
+  if(!el) return;
   const q = (document.getElementById('disc-search')?.value||'').toLowerCase().trim();
-  console.log('[renderDiscRacesList] Arama:', q);
   let races = window.RACES || [];
-  console.log('[renderDiscRacesList] RACES array:', races.length, 'yarış');
   if(q) races = races.filter(r => (r.name||'').toLowerCase().includes(q) || (r.location||'').toLowerCase().includes(q));
-  console.log('[renderDiscRacesList] Filtrelenmiş:', races.length, 'yarış');
-  if(!races.length){ 
-    el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px;font-size:12px">Yarış bulunamadı.</p>'; 
-    console.log('[renderDiscRacesList] Boş liste gösterildi');
-    return; 
-  }
-  const isAdmin = window.CU?.role === 'superadmin';
+  if(!races.length){ el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px;font-size:12px">Yarış bulunamadı.</p>'; return; }
+  const isAdmin = window.CU?.role === 'superadmin' || window.CU?.role === 'admin';
   el.innerHTML = races.map(r => {
     const active = window._selectedDiscRaceId === r.id ? 'active' : '';
-    return `<div class="disc-race-item ${active}" onclick="selectDiscRace('${r.id}')">
-      <div class="name">🏆 ${r.name||'Yarış'}</div>
-      <div class="meta">${r.date||''} · ${r.location||''}</div>
-      ${isAdmin?`<div class="disc-item-actions" onclick="event.stopPropagation()">
-        <button class="btn btn-ghost btn-sm" onclick="editDiscRace('${r.id}')" style="font-size:10px;padding:2px 6px">✏️</button>
-        <button class="btn btn-red btn-sm" onclick="deleteDiscRace('${r.id}')" style="font-size:10px;padding:2px 6px">🗑</button>
-      </div>`:''}
+    return `<div class="disc-race-item ${active}">
+      <div onclick="selectDiscRace('${r.id}')" style="flex:1">
+        <div class="name">🏆 ${r.name||'Yarış'}</div>
+        <div class="meta">${r.date||''} · ${r.location||''}</div>
+      </div>
+      ${isAdmin ? `
+      <div style="display:flex;gap:4px;margin-top:6px;padding-top:6px;border-top:1px solid var(--border)">
+        <button class="btn btn-ghost btn-sm" onclick="editDiscRace('${r.id}')" style="font-size:10px;padding:4px 8px">✏️</button>
+        <button class="btn btn-red btn-sm" onclick="deleteDiscRace('${r.id}')" style="font-size:10px;padding:4px 8px">🗑</button>
+      </div>
+      ` : ''}
     </div>`;
   }).join('');
-  console.log('[renderDiscRacesList] HTML render edildi');
+};
+
+window.editDiscRace = async function(id) {
+  if (window.CU?.role !== 'superadmin' && window.CU?.role !== 'admin') return;
+  const r = (window.RACES||[]).find(x=>x.id===id);
+  if (!r) return;
+  const rep = r.report || {};
+
+  // Mevcut modalı temizle
+  const old = document.getElementById('disc-race-edit-modal');
+  if(old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'disc-race-edit-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:9999;display:flex;align-items:center;justify-content:center;padding:16px;overflow-y:auto';
+  modal.innerHTML = `
+    <div style="background:var(--card);border-radius:14px;padding:24px;width:100%;max-width:580px;max-height:92vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:20px">
+        <h3 style="margin:0;font-size:16px">✏️ Yarışı Düzenle</h3>
+        <button onclick="document.getElementById('disc-race-edit-modal').remove()" style="background:none;border:none;font-size:22px;cursor:pointer;color:var(--muted);line-height:1">×</button>
+      </div>
+
+      <div style="margin-bottom:12px">
+        <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Yarış Adı</label>
+        <input id="disc-edit-name" value="${(r.name||'').replace(/"/g,'&quot;')}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Tarih</label>
+          <input id="disc-edit-date" type="date" value="${r.date||''}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Konum</label>
+          <input id="disc-edit-loc" value="${(r.location||'').replace(/"/g,'&quot;')}" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:14px"/>
+        </div>
+      </div>
+
+      <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px">
+        <div style="font-size:12px;font-weight:700;color:var(--or);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">📋 Değerlendirme Raporu</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Parkur Puanı</label>
+            <select id="edit-rep-parkur" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px">
+              <option value="">— Seç —</option>
+              <option value="1" ${rep.parkurPuan=='1'?'selected':''}>⭐ 1 - Zayıf</option>
+              <option value="2" ${rep.parkurPuan=='2'?'selected':''}>⭐⭐ 2 - Orta Altı</option>
+              <option value="3" ${rep.parkurPuan=='3'?'selected':''}>⭐⭐⭐ 3 - Orta</option>
+              <option value="4" ${rep.parkurPuan=='4'?'selected':''}>⭐⭐⭐⭐ 4 - İyi</option>
+              <option value="5" ${rep.parkurPuan=='5'?'selected':''}>⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Organizasyon</label>
+            <select id="edit-rep-org" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px">
+              <option value="">— Seç —</option>
+              <option value="1" ${rep.orgPuan=='1'?'selected':''}>⭐ 1 - Zayıf</option>
+              <option value="2" ${rep.orgPuan=='2'?'selected':''}>⭐⭐ 2 - Orta Altı</option>
+              <option value="3" ${rep.orgPuan=='3'?'selected':''}>⭐⭐⭐ 3 - Orta</option>
+              <option value="4" ${rep.orgPuan=='4'?'selected':''}>⭐⭐⭐⭐ 4 - İyi</option>
+              <option value="5" ${rep.orgPuan=='5'?'selected':''}>⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:12px">
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Teknik Detaylar</label>
+          <input id="edit-rep-teknik" value="${(rep.teknik||'').replace(/"/g,'&quot;')}" placeholder="Ör: Çamurlu zemin, bol yokuşlu" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--muted);display:block;margin-bottom:4px;font-weight:600;text-transform:uppercase;letter-spacing:.4px">Kısa Özet / Değerlendirme</label>
+          <div id="edit-rep-ozet-editor" style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;min-height:130px;font-size:13px"></div>
+        </div>
+      </div>
+
+      <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)">
+        <button onclick="document.getElementById('disc-race-edit-modal').remove()" class="btn btn-ghost">İptal</button>
+        <button onclick="saveDiscRaceEdit('${id}')" class="btn btn-or">💾 Kaydet</button>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  // Quill editörü başlat
+  setTimeout(() => {
+    if(window.Quill) {
+      window._editRepQuill = new Quill('#edit-rep-ozet-editor', {
+        theme: 'snow',
+        modules: { toolbar: [['bold','italic',{list:'ordered'},{list:'bullet'},'clean']] },
+        placeholder: 'Kısa özet ve değerlendirme...'
+      });
+      if(rep.ozet) window._editRepQuill.root.innerHTML = rep.ozet;
+    }
+  }, 150);
+};
+
+window.saveDiscRaceEdit = async function(id) {
+  const name   = document.getElementById('disc-edit-name')?.value.trim();
+  const date   = document.getElementById('disc-edit-date')?.value || '';
+  const loc    = document.getElementById('disc-edit-loc')?.value.trim() || '';
+  const parkurPuan = document.getElementById('edit-rep-parkur')?.value || '';
+  const orgPuan    = document.getElementById('edit-rep-org')?.value    || '';
+  const teknik     = document.getElementById('edit-rep-teknik')?.value.trim() || '';
+  const ozet       = window._editRepQuill ? window._editRepQuill.root.innerHTML : '';
+
+  if(!name){ toast('Yarış adı gerekli','err'); return; }
+  try {
+    const fb = window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'races',id), {
+      name, date, location: loc,
+      'report.parkurPuan': parkurPuan,
+      'report.orgPuan':    orgPuan,
+      'report.teknik':     teknik,
+      'report.ozet':       ozet,
+    });
+    // Cache güncelle
+    const r = (window.RACES||[]).find(x=>x.id===id);
+    if(r){
+      r.name=name; r.date=date; r.location=loc;
+      if(!r.report) r.report={};
+      r.report.parkurPuan=parkurPuan; r.report.orgPuan=orgPuan;
+      r.report.teknik=teknik; r.report.ozet=ozet;
+    }
+    toast('Güncellendi ✓','ok');
+    document.getElementById('disc-race-edit-modal')?.remove();
+    renderDiscRacesList();
+    if(window._selectedDiscRaceId === id) openRace(id);
+  } catch(e){ toast('Hata: '+e.message,'err'); }
+};
+
+window.deleteDiscRace = async function(id) {
+  if (window.CU?.role !== 'superadmin' && window.CU?.role !== 'admin') return;
+  if (!confirm("Bu yarış başlığını kalıcı olarak silmek istediğinize emin misiniz?")) return;
+  try {
+    await window._fb.deleteDoc(window._fb.doc(window._fb.db, 'races', id));
+    toast("Başlık silindi", "ok");
+    window.RACES = (window.RACES||[]).filter(x=>x.id!==id);
+    if(window._selectedDiscRaceId === id) { window._selectedDiscRaceId = null; document.getElementById('disc-content').innerHTML = '<p class="empty-state" style="padding:40px"><span class="empty-ico">💬</span><br/>Sol taraftan bir yarış seç ve tartışmaları gör.</p>'; }
+    renderDiscRacesList();
+  } catch(e) { toast("Hata: "+e.message, "err"); }
 };
 
 window.filterDiscRaces = function(){ renderDiscRacesList(); };
+
+window.switchDiscTab = function(tab, id) {
+  const t1 = document.getElementById('tab-ozet-'+id);
+  const t2 = document.getElementById('tab-tartisma-'+id);
+  const b1 = document.getElementById('btn-ozet-'+id);
+  const b2 = document.getElementById('btn-tartisma-'+id);
+  if(t1) t1.style.display = tab==='ozet' ? 'block' : 'none';
+  if(t2) t2.style.display = tab==='tartisma' ? 'block' : 'none';
+  if(b1) { b1.style.borderBottom = tab==='ozet' ? '2px solid var(--or)' : '2px solid transparent'; b1.style.color = tab==='ozet' ? 'var(--or)' : 'var(--muted)'; }
+  if(b2) { b2.style.borderBottom = tab==='tartisma' ? '2px solid var(--or)' : '2px solid transparent'; b2.style.color = tab==='tartisma' ? 'var(--or)' : 'var(--muted)'; }
+};
 
 window.selectDiscRace = function(raceId){
   window._selectedDiscRaceId = raceId;
@@ -6217,31 +6502,79 @@ window.selectDiscRace = function(raceId){
       <div style="font-size:12px;color:var(--muted)">📅 ${r.date||'—'} · 📍 ${r.location||'—'}</div>
       <span id="disc-count-${r.id}" style="font-size:11px;color:var(--muted);margin-top:6px;display:inline-block">Yükleniyor...</span>
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
-      <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
-      <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
+
+    <!-- TABS -->
+    <div style="display:flex; border-bottom:1px solid var(--border); margin-bottom:16px;">
+      <button id="btn-ozet-${r.id}" onclick="switchDiscTab('ozet', '${r.id}')" style="flex:1; padding:10px; background:none; border:none; border-bottom:2px solid var(--or); color:var(--or); font-weight:bold; cursor:pointer;">📋 Yarış Özeti</button>
+      <button id="btn-tartisma-${r.id}" onclick="switchDiscTab('tartisma', '${r.id}')" style="flex:1; padding:10px; background:none; border:none; border-bottom:2px solid transparent; color:var(--muted); font-weight:bold; cursor:pointer;">💬 Tartışmalar</button>
     </div>
-    ${window.CU?`
-    <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
-      <textarea id="disc-input-${r.id}" rows="3" maxlength="1500" placeholder="Bu yarış hakkındaki deneyimini paylaş..." oninput="updateDiscCharCount('${r.id}')" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card);color:var(--text)"></textarea>
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:11px;color:var(--muted)">
-        <span>Hashtag seç:</span>
-        <span id="disc-char-${r.id}">0 / 1500</span>
+
+    <!-- TAB 1: ÖZET -->
+    <div id="tab-ozet-${r.id}" style="display:block;">
+      ${r.report ? `
+        <div class="card" style="padding:18px; margin-bottom:16px; border-left:4px solid var(--or); background:var(--bg2);">
+          <h3 style="margin-top:0; margin-bottom:16px; font-size:15px; color:var(--text);">Resmi Değerlendirme Raporu</h3>
+          <div style="display:flex; gap:12px; margin-bottom:16px; flex-wrap:wrap;">
+            <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
+              <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Parkur Puanı</div>
+              <div style="font-size:16px; margin-top:6px;">${'⭐'.repeat(r.report.parkurPuan || 0)}${'☆'.repeat(5-(r.report.parkurPuan || 0))}</div>
+            </div>
+            <div style="flex:1; min-width:120px; background:var(--card); padding:12px; border-radius:8px; text-align:center; box-shadow:0 2px 4px rgba(0,0,0,0.02)">
+              <div style="font-size:10px; font-weight:700; color:var(--muted); text-transform:uppercase; letter-spacing:0.5px">Organizasyon</div>
+              <div style="font-size:16px; margin-top:6px;">${'⭐'.repeat(r.report.orgPuan || 0)}${'☆'.repeat(5-(r.report.orgPuan || 0))}</div>
+            </div>
+          </div>
+          ${r.report.teknik ? `<div style="margin-bottom:12px; background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Teknik Detaylar:</strong> <span style="font-size:13px; color:var(--muted);">${r.report.teknik}</span></div>` : ''}
+          ${r.report.ozet ? `<div style="background:var(--card); padding:12px; border-radius:8px;"><strong style="font-size:12px; color:var(--text); display:block; margin-bottom:4px">Kısa Özet:</strong> <p style="font-size:13px; color:var(--muted); margin:0; line-height:1.5;">${r.report.ozet}</p></div>` : ''}
+        </div>
+      ` : `
+        <div style="text-align:center; padding:40px 10px; color:var(--muted); background:var(--bg2); border-radius:10px; margin-bottom:16px;">
+          <div style="font-size:36px; margin-bottom:12px; opacity:0.5">📋</div>
+          <p style="font-size:13px;">Bu yarış için henüz admin değerlendirme raporu oluşturulmamış.</p>
+        </div>
+      `}
+    </div>
+
+    <!-- TAB 2: TARTIŞMALAR -->
+    <div id="tab-tartisma-${r.id}" style="display:none;">
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:14px;overflow-x:auto;padding-bottom:4px">
+        <button class="filt on" onclick="filterDiscussions('${r.id}','',this)">Tümü</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Parkur',this)">#Parkur</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Ekipman',this)">#Ekipman</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Beslenme',this)">#Beslenme</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Lojistik',this)">#Lojistik</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Konaklama',this)">#Konaklama</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Organizasyon',this)">#Organizasyon</button>
+        <button class="filt" onclick="filterDiscussions('${r.id}','Ölçüm',this)">#Ölçüm</button>
       </div>
-      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
-        <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
-      </div>
-      <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
-    </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
-    <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+      ${window.CU?`
+      <div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px">
+        <textarea id="disc-input-${r.id}" rows="3" maxlength="1500" placeholder="Bu yarış hakkındaki deneyimini paylaş..." oninput="updateDiscCharCount('${r.id}')" style="width:100%;border:1px solid var(--border);border-radius:8px;padding:10px;font-size:13px;resize:vertical;background:var(--card);color:var(--text);margin-bottom:8px;"></textarea>
+        <select id="disc-user-rating-${r.id}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
+          <option value="">Kendi Puanım (1-5) - Opsiyonel</option>
+          <option value="1">⭐ 1 - Çok Kötü</option>
+          <option value="2">⭐⭐ 2 - Kötü</option>
+          <option value="3">⭐⭐⭐ 3 - Orta</option>
+          <option value="4">⭐⭐⭐⭐ 4 - İyi</option>
+          <option value="5">⭐⭐⭐⭐⭐ 5 - Mükemmel</option>
+        </select>
+        <div style="display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)">
+          <span>Hashtag seç:</span>
+          <span id="disc-char-${r.id}">0 / 1500</span>
+        </div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px">
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Parkur"/> Parkur</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ekipman"/> Ekipman</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Beslenme"/> Beslenme</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Lojistik"/> Lojistik</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Konaklama"/> Konaklama</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Organizasyon"/> Organizasyon</label>
+          <label style="font-size:11px;color:var(--muted)"><input type="checkbox" class="disc-tag-${r.id}" value="Ölçüm"/> Ölçüm</label>
+        </div>
+        <button class="btn btn-or btn-sm" style="margin-top:10px" onclick="postDiscussion('${r.id}','${(r.name||'').replace(/'/g,"\\'")}')">Yorumu Paylaş</button>
+      </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
+      <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
+    </div>
   `;
   loadDiscussions(raceId);
 };
@@ -6258,165 +6591,61 @@ window.updateDiscCharCount = function(raceId){
 
 window.toggleDiscRaceForm = function(){
   const form = document.getElementById('disc-race-form');
-  if(!form) return;
-  if(form.style.display === 'none'){
-    form.style.display = 'block';
-    // Bugünün tarihini default olarak ekle
-    const today = new Date().toISOString().split('T')[0];
-    const dateInput = document.getElementById('new-disc-race-date');
-    if(dateInput && !dateInput.value) dateInput.value = today;
-  } else {
-    form.style.display = 'none';
-  }
+  if(form) form.style.display = form.style.display === 'none' ? 'block' : 'none';
 };
 
+
+// Tartışma formu Quill editörü başlat
+window.initDiscQuill = function() {
+  if(window._discQuill || !window.Quill) return;
+  const el = document.getElementById('new-disc-race-ozet-editor');
+  if(!el) return;
+  window._discQuill = new Quill('#new-disc-race-ozet-editor', {
+    theme: 'snow',
+    modules: { toolbar: [['bold','italic',{list:'ordered'},{list:'bullet'},'clean']] },
+    placeholder: 'Kısa özet ve değerlendirme...'
+  });
+};
+
+
+// ── Rapor düzenleme ─────────────────────────────────────────────
+/* editDiscReport: saveDiscRaceEdit ile birleştirildi */
+/* updateDiscReport: saveDiscRaceEdit ile birleştirildi */
 window.addDiscRace = async function(){
-  console.log('[addDiscRace] START');
   if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
   const name = document.getElementById('new-disc-race-name').value.trim();
-  let date = document.getElementById('new-disc-race-date').value;
+  const date = document.getElementById('new-disc-race-date').value;
   const loc = document.getElementById('new-disc-race-loc').value.trim();
-  console.log('[addDiscRace] INPUT:', {name, date, loc});
+  const parkurPuan = document.getElementById('new-disc-race-parkur').value;
+  const orgPuan = document.getElementById('new-disc-race-org').value;
+  const teknik = document.getElementById('new-disc-race-teknik').value.trim();
+  const ozetEl = document.getElementById('new-disc-race-ozet');
+  const ozet = (window._discQuill ? window._discQuill.root.innerHTML : ozetEl?.value||'').trim();
+  const ozetText = window._discQuill ? window._discQuill.getText().trim() : ozet;
   if(!name){ toast('Yarış adı gerekli','err'); return; }
-  // Tarih yoksa bugünün tarihi
-  if(!date){
-    const today = new Date();
-    date = today.toISOString().split('T')[0];
-    console.log('[addDiscRace] Tarih otomatik:', date);
-  }
   try{
     const fb = window._fb;
-    console.log('[addDiscRace] FB check:', fb ? 'OK' : 'NULL');
-    const docData = {
-      name, date, location: loc||'',
+    const r = await fb.addDoc(fb.collection(fb.db,'races'), {
+      name, date: date||'', location: loc||'',
+      userId: window.CU.uid,
+      report: { parkurPuan, orgPuan, teknik, ozet },
       slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
       createdAt: fb.serverTimestamp()
-    };
-    console.log('[addDiscRace] Firestore yazılacak:', docData);
-    const docRef = await fb.addDoc(fb.collection(fb.db,'races'), docData);
-    console.log('[addDiscRace] Firestore YAZILDI, ID:', docRef.id);
+    });
+    if(!window.RACES) window.RACES = [];
+    window.RACES.unshift({id:r.id, name, date:date||'', location:loc||'', report: { parkurPuan, orgPuan, teknik, ozet }});
     document.getElementById('new-disc-race-name').value='';
     document.getElementById('new-disc-race-date').value='';
     document.getElementById('new-disc-race-loc').value='';
+    document.getElementById('new-disc-race-parkur').value='';
+    document.getElementById('new-disc-race-org').value='';
+    document.getElementById('new-disc-race-teknik').value='';
+    document.getElementById('new-disc-race-ozet').value='';
+    if(window._discQuill) window._discQuill.setText('');
     toggleDiscRaceForm();
-    toast('Yarış başlığı eklendi ✓','ok');
-    // Firestore'dan tekrar yükle
-    console.log('[addDiscRace] loadRacesFromDB çağrılıyor...');
-    if(window.loadRacesFromDB){
-      await window.loadRacesFromDB();
-      console.log('[addDiscRace] RACES array:', window.RACES?.length || 0, 'yarış');
-      renderDiscRacesList();
-      console.log('[addDiscRace] renderDiscRacesList ÇAĞRILDİ');
-    } else {
-      console.error('[addDiscRace] loadRacesFromDB BULUNAMADI!');
-    }
-  }catch(e){ 
-    console.error('[addDiscRace] HATA:', e);
-    console.error('[addDiscRace] Error code:', e.code);
-    console.error('[addDiscRace] Error message:', e.message);
-    toast('Hata: '+e.message,'err'); 
-  }
-};
-
-window.deleteDiscRace = async function(raceId){
-  if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
-  const r = (window.RACES||[]).find(x=>x.id===raceId);
-  if(!r) return;
-  if(!confirm(`"${r.name}" yarışını silmek istediğine emin misin?\n\nBu yarışa ait tüm tartışmalar da silinecek!`)) return;
-  try{
-    const fb = window._fb;
-    // Önce yarışa ait tartışmaları sil
-    const discSnap = await fb.getDocs(fb.query(fb.collection(fb.db,'discussions'), fb.where('raceId','==',raceId)));
-    if(discSnap.size > 0){
-      const batch = fb.writeBatch(fb.db);
-      discSnap.forEach(d => batch.delete(d.ref));
-      await batch.commit();
-      console.log('[deleteDiscRace] Tartışmalar silindi:', discSnap.size);
-    }
-    // Yarışı sil
-    await fb.deleteDoc(fb.doc(fb.db,'races',raceId));
-    console.log('[deleteDiscRace] Yarış silindi:', raceId);
-    toast('Yarış silindi ✓','ok');
-    // Seçili yarış silindiyse temizle
-    if(window._selectedDiscRaceId === raceId){
-      window._selectedDiscRaceId = null;
-      const main = document.getElementById('disc-content');
-      if(main) main.innerHTML = '<div style="text-align:center;padding:60px 20px;color:var(--muted)"><div style="font-size:48px;margin-bottom:14px">💬</div><p>Sol taraftan bir yarış seç ve tartışmaları gör.</p></div>';
-    }
-    // Liste güncelle
-    if(window.loadRacesFromDB){
-      await window.loadRacesFromDB();
-      renderDiscRacesList();
-    }
-  }catch(e){
-    console.error('[deleteDiscRace]', e);
-    toast('Hata: '+e.message,'err');
-  }
-};
-
-window.editDiscRace = function(raceId){
-  if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
-  const r = (window.RACES||[]).find(x=>x.id===raceId);
-  if(!r) return;
-  // Formu aç ve doldur
-  const form = document.getElementById('disc-race-form');
-  if(form) form.style.display = 'block';
-  document.getElementById('new-disc-race-name').value = r.name||'';
-  document.getElementById('new-disc-race-date').value = r.date||'';
-  document.getElementById('new-disc-race-loc').value = r.location||'';
-  // Buton metnini değiştir
-  const btn = document.getElementById('disc-race-submit-btn');
-  if(btn){
-    btn.textContent = 'Güncelle';
-    btn.onclick = () => updateDiscRace(raceId);
-  }
-};
-
-window.cancelDiscRaceForm = function(){
-  const form = document.getElementById('disc-race-form');
-  if(form) form.style.display = 'none';
-  document.getElementById('new-disc-race-name').value='';
-  document.getElementById('new-disc-race-date').value='';
-  document.getElementById('new-disc-race-loc').value='';
-  // Buton metnini geri al
-  const btn = document.getElementById('disc-race-submit-btn');
-  if(btn){
-    btn.textContent = 'Ekle';
-    btn.onclick = () => addDiscRace();
-  }
-};
-
-window.updateDiscRace = async function(raceId){
-  if(window.CU?.role !== 'superadmin'){ toast('Sadece admin','err'); return; }
-  const name = document.getElementById('new-disc-race-name').value.trim();
-  let date = document.getElementById('new-disc-race-date').value;
-  const loc = document.getElementById('new-disc-race-loc').value.trim();
-  if(!name){ toast('Yarış adı gerekli','err'); return; }
-  if(!date){
-    const today = new Date();
-    date = today.toISOString().split('T')[0];
-  }
-  try{
-    const fb = window._fb;
-    await fb.updateDoc(fb.doc(fb.db,'races',raceId), {
-      name, date, location: loc||'',
-      slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')
-    });
-    cancelDiscRaceForm();
-    toast('Yarış güncellendi ✓','ok');
-    // Liste güncelle
-    if(window.loadRacesFromDB){
-      await window.loadRacesFromDB();
-      renderDiscRacesList();
-      // Seçili yarış güncellendiyse yeniden yükle
-      if(window._selectedDiscRaceId === raceId){
-        selectDiscRace(raceId);
-      }
-    }
-  }catch(e){
-    console.error('[updateDiscRace]', e);
-    toast('Hata: '+e.message,'err');
-  }
+    renderDiscRacesList();
+    toast('Yarış başlığı ve rapor eklendi ✓','ok');
+  }catch(e){ toast('Hata: '+e.message,'err'); }
 };
 
 window.filterBlogCat=function(cat,btn){
@@ -8875,11 +9104,11 @@ window.deleteEvent=async(id)=>{
     renderAdminSection('events');renderEvts(window.EVENTS,'events-list');renderHomeData();
   }catch(e){console.error('deleteEvent:',e);toast('Silinemedi: '+e.message,'err');}
 };
-window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;if(typeof window.openRaceForm==='function'){window.openRaceForm(r);return;}document.getElementById('edit-race-id').value=id;document.getElementById('edit-race-name').value=r.name;document.getElementById('edit-race-date').value=r.date||'';document.getElementById('edit-race-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
+window.editRace=id=>{const r=RACES.find(x=>x.id===id);if(!r)return;if(typeof window.openRaceForm==='function'){window.openRaceForm(r);return;}document.getElementById('edit-race-id').value=id;document.getElementById('disc-edit-name').value=r.name;document.getElementById('disc-edit-date').value=r.date||'';document.getElementById('disc-edit-loc').value=r.location||'';document.getElementById('edit-race-about').value=r.about||'';document.getElementById('edit-race-phone').value=r.phone||'';document.getElementById('edit-race-email').value=r.email||'';document.getElementById('edit-race-web').value=r.website||'';document.getElementById('edit-race-map').value=r.mapUrl||'';openModal('edit-race-modal');};
 window.saveRaceEdit=async()=>{
   const fb=window._fb;
   const id=document.getElementById('edit-race-id').value;
-  const data={name:document.getElementById('edit-race-name').value,date:document.getElementById('edit-race-date').value,location:document.getElementById('edit-race-loc').value,about:document.getElementById('edit-race-about').value,phone:document.getElementById('edit-race-phone').value,email:document.getElementById('edit-race-email').value,website:document.getElementById('edit-race-web').value,mapUrl:document.getElementById('edit-race-map').value};
+  const data={name:document.getElementById('disc-edit-name').value,date:document.getElementById('disc-edit-date').value,location:document.getElementById('disc-edit-loc').value,about:document.getElementById('edit-race-about').value,phone:document.getElementById('edit-race-phone').value,email:document.getElementById('edit-race-email').value,website:document.getElementById('edit-race-web').value,mapUrl:document.getElementById('edit-race-map').value};
   try{
     await fb.setDoc(fb.doc(fb.db,'races',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
     const r=RACES.find(x=>x.id===id);if(r)Object.assign(r,data);

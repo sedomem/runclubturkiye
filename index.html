@@ -4074,16 +4074,45 @@ window.loadTotalUserCount = async function() {
 window.loadAdminUsers=async()=>{
   const el=document.getElementById('admin-users-content');if(!el)return;
   try{
-    const snap=await getDocs(collection(db,'users'));
-    const users=[];snap.forEach(d=>{users.push({id:d.id,...d.data()});});
+    // createdAt desc sırala — en yeni en üstte
+    let snap;
+    try{
+      snap=await getDocs(query(collection(db,'users'),orderBy('createdAt','desc')));
+    }catch(idxErr){
+      // Index henüz oluşturulmadıysa sırasız çek, client-side sırala
+      console.warn('[Users] Index yok, sırasız çekiliyor:',idxErr.message);
+      snap=await getDocs(collection(db,'users'));
+    }
+    const users=[];
+    snap.forEach(d=>{users.push({id:d.id,...d.data()});});
+    // Index yoksa client-side sırala
+    users.sort((a,b)=>{
+      const ta=a.createdAt?.seconds||0;
+      const tb=b.createdAt?.seconds||0;
+      return tb-ta;
+    });
     window._adminUsers=users;
+
+    // GG.AA.YYYY formatı
+    const fmtDate=ts=>{
+      if(!ts) return '—';
+      let d;
+      if(ts.seconds) d=new Date(ts.seconds*1000);
+      else if(ts instanceof Date) d=ts;
+      else d=new Date(ts);
+      if(isNaN(d.getTime())) return '—';
+      return [String(d.getDate()).padStart(2,'0'),
+              String(d.getMonth()+1).padStart(2,'0'),
+              d.getFullYear()].join('.');
+    };
+
     const roleLabel=r=>r==='superadmin'?'⭐ Süper Admin':r==='groupadmin'?'🔑 Grup Admin':r==='pending_groupadmin'?'⏳ Bekleyen':r==='subadmin'?'🔑 Sub Admin':'👤 Üye';
     const rolePill=r=>r==='superadmin'?'pill-or':r==='groupadmin'||r==='subadmin'?'pill-bl':r==='pending_groupadmin'?'pill-re':'pill-gr';
     let html=`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;flex-wrap:wrap;gap:8px">
       <span style="font-size:13px;color:var(--muted)">${users.length} kullanıcı</span>
       <button class="btn btn-green btn-sm" onclick="exportUsersExcel()">⬇ Excel İndir</button>
     </div>
-    <div style="overflow-x:auto"><table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Doğum</th><th>Tişört</th><th>Rol</th><th>km</th><th>İşlem</th></tr></thead><tbody>`;
+    <div style="overflow-x:auto"><table><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Doğum</th><th>Tişört</th><th>Rol</th><th>km</th><th>Kayıt Tarihi</th><th>İşlem</th></tr></thead><tbody>`;
     users.forEach((u,i)=>{
       html+=`<tr>
         <td><b>${u.name||'—'}</b></td>
@@ -4094,6 +4123,7 @@ window.loadAdminUsers=async()=>{
         <td style="font-size:11px">${u.tshirtSize||'—'}</td>
         <td><span class="pill ${rolePill(u.role)}" style="font-size:10px">${roleLabel(u.role)}</span></td>
         <td>${u.totalKm||0}</td>
+        <td style="font-size:11px;color:var(--muted);white-space:nowrap">${fmtDate(u.createdAt)}</td>
         <td class="action-btns">
           <button class="btn btn-ghost btn-sm" onclick="showUserProfile(${i})">👁</button>
           <button class="btn btn-ghost btn-sm" onclick="adminAddKm('${u.id}')">+km</button>

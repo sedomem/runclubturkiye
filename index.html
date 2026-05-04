@@ -5779,6 +5779,9 @@ window.openClub=async(id)=>{
       const d=cSnap.data();
       c={id,...c,name:d.name||d.clubName||c.name||'',city:d.city||c.city||'',
         desc:d.desc||d.clubDesc||c.desc||'',imgUrl:d.imgUrl||d.clubImg||c.imgUrl||'',
+        bannerUrl:d.bannerUrl||'',logoUrl:d.logoUrl||'',
+        category:d.category||'',timezone:d.timezone||'Europe/Istanbul',
+        socialLinks:d.socialLinks||{},
         open:d.open!==false,insta:d.insta||d.clubInsta||c.insta||'',
         strava:d.strava||d.clubStrava||c.strava||'',
         parkur:d.clubParkur||d.parkur||c.parkur||'',
@@ -5797,36 +5800,97 @@ window.openClub=async(id)=>{
   }catch(e){}
 
   document.getElementById('club-detail-content').innerHTML=`
-    <div class="card" style="padding:28px;display:flex;gap:20px;align-items:flex-start;margin-bottom:20px;flex-wrap:wrap">
-      <div style="width:80px;height:80px;border-radius:14px;background:linear-gradient(135deg,var(--or),#ff9500);display:flex;align-items:center;justify-content:center;font-size:32px;flex-shrink:0;overflow:hidden">${c.imgUrl?`<img src="${c.imgUrl}" style="width:100%;height:100%;object-fit:cover"/>`:'🏃'}</div>
-      <div style="flex:1;min-width:200px">
-        <span class="tag tag-gr">${c.city}</span>
-        <h2 style="margin:6px 0;font-size:22px">${c.name}</h2>
-        <p style="color:var(--muted);font-size:13px;margin-bottom:12px">${c.desc||''}</p>
-        <div style="display:flex;gap:16px;flex-wrap:wrap;font-size:12px;color:var(--muted);margin-bottom:14px">
-          <span>👥 ${memberCount} üye</span>
-          <span class="tag ${c.open?'tag-gr':'tag-bl'}" style="margin:0">${c.open?'Açık Kulüp':'Kodlu Kulüp'}</span>
-          ${c.insta?`<a href="https://instagram.com/${c.insta.replace('@','')}" target="_blank">📸 ${c.insta}</a>`:''}
-          ${c.strava?`<a href="${c.strava}" target="_blank">🟠 Strava</a>`:''}
-          ${c.parkur?`<span style="font-size:12px;color:var(--muted)">🏃 Parkur: <b style="color:var(--text)">${c.parkur}</b></span>`:''}
-          ${c.mapUrl?`<a href="${c.mapUrl}" target="_blank" style="font-size:12px">📍 Haritada Gör</a>`:''}
-        </div>
-        <div style="display:flex;gap:8px;flex-wrap:wrap">
-          ${isJoined
-            ?`<button class="btn btn-ghost btn-sm" disabled>✓ Üyesin</button>
-               <button class="btn btn-red btn-sm" onclick="leaveClub('${c.id}')">Ayrıl</button>`
-            :`<button class="btn btn-or btn-sm" onclick="joinClub('${c.id}')">🤝 Kulübe Katıl</button>`
-          }
+    <!-- ── LUMA STİL KULÜP SAYFASI ── -->
+    <div style="margin:-20px -16px 0;position:relative">
+
+      <!-- BANNER -->
+      <div style="width:100%;height:200px;background:linear-gradient(135deg,var(--or),#ff6b35);overflow:hidden;position:relative">
+        ${c.bannerUrl?`<img src="${c.bannerUrl}" style="width:100%;height:100%;object-fit:cover"/>`
+          : c.imgUrl?`<img src="${c.imgUrl}" style="width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(.8)"/>` : ''}
+        <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.45))"></div>
+      </div>
+
+      <!-- LOGO (banner üzerine taşan) -->
+      <div style="position:relative;padding:0 16px">
+        <div style="position:absolute;top:-40px;left:16px;width:80px;height:80px;border-radius:16px;border:3px solid var(--card);background:var(--card);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.2)">
+          ${c.logoUrl
+            ? `<img src="${c.logoUrl}" style="width:100%;height:100%;object-fit:cover"/>`
+            : c.imgUrl
+              ? `<img src="${c.imgUrl}" style="width:100%;height:100%;object-fit:cover"/>`
+              : `<div style="width:100%;height:100%;background:linear-gradient(135deg,var(--or),#ff9500);display:flex;align-items:center;justify-content:center;font-size:30px">🏃</div>`}
         </div>
       </div>
     </div>
-    <div id="club-training-schedule" style="margin-top:20px;margin-bottom:20px;"></div>
-    <div style="margin-top:20px;background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:20px">
-      <h3 style="font-size:16px;font-family:var(--font-head);font-weight:700;margin-bottom:14px">🏆 Kulüp Yarış Takvimi</h3>
+
+    <!-- BAŞLIK ALANI -->
+    <div style="padding:52px 16px 0;margin-bottom:16px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap">
+        <div style="flex:1;min-width:200px">
+          <h2 style="margin:0 0 6px;font-size:22px;font-weight:800;line-height:1.2">${c.name}</h2>
+          <div style="display:flex;flex-wrap:wrap;gap:10px;font-size:12px;color:var(--muted);margin-bottom:10px">
+            ${c.city?`<span>📍 ${c.city}</span>`:''}
+            ${c.category?`<span>🏷 ${c.category==='road'?'Yol Koşusu':c.category==='trail'?'Trail':c.category==='ultra'?'Ultra':c.category==='marathon'?'Maraton':c.category==='triathlon'?'Triatlon':'Genel Koşu'}</span>`:''}
+            ${c.timezone&&c.timezone!=='Europe/Istanbul'?`<span>🕐 ${c.timezone}</span>`:'<span>🕐 Istanbul (UTC+3)</span>'}
+            <span>👥 ${memberCount} üye</span>
+            <span class="tag ${c.open?'tag-gr':'tag-bl'}" style="margin:0;font-size:10px">${c.open?'Açık Kulüp':'Kodlu Kulüp'}</span>
+          </div>
+        </div>
+        <!-- ANA BUTON -->
+        <div style="flex-shrink:0">
+          ${isJoined
+            ?`<div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end">
+                <button class="btn btn-ghost btn-sm" disabled style="min-width:110px">✓ Üyesin</button>
+                <button class="btn btn-red btn-sm" onclick="leaveClub('${c.id}')" style="min-width:110px">Kulüpten Ayrıl</button>
+              </div>`
+            :`<button class="btn btn-or" onclick="joinClub('${c.id}')" style="min-width:130px;font-weight:700">🤝 Kulübe Katıl</button>`}
+        </div>
+      </div>
+
+      <!-- AÇIKLAMA -->
+      ${(c.desc||c.clubDesc)?`<p style="font-size:14px;color:var(--text);line-height:1.7;margin:0 0 14px;max-width:600px">${c.desc||c.clubDesc}</p>`:''}
+
+      <!-- SOSYAL MEDYA -->
+      <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px">
+        ${(c.socialLinks&&c.socialLinks.instagram)||c.insta
+          ?`<a href="https://instagram.com/${((c.socialLinks&&c.socialLinks.instagram)||c.insta||'').replace('@','')}" target="_blank"
+              style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
+              📸 Instagram
+            </a>` : ''}
+        ${(c.socialLinks&&c.socialLinks.linkedin)
+          ?`<a href="${c.socialLinks.linkedin}" target="_blank"
+              style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
+              💼 LinkedIn
+            </a>` : ''}
+        ${(c.socialLinks&&c.socialLinks.website)
+          ?`<a href="${c.socialLinks.website}" target="_blank"
+              style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
+              🌐 Web Sitesi
+            </a>` : ''}
+        ${c.strava
+          ?`<a href="${c.strava}" target="_blank"
+              style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
+              🟠 Strava
+            </a>` : ''}
+        ${c.mapUrl
+          ?`<a href="${c.mapUrl}" target="_blank"
+              style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
+              📍 Haritada Gör
+            </a>` : ''}
+        ${c.parkur
+          ?`<span style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;color:var(--text)">
+              🏃 ${c.parkur}
+            </span>` : ''}
+      </div>
+    </div>
+
+    <!-- ETKİNLİKLER & TAKVİM -->
+    <div id="club-training-schedule" style="margin-top:20px;margin-bottom:4px;padding:0 4px"></div>
+    <div style="margin-top:16px;background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:18px 16px">
+      <h3 style="font-size:15px;font-weight:700;margin:0 0 14px">🏆 Kulüp Yarış Takvimi</h3>
       <div id="club-race-calendar-section"><div class="spinner" style="margin:12px auto"></div></div>
     </div>
-    <div style="margin-top:20px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:20px">
-      <h3 style="font-size:16px;font-family:var(--font-head);font-weight:700;margin-bottom:14px">📅 Etkinlik Takvimi</h3>
+    <div style="margin-top:14px;background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:18px 16px">
+      <h3 style="font-size:15px;font-weight:700;margin:0 0 14px">📅 Etkinlik Takvimi</h3>
       <div id="club-calendar-section"><div class="spinner" style="margin:12px auto"></div></div>
     </div>`;
   nav('club-detail');
@@ -7672,6 +7736,7 @@ window.gNav=function(sec,btn){
     if(b)b.classList.add('on');
   }
   if(typeof renderGroupSection==='function')renderGroupSection(sec);
+  if(sec==='profil')setTimeout(function(){window.loadClubProfileForGA&&window.loadClubProfileForGA();},300);
 };
 
 
@@ -9351,6 +9416,86 @@ function renderGroupSection(sec){
         <div style="margin-top:24px;padding-top:16px;border-top:1.5px solid rgba(192,57,43,.2)">
           <h4 style="font-size:13px;color:#c0392b;margin-bottom:10px">⚠️ Tehlikeli Bölge</h4>
           <button class="btn btn-red btn-sm" onclick="if(confirm('Hesabınız kalıcı silinecek?'))window.deleteMyAccount&&deleteMyAccount()">🗑 Hesabımı Sil</button>
+        </div>
+      </div>
+      <div class="card" style="padding:24px;margin-top:20px">
+        <h3 style="margin-bottom:18px;font-size:15px;display:flex;align-items:center;gap:8px">🏃 Kulüp Profilini Düzenle
+          <span style="font-size:11px;color:var(--muted);font-weight:400">— Sadece kulüp adminine görünür</span>
+        </h3>
+        <div style="margin-bottom:18px">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px">Banner Görseli</label>
+          <div id="ga-banner-drop" onclick="document.getElementById('ga-banner-input').click()"
+            style="width:100%;height:120px;border:2px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative"
+            ondragover="event.preventDefault();this.style.borderColor='var(--or)'"
+            ondragleave="this.style.borderColor='var(--border)'"
+            ondrop="window._gaHandleDrop(event,'banner')">
+            <img id="ga-banner-preview" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/>
+            <div id="ga-banner-ph" style="text-align:center;color:var(--muted);font-size:13px;z-index:1">
+              <div style="font-size:28px;margin-bottom:4px">🖼</div>Sürükle &amp; bırak veya tıkla<br/>
+              <span style="font-size:11px">1200×400px önerilir · JPG/PNG</span>
+            </div>
+          </div>
+          <input type="file" id="ga-banner-input" accept="image/*" style="display:none" onchange="window._gaPreview(this,'banner')"/>
+        </div>
+        <div style="margin-bottom:18px">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px">Kulüp Logosu</label>
+          <div style="display:flex;align-items:center;gap:14px">
+            <div id="ga-logo-drop" onclick="document.getElementById('ga-logo-input').click()"
+              style="width:80px;height:80px;border:2px dashed var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative;flex-shrink:0"
+              ondrop="window._gaHandleDrop(event,'logo')">
+              <img id="ga-logo-preview" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/>
+              <div id="ga-logo-ph" style="text-align:center;color:var(--muted);font-size:10px">🏃<br/>Logo</div>
+            </div>
+            <div style="font-size:12px;color:var(--muted);line-height:1.6">400×400px kare görsel önerilir.</div>
+          </div>
+          <input type="file" id="ga-logo-input" accept="image/*" style="display:none" onchange="window._gaPreview(this,'logo')"/>
+        </div>
+        <div class="form-grp" style="margin-bottom:12px">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Kulüp Açıklaması</label>
+          <textarea id="ga-club-desc" rows="3" placeholder="Kulübünüzü kısaca tanıtın..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;resize:vertical;margin-top:6px"></textarea>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Kategori</label>
+            <select id="ga-club-cat" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px">
+              <option value="">— Seç —</option>
+              <option value="road">🏙 Yol Koşusu</option>
+              <option value="trail">⛰ Trail</option>
+              <option value="ultra">🏔 Ultra</option>
+              <option value="triathlon">🏊 Triatlon</option>
+              <option value="marathon">🏆 Maraton</option>
+              <option value="general">🏃 Genel Koşu</option>
+            </select>
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Saat Dilimi</label>
+            <select id="ga-club-tz" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px">
+              <option value="Europe/Istanbul">🇹🇷 Istanbul (UTC+3)</option>
+              <option value="Europe/London">🇬🇧 London (UTC+0)</option>
+              <option value="America/New_York">🇺🇸 New York (UTC-5)</option>
+            </select>
+          </div>
+        </div>
+        <div style="margin-bottom:18px">
+          <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px">Sosyal Medya</label>
+          <div style="display:flex;flex-direction:column;gap:8px">
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="width:28px;text-align:center;font-size:16px">📸</span>
+              <input id="ga-club-insta" placeholder="@kulup_adi (Instagram)" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="width:28px;text-align:center;font-size:16px">💼</span>
+              <input id="ga-club-linkedin" placeholder="LinkedIn URL" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
+            </div>
+            <div style="display:flex;align-items:center;gap:8px">
+              <span style="width:28px;text-align:center;font-size:16px">🌐</span>
+              <input id="ga-club-web" placeholder="https://kulup.com" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center">
+          <span id="ga-club-save-status" style="font-size:12px;color:var(--muted)"></span>
+          <button class="btn btn-or" onclick="window.gasSaveClubProfile()">💾 Kulüp Profilini Kaydet</button>
         </div>
       </div>`,
     settings:`

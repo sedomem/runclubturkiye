@@ -4273,10 +4273,142 @@ window.loadApplications=async()=>{
 };
 window.approveApplication=async(appId,uid)=>{
   try{
-    // users koleksiyonuna yazma izni var
+    // 1. Başvuru verisini çek (isim, email, kulüp bilgileri)
+    const appSnap=await getDoc(doc(db,'applications',appId));
+    const appData=appSnap.exists()?appSnap.data():{};
+    const name     = appData.name     || 'Grup Admin';
+    const email    = appData.email    || '';
+    const clubName = appData.clubName || appData.club || '';
+
+    // 2. users koleksiyonuna groupadmin rolü ver
     await setDoc(doc(db,'users',uid),{role:'groupadmin'},{merge:true});
-    // applications'a setDoc+merge - updateDoc yerine (Rules uyumlu)
+
+    // 3. clubs koleksiyonuna kulüp oluştur
+    await setDoc(doc(db,'clubs',uid),{
+      name:     clubName,
+      city:     appData.city||'',
+      adminUid: uid,
+      adminEmail:email,
+      open:     true,
+      members:  1,
+      createdAt:serverTimestamp()
+    },{merge:true});
+
+    // 4. memberships kaydı
+    await setDoc(doc(db,'memberships',uid+'_'+uid),{
+      uid,userId:uid,clubId:uid,
+      clubName,userName:name,userEmail:email,
+      clubAdminUid:uid,status:'approved',
+      joinedAt:serverTimestamp()
+    },{merge:true});
+
+    // 5. applications'ı onayla
     await setDoc(doc(db,'applications',appId),{status:'approved'},{merge:true});
+
+    // 6. Onay e-postası gönder (Firebase Email Extension)
+    if(email){
+      const WELCOME_HTML=`<!DOCTYPE html>
+<html lang="tr">
+<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
+<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
+<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:30px 0;">
+<tr><td align="center">
+<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
+  <!-- HEADER -->
+  <tr><td style="background:#E8622A;padding:28px 36px;text-align:center;">
+    <h1 style="margin:0;color:#fff;font-size:24px;font-weight:800;">🏃 RunClub Türkiye</h1>
+    <p style="margin:8px 0 0;color:rgba(255,255,255,.85);font-size:13px;">Grup Admin Paneli — Hoş Geldin!</p>
+  </td></tr>
+  <!-- BODY -->
+  <tr><td style="padding:32px 36px;">
+    <h2 style="margin:0 0 12px;font-size:20px;color:#1a1a1a;">Tebrikler, {{NAME}}! 🎉</h2>
+    <p style="margin:0 0 16px;color:#444;font-size:14px;line-height:1.7;">
+      <strong>{{CLUB_NAME}}</strong> kulübünün Grup Admin başvurusu onaylandı!
+      Artık kulübünü RunClub Türkiye üzerinden yönetebilir, etkinlik ve antrenman takvimi oluşturabilirsin.
+    </p>
+
+    <!-- GİRİŞ BİLGİLERİ -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fdf6f2;border-radius:10px;margin-bottom:20px;">
+    <tr><td style="padding:20px 24px;">
+      <h3 style="margin:0 0 12px;color:#E8622A;font-size:14px;">🔐 Nasıl Giriş Yaparsın?</h3>
+      <p style="margin:0 0 8px;color:#333;font-size:13px;line-height:1.7;">
+        <strong>1.</strong> <a href="https://www.runclubturkiye.com" style="color:#E8622A;">runclubturkiye.com</a> adresine git<br/>
+        <strong>2.</strong> Sağ üstteki <strong>"Giriş Yap"</strong> butonuna tıkla<br/>
+        <strong>3.</strong> <strong>Grup Admin</strong> sekmesini seç<br/>
+        <strong>4.</strong> Kayıt olurken kullandığın e-posta ve şifreni gir<br/>
+        <strong>5.</strong> Giriş yaptıktan sonra sol menüdeki <strong>"Grup Paneli"</strong> butonuna tıkla
+      </p>
+    </td></tr>
+    </table>
+
+    <!-- DASHBOARD ÖZELLİKLERİ -->
+    <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;margin-bottom:20px;">
+    <tr><td style="padding:20px 24px;">
+      <h3 style="margin:0 0 14px;color:#E8622A;font-size:14px;">⚡ Grup Panelinde Neler Yapabilirsin?</h3>
+      <table cellpadding="0" cellspacing="0" width="100%">
+        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
+          <span style="color:#E8622A;font-weight:700">📅 Etkinlik Yönetimi</span><br/>
+          <span style="color:#aaa;font-size:12px;">Kulübünüze özel etkinlikler oluştur, düzenle ve yönet. Etkinlikler süper admin onayıyla sitede yayınlanır.</span>
+        </td></tr>
+        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
+          <span style="color:#E8622A;font-weight:700">🏃 Koşu / Antrenman Takvimi</span><br/>
+          <span style="color:#aaa;font-size:12px;">Haftalık antrenman programları oluştur. Tarih, saat, konum ve tempo bilgilerini ekle.</span>
+        </td></tr>
+        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
+          <span style="color:#E8622A;font-weight:700">👥 Üye Yönetimi</span><br/>
+          <span style="color:#aaa;font-size:12px;">Kulüp üyelerini görüntüle, başvuruları onayla veya reddet.</span>
+        </td></tr>
+        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
+          <span style="color:#E8622A;font-weight:700">📢 Duyuru Gönder</span><br/>
+          <span style="color:#aaa;font-size:12px;">Kulüp üyelerine anlık duyurular yayınla. Push bildirimleri ile üyelerine ulaş.</span>
+        </td></tr>
+        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
+          <span style="color:#E8622A;font-weight:700">🏆 Yarış Takvimi</span><br/>
+          <span style="color:#aaa;font-size:12px;">Kulübünüze özel yarış takvimi oluştur ve üyelerini haberdar et.</span>
+        </td></tr>
+        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
+          <span style="color:#E8622A;font-weight:700">✏️ Kulüp Profilini Düzenle</span><br/>
+          <span style="color:#aaa;font-size:12px;">Kulübünün banner, logo, açıklama ve sosyal medya linklerini güncelle.</span>
+        </td></tr>
+      </table>
+    </td></tr>
+    </table>
+
+    <!-- CTA -->
+    <div style="text-align:center;margin-bottom:24px;">
+      <a href="https://www.runclubturkiye.com" style="display:inline-block;background:#E8622A;color:#fff;font-size:14px;font-weight:700;padding:13px 32px;border-radius:8px;text-decoration:none;">
+        🚀 Grup Paneline Git
+      </a>
+    </div>
+
+    <p style="margin:0;color:#888;font-size:13px;line-height:1.6;">
+      Herhangi bir sorun yaşarsan bize ulaşabilirsin: <a href="mailto:runclubturkiye@gmail.com" style="color:#E8622A;">runclubturkiye@gmail.com</a><br/>
+      <strong style="color:#E8622A;">RunClub Türkiye Ekibi</strong> 🧡
+    </p>
+  </td></tr>
+  <!-- FOOTER -->
+  <tr><td style="background:#f9f9f9;padding:16px 36px;border-top:1px solid #eee;text-align:center;">
+    <p style="margin:0;color:#aaa;font-size:11px;">
+      © 2025 RunClub Türkiye &nbsp;·&nbsp;\n      <a href="https://www.runclubturkiye.com/privacy-policy.html" style="color:#aaa;">Gizlilik</a> &nbsp;·&nbsp; <a href="mailto:runclubturkiye@gmail.com" style="color:#aaa;">runclubturkiye@gmail.com</a>\n    </p>
+  </td></tr>
+</table>
+</td></tr>
+</table>
+</body>
+</html>`;
+      const emailHtml=WELCOME_HTML
+        .replace(/\{\{NAME\}\}/g, name)
+        .replace(/\{\{CLUB_NAME\}\}/g, clubName);
+      await addDoc(collection(db,'mail'),{
+        to: email,
+        message:{
+          subject: `✅ Tebrikler ${name}! Grup Admin Başvurunuz Onaylandı — RunClub Türkiye`,
+          html:    emailHtml,
+          text:    `Merhaba ${name}, ${clubName} kulübünün Grup Admin başvurusu onaylandı! Giriş yapmak için: https://www.runclubturkiye.com`,
+        },
+      });
+    }
+
     toast('Başvuru onaylandı ✓','ok');
     if(window._adminAppCount>0){
       window._adminAppCount--;

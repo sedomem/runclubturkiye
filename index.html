@@ -2617,6 +2617,31 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
   </div>
   <div class="admin-main" id="panel-main"></div>
+
+<!-- KULÜP PROFİL DÜZENLEME -->
+<div id="ga-club-profile-section" style="display:none;padding:20px">
+<h2 style="margin-bottom:18px;font-size:18px">🏃 Kulüp Profilini Düzenle</h2>
+<div class="card" style="padding:20px;margin-bottom:16px">
+<h3 style="font-size:14px;margin-bottom:12px;color:var(--or)">🖼 Banner Görseli</h3>
+<div id="ga-banner-drop" style="width:100%;height:130px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative;display:flex;align-items:center;justify-content:center"><img id="ga-banner-preview" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/><div id="ga-banner-ph" style="text-align:center;color:var(--muted);font-size:13px;pointer-events:none"><div style="font-size:28px;margin-bottom:4px">🖼</div>Sürükle &amp; bırak veya <u>tıkla</u><br/><span style="font-size:11px">1200×400px · JPG/PNG</span></div></div>
+<input type="file" id="ga-banner-input" accept="image/*" style="display:none"/>
+</div>
+<div class="card" style="padding:20px;margin-bottom:16px">
+<h3 style="font-size:14px;margin-bottom:12px;color:var(--or)">🏃 Kulüp Logosu</h3>
+<div style="display:flex;align-items:center;gap:16px"><div id="ga-logo-drop" style="width:88px;height:88px;border:2px dashed var(--border);border-radius:14px;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img id="ga-logo-preview" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/><div id="ga-logo-ph" style="text-align:center;color:var(--muted);font-size:11px;pointer-events:none">🏃<br/>Logo</div></div><div><p style="font-size:13px;font-weight:600;margin:0 0 4px">Logo Yükle</p><p style="font-size:12px;color:var(--muted);margin:0 0 8px">400×400px · JPG/PNG</p><button class="btn btn-ghost btn-sm" id="ga-logo-btn">📁 Galeriden Seç</button></div></div>
+<input type="file" id="ga-logo-input" accept="image/*" style="display:none"/>
+</div>
+<div class="card" style="padding:20px;margin-bottom:16px">
+<h3 style="font-size:14px;margin-bottom:14px;color:var(--or)">📝 Kulüp Bilgileri</h3>
+<div style="margin-bottom:12px"><label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px">Açıklama</label><textarea id="ga-club-desc" rows="3" placeholder="Kulübünüzü tanıtın..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;resize:vertical;box-sizing:border-box"></textarea></div>
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px"><div><label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px">Kategori</label><select id="ga-club-cat" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"><option value="">— Seç —</option><option value="road">Yol Koşusu</option><option value="trail">Trail</option><option value="ultra">Ultra</option><option value="triathlon">Triatlon</option><option value="marathon">Maraton</option><option value="general">Genel Koşu</option></select></div><div><label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:6px">Saat Dilimi</label><select id="ga-club-tz" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"><option value="Europe/Istanbul">Istanbul (UTC+3)</option><option value="Europe/London">London (UTC+0)</option><option value="America/New_York">New York (UTC-5)</option></select></div></div>
+</div>
+<div class="card" style="padding:20px;margin-bottom:16px">
+<h3 style="font-size:14px;margin-bottom:14px;color:var(--or)">Sosyal Medya</h3>
+<div style="display:flex;flex-direction:column;gap:10px"><div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;width:28px;text-align:center">📸</span><input id="ga-club-insta" placeholder="@kulup_adi (Instagram)" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div><div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;width:28px;text-align:center">💼</span><input id="ga-club-linkedin" placeholder="LinkedIn URL" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div><div style="display:flex;align-items:center;gap:10px"><span style="font-size:18px;width:28px;text-align:center">🌐</span><input id="ga-club-web" placeholder="https://kulup.com" style="flex:1;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div></div>
+</div>
+<div style="display:flex;justify-content:space-between;align-items:center;padding:0 4px"><span id="ga-club-save-status" style="font-size:12px;color:var(--muted)"></span><button class="btn btn-or" id="ga-save-club-btn" style="font-weight:700;padding:10px 24px">💾 Kulüp Profilini Kaydet</button></div>
+</div>
 </div></div>
 
 <!-- LEGAL -->
@@ -7735,8 +7760,81 @@ window.gNav=function(sec,btn){
     var b=document.querySelector('#pg-panel .admin-sb button[onclick*="gNav(\''+sec+'\'"');
     if(b)b.classList.add('on');
   }
+  if(sec==='profil'){
+    var pm=document.getElementById('panel-main');
+    var cps=document.getElementById('ga-club-profile-section');
+    if(pm)pm.style.display='none';
+    if(cps)cps.style.display='block';
+    setTimeout(function(){
+
+window.loadClubProfileForGA=async function(){
+  var clubId=window.CU&&(window.CU.clubId||window.CU.uid);
+  if(!clubId)return;
+  try{
+    var fb=window._fb;
+    var snap=await fb.getDoc(fb.doc(fb.db,'clubs',clubId));
+    var d=snap.exists()?snap.data():{};
+    var set=function(id,val){var el=document.getElementById(id);if(el)el.value=val||'';};
+    set('ga-club-desc',     d.desc||d.clubDesc||'');
+    set('ga-club-insta',    (d.socialLinks&&d.socialLinks.instagram)||d.insta||'');
+    set('ga-club-linkedin', (d.socialLinks&&d.socialLinks.linkedin)||'');
+    set('ga-club-web',      (d.socialLinks&&d.socialLinks.website)||'');
+    // Kategori ve timezone
+    var catEl=document.getElementById('ga-club-cat');
+    if(catEl)catEl.value=d.category||'';
+    var tzEl=document.getElementById('ga-club-tz');
+    if(tzEl)tzEl.value=d.timezone||'Europe/Istanbul';
+    // Banner preview
+    var bUrl=d.bannerUrl||d.imgUrl||'';
+    if(bUrl){
+      var bP=document.getElementById('ga-banner-preview');
+      var bH=document.getElementById('ga-banner-ph');
+      if(bP){bP.src=bUrl;bP.style.display='block';}
+      if(bH)bH.style.display='none';
+    }
+    // Logo preview
+    var lUrl=d.logoUrl||'';
+    if(lUrl){
+      var lP=document.getElementById('ga-logo-preview');
+      var lH=document.getElementById('ga-logo-ph');
+      if(lP){lP.src=lUrl;lP.style.display='block';}
+      if(lH)lH.style.display='none';
+    }
+  }catch(e){console.warn('[loadClubProfileForGA]',e.message);}
+  window._initClubProfileListeners&&window._initClubProfileListeners();
+};
+window._initClubProfileListeners=function(){
+  var bi=document.getElementById('ga-banner-input');
+  var li=document.getElementById('ga-logo-input');
+  var bd=document.getElementById('ga-banner-drop');
+  var ld=document.getElementById('ga-logo-drop');
+  var lb=document.getElementById('ga-logo-btn');
+  var sb=document.getElementById('ga-save-club-btn');
+  if(bi&&!bi._ga){bi._ga=true;
+    bi.addEventListener('change',function(){window._gaPreview(this,'banner');});
+    if(bd)bd.addEventListener('click',function(){bi.click();});
+    if(bd)bd.addEventListener('dragover',function(e){e.preventDefault();bd.style.borderColor='var(--or)';});
+    if(bd)bd.addEventListener('dragleave',function(){bd.style.borderColor='var(--border)';});
+    if(bd)bd.addEventListener('drop',function(e){window._gaHandleDrop(e,'banner');});
+  }
+  if(li&&!li._ga){li._ga=true;
+    li.addEventListener('change',function(){window._gaPreview(this,'logo');});
+    if(ld)ld.addEventListener('click',function(){li.click();});
+    if(lb)lb.addEventListener('click',function(){li.click();});
+    if(ld)ld.addEventListener('drop',function(e){window._gaHandleDrop(e,'logo');});
+  }
+  if(sb&&!sb._ga){sb._ga=true;
+    sb.addEventListener('click',function(){window.gasSaveClubProfile();});
+  }
+};
+window.loadClubProfileForGA&&window.loadClubProfileForGA();},200);
+    return;
+  }
+  var cps2=document.getElementById('ga-club-profile-section');
+  var pm2=document.getElementById('panel-main');
+  if(cps2)cps2.style.display='none';
+  if(pm2)pm2.style.display='';
   if(typeof renderGroupSection==='function')renderGroupSection(sec);
-  if(sec==='profil')setTimeout(function(){window.loadClubProfileForGA&&window.loadClubProfileForGA();},300);
 };
 
 
@@ -9416,86 +9514,6 @@ function renderGroupSection(sec){
         <div style="margin-top:24px;padding-top:16px;border-top:1.5px solid rgba(192,57,43,.2)">
           <h4 style="font-size:13px;color:#c0392b;margin-bottom:10px">⚠️ Tehlikeli Bölge</h4>
           <button class="btn btn-red btn-sm" onclick="if(confirm('Hesabınız kalıcı silinecek?'))window.deleteMyAccount&&deleteMyAccount()">🗑 Hesabımı Sil</button>
-        </div>
-      </div>
-      <div class="card" style="padding:24px;margin-top:20px">
-        <h3 style="margin-bottom:18px;font-size:15px;display:flex;align-items:center;gap:8px">🏃 Kulüp Profilini Düzenle
-          <span style="font-size:11px;color:var(--muted);font-weight:400">— Sadece kulüp adminine görünür</span>
-        </h3>
-        <div style="margin-bottom:18px">
-          <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px">Banner Görseli</label>
-          <div id="ga-banner-drop" onclick="document.getElementById('ga-banner-input').click()"
-            style="width:100%;height:120px;border:2px dashed var(--border);border-radius:10px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative"
-            ondragover="event.preventDefault();this.style.borderColor='var(--or)'"
-            ondragleave="this.style.borderColor='var(--border)'"
-            ondrop="window._gaHandleDrop(event,'banner')">
-            <img id="ga-banner-preview" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/>
-            <div id="ga-banner-ph" style="text-align:center;color:var(--muted);font-size:13px;z-index:1">
-              <div style="font-size:28px;margin-bottom:4px">🖼</div>Sürükle &amp; bırak veya tıkla<br/>
-              <span style="font-size:11px">1200×400px önerilir · JPG/PNG</span>
-            </div>
-          </div>
-          <input type="file" id="ga-banner-input" accept="image/*" style="display:none" onchange="window._gaPreview(this,'banner')"/>
-        </div>
-        <div style="margin-bottom:18px">
-          <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px">Kulüp Logosu</label>
-          <div style="display:flex;align-items:center;gap:14px">
-            <div id="ga-logo-drop" onclick="document.getElementById('ga-logo-input').click()"
-              style="width:80px;height:80px;border:2px dashed var(--border);border-radius:14px;display:flex;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative;flex-shrink:0"
-              ondrop="window._gaHandleDrop(event,'logo')">
-              <img id="ga-logo-preview" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/>
-              <div id="ga-logo-ph" style="text-align:center;color:var(--muted);font-size:10px">🏃<br/>Logo</div>
-            </div>
-            <div style="font-size:12px;color:var(--muted);line-height:1.6">400×400px kare görsel önerilir.</div>
-          </div>
-          <input type="file" id="ga-logo-input" accept="image/*" style="display:none" onchange="window._gaPreview(this,'logo')"/>
-        </div>
-        <div class="form-grp" style="margin-bottom:12px">
-          <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px">Kulüp Açıklaması</label>
-          <textarea id="ga-club-desc" rows="3" placeholder="Kulübünüzü kısaca tanıtın..." style="width:100%;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px;resize:vertical;margin-top:6px"></textarea>
-        </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
-          <div>
-            <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Kategori</label>
-            <select id="ga-club-cat" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px">
-              <option value="">— Seç —</option>
-              <option value="road">🏙 Yol Koşusu</option>
-              <option value="trail">⛰ Trail</option>
-              <option value="ultra">🏔 Ultra</option>
-              <option value="triathlon">🏊 Triatlon</option>
-              <option value="marathon">🏆 Maraton</option>
-              <option value="general">🏃 Genel Koşu</option>
-            </select>
-          </div>
-          <div>
-            <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:6px">Saat Dilimi</label>
-            <select id="ga-club-tz" style="width:100%;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px">
-              <option value="Europe/Istanbul">🇹🇷 Istanbul (UTC+3)</option>
-              <option value="Europe/London">🇬🇧 London (UTC+0)</option>
-              <option value="America/New_York">🇺🇸 New York (UTC-5)</option>
-            </select>
-          </div>
-        </div>
-        <div style="margin-bottom:18px">
-          <label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.4px;display:block;margin-bottom:8px">Sosyal Medya</label>
-          <div style="display:flex;flex-direction:column;gap:8px">
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="width:28px;text-align:center;font-size:16px">📸</span>
-              <input id="ga-club-insta" placeholder="@kulup_adi (Instagram)" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="width:28px;text-align:center;font-size:16px">💼</span>
-              <input id="ga-club-linkedin" placeholder="LinkedIn URL" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
-            </div>
-            <div style="display:flex;align-items:center;gap:8px">
-              <span style="width:28px;text-align:center;font-size:16px">🌐</span>
-              <input id="ga-club-web" placeholder="https://kulup.com" style="flex:1;padding:8px 12px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
-            </div>
-          </div>
-        </div>
-        <div style="display:flex;justify-content:space-between;align-items:center">
-          <span id="ga-club-save-status" style="font-size:12px;color:var(--muted)"></span>
-          <button class="btn btn-or" onclick="window.gasSaveClubProfile()">💾 Kulüp Profilini Kaydet</button>
         </div>
       </div>`,
     settings:`

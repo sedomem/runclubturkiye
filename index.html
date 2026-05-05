@@ -7767,6 +7767,87 @@ window.gNav=function(sec,btn){
     if(cps)cps.style.display='block';
     setTimeout(function(){
 
+
+// ── Kulüp Profili: görsel önizleme ─────────────────────────
+window._gaPreview=function(input,type){
+  var file=input&&input.files&&input.files[0];
+  if(!file)return;
+  var reader=new FileReader();
+  reader.onload=function(e){
+    var prev=document.getElementById("ga-"+type+"-preview");
+    var ph=document.getElementById("ga-"+type+"-ph");
+    if(prev){prev.src=e.target.result;prev.style.display="block";}
+    if(ph)ph.style.display="none";
+  };
+  reader.readAsDataURL(file);
+};
+
+window._gaHandleDrop=function(event,type){
+  event.preventDefault();
+  var file=event.dataTransfer&&event.dataTransfer.files&&event.dataTransfer.files[0];
+  if(!file||!file.type.startsWith("image/"))return;
+  var input=document.getElementById("ga-"+type+"-input");
+  if(!input)return;
+  try{
+    var dt=new DataTransfer();
+    dt.items.add(file);
+    input.files=dt.files;
+    window._gaPreview(input,type);
+  }catch(e){console.warn("_gaHandleDrop:",e);}
+};
+
+window.gasSaveClubProfile=async function(){
+  var statusEl=document.getElementById("ga-club-save-status");
+  var clubId=window.CU&&(window.CU.clubId||window.CU.uid);
+  if(!clubId){toast("Kulüp ID bulunamadı","err");return;}
+  if(statusEl)statusEl.textContent="⏳ Kaydediliyor...";
+  var fb=window._fb;
+  var g=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
+  var updateData={
+    desc:     g("ga-club-desc"),
+    category: g("ga-club-cat"),
+    timezone: g("ga-club-tz")||"Europe/Istanbul",
+    socialLinks:{
+      instagram: g("ga-club-insta"),
+      linkedin:  g("ga-club-linkedin"),
+      website:   g("ga-club-web"),
+    },
+    updatedAt:fb.serverTimestamp(),
+  };
+  try{
+    // Banner yükle
+    var bannerFile=document.getElementById("ga-banner-input");
+    bannerFile=bannerFile&&bannerFile.files&&bannerFile.files[0];
+    if(bannerFile){
+      if(statusEl)statusEl.textContent="⏳ Banner yükleniyor...";
+      var bRef=fb.ref(fb.storage,"clubs/"+clubId+"/banner");
+      await fb.uploadBytes(bRef,bannerFile);
+      updateData.bannerUrl=await fb.getDownloadURL(bRef);
+      updateData.imgUrl=updateData.bannerUrl;
+    }
+    // Logo yükle
+    var logoFile=document.getElementById("ga-logo-input");
+    logoFile=logoFile&&logoFile.files&&logoFile.files[0];
+    if(logoFile){
+      if(statusEl)statusEl.textContent="⏳ Logo yükleniyor...";
+      var lRef=fb.ref(fb.storage,"clubs/"+clubId+"/logo");
+      await fb.uploadBytes(lRef,logoFile);
+      updateData.logoUrl=await fb.getDownloadURL(lRef);
+    }
+    // Firestore güncelle
+    if(statusEl)statusEl.textContent="⏳ Kaydediliyor...";
+    await fb.setDoc(fb.doc(fb.db,"clubs",clubId),updateData,{merge:true});
+    // Cache güncelle
+    var cached=(window.CLUBS||[]).find(function(c){return c.id===clubId;});
+    if(cached)Object.assign(cached,updateData);
+    toast("Kulüp profili güncellendi ✓","ok");
+    if(statusEl)statusEl.innerHTML='<span style="color:var(--green)">✅ Kaydedildi</span>';
+    setTimeout(function(){if(statusEl)statusEl.textContent="";},3000);
+  }catch(e){
+    toast("Hata: "+e.message,"err");
+    if(statusEl)statusEl.textContent="❌ Hata: "+e.message;
+  }
+};
 window.loadClubProfileForGA=async function(){
   var clubId=window.CU&&(window.CU.clubId||window.CU.uid);
   if(!clubId)return;

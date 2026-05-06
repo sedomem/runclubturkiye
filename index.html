@@ -3944,7 +3944,7 @@ window.saveBlogFromAdmin=async()=>{
   const kategori=document.getElementById('ab-kategori')?.value||'Haber';
   const featured=document.getElementById('ab-featured')?.checked||false;
   const slug=title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'');
-  const data={title,kategori,featured,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:CU?.name||'RunClub Editör',status:'published',publishedAt:new Date().toISOString().split('T')[0],slug};
+  const data={title,kategori,featured,body:(window._quillEditor?window._quillEditor.root.innerHTML:document.getElementById('ab-body').value)||'',coverUrl,tags:document.getElementById('ab-tags').value.split(',').map(t=>t.trim()).filter(Boolean),metaTitle:document.getElementById('ab-meta-title')?.value||title,metaDesc:document.getElementById('ab-meta-desc')?.value||'',authorName:(document.getElementById('ab-author')?.value.trim())||'Run Club Editör',status:'published',publishedAt:new Date().toISOString().split('T')[0],slug};
   toast('Kaydediliyor...','ok');
   try{
     if(editId){
@@ -3959,7 +3959,11 @@ window.saveBlogFromAdmin=async()=>{
       window.BLOG_POSTS.unshift({id:r.id,...data,likes:0});
       toast('Yazı yayınlandı ✓','ok');
     }
-    renderBlogList();renderBlogPreview();renderAdminSection('blog');
+    renderBlogList();renderBlogPreview();
+    // ab-author'ı sıfırla
+    const abAuth=document.getElementById('ab-author');
+    if(abAuth)abAuth.value='';
+    renderAdminSection('blog');
   }catch(e){toast('Kaydedilemedi: '+e.message,'err');}
 };
 
@@ -8975,6 +8979,7 @@ function renderAdminSection(sec){
           </div>
         </div>
         <div class="form-grp"><label>Başlık</label><input id="ab-title" oninput="updateSeoScore()"/></div>
+        <div class="form-grp"><label>Yazar İsmi</label><input id="ab-author" placeholder="Run Club Editör" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:14px"/></div>
         ${imgUploadHtml('ab-img-input','Kapak Görseli','1200×630px')}
         <div class="form-grp">
           <label>İçerik</label>

@@ -251,7 +251,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 
 /* ━━ CONTAINER ━━ */
 .container{max-width:1120px;margin:0 auto;padding:0 22px}
-.sec{padding:60px 0}.sec-sm{padding:36px 0}
+.sec{padding:80px 0}.sec-sm{padding:36px 0}
 
 /* ━━ NAV ━━ */
 #topnav{position:sticky;top:0;z-index:200;background:rgba(253,250,246,.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-bottom:1.5px solid var(--border);height:64px;display:flex;align-items:center;padding:0 20px;gap:8px;box-shadow:var(--shadow-sm);overflow:hidden;max-width:100%}
@@ -290,8 +290,8 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .g2{grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
 .g3{grid-template-columns:repeat(auto-fill,minmax(240px,1fr))}
 .g4{grid-template-columns:repeat(auto-fill,minmax(min(220px,100%),1fr))}
-.card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all var(--transition);box-shadow:var(--shadow-sm)}
-.card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;box-shadow:var(--shadow-sm)}
+.card:hover{border-color:var(--or);transform:translateY(-6px);box-shadow:0 12px 32px rgba(232,98,42,.18);cursor:pointer}
 /* CLS FIX: card-img aspect-ratio ile yükseklik rezervasyonu */
 .card-img{height:160px;aspect-ratio:16/6;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:40px;position:relative;overflow:hidden}
 .card-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s var(--transition)}
@@ -335,7 +335,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .kod-box .kod-label{font-size:11px;color:var(--muted);margin-top:3px}
 
 /* ━━ SEC HEAD ━━ */
-.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:24px}
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:32px}
 .sec-head h2{font-size:22px;font-weight:700;font-family:var(--font-head);color:var(--dark2);position:relative;padding-bottom:8px}
 .sec-head h2::after{content:'';position:absolute;bottom:0;left:0;width:36px;height:3px;background:var(--or);border-radius:2px}
 .divider{height:1.5px;background:var(--border)}
@@ -459,8 +459,8 @@ tr:hover td{background:var(--or-soft)}
 .sponsor-edit{position:absolute;top:5px;left:5px;background:var(--or);border:none;color:#fff;width:20px;height:20px;border-radius:50%;font-size:12px;cursor:pointer;display:flex;align-items:center;justify-content:center}
 
 /* ━━ RACE CARD — CLS fix ━━ */
-.race-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:all var(--transition);box-shadow:var(--shadow-sm)}
-.race-card:hover{border-color:var(--or-light);transform:translateY(-4px);box-shadow:var(--shadow-md)}
+.race-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden;cursor:pointer;transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease;box-shadow:var(--shadow-sm)}
+.race-card:hover{border-color:var(--or);transform:translateY(-6px);box-shadow:0 12px 32px rgba(232,98,42,.18)}
 /* CLS FIX: aspect-ratio ile yükseklik rezervasyonu */
 .race-img{height:210px;aspect-ratio:unset;width:100%;background:linear-gradient(135deg,var(--dark2),var(--dark));display:flex;align-items:center;justify-content:center;position:relative;overflow:hidden;font-size:48px}
 .race-img img{width:100%;height:100%;object-fit:cover;position:absolute;inset:0;transition:transform .4s}
@@ -951,11 +951,11 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .how-text h3{font-size:12px;font-weight:700;margin:0 0 3px;font-family:var(--font-head);color:var(--dark2)}
 .how-text p{font-size:11px;color:var(--muted);line-height:1.45;margin:0}
 .how-arrow{display:flex;align-items:center;color:var(--or);font-size:16px;padding:0 4px;padding-top:18px;opacity:.5}
-.how-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);flex-wrap:wrap}
-.how-stat{display:flex;flex-direction:column;align-items:center;padding:6px 20px;gap:2px}
-.how-stat-n{font-size:18px;font-weight:800;color:var(--or);font-family:var(--font-head);line-height:1}
-.how-stat-l{font-size:10px;color:var(--muted);letter-spacing:.3px}
-.how-stat-div{width:1px;height:28px;background:var(--border)}
+.how-stats{display:flex;align-items:center;justify-content:center;gap:0;margin-top:32px;padding-top:24px;border-top:1px solid var(--border);flex-wrap:wrap}
+.how-stat{display:flex;flex-direction:column;align-items:center;padding:12px 32px;gap:4px}
+.how-stat-n{font-size:32px;font-weight:900;color:var(--or);font-family:var(--font-head);line-height:1;letter-spacing:-1px}
+.how-stat-l{font-size:12px;color:var(--muted);letter-spacing:.3px}
+.how-stat-div{width:1px;height:44px;background:var(--border);opacity:.5}
 
 /* ━━ HAMBURGER MENÜ ━━ */
 #hamburger{display:none;flex-direction:column;gap:5px;cursor:pointer;padding:6px;border-radius:8px;background:none;border:none}
@@ -1209,6 +1209,46 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .disc-report-body ul,.disc-report-body ol{margin:0 0 10px;padding-left:20px}
 .disc-report-body li{margin-bottom:4px}
 .disc-report-body strong{font-weight:700}
+
+/* ═══ UI REVİZYON ═══ */
+/* Section başlık hiyerarşisi */
+.sec-head h2{font-size:22px;font-weight:800;font-family:var(--font-head);letter-spacing:-.3px}
+.sec-sub{display:block;font-size:13px;font-weight:400;color:var(--muted);margin-top:2px;font-family:sans-serif;letter-spacing:0}
+@media(min-width:768px){.sec-head h2{font-size:26px}}
+/* Kart tipi ayırt edici şeritler */
+.ev-card{border-left:3px solid var(--or) !important}
+.race-card{border-top:3px solid #3b82f6 !important}
+.blog-card{border-top:3px solid #10b981 !important}
+/* Skeleton kartlar */
+.sk-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.sk-img{height:160px;width:100%}
+.sk-body{padding:14px}
+.sk-line{height:13px;margin-bottom:8px;border-radius:6px}
+.sk-line.w100{width:100%}.sk-line.w75{width:75%}.sk-line.w50{width:50%}.sk-line.w30{width:30%}
+.sk-title{height:17px;margin-bottom:12px;border-radius:6px;width:85%}
+.sk-badge{height:20px;width:60px;border-radius:20px;margin-bottom:10px;display:inline-block}
+.sk-ev-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:14px;display:flex;gap:12px}
+.sk-ev-date{width:44px;height:52px;border-radius:8px;flex-shrink:0}
+.sk-ev-body{flex:1}
+.sk-club-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);overflow:hidden}
+.sk-club-img{height:100px;width:100%}
+.sk-club-body{padding:12px}
+/* Social proof */
+.social-proof-sec{background:var(--bg2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:56px 0}
+.sp-testimonials{display:grid;gap:16px;grid-template-columns:1fr}
+@media(min-width:640px){.sp-testimonials{grid-template-columns:repeat(3,1fr)}}
+.sp-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:22px;position:relative}
+.sp-card::before{content:'"';position:absolute;top:8px;left:14px;font-size:52px;color:var(--or);opacity:.15;font-family:Georgia,serif;line-height:1}
+.sp-text{font-size:13px;color:var(--text);line-height:1.75;margin-bottom:14px;padding-top:14px}
+.sp-author{display:flex;align-items:center;gap:10px}
+.sp-avatar{width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff9500);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;color:#fff;flex-shrink:0}
+.sp-name{font-size:13px;font-weight:700;color:var(--text)}
+.sp-meta{font-size:11px;color:var(--muted)}
+/* Empty states */
+.empty-state{text-align:center;padding:48px 20px;color:var(--muted)}
+.empty-state .es-icon{font-size:44px;margin-bottom:12px;opacity:.6}
+.empty-state h3{font-size:16px;font-weight:700;color:var(--text);margin:0 0 6px}
+.empty-state p{font-size:13px;line-height:1.65;margin:0 0 16px}
 </style>
 </head>
 <body>
@@ -1407,22 +1447,46 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   </div></div>
   <div class="divider"></div>
   <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Popüler Kulüpler</h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
+    <div class="sec-head"><h2>Popüler Kulüpler<span class="sec-sub">Şehrindeki aktif koşu grupları</span></h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
     <div class="grid g4" id="home-clubs"></div>
   </div></div>
   <div class="divider"></div>
   <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
+    <div class="sec-head"><h2>Yaklaşan Yarışlar<span class="sec-sub">Maraton, trail ve yol koşuları</span></h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
     <div class="grid g4" id="home-races"></div>
   </div></div>
   <div class="divider"></div>
   <div class="sec"><div class="container">
-    <div class="sec-head"><h2>Son Haberler</h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
+    <div class="sec-head"><h2>Son Haberler<span class="sec-sub">Koşu dünyasından güncel içerikler</span></h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
     <div class="grid g4" id="home-blog"></div>
   </div></div>
   <div class="divider"></div>
   <!-- ✅ YENİ: Ana Sayfa Fırsatlar Bölümü -->
-  <div class="sec" style="background:linear-gradient(135deg,rgba(255,107,0,.04),transparent)"><div class="container">
+  
+  <!-- SOCIAL PROOF -->
+  <div class="social-proof-sec">
+    <div class="container">
+      <div style="text-align:center;margin-bottom:28px">
+        <h2 style="font-size:20px;font-weight:800;font-family:var(--font-head)">Koşucular Ne Diyor?</h2>
+        <p style="color:var(--muted);font-size:13px;margin-top:4px">Türkiye'nin dört bir yanından gerçek deneyimler</p>
+      </div>
+      <div class="sp-testimonials">
+        <div class="sp-card">
+          <p class="sp-text">İstanbul'da yeni taşındım ve kulüp arıyordum. RunClubTürkiye sayesinde 2 haftada kendi tempoma uygun bir grup buldum. Artık haftada 3 antrenman yapıyorum!</p>
+          <div class="sp-author"><div class="sp-avatar">A</div><div><div class="sp-name">Ayşe K.</div><div class="sp-meta">🏅 Kadıköy Runners üyesi</div></div></div>
+        </div>
+        <div class="sp-card">
+          <p class="sp-text">Yarış takvimi özelliği müthiş. Kayıt son tarihlerini artık kaçırmıyorum. İstanbul Maratonu'na tam zamanında başvurdum, teşekkürler!</p>
+          <div class="sp-author"><div class="sp-avatar">M</div><div><div class="sp-name">Mehmet Y.</div><div class="sp-meta">🏆 3 maraton tamamladı</div></div></div>
+        </div>
+        <div class="sp-card">
+          <p class="sp-text">Kulüp kurma süreci çok kolaydı. Şu an Ankara'da 45 üyeli aktif bir grubumuz var. Platform olmadan bu kadar hızlı büyüyemezdik.</p>
+          <div class="sp-author"><div class="sp-avatar">S</div><div><div class="sp-name">Selin T.</div><div class="sp-meta">🔑 Grup Admin — Ankara</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+<div class="sec" style="background:linear-gradient(135deg,rgba(255,107,0,.04),transparent)"><div class="container">
     <div class="sec-head">
       <h2>🎁 Koşucuya Özel Fırsatlar</h2>
       <button class="btn btn-ghost btn-sm" onclick="nav('firsatlar')">Tümünü Gör →</button>
@@ -4915,7 +4979,7 @@ function evtCard(e){
     </div>
   </div>`;
 }
-function renderEvts(list,cid){const el=document.getElementById(cid);if(el)el.innerHTML=list.map(evtCard).join('')||'<p style="color:var(--muted)">Etkinlik bulunamadı.</p>';}
+function renderEvts(list,cid){const el=document.getElementById(cid);if(el)el.innerHTML=list.map(evtCard).join('')||`<div class='empty-state'><div class='es-icon'>🏃</div><h3>Etkinlik Bulunamadı</h3><p>Bu kriterlere uygun etkinlik yok.<br>Başka bir kategori veya şehir dene.</p></div>`;}
 window.filterEvts=q=>renderEvts(EVENTS.filter(e=>e.title.toLowerCase().includes(q.toLowerCase())||e.city.toLowerCase().includes(q.toLowerCase())),'events-list');
 window.filterEvtCat=(cat,btn)=>{document.querySelectorAll('#pg-events .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderEvts(cat==='tüm'?EVENTS:EVENTS.filter(e=>e.cat===cat),'events-list');};
 window.openEvent=id=>{

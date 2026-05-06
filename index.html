@@ -1249,6 +1249,36 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .empty-state .es-icon{font-size:44px;margin-bottom:12px;opacity:.6}
 .empty-state h3{font-size:16px;font-weight:700;color:var(--text);margin:0 0 6px}
 .empty-state p{font-size:13px;line-height:1.65;margin:0 0 16px}
+
+/* ═══ PERFORMANS & UX REVİZYON ═══ */
+#notif-bell-btn{position:relative;background:none;border:none;cursor:pointer;padding:6px 8px;border-radius:8px;font-size:20px;color:var(--text);transition:background .15s}
+#notif-bell-btn:hover{background:var(--bg2)}
+#notif-badge{position:absolute;top:2px;right:2px;min-width:16px;height:16px;background:#ef4444;border-radius:8px;font-size:10px;font-weight:700;color:#fff;display:none;align-items:center;justify-content:center;padding:0 3px}
+#notif-dropdown{position:absolute;top:calc(100% + 8px);right:0;width:340px;max-height:440px;overflow-y:auto;background:var(--card);border:1.5px solid var(--border);border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.18);z-index:3000;display:none}
+#notif-dropdown.open{display:block}
+.notif-header{display:flex;justify-content:space-between;align-items:center;padding:14px 16px 10px;border-bottom:1px solid var(--border)}
+.notif-header h4{margin:0;font-size:14px;font-weight:700}
+.notif-item{display:flex;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);cursor:pointer;transition:background .15s}
+.notif-item:last-child{border-bottom:none}
+.notif-item:hover{background:var(--bg2)}
+.notif-item.unread{background:rgba(232,98,42,.06)}
+.notif-icon{font-size:18px;flex-shrink:0;width:36px;height:36px;border-radius:10px;background:var(--bg2);display:flex;align-items:center;justify-content:center}
+.notif-body{flex:1;min-width:0}
+.notif-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.notif-desc{font-size:12px;color:var(--muted);line-height:1.4}
+.notif-time{font-size:10px;color:var(--muted);margin-top:3px}
+.notif-empty{text-align:center;padding:32px 16px;color:var(--muted);font-size:13px}
+#pwa-install-bar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1.5px solid var(--border);padding:12px 20px;z-index:2900;box-shadow:0 -4px 20px rgba(0,0,0,.1);align-items:center;gap:12px}
+#pwa-install-bar.show{display:flex}
+#pwa-install-bar .pwa-icon{font-size:28px}
+#pwa-install-bar .pwa-text{flex:1}
+#pwa-install-bar .pwa-text strong{display:block;font-size:14px;color:var(--text)}
+#pwa-install-bar .pwa-text span{font-size:12px;color:var(--muted)}
+.club-sort-bar{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px;align-items:center}
+.club-sort-bar select{padding:7px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:13px;cursor:pointer}
+.load-more-wrap{text-align:center;margin-top:24px}
+.load-more-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
+.load-more-btn:hover{border-color:var(--or);color:var(--or)}
 </style>
 </head>
 <body>
@@ -1300,6 +1330,13 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     </div>
     <div id="nav-user" style="display:none;gap:5px" class="nav-right">
       <button class="btn btn-ghost btn-sm" id="nav-role-btn" onclick="goPanel()" style="display:none"></button>
+      <div style="position:relative">
+        <button id="notif-bell-btn" onclick="toggleNotifDropdown()" aria-label="Bildirimler" title="Bildirimler">🔔<span id="notif-badge"></span></button>
+        <div id="notif-dropdown">
+          <div class="notif-header"><h4>🔔 Bildirimler</h4><button class="btn btn-ghost btn-sm" onclick="markAllNotifsRead()" style="font-size:11px">Tümünü Oku</button></div>
+          <div id="notif-list"><div class="notif-empty">Bildirim yok</div></div>
+        </div>
+      </div>
       <button class="btn btn-or btn-sm" id="nav-dashboard-btn" onclick="nav('dashboard')">Dashboard</button>
     </div>
   </div>
@@ -1583,10 +1620,29 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <h2 style="margin-bottom:18px">Koşu Kulüpleri</h2>
   <div class="search-wrap"><input type="text" placeholder="Kulüp veya şehir ara..." oninput="filterClubs(this.value)"/></div>
   <div class="filter-strip">
-    <button class="filt on" onclick="filterClubCity('tüm',this)">Tümü</button>
-    <button class="filt" onclick="filterClubCity('İstanbul',this)">İstanbul</button>
-    <button class="filt" onclick="filterClubCity('Ankara',this)">Ankara</button>
-    <button class="filt" onclick="filterClubCity('İzmir',this)">İzmir</button>
+    <button class="filt on" onclick="filterClubCity('tüm',this);sortAndRenderClubs()">Tümü</button>
+    <button class="filt" onclick="filterClubCity('İstanbul',this);sortAndRenderClubs()">İstanbul</button>
+    <button class="filt" onclick="filterClubCity('Ankara',this);sortAndRenderClubs()">Ankara</button>
+    <button class="filt" onclick="filterClubCity('İzmir',this);sortAndRenderClubs()">İzmir</button>
+  </div>
+  <div class="club-sort-bar">
+    <span style="font-size:12px;color:var(--muted);font-weight:600">Sırala:</span>
+    <select id="club-sort-select" onchange="sortAndRenderClubs()">
+      <option value="default">Varsayılan</option>
+      <option value="members_desc">En Fazla Üye</option>
+      <option value="name_asc">A &rarr; Z</option>
+      <option value="name_desc">Z &rarr; A</option>
+    </select>
+    <select id="club-cat-select" onchange="sortAndRenderClubs()">
+      <option value="">Tüm Kategoriler</option>
+      <option value="road">Yol Koşusu</option>
+      <option value="trail">Trail</option>
+      <option value="ultra">Ultra</option>
+      <option value="marathon">Maraton</option>
+      <option value="triathlon">Triatlon</option>
+      <option value="general">Genel</option>
+    </select>
+    <span id="club-count-label" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
   </div>
   <div class="grid g3" id="clubs-list"></div>
 </div></div>
@@ -4462,6 +4518,9 @@ window.approveApplication=async(appId,uid)=>{
 </table>
 </td></tr>
 </table>
+
+<!-- PWA -->
+<div id="pwa-install-bar"><span class="pwa-icon">📱</span><div class="pwa-text"><strong>Uygulamayı Yükle</strong><span>Ana ekrana ekle, daha hızlı aç</span></div><button class="btn btn-or btn-sm" onclick="pwaInstall()">Yükle</button><button class="btn btn-ghost btn-sm" onclick="pwaDismiss()">X</button></div>
 </body>
 </html>`;
       const emailHtml=WELCOME_HTML
@@ -4788,7 +4847,7 @@ window.nav=id=>{
       renderSkeletons('home-races',4,'120px');
       renderSkeletons('home-blog',4,'160px');
     }
-    if(window.loadAllFromDB)window.loadAllFromDB();
+    if(window.loadAllFromDB)window.loadAllFromDB();setTimeout(function(){window.initNotifSystem&&window.initNotifSystem();},1500);
   }
 };
 window.openAuth=type=>{
@@ -7951,6 +8010,176 @@ window.switchKmTab=function(tab){
 
 
 // ── Grup Admin Panel Navigation ─────────────────────────
+
+window._notifUnsub=null;
+window._notifCache=[];
+window.initNotifSystem=function(){
+  var uid=window.CU&&window.CU.uid;
+  if(!uid)return;
+  var fb=window._fb;
+  if(!fb||!fb.onSnapshot)return;
+  if(window._notifUnsub)window._notifUnsub();
+  try{
+    var q=fb.query(fb.collection(fb.db,'announcements'),fb.where('targetUid','==',uid),fb.orderBy('createdAt','desc'));
+    window._notifUnsub=fb.onSnapshot(q,function(snap){
+      var notifs=[];
+      snap.forEach(function(d){
+        var dat=d.data();
+        notifs.push({id:d.id,title:dat.title,body:dat.body,readAt:dat.readAt,createdAt:dat.createdAt,isWelcome:dat.isWelcome});
+      });
+      window._notifCache=notifs.slice(0,20);
+      window.renderNotifBadge&&window.renderNotifBadge();
+    },function(err){console.warn('[Notif]',err.message);});
+  }catch(e){console.warn('[Notif init]',e.message);}
+};
+window.renderNotifBadge=function(){
+  var badge=document.getElementById('notif-badge');
+  if(!badge)return;
+  var unread=(window._notifCache||[]).filter(function(n){return !n.readAt;}).length;
+  if(unread>0){badge.textContent=unread>9?'9+':String(unread);badge.style.display='flex';}
+  else{badge.style.display='none';}
+};
+window.renderNotifDropdown=function(){
+  var list=document.getElementById('notif-list');
+  if(!list)return;
+  var notifs=window._notifCache||[];
+  if(!notifs.length){list.innerHTML='<div class="notif-empty">Henüz bildirim yok</div>';return;}
+  var html='';
+  notifs.forEach(function(n){
+    var icon=n.isWelcome?'🎉':'🔔';
+    var timeStr='';
+    if(n.createdAt&&n.createdAt.seconds){
+      var diff=Math.floor((Date.now()-n.createdAt.seconds*1000)/60000);
+      if(diff<60)timeStr=diff+'dk';
+      else if(diff<1440)timeStr=Math.floor(diff/60)+'sa';
+      else timeStr=Math.floor(diff/1440)+'g';
+    }
+    var cls='notif-item'+(n.readAt?'':' unread');
+    var nid=n.id;
+    var ttl=(n.title||'Bildirim').replace(/</g,'&lt;');
+    var bdy=((n.body||'').slice(0,80)).replace(/</g,'&lt;');
+    html+='<div class="'+cls+'" data-nid="'+nid+'">'
+       +'<div class="notif-icon">'+icon+'</div>'
+       +'<div class="notif-body">'
+       +'<div class="notif-title">'+ttl+'</div>'
+       +'<div class="notif-desc">'+bdy+(n.body&&n.body.length>80?'...':'')+'</div>'
+       +(timeStr?'<div class="notif-time">'+timeStr+' once</div>':'')
+       +'</div></div>';
+  });
+  list.innerHTML=html;
+  list.querySelectorAll('.notif-item').forEach(function(el){
+    el.addEventListener('click',function(){window.openNotif(el.dataset.nid);});
+  });
+};
+window.toggleNotifDropdown=function(){
+  var dd=document.getElementById('notif-dropdown');
+  if(!dd)return;
+  dd.classList.toggle('open');
+  if(dd.classList.contains('open')){
+    window.renderNotifDropdown();
+    setTimeout(function(){
+      document.addEventListener('click',function closeDD(e){
+        if(!dd.contains(e.target)&&e.target.id!=='notif-bell-btn'){
+          dd.classList.remove('open');
+          document.removeEventListener('click',closeDD);
+        }
+      });
+    },50);
+  }
+};
+window.openNotif=function(nid){
+  var notif=(window._notifCache||[]).find(function(n){return n.id===nid;});
+  if(!notif)return;
+  var fb=window._fb;
+  if(fb&&!notif.readAt){fb.updateDoc(fb.doc(fb.db,'announcements',nid),{readAt:fb.serverTimestamp()}).catch(function(){});}
+  var dd=document.getElementById('notif-dropdown');
+  if(dd)dd.classList.remove('open');
+  nav('dashboard');setTimeout(function(){typeof showDash==='function'&&showDash('notifications');},200);
+};
+window.markAllNotifsRead=function(){
+  var fb=window._fb;
+  if(!fb)return;
+  (window._notifCache||[]).forEach(function(n){
+    if(!n.readAt)fb.updateDoc(fb.doc(fb.db,'announcements',n.id),{readAt:fb.serverTimestamp()}).catch(function(){});
+  });
+  var dd=document.getElementById('notif-dropdown');
+  if(dd)dd.classList.remove('open');
+};
+window._pwaPrompt=null;
+window.addEventListener('beforeinstallprompt',function(e){
+  e.preventDefault();
+  window._pwaPrompt=e;
+  var dismissed=localStorage.getItem('pwa_dismissed');
+  if(!dismissed||Date.now()-parseInt(dismissed)>7*24*60*60*1000){
+    setTimeout(function(){var bar=document.getElementById('pwa-install-bar');if(bar)bar.classList.add('show');},30000);
+  }
+});
+window.pwaInstall=function(){
+  if(!window._pwaPrompt)return;
+  window._pwaPrompt.prompt();
+  window._pwaPrompt.userChoice.then(function(r){
+    if(r.outcome==='accepted'){var bar=document.getElementById('pwa-install-bar');if(bar)bar.classList.remove('show');}
+    window._pwaPrompt=null;
+  });
+};
+window.pwaDismiss=function(){
+  localStorage.setItem('pwa_dismissed',String(Date.now()));
+  var bar=document.getElementById('pwa-install-bar');
+  if(bar)bar.classList.remove('show');
+};
+window.sortAndRenderClubs=function(){
+  var el=document.getElementById('clubs-list');
+  if(!el)return;
+  var sortEl=document.getElementById('club-sort-select');
+  var catEl=document.getElementById('club-cat-select');
+  var sort=sortEl?sortEl.value:'default';
+  var cat=catEl?catEl.value:'';
+  var cityBtn=document.querySelector('#pg-clubs .filt.on');
+  var city=cityBtn?cityBtn.textContent.trim():'';
+  if(city==='Tümü')city='';
+  var clubs=(window.CLUBS||[]).slice();
+  if(cat)clubs=clubs.filter(function(c){return (c.category||'')===cat;});
+  if(city)clubs=clubs.filter(function(c){return (c.city||'').toLowerCase().indexOf(city.toLowerCase())>-1;});
+  if(sort==='members_desc')clubs.sort(function(a,b){return(b.members||0)-(a.members||0);});
+  else if(sort==='name_asc')clubs.sort(function(a,b){return(a.name||'').localeCompare(b.name||'','tr');});
+  else if(sort==='name_desc')clubs.sort(function(a,b){return(b.name||'').localeCompare(a.name||'','tr');});
+  var lbl=document.getElementById('club-count-label');
+  if(lbl)lbl.textContent=clubs.length+' kulüp';
+  if(!clubs.length){
+    el.innerHTML='<div class="empty-state"><div class="es-icon">🤝</div><h3>Kulüp Bulunamadı</h3><p>Farklı filtreler dene.</p></div>';
+    return;
+  }
+  el.innerHTML=clubs.map(typeof clubCard==='function'?clubCard:function(c){return '<div>'+c.name+'</div>';}).join('');
+};
+window._raceShowCount=20;
+window._racePageSize=20;
+window.loadMoreRaces=function(){
+  window._raceShowCount+=window._racePageSize;
+  window.renderRaceListPaged&&window.renderRaceListPaged();
+};
+window.renderRaceListPaged=function(){
+  if(!window.RACES||!window.RACES.length)return;
+  var rl=document.getElementById('races-list');
+  if(!rl)return;
+  var today=new Date();today.setHours(0,0,0,0);
+  var all=window.RACES||[];
+  var active=all.filter(function(r){return !r.date||new Date(r.date)>=today;});
+  var expired=all.filter(function(r){return r.date&&new Date(r.date)<today;});
+  var sorted=active.concat(expired);
+  var paged=sorted.slice(0,window._raceShowCount);
+  rl.innerHTML=paged.map(typeof raceCard==='function'?raceCard:function(r){return '<div>'+r.name+'</div>';}).join('')||'<p style="color:var(--muted);padding:20px">Yarış bulunamadı.</p>';
+  var wrap=document.getElementById('race-load-more-wrap');
+  if(!wrap){
+    wrap=document.createElement('div');
+    wrap.id='race-load-more-wrap';
+    wrap.className='load-more-wrap';
+    wrap.innerHTML='<button class="load-more-btn" id="race-load-more-btn" onclick="loadMoreRaces()">Daha Fazla Yarış Yukle</button>';
+    if(rl.parentNode)rl.parentNode.insertBefore(wrap,rl.nextSibling);
+  }
+  var btn=document.getElementById('race-load-more-btn');
+  if(btn)btn.style.display=window._raceShowCount>=sorted.length?'none':'inline-flex';
+};
+
 window.gNav=function(sec,btn){
   document.querySelectorAll('#pg-panel .admin-sb button').forEach(function(b){
     b.classList.remove('on');

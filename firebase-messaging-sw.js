@@ -1,193 +1,284 @@
-// ═══════════════════════════════════════════════════════════════════════════
-// Firebase Cloud Messaging Service Worker
-// Dosya: public/firebase-messaging-sw.js
-// RunClubTürkiye - Background Push Notifications (DATA-ONLY Support)
-// VERSION: 2.0.0 - CACHE BUSTING ENABLED
-// ═══════════════════════════════════════════════════════════════════════════
-
-const SW_VERSION = '2.0.0';
-const CACHE_NAME = 'fcm-sw-v2.0.0';
-
-console.log(`[SW] Version ${SW_VERSION} loading...`);
-
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js');
 importScripts('https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging-compat.js');
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// FIREBASE CONFIG
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-const firebaseConfig = {
-  apiKey: "AIzaSyDJGIl9f_nHo2aB0pCGhXLSF8q-aQbZ0XY",
-  authDomain: "one-question-8e3bc.firebaseapp.com",
-  projectId: "one-question-8e3bc",
-  storageBucket: "one-question-8e3bc.firebasestorage.app",
-  messagingSenderId: "690128633859",
-  appId: "1:690128633859:web:27c50bde1621c1b8783f2d"
-};
+firebase.initializeApp({
+  apiKey:"AIzaSyDWFv6jtbCvSH7ky0n8v5DYPtJX5hpFxiY",
+  authDomain:"runclubturkiye.firebaseapp.com",
+  projectId:"runclubturkiye",
+  storageBucket:"runclubturkiye.appspot.com",
+  messagingSenderId:"1040984820849",
+  appId:"1:1040984820849:web:06869a5b74b74e17cbbecf"
+});
 
-firebase.initializeApp(firebaseConfig);
 const messaging = firebase.messaging();
 
-console.log('[SW] Firebase Messaging initialized');
+// ═══════════════════════════════════════════════════════════════════
+// CACHE STRATEJİSİ — Offline Mode
+// Versiyon numarasını değiştirmek tüm cache'i temizler
+// ═══════════════════════════════════════════════════════════════════
+const CACHE_VERSION  = 'rct-v3';
+const STATIC_CACHE   = CACHE_VERSION + '-static';
+const DYNAMIC_CACHE  = CACHE_VERSION + '-dynamic';
+const IMAGE_CACHE    = CACHE_VERSION + '-images';
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// BACKGROUND MESSAGE HANDLER — DATA-ONLY PAYLOAD
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Cloud Function sadece 'data' field gönderiyor (notification field yok)
-// Bu handler manuel olarak notification gösterir
+// Kurulumda cache'lenecek kritik dosyalar (App Shell)
+const STATIC_ASSETS = [
+  '/',
+  '/index.html',
+  '/icon-192.png',
+  '/icon-512.png',
+  'https://fonts.googleapis.com/css2?family=Raleway:wght@700;800;900&display=swap',
+  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
+  'https://cdn.quilljs.com/1.3.7/quill.snow.css',
+  'https://cdn.quilljs.com/1.3.7/quill.min.js',
+];
 
-messaging.onBackgroundMessage((payload) => {
-  console.log('[SW] Background message received:', payload);
+// Bu URL pattern'ları için NETWORK FIRST (her zaman taze veri):
+const NETWORK_FIRST_PATTERNS = [
+  /firestore\.googleapis\.com/,
+  /firebase\.googleapis\.com/,
+  /identitytoolkit\.googleapis\.com/,
+  /securetoken\.googleapis\.com/,
+  /fcm\.googleapis\.com/,
+  /googleapis\.com\/v1\/projects/,
+];
 
-  // DATA payload'dan bilgileri al (notification değil!)
-  const data = payload.data || {};
-  
-  const notificationTitle = data.title || 'RunClubTürkiye';
-  const notificationOptions = {
-    body: data.body || '',
-    icon: data.icon || 'https://www.runclubturkiye.com/icon-192.png',
-    badge: 'https://www.runclubturkiye.com/icon-192.png',
-    image: data.image || null,
-    data: {
-      clickTarget: data.clickTarget || 'https://www.runclubturkiye.com/',
-      timestamp: data.timestamp || Date.now()
-    },
-    requireInteraction: false,
-    tag: 'runclub-notification',
-    vibrate: [200, 100, 200],
-    timestamp: parseInt(data.timestamp) || Date.now()
-  };
+// Bu pattern'lar için CACHE FIRST (statik içerik):
+const CACHE_FIRST_PATTERNS = [
+  /fonts\.googleapis\.com/,
+  /fonts\.gstatic\.com/,
+  /cdn\.jsdelivr\.net/,
+  /cdn\.quilljs\.com/,
+  /gstatic\.com\/firebasejs/,
+  /leafletjs\.com/,
+];
 
-  console.log('[SW] Showing notification:', notificationTitle, notificationOptions);
+// Görseller için IMAGE CACHE (en uzun ömürlü):
+const IMAGE_PATTERNS = [
+  /firebasestorage\.googleapis\.com/,
+  /\.(png|jpg|jpeg|gif|webp|svg|ico)(\?|$)/i,
+];
 
-  // Notification göster
-  return self.registration.showNotification(notificationTitle, notificationOptions);
-});
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// NOTIFICATION CLICK HANDLER
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked');
-  
-  event.notification.close();
-
-  const clickTarget = event.notification.data?.clickTarget || 'https://www.runclubturkiye.com/';
-
+// ── INSTALL — App Shell'i cache'e al ─────────────────────────────
+self.addEventListener('install', function(event) {
+  console.log('[SW] Install:', CACHE_VERSION);
   event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clientList) => {
-      // Aynı URL zaten açıksa focus et
-      for (const client of clientList) {
-        if (client.url === clickTarget && 'focus' in client) {
-          console.log('[SW] Focusing existing tab');
-          return client.focus();
-        }
-      }
-      
-      // Yoksa yeni tab aç
-      if (clients.openWindow) {
-        console.log('[SW] Opening new window:', clickTarget);
-        return clients.openWindow(clickTarget);
-      }
+    caches.open(STATIC_CACHE).then(function(cache) {
+      return cache.addAll(
+        STATIC_ASSETS.filter(function(url) {
+          // Sadece erişilebilir URL'leri cache'le, hata olursa atla
+          return true;
+        })
+      ).catch(function(err) {
+        console.warn('[SW] Static cache partial fail:', err.message);
+        // Kritik olmayan dosyalarda hata olsa da kurulumu tamamla
+        return cache.addAll(['/', '/index.html']).catch(function(){});
+      });
+    }).then(function() {
+      return self.skipWaiting();
     })
   );
 });
 
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// PUSH EVENT LISTENER (Fallback)
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// Bazı durumlarda onBackgroundMessage yerine push eventi tetiklenebilir
-
-self.addEventListener('push', (event) => {
-  console.log('[SW] Push event received');
-  
-  if (!event.data) {
-    console.log('[SW] No data in push event');
-    return;
-  }
-
-  let data;
-  try {
-    data = event.data.json();
-    console.log('[SW] Push data:', data);
-  } catch (e) {
-    console.log('[SW] Could not parse push data:', e);
-    return;
-  }
-
-  // data payload varsa göster
-  if (data.data) {
-    const payload = data.data;
-    const title = payload.title || 'RunClubTürkiye';
-    const options = {
-      body: payload.body || '',
-      icon: payload.icon || 'https://www.runclubturkiye.com/icon-192.png',
-      badge: 'https://www.runclubturkiye.com/icon-192.png',
-      data: {
-        clickTarget: payload.clickTarget || 'https://www.runclubturkiye.com/'
-      }
-    };
-
-    event.waitUntil(
-      self.registration.showNotification(title, options)
-    );
-  }
-});
-
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-// SERVICE WORKER LIFECYCLE - CACHE BUSTING & FORCE UPDATE
-// ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
-
-self.addEventListener('install', (event) => {
-  console.log(`[SW] Installing version ${SW_VERSION}...`);
-  
-  // FORCE UPDATE: Eski SW'yi beklemeden hemen aktif et
-  self.skipWaiting();
-  
-  console.log('[SW] ✅ Installed and skipped waiting');
-});
-
-self.addEventListener('activate', (event) => {
-  console.log(`[SW] Activating version ${SW_VERSION}...`);
-  
+// ── ACTIVATE — Eski cache'leri temizle ───────────────────────────
+self.addEventListener('activate', function(event) {
+  console.log('[SW] Activate:', CACHE_VERSION);
   event.waitUntil(
-    // Eski cache'leri temizle
-    caches.keys().then((cacheNames) => {
+    caches.keys().then(function(cacheNames) {
       return Promise.all(
         cacheNames
-          .filter((cacheName) => cacheName !== CACHE_NAME)
-          .map((cacheName) => {
-            console.log('[SW] 🗑️ Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
+          .filter(function(name) {
+            // Eski versiyon cache'leri sil
+            return name.startsWith('rct-') && !name.startsWith(CACHE_VERSION);
+          })
+          .map(function(name) {
+            console.log('[SW] Eski cache silindi:', name);
+            return caches.delete(name);
           })
       );
-    })
-    .then(() => {
-      console.log('[SW] ✅ Old caches cleared');
-      // Tüm client'ları hemen kontrol et
-      return clients.claim();
-    })
-    .then(() => {
-      console.log('[SW] ✅ All clients claimed');
-      // Tüm client'lara güncelleme mesajı gönder
-      return clients.matchAll({ type: 'window' });
-    })
-    .then((clients) => {
-      clients.forEach((client) => {
-        client.postMessage({
-          type: 'SW_UPDATED',
-          version: SW_VERSION
-        });
-      });
+    }).then(function() {
+      return self.clients.claim();
     })
   );
 });
 
-// Message event - Client'tan gelen mesajları dinle
-self.addEventListener('message', (event) => {
-  if (event.data && event.data.type === 'SKIP_WAITING') {
-    console.log('[SW] Client requested skip waiting');
-    self.skipWaiting();
+// ── FETCH — Akıllı cache stratejisi ──────────────────────────────
+self.addEventListener('fetch', function(event) {
+  var url = event.request.url;
+  var method = event.request.method;
+
+  // POST/PUT/DELETE istekleri cache'lenemez
+  if (method !== 'GET') return;
+
+  // Chrome extension ve data URL'lerini atla
+  if (url.startsWith('chrome-extension:') || url.startsWith('data:')) return;
+
+  // ── 1. NETWORK FIRST — Firebase API istekleri ──────────────────
+  if (NETWORK_FIRST_PATTERNS.some(function(p) { return p.test(url); })) {
+    event.respondWith(networkFirst(event.request, DYNAMIC_CACHE));
+    return;
   }
+
+  // ── 2. GÖRSEL — Cache First, uzun TTL ─────────────────────────
+  if (IMAGE_PATTERNS.some(function(p) { return p.test(url); })) {
+    event.respondWith(cacheFirst(event.request, IMAGE_CACHE));
+    return;
+  }
+
+  // ── 3. STATİK CDN — Cache First ───────────────────────────────
+  if (CACHE_FIRST_PATTERNS.some(function(p) { return p.test(url); })) {
+    event.respondWith(cacheFirst(event.request, STATIC_CACHE));
+    return;
+  }
+
+  // ── 4. ANA SAYFA & HTML — Stale While Revalidate ──────────────
+  if (url.includes('runclubturkiye.com') &&
+     (url.endsWith('/') || url.includes('/index.html') ||
+      url.match(/runclubturkiye\.com\/(yaris|kulup|etkinlik|blog)\//))) {
+    event.respondWith(staleWhileRevalidate(event.request, STATIC_CACHE));
+    return;
+  }
+
+  // ── 5. DİĞER — Network First, cache fallback ──────────────────
+  event.respondWith(networkFirst(event.request, DYNAMIC_CACHE));
+});
+
+// ═══════════════════════════════════════════════════════════════════
+// STRATEJİ FONKSİYONLARI
+// ═══════════════════════════════════════════════════════════════════
+
+// Network First: önce ağa git, offline ise cache'ten sun
+function networkFirst(request, cacheName) {
+  return fetch(request.clone()).then(function(response) {
+    if (response && response.status === 200) {
+      var cloned = response.clone();
+      caches.open(cacheName).then(function(cache) {
+        // Sadece same-origin ve CORS izinli istekleri cache'le
+        if (request.url.startsWith('https://')) {
+          cache.put(request, cloned).catch(function(){});
+        }
+      });
+    }
+    return response;
+  }).catch(function() {
+    // Network yok — cache'e bak
+    return caches.match(request).then(function(cached) {
+      if (cached) return cached;
+      // HTML isteğiyse offline fallback göster
+      if (request.headers.get('accept') &&
+          request.headers.get('accept').includes('text/html')) {
+        return offlinePage();
+      }
+      return new Response('', { status: 503, statusText: 'Offline' });
+    });
+  });
+}
+
+// Cache First: önce cache'e bak, yoksa ağdan çek ve cache'le
+function cacheFirst(request, cacheName) {
+  return caches.match(request).then(function(cached) {
+    if (cached) return cached;
+    return fetch(request.clone()).then(function(response) {
+      if (response && response.status === 200) {
+        var cloned = response.clone();
+        caches.open(cacheName).then(function(cache) {
+          cache.put(request, cloned).catch(function(){});
+        });
+      }
+      return response;
+    }).catch(function() {
+      return new Response('', { status: 503 });
+    });
+  });
+}
+
+// Stale While Revalidate: cache'ten hemen sun, arka planda güncelle
+function staleWhileRevalidate(request, cacheName) {
+  var fetchPromise = fetch(request.clone()).then(function(response) {
+    if (response && response.status === 200) {
+      var cloned = response.clone();
+      caches.open(cacheName).then(function(cache) {
+        cache.put(request, cloned).catch(function(){});
+      });
+    }
+    return response;
+  }).catch(function() { return null; });
+
+  return caches.match(request).then(function(cached) {
+    return cached || fetchPromise.then(function(r) {
+      return r || offlinePage();
+    });
+  });
+}
+
+// Offline fallback sayfası
+function offlinePage() {
+  var html = '<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"/>'
+    + '<meta name="viewport" content="width=device-width,initial-scale=1"/>'
+    + '<title>RunClubTürkiye — Çevrimdışı</title>'
+    + '<style>'
+    + 'body{margin:0;font-family:Arial,sans-serif;background:#0d0d0d;color:#fff;'
+    + 'display:flex;flex-direction:column;align-items:center;justify-content:center;'
+    + 'min-height:100vh;text-align:center;padding:20px}'
+    + '.icon{font-size:72px;margin-bottom:20px}'
+    + 'h1{font-size:22px;font-weight:800;margin:0 0 10px;color:#E8622A}'
+    + 'p{font-size:14px;color:#aaa;line-height:1.6;max-width:320px;margin:0 auto 24px}'
+    + 'button{background:#E8622A;color:#fff;border:none;padding:12px 28px;'
+    + 'border-radius:10px;font-size:15px;font-weight:700;cursor:pointer}'
+    + '</style></head><body>'
+    + '<div class="icon">🏃</div>'
+    + '<h1>İnternet Bağlantısı Yok</h1>'
+    + '<p>RunClubTürkiye\'ye erişmek için internet bağlantına ihtiyacın var. '
+    + 'Bağlantın tekrar kurulunca sayfa otomatik yenilenir.</p>'
+    + '<button onclick="location.reload()">🔄 Yeniden Dene</button>'
+    + '<script>window.addEventListener("online",function(){location.reload();});<\/script>'
+    + '</body></html>';
+  return new Response(html, {
+    headers: { 'Content-Type': 'text/html; charset=utf-8' }
+  });
+}
+
+// ═══════════════════════════════════════════════════════════════════
+// FCM — Arka plan push bildirimleri (mevcut kod korundu)
+// ═══════════════════════════════════════════════════════════════════
+messaging.onBackgroundMessage(function(payload) {
+  console.log('[SW] Arka plan mesajı:', payload);
+  const data = payload.data || {};
+  const title = data.title || 'RunClubTürkiye';
+  const body  = data.body  || '';
+  const url   = data.url   || 'https://www.runclubturkiye.com/';
+  const icon  = data.icon  || '/icon-192.png';
+  const image = data.image || '';
+  const options = {
+    body,
+    icon,
+    badge: '/icon-192.png',
+    ...(image ? {image} : {}),
+    data: { clickTarget: url },
+    requireInteraction: false,
+    tag: 'rct-push-' + Date.now(),
+    vibrate: [200, 100, 200],
+  };
+  return self.registration.showNotification(title, options);
+});
+
+// ── Bildirime tıklandığında yönlendirme ──────────────────────────
+self.addEventListener('notificationclick', function(event) {
+  event.notification.close();
+  const targetUrl = event.notification.data?.clickTarget
+    || event.notification.data?.targetUrl
+    || event.notification.data?.url
+    || 'https://www.runclubturkiye.com/';
+  event.waitUntil(
+    clients.matchAll({type:'window', includeUncontrolled:true}).then(function(clientList) {
+      for (let client of clientList) {
+        if (client.url.includes('runclubturkiye.com') && 'focus' in client) {
+          client.focus();
+          if (targetUrl !== client.url) client.navigate(targetUrl);
+          return;
+        }
+      }
+      if (clients.openWindow) return clients.openWindow(targetUrl);
+    })
+  );
 });

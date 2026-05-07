@@ -1279,6 +1279,28 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .load-more-wrap{text-align:center;margin-top:24px}
 .load-more-btn{display:inline-flex;align-items:center;gap:8px;padding:12px 28px;border:1.5px solid var(--border);border-radius:10px;background:var(--card);color:var(--text);font-size:14px;font-weight:600;cursor:pointer;transition:all .2s}
 .load-more-btn:hover{border-color:var(--or);color:var(--or)}
+
+/* ═══ KOŞUCU ÖZELLİKLERİ ═══ */
+.pace-calc-wrap{background:var(--bg2);border-radius:14px;padding:20px;margin-bottom:16px}
+.pace-calc-wrap h3{margin:0 0 14px;font-size:15px}
+.pace-inputs{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:12px}
+.pace-inputs label{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px}
+.pace-inputs input,.pace-inputs select{width:100%;padding:8px 10px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:14px;box-sizing:border-box}
+.pace-res{background:var(--or);color:#fff;border-radius:10px;padding:14px 18px;display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:10px;text-align:center}
+@media(max-width:480px){.pace-res{grid-template-columns:1fr 1fr}}
+.pace-res .pv{font-size:20px;font-weight:800;font-family:var(--font-head)}
+.pace-res .pl{font-size:11px;opacity:.85;margin-top:2px}
+.pr-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px}
+@media(min-width:500px){.pr-grid{grid-template-columns:repeat(5,1fr)}}
+.pr-card{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:center;transition:border-color .2s}
+.pr-card .prd{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;margin-bottom:4px}
+.pr-card .prt{font-size:18px;font-weight:800;font-family:var(--font-head);color:var(--or)}
+.pr-card .prdate{font-size:10px;color:var(--muted);margin-top:2px}
+.attendee-list{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.attendee-chip{display:flex;align-items:center;gap:5px;background:var(--bg2);border:1px solid var(--border);border-radius:20px;padding:4px 10px;font-size:12px}
+.att-av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff9500);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
+.zone-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.zone-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
 </style>
 </head>
 <body>
@@ -1707,6 +1729,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
             <input type="text" id="new-disc-race-name" placeholder="Yarış adı" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
             <input type="date" id="new-disc-race-date" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
             <input type="text" id="new-disc-race-loc" placeholder="Konum" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px"/>
+       <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-bottom:8px"><input id="new-disc-race-fee" placeholder="Ucret (250tl)" style="padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px"/><input id="new-disc-race-deadline" type="date" title="Kayit Son Tarihi" style="padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px"/><input id="new-disc-race-distance" placeholder="Mesafe (42K)" style="padding:7px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px"/></div>
             <div style="font-size:11px;font-weight:700;color:var(--muted);margin-bottom:4px;text-transform:uppercase">Yarış Değerlendirme Raporu (Opsiyonel)</div>
             <select id="new-disc-race-parkur" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:6px;background:var(--card);color:var(--text);font-size:12px;margin-bottom:8px">
               <option value="">Parkur Puanı (1-5)</option>
@@ -5130,6 +5153,8 @@ window.openEvent=id=>{
               :`<button class="btn btn-or btn-full" id="rsvp-btn" onclick="rsvpEvent('${e.id}','${e.fee}')">🏃 Etkinliğe Kaydol</button>`
           }
           <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick='addToCalendar(${JSON.stringify(e).replace(/'/g, "&#39;")})'>📅 Takvime Ekle</button>
+          <button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="(function(){var el=document.getElementById('att-'+e.id);el.style.display=el.style.display==='none'?'block':'none';if(el.style.display==='block')loadEventAttendees('${e.id}',el);})()">Kimler Geliyor?</button>
+          <div id="att-${e.id}" style="display:none;margin-top:8px"></div>
           ${e.qr?`<button class="btn btn-ghost btn-full" style="margin-top:8px" onclick="showQR('${e.id}','${e.title}')">📲 QR Check-in</button>`:''}
         </div>
       </div>
@@ -6298,6 +6323,9 @@ window.openRace=id=>{
         <div class="ev-meta" style="margin-bottom:16px">
           <span class="meta">📅 ${r.date||'—'}</span>
           <span class="meta">📍 ${r.location||'—'}</span>
+          ${r.distance?`<span class="meta">🏃 ${r.distance}</span>`:''}
+          ${r.fee?`<span class="meta" style="color:#059669;font-weight:700">💰 ${r.fee}</span>`:''}
+          ${r.regDeadline?`<span class="meta" style="color:#dc2626;font-weight:700">⏰ Son: ${r.regDeadline}</span>`:''}
         </div>
         ${r.about?`<div class="blog-body-content" style="font-size:15px;line-height:1.85;color:var(--text);margin-bottom:20px">${r.about}</div>`:''}
         <!-- İletişim & Link Bilgileri -->
@@ -6751,6 +6779,14 @@ window.editDiscRace = async function(id) {
         </div>
       </div>
 
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px">
+        <div><label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">Ucret</label>
+        <input id="disc-edit-fee" value="${(r.fee||'').replace(/"/g,'&quot;')}" placeholder="250tl" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
+        <div><label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">Kayit Son</label>
+        <input id="disc-edit-deadline" type="date" value="${r.regDeadline||''}" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
+        <div><label style="font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;display:block;margin-bottom:4px">Mesafe</label>
+        <input id="disc-edit-distance" value="${(r.distance||'').replace(/"/g,'&quot;')}" placeholder="42K" style="width:100%;padding:8px;border:1px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
+      </div>
       <div style="border-top:1px solid var(--border);margin:16px 0;padding-top:16px">
         <div style="font-size:12px;font-weight:700;color:var(--or);margin-bottom:12px;text-transform:uppercase;letter-spacing:.5px">📋 Değerlendirme Raporu</div>
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px">
@@ -6811,6 +6847,9 @@ window.saveDiscRaceEdit = async function(id) {
   const name   = document.getElementById('disc-edit-name')?.value.trim();
   const date   = document.getElementById('disc-edit-date')?.value || '';
   const loc    = document.getElementById('disc-edit-loc')?.value.trim() || '';
+  const fee    = document.getElementById('disc-edit-fee')?.value.trim() || '';
+  const regDeadline = document.getElementById('disc-edit-deadline')?.value || '';
+  const distance = document.getElementById('disc-edit-distance')?.value.trim() || '';
   const parkurPuan = document.getElementById('edit-rep-parkur')?.value || '';
   const orgPuan    = document.getElementById('edit-rep-org')?.value    || '';
   const teknik     = document.getElementById('edit-rep-teknik')?.value.trim() || '';
@@ -6820,7 +6859,7 @@ window.saveDiscRaceEdit = async function(id) {
   try {
     const fb = window._fb;
     await fb.updateDoc(fb.doc(fb.db,'races',id), {
-      name, date, location: loc,
+      name, date, location: loc, fee, regDeadline, distance,
       'report.parkurPuan': parkurPuan,
       'report.orgPuan':    orgPuan,
       'report.teknik':     teknik,
@@ -6995,6 +7034,9 @@ window.addDiscRace = async function(){
   const name = document.getElementById('new-disc-race-name').value.trim();
   const date = document.getElementById('new-disc-race-date').value;
   const loc = document.getElementById('new-disc-race-loc').value.trim();
+  const fee = document.getElementById('new-disc-race-fee')?.value.trim()||'';
+  const regDeadline = document.getElementById('new-disc-race-deadline')?.value||'';
+  const distance = document.getElementById('new-disc-race-distance')?.value.trim()||'';
   const parkurPuan = document.getElementById('new-disc-race-parkur').value;
   const orgPuan = document.getElementById('new-disc-race-org').value;
   const teknik = document.getElementById('new-disc-race-teknik').value.trim();
@@ -7006,6 +7048,7 @@ window.addDiscRace = async function(){
     const fb = window._fb;
     const r = await fb.addDoc(fb.collection(fb.db,'races'), {
       name, date: date||'', location: loc||'',
+      fee, regDeadline, distance,
       userId: window.CU.uid,
       report: { parkurPuan, orgPuan, teknik, ozet },
       slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
@@ -7016,6 +7059,7 @@ window.addDiscRace = async function(){
     document.getElementById('new-disc-race-name').value='';
     document.getElementById('new-disc-race-date').value='';
     document.getElementById('new-disc-race-loc').value='';
+    ['new-disc-race-fee','new-disc-race-deadline','new-disc-race-distance'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=';'});
     document.getElementById('new-disc-race-parkur').value='';
     document.getElementById('new-disc-race-org').value='';
     document.getElementById('new-disc-race-teknik').value='';
@@ -7985,6 +8029,7 @@ window.loadClubRaceResults = async function(clubId) {
 
 
 
+window._origSKT=null;
 window.switchKmTab=function(tab){
   const kmContent=document.getElementById('km-tab-content');
   const rrContent=document.getElementById('rr-tab-content');
@@ -8002,6 +8047,14 @@ window.switchKmTab=function(tab){
     if(kmBtn){kmBtn.style.color='var(--muted)';kmBtn.style.borderBottomColor='transparent';}
     if(typeof window.loadRaceResults==='function')window.loadRaceResults();
   }
+  var extras=['pr','pace'];
+  extras.forEach(function(t){
+    var c=document.getElementById(t+'-tab-content');
+    var b=document.getElementById(t+'-tab-btn');
+    if(c)c.style.display=t===tab?'block':'none';
+    if(b){b.style.color=t===tab?'var(--or)':'var(--muted)';b.style.borderBottomColor=t===tab?'var(--or)':'transparent';b.style.fontWeight=t===tab?'700':'400';}
+  });
+  if(tab==='pr')window.loadPRs&&window.loadPRs();
 };
 
 
@@ -9036,6 +9089,8 @@ function buildDashboard(){
       <div style="display:flex;gap:0;margin-bottom:18px;border-bottom:2px solid var(--border)">
         <button id="km-tab-btn" onclick="switchKmTab('km')" style="padding:8px 16px;border:none;background:none;cursor:pointer;font-weight:700;font-size:14px;color:var(--or);border-bottom:2px solid var(--or);margin-bottom:-2px">📍 KM Takibi</button>
         <button id="rr-tab-btn" onclick="switchKmTab('rr')" style="padding:8px 16px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px">🏅 Yarış Sonuçlarım</button>
+        <button id="pr-tab-btn" onclick="switchKmTab('pr')" style="padding:8px 16px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px">🏆 PR</button>
+        <button id="pace-tab-btn" onclick="switchKmTab('pace')" style="padding:8px 16px;border:none;background:none;cursor:pointer;font-size:14px;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px">Pace</button>
       </div>
       <div id="km-tab-content">
         <div class="card" style="padding:24px;margin-bottom:14px">
@@ -9049,6 +9104,58 @@ function buildDashboard(){
           ${!CU.stravaLink?'<p style="font-size:11px;color:var(--muted)">Strava senkronizasyonu için <a onclick="nav(\'profile\'" style="cursor:pointer;color:var(--or)">profiline</a> Strava linki ekle.</p>':''}
         </div>
         <div id="km-events-list"></div>
+      </div>
+      <div id="pr-tab-content" style="display:none">
+        <h3 style="margin:0 0 12px;font-size:15px">Kisisel Rekorlarim</h3>
+        <div class="pr-grid" id="pr-grid-display"></div>
+        <div class="card" style="padding:16px">
+          <h4 style="margin:0 0 10px;font-size:13px;color:var(--muted)">PR Guncelle</h4>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+            <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Mesafe</label>
+            <select id="pr-dist-select" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px">
+              <option value="5K">5K</option><option value="10K">10K</option>
+              <option value="HM">Yari Maraton</option><option value="M">Maraton</option><option value="Ultra">Ultra</option>
+            </select></div>
+            <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Sure</label>
+            <input id="pr-time-input" placeholder="ss:dd:ss" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+            <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Yaris</label>
+            <input id="pr-race-input" placeholder="Istanbul Maratonu" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
+            <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Tarih</label>
+            <input id="pr-date-input" type="date" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
+          </div>
+          <button class="btn btn-or btn-full" onclick="savePR()">PR Kaydet</button>
+        </div>
+      </div>
+      <div id="pace-tab-content" style="display:none">
+        <div class="pace-calc-wrap">
+          <h3>Pace Hesaplayici</h3>
+          <div class="pace-inputs">
+            <div><label>Mesafe</label>
+            <select id="pace-dist" onchange="document.getElementById('pace-custom-km').style.display=this.value==='custom'?'block':'none'">
+              <option value="5">5K</option><option value="10">10K</option>
+              <option value="21.0975">Yari Maraton</option><option value="42.195">Maraton</option><option value="custom">Ozel km</option>
+            </select></div>
+            <div><label>Km (ozel)</label><input id="pace-custom-km" type="number" placeholder="km" step="0.1" style="display:none"/></div>
+            <div><label>Hedef Sure</label><input id="pace-target-time" placeholder="3:30:00"/></div>
+          </div>
+          <button class="btn btn-or" onclick="calcPace()" style="width:100%;margin-bottom:12px">Hesapla</button>
+          <div id="pace-result" class="pace-res" style="display:none">
+            <div><div class="pv" id="pace-per-km">—</div><div class="pl">Pace /km</div></div>
+            <div><div class="pv" id="pace-speed">—</div><div class="pl">km/sa</div></div>
+            <div><div class="pv" id="pace-5k">—</div><div class="pl">5K</div></div>
+            <div><div class="pv" id="pace-10k">—</div><div class="pl">10K</div></div>
+          </div>
+        </div>
+        <div class="card" style="padding:16px">
+          <h4 style="margin:0 0 10px;font-size:14px">Pace Zonlari</h4>
+          <div style="display:flex;gap:8px;margin-bottom:10px">
+            <input id="zone-marathon" placeholder="Hedef maraton (3:30:00)" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
+            <button class="btn btn-or" onclick="calcZones()">Hesapla</button>
+          </div>
+          <div id="pace-zones-result"></div>
+        </div>
       </div>
       <div id="rr-tab-content" style="display:none">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px;flex-wrap:wrap;gap:8px">
@@ -12842,6 +12949,145 @@ window.gShowRaceParticipants = async function(raceId, raceName) {
 
 // URL routing — sayfa yüklenince mevcut URL'yi kontrol et
 setTimeout(()=>{try{if(typeof routerInit==='function')routerInit();}catch(e){}},300);
+
+window.loadPRs=async function(){
+  var uid=window.CU&&window.CU.uid;if(!uid)return;
+  try{
+    var fb=window._fb;
+    var snap=await fb.getDoc(fb.doc(fb.db,"users",uid));
+    var prs=snap.exists()?(snap.data().personalRecords||{}):{};
+    window._userPRs=prs;
+    window.renderPRGrid&&window.renderPRGrid(prs);
+  }catch(e){console.warn("[PR]",e.message);}
+};
+window.renderPRGrid=function(prs){
+  var el=document.getElementById("pr-grid-display");if(!el)return;
+  var dists=["5K","10K","HM","M","Ultra"];
+  function dl(d){return d==="HM"?"Yari M":d==="M"?"Maraton":d;}
+  el.innerHTML=dists.map(function(d){
+    var pr=prs[d];
+    return "<div class='pr-card'><div class='prd'>"+dl(d)+"</div>"
+      +(pr?"<div class='prt'>"+pr.time+"</div><div class='prdate'>"+(pr.race||"")+(pr.date?" - "+pr.date:"")+"</div>"
+          :"<div class='prt' style='color:var(--muted);font-size:13px'>—</div>")
+      +"</div>";
+  }).join("");
+};
+window.savePR=async function(){
+  var dist=document.getElementById("pr-dist-select")?.value;
+  var time=document.getElementById("pr-time-input")?.value.trim();
+  var race=document.getElementById("pr-race-input")?.value.trim();
+  var date=document.getElementById("pr-date-input")?.value;
+  if(!dist||!time){toast("Mesafe ve sure gerekli","err");return;}
+  var uid=window.CU&&window.CU.uid;if(!uid)return;
+  var fb=window._fb;
+  var prs=window._userPRs||{};
+  prs[dist]={time:time,race:race||"",date:date||""};
+  try{
+    await fb.updateDoc(fb.doc(fb.db,"users",uid),{personalRecords:prs});
+    window._userPRs=prs;window.renderPRGrid(prs);
+    toast("PR kaydedildi","ok");
+    ["pr-time-input","pr-race-input","pr-date-input"].forEach(function(id){
+      var el=document.getElementById(id);if(el)el.value="";
+    });
+  }catch(e){toast("Hata: "+e.message,"err");}
+};
+function _fmtSec(s){
+  s=Math.round(s);
+  var h=Math.floor(s/3600);var m2=Math.floor((s%3600)/60);var sec=s%60;
+  if(h>0)return h+":"+(m2<10?"0":"")+m2+":"+(sec<10?"0":"")+sec;
+  return m2+":"+(sec<10?"0":"")+sec;
+}
+window.calcPace=function(){
+  var distSel=document.getElementById("pace-dist")?.value;
+  var customKm=parseFloat(document.getElementById("pace-custom-km")?.value||"0");
+  var km=distSel==="custom"?customKm:parseFloat(distSel||"0");
+  var timeStr=document.getElementById("pace-target-time")?.value.trim();
+  if(!km||!timeStr){toast("Mesafe ve sure girin","err");return;}
+  var parts=timeStr.split(":").map(Number);
+  var total=parts.length===3?parts[0]*3600+parts[1]*60+parts[2]:parts.length===2?parts[0]*60+parts[1]:0;
+  if(!total){toast("Format: ss:dd:ss","err");return;}
+  var paceKm=total/km;
+  var pm=Math.floor(paceKm/60);var ps=Math.round(paceKm%60);
+  var spd=(km/(total/3600)).toFixed(1);
+  document.getElementById("pace-per-km").textContent=pm+":"+(ps<10?"0":"")+ps;
+  document.getElementById("pace-speed").textContent=spd+" km/sa";
+  document.getElementById("pace-5k").textContent=_fmtSec(paceKm*5);
+  document.getElementById("pace-10k").textContent=_fmtSec(paceKm*10);
+  document.getElementById("pace-result").style.display="grid";
+};
+window.calcZones=function(){
+  var timeStr=document.getElementById("zone-marathon")?.value.trim();if(!timeStr)return;
+  var parts=timeStr.split(":").map(Number);
+  var total=parts.length===3?parts[0]*3600+parts[1]*60+parts[2]:parts[0]*60+(parts[1]||0);
+  if(!total)return;
+  var pace=total/42.195;
+  var zones=[
+    ["Z1 Kolay",1.35,"#22c55e","Uzun yavas kosu"],
+    ["Z2 Aerobik",1.20,"#84cc16","Temel dayaniklilik"],
+    ["Z3 Tempo",1.08,"#eab308","Konusma siniri"],
+    ["Z4 Esik",1.00,"#f97316","Maraton pace"],
+    ["Z5 Interval",0.90,"#ef4444","5K pace civari"],
+  ];
+  var el=document.getElementById("pace-zones-result");if(!el)return;
+  el.innerHTML=zones.map(function(z){
+    var zp=pace*z[1];var zm=Math.floor(zp/60);var zs=Math.round(zp%60);
+    return "<div class='zone-row'><div class='zone-dot' style='background:"+z[2]+"'></div>"
+      +"<div style='flex:1'><strong>"+z[0]+"</strong> <span style='font-size:11px;color:var(--muted)'>"+z[3]+"</span></div>"
+      +"<div style='font-weight:700;font-size:13px'>"+zm+":"+(zs<10?"0":"")+zs+" /km</div></div>";
+  }).join("");
+};
+window.toggleRaceReminder=function(raceId,btn){
+  var key="rrem_"+raceId;
+  if(localStorage.getItem(key)){
+    localStorage.removeItem(key);
+    if(btn)btn.textContent="🔕";
+    toast("Hatirlayici kaldirildi","ok");
+  }else{
+    var race=(window.RACES||[]).find(function(r){return r.id===raceId;});
+    localStorage.setItem(key,JSON.stringify({raceId:raceId,name:(race&&race.name)||"",deadline:(race&&race.regDeadline)||""}));
+    if(btn)btn.textContent="🔔";
+    toast("Hatirlayici kuruldu"+(race&&race.regDeadline?" - Son: "+race.regDeadline:""),"ok");
+  }
+};
+window.showCalendarOptions=function(e){
+  var old=document.getElementById("cal-opts");if(old){old.remove();return;}
+  var d=document.createElement("div");
+  d.id="cal-opts";
+  d.style.cssText="position:fixed;bottom:80px;left:50%;transform:translateX(-50%);background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:8px;box-shadow:0 8px 24px rgba(0,0,0,.15);z-index:5000;min-width:180px";
+  var name=encodeURIComponent(e.title||e.name||"Etkinlik");
+  var loc=encodeURIComponent(e.location||"");
+  function fmtCal(dt){return new Date(dt).toISOString().replace(/[-:]/g,"").split(".")[0]+"Z";}
+  var start=fmtCal(e.date);
+  var enddt=fmtCal(new Date(new Date(e.date).getTime()+3600000));
+  var gcal="https://calendar.google.com/calendar/render?action=TEMPLATE&text="+name+"&dates="+start+"/"+enddt+"&location="+loc;
+  var btn=document.createElement("div");
+  btn.style.cssText="padding:10px 14px;border-radius:8px;cursor:pointer;font-size:13px;font-weight:600;color:var(--text)";
+  btn.textContent="Google Calendar";
+  btn.addEventListener("click",function(){window.open(gcal,"_blank");d.remove();});
+  d.appendChild(btn);
+  document.body.appendChild(d);
+  setTimeout(function(){
+    document.addEventListener("click",function cl(ev){
+      if(!d.contains(ev.target)){d.remove();document.removeEventListener("click",cl);}
+    });
+  },50);
+};
+window.loadEventAttendees=async function(eventId,containerEl){
+  if(!containerEl)return;
+  containerEl.innerHTML="<div class='spinner' style='margin:8px auto'></div>";
+  try{
+    var fb=window._fb;
+    var snap=await fb.getDocs(fb.collection(fb.db,"events",eventId,"attendees"));
+    if(snap.empty){containerEl.innerHTML="<p style='font-size:12px;color:var(--muted)'>Henuz katilan yok.</p>";return;}
+    var chips="";
+    snap.forEach(function(d){
+      var dat=d.data();
+      var ini=(dat.name||"K").slice(0,1).toUpperCase();
+      chips+="<div class='attendee-chip'><div class='att-av'>"+ini+"</div><span>"+(dat.name||"Katilimci")+"</span></div>";
+    });
+    containerEl.innerHTML="<div class='attendee-list'>"+chips+"</div>";
+  }catch(e){containerEl.innerHTML="<p style='font-size:11px;color:var(--muted)'>Yuklenemedi</p>";}
+};
 </script>
 </body>
 </html>

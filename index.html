@@ -1301,6 +1301,24 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .att-av{width:22px;height:22px;border-radius:50%;background:linear-gradient(135deg,var(--or),#ff9500);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:#fff}
 .zone-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
 .zone-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ═══ FIRSATLAR REVİZYON ═══ */
+.firsat-card{position:relative;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:pointer}
+.firsat-card:hover{transform:translateY(-4px);box-shadow:0 12px 32px rgba(0,0,0,.2)}
+.firsat-new-badge{position:absolute;top:10px;right:10px;z-index:5;background:#22c55e;color:#fff;font-size:10px;font-weight:800;padding:3px 10px;border-radius:20px;text-transform:uppercase;letter-spacing:.5px}
+.firsat-countdown{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:8px 12px;text-align:center;margin:10px 0}
+.firsat-countdown .cd-val{font-size:18px;font-weight:800;color:#ef4444;font-family:var(--font-head);line-height:1}
+.firsat-countdown .cd-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.firsat-countdown .cd-urgent{color:#ef4444;font-size:12px;font-weight:700;text-align:center;margin-top:4px}
+.kod-copy-btn{display:flex;align-items:center;justify-content:space-between;background:var(--bg2);border:2px dashed var(--border);border-radius:10px;padding:12px 16px;margin:14px 0;cursor:pointer;transition:border-color .2s;gap:12px}
+.kod-copy-btn:hover{border-color:var(--or)}
+.kod-copy-btn .kc-code{font-family:monospace;font-size:18px;font-weight:800;color:var(--or);letter-spacing:3px}
+.kod-copy-btn .kc-btn{background:var(--or);color:#fff;border:none;border-radius:6px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;white-space:nowrap;flex-shrink:0}
+.kod-copy-btn.copied{border-color:#22c55e}
+.kod-copy-btn.copied .kc-code{color:#22c55e}
+.firsat-views{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-top:6px}
+.gated-blur{filter:blur(5px);user-select:none;pointer-events:none}
+.gated-overlay{background:linear-gradient(to bottom,transparent 0%,var(--card) 40%);position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px}
 </style>
 </head>
 <body>
@@ -4741,11 +4759,27 @@ window.EVENTS=[];
 window.CLUBS=[];
 window.RACES=[];
 window.BLOG_POSTS=[];
-window.FIRSATLAR=[
-  {id:'f1',baslik:'Koşucuya Özel %20 İndirim',marka:'Garmin',kategori:'Teknoloji',aciklama:'Garmin Forerunner serisinde koşuculara özel indirim.',indirim:'%20',kod:'RCT20GARMIN',link:'https://garmin.com',bitis:'2025-06-30',imgUrl:'',aktif:true,slug:'garmin-indirim'},
-  {id:'f2',baslik:'Ücretsiz Enerji Jeli Paketi',marka:'GU Energy',kategori:'Beslenme',aciklama:'30 TL ve üzeri alışverişlerde ücretsiz enerji jeli paketi.',indirim:'Ücretsiz',kod:'RCGUFREE',link:'https://guenturkey.com',bitis:'2025-05-31',imgUrl:'',aktif:true,slug:'gu-energy-ucretsiz'},
-  {id:'f3',baslik:'Trail Ayakkabıda %15 İndirim',marka:'Salomon',kategori:'Ekipman',aciklama:'Salomon trail ayakkabı serisinde koşucu indirimi.',indirim:'%15',kod:'RCTSALOMON',link:'https://salomon.com',bitis:'2025-07-15',imgUrl:'',aktif:true,slug:'salomon-trail-indirim'},
-];
+window.FIRSATLAR=[];
+window.loadFirsatlarFromDB=async function(){
+  try{
+    var fb=window._fb;
+    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'firsatlar'),fb.orderBy('createdAt','desc')));
+    window.FIRSATLAR=[];
+    snap.forEach(function(d){
+      var dat=d.data();
+      window.FIRSATLAR.push({id:d.id,baslik:dat.baslik||'',marka:dat.marka||'',
+        kategori:dat.kategori||'Genel',aciklama:dat.aciklama||'',
+        indirim:dat.indirim||'',kod:dat.kod||'',link:dat.link||'',
+        bitis:dat.bitis||'',imgUrl:dat.imgUrl||'',aktif:dat.aktif!==false,
+        views:dat.views||0,createdAt:dat.createdAt});
+    });
+    console.log('[Firsatlar] loaded:',window.FIRSATLAR.length);
+    renderFirsatlar();
+  }catch(e){
+    console.warn('[Firsatlar]',e.message);
+    renderFirsatlar(); // static fallback
+  }
+};
 window.SPONSORS_DATA=[];
 window.BANNER_SLOTS=[null,null,null];
 window.PAGE_BANNERS={events:null,clubs:null,races:null,blog:null,community:null};
@@ -4855,7 +4889,7 @@ window.nav=id=>{
   if(id==='races'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('races');}catch(e){}; if(window.RACES&&window.RACES.length){renderRaceList();}else if(window.loadRacesFromDB)window.loadRacesFromDB().then(()=>renderRaceList());}
   if(id==='discussions'){if(typeof renderDiscHub==='function')renderDiscHub();setTimeout(()=>window.initDiscQuill&&window.initDiscQuill(),300);}
   if(id==='blog'){if(typeof renderPageBanner==='function'||window.renderPageBanner)try{renderPageBanner('blog');}catch(e){}; if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>renderBlogList());}
-  if(id==='firsatlar')renderFirsatlar();
+  if(id==='firsatlar'){window.loadFirsatlarFromDB?window.loadFirsatlarFromDB():renderFirsatlar();}
   if(id==='sss'){} // SSS statik sayfa, ek yükleme gerekmez
   if(id==='hakkimizda'){} // Hakkımızda statik sayfa, ek yükleme gerekmez
   if(id==='community'){
@@ -7283,22 +7317,56 @@ window.shareRace=(raceId,raceName)=>{
 
 // ── FIRSATLAR ──
 function renderFirsatlar(list){
-  const items=list||window.FIRSATLAR.filter(f=>f.aktif);
-  const el=document.getElementById('firsatlar-list');if(!el)return;
-  el.innerHTML=items.map(f=>`
-    <div class="firsat-card" onclick="openFirsatDetail('${f.id}')">
-      ${f.indirim?`<div class="firsat-badge">${f.indirim} İNDİRİM</div>`:''}
-      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="font-size:48px">🎁</span>'}</div>
-      <div class="firsat-body">
-        <span class="tag tag-pu">${f.kategori||'Genel'}</span>
-        <h3>${f.baslik}</h3>
-        <p>${f.aciklama||''}</p>
-        <div class="firsat-meta"><span>🏷️ ${f.marka||''}</span>${f.bitis?`<span>⏰ ${f.bitis}'e kadar</span>`:''}</div>
-        <button class="btn btn-or btn-full">Detayları Gör →</button>
-      </div>
-    </div>`).join('')||'<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">🎁</div><p>Bu kategoride henüz fırsat yok.</p></div>';
-}
-window.filterFirsatlar=(kat,btn)=>{document.querySelectorAll('#firsat-filters .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderFirsatlar(kat==='tümü'?null:FIRSATLAR.filter(f=>f.aktif&&f.kategori===kat));};
+  var items=list||window.FIRSATLAR.filter(function(f){return f.aktif;});
+  var el=document.getElementById('firsatlar-list');if(!el)return;
+  var now=Date.now();
+  var sevenDays=7*24*60*60*1000;
+  var html='';
+  items.forEach(function(f){
+    var isNew=f.createdAt&&f.createdAt.seconds&&(now-f.createdAt.seconds*1000)<sevenDays;
+    var cdHtml='';
+    if(f.bitis){
+      var diff=new Date(f.bitis).getTime()-now;
+      if(diff>0){
+        var days=Math.floor(diff/86400000);
+        var hrs=Math.floor((diff%86400000)/3600000);
+        var urgent=days<3;
+        cdHtml='<div class="firsat-countdown">'
+          +'<div style="display:flex;justify-content:center;gap:12px">'
+          +'<div><div class="cd-val">'+days+'</div><div class="cd-lbl">GÜN</div></div>'
+          +'<div style="font-size:18px;font-weight:800;color:var(--muted);align-self:flex-start;margin-top:2px">:</div>'
+          +'<div><div class="cd-val">'+hrs+'</div><div class="cd-lbl">SAAT</div></div>'
+          +'</div>'
+          +(urgent?'<div class="cd-urgent">Son '+days+' gün!</div>':'')
+          +'</div>';
+      }else{
+        cdHtml='<div style="text-align:center;padding:6px;background:rgba(107,114,128,.1);border-radius:8px;font-size:12px;color:var(--muted);margin:8px 0">Süresi Doldu</div>';
+      }
+    }
+    html+='<div class="firsat-card card" data-fid="'+f.id+'" style="cursor:pointer">'
+      +(isNew?'<div class="firsat-new-badge">YENİ</div>':'')
+      +'<div class="firsat-img">'
+      +(f.imgUrl?'<img src="'+f.imgUrl+'" alt="'+f.baslik.replace(/"/g,'&quot;')+'" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>'
+               :'<span style="font-size:48px">🎁</span>')
+      +'</div>'
+      +'<div class="firsat-body">'
+      +(f.indirim?'<div class="firsat-badge">'+f.indirim+' İNDİRİM</div>':'')
+      +'<span class="tag tag-pu">'+f.kategori+'</span>'
+      +'<h3>'+f.baslik+'</h3>'
+      +'<p style="font-size:13px;color:var(--muted);line-height:1.5">'+( f.aciklama||'').slice(0,80)+(f.aciklama&&f.aciklama.length>80?'...':'')+'</p>'
+      +cdHtml
+      +'<div class="firsat-views">👁 '+(f.views||0)+' kez görüntülendi</div>'
+      +'<button class="btn btn-or btn-full" style="margin-top:8px">Detayları Gör →</button>'
+      +'</div></div>';
+  });
+  el.innerHTML=html||'<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--muted)"><div style="font-size:48px;margin-bottom:16px">🎁</div><p>Bu kategoride henüz fırsat yok.</p></div>';
+  // Event delegation ile click
+  el.querySelectorAll('.firsat-card[data-fid]').forEach(function(card){
+    card.addEventListener('click',function(){
+      openFirsatDetail(card.dataset.fid);
+    });
+  });
+}window.filterFirsatlar=(kat,btn)=>{document.querySelectorAll('#firsat-filters .filt').forEach(b=>b.classList.remove('on'));btn.classList.add('on');renderFirsatlar(kat==='tümü'?null:FIRSATLAR.filter(f=>f.aktif&&f.kategori===kat));};
 
 
 // ── PUSH BİLDİRİMLER ─────────────────────────────────────────────────────
@@ -8709,6 +8777,8 @@ window.openFirsatDetail=id=>{
   }
   
   const isLoggedIn=!!window.CU;
+  // View sayacı artır
+  trackFirsatView(f.id);
   document.getElementById('firsat-detail-content').innerHTML=`
     <div class="firsat-detail-hero" style="${f.imgUrl?'':'background:linear-gradient(135deg,#1a0500,#2a0800)'}">
       ${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="hero-overlay"></div>`:''}
@@ -8735,17 +8805,39 @@ window.openFirsatDetail=id=>{
         <div class="card" style="padding:20px;text-align:center">
           <div style="font-size:32px;margin-bottom:10px">🎁</div>
           <h3 style="margin-bottom:6px;font-size:15px">Fırsatı Kullan</h3>
+          ${(()=>{if(!f.bitis)return '';var diff=new Date(f.bitis).getTime()-Date.now();if(diff<=0)return '<div style="text-align:center;padding:8px;background:rgba(107,114,128,.1);border-radius:8px;font-size:12px;color:var(--muted)">Süresi Doldu</div>';var d=Math.floor(diff/86400000);var h=Math.floor((diff%86400000)/3600000);var m=Math.floor((diff%3600000)/60000);return '<div class="firsat-countdown"><div style="font-size:11px;font-weight:600;color:var(--muted);margin-bottom:6px">Fırsat Bitiyor</div><div style="display:flex;justify-content:center;gap:10px"><div><div class="cd-val">'+d+'</div><div class="cd-lbl">GÜN</div></div><div style="font-size:18px;font-weight:800;color:var(--muted)">:</div><div><div class="cd-val">'+h+'</div><div class="cd-lbl">SAAT</div></div><div style="font-size:18px;font-weight:800;color:var(--muted)">:</div><div><div class="cd-val">'+m+'</div><div class="cd-lbl">DAK</div></div></div>'+(d<3?'<div class="cd-urgent">⚡ Son '+d+' gün!</div>':'')+'</div>';})()
+}
           ${isLoggedIn?`
-            ${f.kod?`<div class="kod-box" style="margin:14px 0"><div class="kod-label">İndirim Kodun</div><div class="kod">${f.kod}</div><button onclick="navigator.clipboard.writeText('${f.kod}');toast('Kod kopyalandı! 📋','ok')" style="margin-top:8px;background:none;border:none;color:var(--or);font-size:12px;cursor:pointer">📋 Kopyala</button></div>`:`<div style="background:var(--bg3);border-radius:8px;padding:12px;margin:14px 0;font-size:13px;color:var(--muted)">Bu fırsat için kod gerekmez. Aşağıdaki butona tıkla.</div>`}
-            ${f.link?`<a href="${f.link}" target="_blank" class="btn btn-or btn-full" style="margin-bottom:8px;display:flex;justify-content:center">🌐 ${f.marka} Sitesine Git</a>`:''}
+            ${f.kod?`
+              <div id="kod-btn-${f.id}" class="kod-copy-btn" onclick="copyFirsatKod('${f.kod}','${f.id}')">
+                <div>
+                  <div style="font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px">İndirim Kodun</div>
+                  <div class="kc-code">${f.kod}</div>
+                </div>
+                <button class="kc-btn">📋 Kopyala</button>
+              </div>
+            `:`<div style="background:var(--bg3);border-radius:8px;padding:12px;margin:14px 0;font-size:13px;color:var(--muted)">Bu fırsat için kod gerekmez.</div>`}
+            ${f.link?`<a href="${f.link}" target="_blank" class="btn btn-or btn-full" style="margin-bottom:8px;display:flex;justify-content:center" onclick="trackFirsatClick('${f.id}')">🌐 ${f.marka} Sitesine Git →</a>`:''}
             <button class="btn btn-ghost btn-full" onclick="nav('firsatlar')">← Tüm Fırsatlar</button>
+            <div class="firsat-views" style="justify-content:center;margin-top:8px">👁 ${(f.views||0)} kez görüntülendi</div>
           `:`
-            <p style="font-size:13px;color:var(--muted);margin:12px 0">İndirim kodunu görmek için üye girişi yapın.</p>
-            <div style="display:flex;flex-direction:column;gap:8px">
-              <button class="btn btn-or btn-full" onclick="openAuth('login')">🔑 Giriş Yap</button>
-              <button class="btn btn-ghost btn-full" onclick="openAuth('register')">✨ Üye Ol (Ücretsiz)</button>
+            <div style="position:relative;overflow:hidden;border-radius:10px;margin:14px 0">
+              <div class="gated-blur" style="background:var(--bg2);padding:14px;border-radius:10px">
+                <div style="font-size:10px;color:var(--muted);text-transform:uppercase">İndirim Kodu</div>
+                <div style="font-family:monospace;font-size:20px;font-weight:800;letter-spacing:3px;color:var(--or)">XXXXXXXX</div>
+              </div>
+              <div class="gated-overlay">
+                <div style="text-align:center">
+                  <div style="font-size:20px;margin-bottom:4px">🔒</div>
+                  <div style="font-size:12px;font-weight:700;color:var(--text)">Üyeye Özel</div>
+                </div>
+              </div>
             </div>
-            <div style="margin-top:12px;padding:10px;background:rgba(255,107,0,.06);border:1px solid rgba(255,107,0,.2);border-radius:8px;font-size:11px;color:var(--muted)">🔒 Üyeler özel indirim kodlarına ve fırsatlara erişebilir.</div>
+            <p style="font-size:13px;color:var(--muted);margin:8px 0">Kodu görmek için ücretsiz üye ol.</p>
+            <div style="display:flex;flex-direction:column;gap:8px">
+              <button class="btn btn-or btn-full" onclick="openAuth('register')">✨ Ücretsiz Üye Ol</button>
+              <button class="btn btn-ghost btn-full" onclick="openAuth('login')">🔑 Giriş Yap</button>
+            </div>
           `}
         </div>
       </div>
@@ -9426,8 +9518,8 @@ function renderAdminSection(sec){
         <div class="form-grp"><label>Web Linki</label><input id="fr-link" placeholder="https://..."/></div>
         <button class="btn btn-or" onclick="saveFirsatFromAdmin()">Fırsat Ekle</button>
       </div>
-      <table><thead><tr><th>Başlık</th><th>Marka</th><th>Kategori</th><th>Kod</th><th>Bitiş</th><th>İşlem</th></tr></thead>
-      <tbody>${FIRSATLAR.map(f=>`<tr><td>${f.baslik}</td><td>${f.marka||'—'}</td><td>${f.kategori||'—'}</td><td style="font-family:monospace;font-weight:600;color:var(--or)">${f.kod||'—'}</td><td>${f.bitis||'—'}</td><td class="action-btns"><button class="btn btn-red btn-sm" onclick="deleteFirsat('${f.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
+      <table><thead><tr><th>Başlık</th><th>Marka</th><th>Kod</th><th>Bitiş</th><th>Görüntülenme</th><th>Aktif</th><th>İşlem</th></tr></thead>
+      <tbody>${FIRSATLAR.map(f=>`<tr><td><b>${f.baslik}</b></td><td>${f.marka||'—'}</td><td style="font-family:monospace;font-weight:600;color:var(--or)">${f.kod||'—'}</td><td style="font-size:12px">${f.bitis||'—'}</td><td style="text-align:center">👁 ${f.views||0}</td><td><button class="btn btn-sm ${f.aktif?'btn-or':'btn-ghost'}" onclick="toggleFirsatAktif('${f.id}',${f.aktif})">${f.aktif?'✅ Aktif':'⏸ Pasif'}</button></td><td class="action-btns"><button class="btn btn-red btn-sm" onclick="deleteFirsat('${f.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
     banners:`<h2 style="margin-bottom:6px;font-family:'Raleway',sans-serif">🖼 Banner Yönetimi</h2>
       <p style="color:var(--muted);font-size:13px;margin-bottom:20px">Ana sayfa ve tüm sayfalar için banner yönetin.</p>
       <div style="display:flex;gap:8px;margin-bottom:20px;flex-wrap:wrap">
@@ -9650,7 +9742,7 @@ function renderAdminSection(sec){
     return;
   }
 }
-window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);};
+window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);if(sec==='firsatlar')setTimeout(()=>loadFirsatlarFromDB&&loadFirsatlarFromDB(),200);};
 
 // ── ETKİNLİK İSTATİSTİKLERİ ──
 window.showEventStats=async(eventId)=>{
@@ -13087,6 +13179,97 @@ window.loadEventAttendees=async function(eventId,containerEl){
     });
     containerEl.innerHTML="<div class='attendee-list'>"+chips+"</div>";
   }catch(e){containerEl.innerHTML="<p style='font-size:11px;color:var(--muted)'>Yuklenemedi</p>";}
+};
+
+// ═══ FIRSATLAR SİSTEMİ ═══════════════════════════════════════
+window.copyFirsatKod=function(kod,id){
+  navigator.clipboard.writeText(kod).then(function(){
+    toast("Kod kopyalandı: "+kod+" 📋","ok");
+    var btn=document.getElementById("kod-btn-"+id);
+    if(btn){
+      btn.classList.add("copied");
+      var kbtn=btn.querySelector(".kc-btn");
+      if(kbtn){kbtn.textContent="✅ Kopyalandı";}
+      setTimeout(function(){
+        btn.classList.remove("copied");
+        if(kbtn)kbtn.textContent="📋 Kopyala";
+      },2500);
+    }
+    trackFirsatClick(id);
+  }).catch(function(){toast(kod+" — Kodu kopyala","ok");});
+};
+
+window.trackFirsatView=async function(id){
+  try{
+    var fb=window._fb;
+    await fb.updateDoc(fb.doc(fb.db,"firsatlar",id),{views:window._fb.increment(1)});
+    var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});
+    if(f)f.views=(f.views||0)+1;
+  }catch(e){}
+};
+
+window.trackFirsatClick=async function(id){
+  try{
+    var fb=window._fb;
+    await fb.updateDoc(fb.doc(fb.db,"firsatlar",id),{clicks:window._fb.increment(1)});
+  }catch(e){}
+};
+
+window.saveFirsatFromAdmin=async function(){
+  var baslik=document.getElementById("fr-baslik")?.value.trim();
+  var marka=document.getElementById("fr-marka")?.value.trim();
+  var kategori=document.getElementById("fr-kategori")?.value||"Genel";
+  var indirim=document.getElementById("fr-indirim")?.value.trim();
+  var aciklama=document.getElementById("fr-aciklama")?.value.trim();
+  var kod=document.getElementById("fr-kod")?.value.trim().toUpperCase();
+  var bitis=document.getElementById("fr-bitis")?.value;
+  var link=document.getElementById("fr-link")?.value.trim();
+  if(!baslik){toast("Başlık gerekli","err");return;}
+  var fb=window._fb;
+  try{
+    var imgUrl="";
+    var imgFile=document.getElementById("fr-img-input")?.files?.[0];
+    if(imgFile){
+      var imgRef=fb.ref(fb.storage,"firsatlar/"+Date.now()+"_"+imgFile.name);
+      await fb.uploadBytes(imgRef,imgFile);
+      imgUrl=await fb.getDownloadURL(imgRef);
+    }
+    var data={baslik,marka:marka||"",kategori,indirim:indirim||"",
+      aciklama:aciklama||"",kod:kod||"",bitis:bitis||"",link:link||"",
+      imgUrl,aktif:true,views:0,clicks:0,createdAt:fb.serverTimestamp()};
+    var {id:_,...dataNoId}=data;
+    await fb.addDoc(fb.collection(fb.db,"firsatlar"),dataNoId);
+    toast("Fırsat eklendi ✓","ok");
+    // Form temizle
+    ["fr-baslik","fr-marka","fr-indirim","fr-aciklama","fr-kod","fr-bitis","fr-link"].forEach(function(id){
+      var el=document.getElementById(id);if(el)el.value="";
+    });
+    // Listeyi yenile
+    await window.loadFirsatlarFromDB();
+    renderAdminSection("firsatlar");
+  }catch(e){toast("Hata: "+e.message,"err");}
+};
+
+window.deleteFirsat=async function(id){
+  if(!confirm("Bu fırsatı silmek istediğine emin misin?"))return;
+  var fb=window._fb;
+  try{
+    await fb.deleteDoc(fb.doc(fb.db,"firsatlar",id));
+    window.FIRSATLAR=(window.FIRSATLAR||[]).filter(function(f){return f.id!==id;});
+    toast("Fırsat silindi","ok");
+    renderAdminSection("firsatlar");
+  }catch(e){toast("Hata: "+e.message,"err");}
+};
+
+window.toggleFirsatAktif=async function(id,current){
+  var fb=window._fb;
+  try{
+    await fb.updateDoc(fb.doc(fb.db,"firsatlar",id),{aktif:!current});
+    var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});
+    if(f)f.aktif=!current;
+    renderAdminSection("firsatlar");
+    toast((!current?"Aktif edildi":"Pasif edildi")+" ✓","ok");
+  }catch(e){toast("Hata: "+e.message,"err");}
 };
 </script>
 </body>

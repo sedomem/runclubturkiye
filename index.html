@@ -9,7 +9,7 @@
 <meta property="og:image" content="https://www.runclubturkiye.com/og-image.png"/>
 <meta name="twitter:card" content="summary_large_image"/>
 <title>RunClubTürkiye — Türkiye'nin Koşu Topluluğu</title>
-<meta name="description" content="Türkiye genelinde koşu kulüpleri, etkinlikler ve yarış takvimi."/>
+<meta name="description" content="Türkiye'nin en büyük koşu topluluğu. 250+ kulüp, 12.000+ sporcu, 450+ etkinlik. Kulübü bul, etkinliklere katıl, yarış takvimini takip et. 81 ilde ücretsiz."/>
 
 <!-- ═══════════════════════════════════════════════════════════════════════════
      ENHANCED SEO META TAGS — Google Ranking Optimization
@@ -65,13 +65,22 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="default"/>
 <meta name="apple-mobile-web-app-title" content="RunClubTürkiye"/>
 <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 200 200'%3E%3Crect width='200' height='200' rx='44' fill='%23E8622A'/%3E%3Ccircle cx='112' cy='60' r='18' fill='%23fff'/%3E%3Cellipse cx='104' cy='98' rx='12' ry='24' fill='%23fff' transform='rotate(-12 104 98)'/%3E%3Cpath d='M98 82 L68 64' stroke='%23F5F0E8' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 80 L136 90' stroke='%23F5F0E8' stroke-width='8' stroke-linecap='round' fill='none'/%3E%3Cpath d='M96 120 L74 144' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3Cpath d='M108 122 L130 135' stroke='%23fff' stroke-width='9' stroke-linecap='round' fill='none'/%3E%3C/svg%3E"/>
+<link rel="apple-touch-icon" href="/icon-192.png">
+<!-- Performans: preconnect + preload hints -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://cdn.jsdelivr.net">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://firebasestorage.googleapis.com">
+<link rel="preload" as="style" href="https://fonts.googleapis.com/css2?family=Raleway:wght@700;800;900&display=swap" onload="this.onload=null;this.rel='stylesheet'">
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:wght@700;800;900&display=swap"></noscript>
+<link rel="dns-prefetch" href="https://www.gstatic.com">
+<link rel="dns-prefetch" href="https://unpkg.com">
 <!-- Kritik Google Fonts önce yüklensin (LCP için Raleway ve Open Sans) -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Raleway:ital,wght@0,300;0,400;0,600;0,700;0,800;0,900;1,400&family=Open+Sans:wght@300;400;500;600&family=Alatsi&display=swap">
 <!-- Lexend ve Quill CSS kritik değil → defer benzeri media trick ile lazy-load -->
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&display=swap" media="print" onload="this.media='all'">
-<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&display=swap"></noscript>
+<noscript><link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lexend:wght@400;700;800;900&display=swap" media="print" onload="this.media='all'"></noscript>
 <!-- Quill CSS yalnızca Admin paneli açıldığında gerekli → non-blocking -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.snow.min.css"/></noscript>
@@ -425,7 +434,7 @@ h1,h2,h3,h4{font-family:var(--font-head)}
 .admin-sb button{display:flex;align-items:center;gap:8px;width:100%;padding:10px 16px;background:none;border:none;color:var(--muted);font-size:12px;text-align:left;transition:all var(--transition);cursor:pointer;position:relative;font-family:var(--font-head);font-weight:600}
 .admin-sb button:hover{background:var(--or-soft);color:var(--or)}
 .admin-sb button.on{background:var(--or-soft);border-right:3px solid var(--or);color:var(--or)}
-.admin-sb .logout-btn{margin-top:auto;color:#c0392b!important;border-top:1.5px solid var(--border)}
+.admin-sb .logout-btn{margin-top:auto;color:#c0392b;border-top:1.5px solid var(--border)}
 .admin-main{padding:26px;overflow:auto;background:var(--bg2)}
 .admin-main .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;width:100%}
 .admin-sec{display:none}.admin-sec.on{display:block;animation:fadeUp .3s var(--transition)}
@@ -1058,8 +1067,8 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 /* ── Featured cards ──────────────────────────── */
 .featured-race-card{border:2px solid #f59e0b!important;box-shadow:0 4px 20px rgba(245,158,11,.18)!important}
 .featured-race-card:hover{box-shadow:0 8px 32px rgba(245,158,11,.28)!important;transform:translateY(-3px)}
-.featured-blog-card{border:2px solid var(--or)!important}
-.featured-blog-card:hover{box-shadow:0 8px 24px rgba(232,98,42,.15)!important}
+.featured-blog-card{border:2px solid var(--or)}
+.featured-blog-card:hover{box-shadow:0 8px 24px rgba(232,98,42,.15)}
 
 /* Mobil - kart görselleri tam genişlik */
 @media(max-width:768px){
@@ -1157,7 +1166,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .mdr-btn:hover{background:var(--bg2)}
 .mdr-btn:active{background:var(--border)}
 .mdr-btn.active{background:rgba(232,98,42,.1);color:var(--or);font-weight:700}
-.mdr-admin{color:var(--or)!important;font-weight:700!important}
+.mdr-admin{color:var(--or);font-weight:700}
 .mdr-ico{font-size:18px;width:26px;text-align:center;flex-shrink:0}
 /* Dash sidebar desktop'ta görünür, mobilden gizlenir */
 @media(max-width:768px){
@@ -1368,9 +1377,27 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .footer-cta-trust span{display:flex;align-items:center;gap:5px}
 .how-step{transition:transform .2s}
 .how-step:hover{transform:translateY(-4px)}
+
+/* ── Skip to content (erişilebilirlik) ── */
+.skip-link{position:absolute;top:-40px;left:0;background:var(--or);color:#fff;padding:8px 16px;border-radius:0 0 8px 0;font-size:14px;font-weight:700;z-index:9999;transition:top .2s;text-decoration:none}
+.skip-link:focus{top:0}
+/* ── Focus ring (klavye navigasyonu) ── */
+*:focus-visible{outline:3px solid var(--or);outline-offset:2px;border-radius:4px}
+button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--or);outline-offset:2px}
+
+/* ── Error boundary ── */
+#error-boundary{display:none;position:fixed;bottom:20px;right:20px;max-width:320px;background:#1a1a2e;border:1.5px solid #ef4444;border-radius:14px;padding:16px 18px;z-index:9990;box-shadow:0 8px 32px rgba(0,0,0,.3)}
+#error-boundary.show{display:block}
+#error-boundary h4{margin:0 0 6px;font-size:14px;font-weight:700;color:#ef4444}
+#error-boundary p{margin:0 0 10px;font-size:12px;color:rgba(255,255,255,.7);line-height:1.5}
+#error-boundary .err-btns{display:flex;gap:8px}
+#error-boundary button{font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;border:none;font-weight:600}
+.err-retry{background:var(--or);color:#fff}
+.err-dismiss{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
 </style>
 </head>
 <body>
+<a href="#main-content" class="skip-link">Ana icerige gec</a>
 <div class="loading" id="loading" style="background:#F5F0E8"><svg width="90" height="90" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block">
   <rect x="0" y="0" width="200" height="200" rx="44" fill="#E8622A"/>
   <circle cx="112" cy="60" r="18" fill="#fff"/>
@@ -1429,7 +1456,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <button class="btn btn-or btn-sm" id="nav-dashboard-btn" onclick="nav('dashboard')">Dashboard</button>
     </div>
   </div>
-  <button id="master-hamburger" onclick="openMasterDrawer()" aria-label="Menüyü aç" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:40px;height:40px;background:var(--or);border:none;border-radius:10px;cursor:pointer;flex-shrink:0">
+  <button id="master-hamburger" onclick="openMasterDrawer()" aria-label="Menüyü aç" aria-expanded="false" aria-controls="master-drawer" style="display:none;flex-direction:column;justify-content:center;align-items:center;gap:5px;width:40px;height:40px;background:var(--or);border:none;border-radius:10px;cursor:pointer;flex-shrink:0">
     <span style="display:block;width:18px;height:2px;background:#fff;border-radius:2px;transition:.25s"></span>
     <span style="display:block;width:14px;height:2px;background:#fff;border-radius:2px;transition:.25s;align-self:flex-end"></span>
     <span style="display:block;width:18px;height:2px;background:#fff;border-radius:2px;transition:.25s"></span>
@@ -1551,6 +1578,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 
 <!-- HOME -->
 <div class="pg" id="pg-home">
+  <main id="main-content" aria-label="Ana içerik" style="display:contents"></main>
   <div id="hero-banner">
     <button class="banner-nav prev" onclick="bannerPrev()" aria-label="Önceki banner">‹</button>
     <button class="banner-nav next" onclick="bannerNext()" aria-label="Sonraki banner">›</button>
@@ -1876,7 +1904,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <div style="background:linear-gradient(135deg,#0a0500,#1a0800);padding:60px 0 40px;margin-bottom:0">
     <div class="container" style="text-align:center">
       <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,107,0,.15);border:1px solid rgba(255,107,0,.3);color:var(--or);padding:6px 16px;border-radius:20px;font-size:13px;margin-bottom:16px">🎁 Özel Fırsatlar</div>
-      <h1 style="font-size:clamp(24px,4vw,42px);font-weight:700;color:#fff;margin-bottom:12px">Koşucuya Özel <span style="color:var(--or)">İndirimler</span></h1>
+      <h2 style="font-size:clamp(24px,4vw,42px);font-weight:700;color:#fff;margin-bottom:12px">Koşucuya Özel <span style="color:var(--or)">İndirimler</span></h2>
       <p style="color:rgba(255,255,255,.7);font-size:15px;max-width:500px;margin:0 auto">Sponsorlarımız ve iş ortaklarımızdan koşuculara özel indirim ve fırsatlar.</p>
     </div>
   </div>
@@ -1943,7 +1971,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   <div id="pb-sss" class="page-banner pb-sss"></div>
   <div class="container sec" style="max-width:860px">
     <div style="text-align:center;margin-bottom:48px">
-      <h1 style="font-size:32px;font-family:var(--font-head);margin-bottom:10px">Sık Sorulan Sorular</h1>
+      <h2 style="font-size:32px;font-family:var(--font-head);margin-bottom:10px">Sık Sorulan Sorular</h2>
       <p style="color:var(--muted);font-size:15px;max-width:540px;margin:0 auto">RunClubTürkiye hakkında merak ettiğin her şeyin cevabı burada.</p>
     </div>
 
@@ -2233,7 +2261,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <button class="btn btn-ghost btn-sm" onclick="nav('home')" style="margin-bottom:24px">← Ana Sayfa</button>
     <div style="text-align:center;margin-bottom:40px">
       <span class="tag tag-or" style="margin-bottom:12px;display:inline-block">Yardım Merkezi</span>
-      <h1 style="font-size:30px;font-family:var(--font-head);margin-bottom:10px">Sıkça Sorulan Sorular</h1>
+      <h2 style="font-size:30px;font-family:var(--font-head);margin-bottom:10px">Sıkça Sorulan Sorular</h2>
       <p style="color:var(--muted);font-size:14px;max-width:520px;margin:0 auto">RunClubTürkiye hakkında merak ettiğin her şey burada. Bulamadığın bir cevap varsa <a href="/cdn-cgi/l/email-protection#432a2d252c0331362d202f3621373631282a3a266d202c2e" style="color:var(--or)">bize yaz</a>.</p>
     </div>
 
@@ -2428,7 +2456,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
         <div class="sss-a">
           <p>Her türlü soru, öneri ve geri bildirim için:</p>
           <p style="margin-top:8px">📧 <a href="/cdn-cgi/l/email-protection#543d3a323b1426213a373821362021263f3d2d317a373b39" style="color:var(--or)"><span class="__cf_email__" data-cfemail="0960676f66497b7c676a657c6b7d7c7b6260706c276a6664">[email&#160;protected]</span></a></p>
-          <p style="margin-top:4px">📸 Instagram: <a href="https://instagram.com/runclubturkiye" target="_blank" style="color:var(--or)">@runclubturkiye</a></p>
+          <p style="margin-top:4px">📸 Instagram: <a href="https://instagram.com/runclubturkiye" target="_blank" rel="noopener noreferrer" style="color:var(--or)">@runclubturkiye</a></p>
           <p style="margin-top:8px;color:var(--muted);font-size:12px">Mesajlara genellikle 1–2 iş günü içinde dönüş yapılmaktadır.</p>
         </div>
       </div>
@@ -2467,7 +2495,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <!-- Fotoğraf -->
     <div id="comm-photo-input" style="display:none;margin-top:12px">
       <input type="file" accept="image/*" onchange="previewCommImg(this)" style="font-size:13px"/>
-      <img id="comm-photo-preview" style="max-width:100%;border-radius:10px;margin-top:8px;display:none"/>
+      <img id="comm-photo-preview" alt="" style="max-width:100%;border-radius:10px;margin-top:8px;display:none"/>
     </div>
   </div>
   <div id="comm-login-prompt" style="background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:20px;display:none">
@@ -2875,12 +2903,12 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 <h2 style="margin-bottom:18px;font-size:18px">🏃 Kulüp Profilini Düzenle</h2>
 <div class="card" style="padding:20px;margin-bottom:16px">
 <h3 style="font-size:14px;margin-bottom:12px;color:var(--or)">🖼 Banner Görseli</h3>
-<div id="ga-banner-drop" style="width:100%;height:130px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative;display:flex;align-items:center;justify-content:center"><img id="ga-banner-preview" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/><div id="ga-banner-ph" style="text-align:center;color:var(--muted);font-size:13px;pointer-events:none"><div style="font-size:28px;margin-bottom:4px">🖼</div>Sürükle &amp; bırak veya <u>tıkla</u><br/><span style="font-size:11px">1200×400px · JPG/PNG</span></div></div>
+<div id="ga-banner-drop" style="width:100%;height:130px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative;display:flex;align-items:center;justify-content:center"><img id="ga-banner-preview" alt="" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/><div id="ga-banner-ph" style="text-align:center;color:var(--muted);font-size:13px;pointer-events:none"><div style="font-size:28px;margin-bottom:4px">🖼</div>Sürükle &amp; bırak veya <u>tıkla</u><br/><span style="font-size:11px">1200×400px · JPG/PNG</span></div></div>
 <input type="file" id="ga-banner-input" accept="image/*" style="display:none"/>
 </div>
 <div class="card" style="padding:20px;margin-bottom:16px">
 <h3 style="font-size:14px;margin-bottom:12px;color:var(--or)">🏃 Kulüp Logosu</h3>
-<div style="display:flex;align-items:center;gap:16px"><div id="ga-logo-drop" style="width:88px;height:88px;border:2px dashed var(--border);border-radius:14px;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img id="ga-logo-preview" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/><div id="ga-logo-ph" style="text-align:center;color:var(--muted);font-size:11px;pointer-events:none">🏃<br/>Logo</div></div><div><p style="font-size:13px;font-weight:600;margin:0 0 4px">Logo Yükle</p><p style="font-size:12px;color:var(--muted);margin:0 0 8px">400×400px · JPG/PNG</p><button class="btn btn-ghost btn-sm" id="ga-logo-btn">📁 Galeriden Seç</button></div></div>
+<div style="display:flex;align-items:center;gap:16px"><div id="ga-logo-drop" style="width:88px;height:88px;border:2px dashed var(--border);border-radius:14px;cursor:pointer;overflow:hidden;background:var(--bg2);position:relative;display:flex;align-items:center;justify-content:center;flex-shrink:0"><img id="ga-logo-preview" alt="" src="" style="position:absolute;inset:0;width:100%;height:100%;object-fit:cover;display:none"/><div id="ga-logo-ph" style="text-align:center;color:var(--muted);font-size:11px;pointer-events:none">🏃<br/>Logo</div></div><div><p style="font-size:13px;font-weight:600;margin:0 0 4px">Logo Yükle</p><p style="font-size:12px;color:var(--muted);margin:0 0 8px">400×400px · JPG/PNG</p><button class="btn btn-ghost btn-sm" id="ga-logo-btn">📁 Galeriden Seç</button></div></div>
 <input type="file" id="ga-logo-input" accept="image/*" style="display:none"/>
 </div>
 <div class="card" style="padding:20px;margin-bottom:16px">
@@ -3046,7 +3074,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       <div class="img-upload-area" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDropGeneric(event,'edit-club-img','edit-club-img-preview')">
         <input type="file" accept="image/*" id="edit-club-img" onchange="previewImg(this,'edit-club-img-preview')"/>
         <div style="font-size:12px;color:var(--muted)">📁 Tıkla veya sürükle · 400×400px</div>
-        <img class="img-preview" id="edit-club-img-preview"/>
+        <img class="img-preview" id="edit-club-img-preview" alt=""/>
       </div>
       <input type="text" id="edit-club-imgurl" placeholder="veya görsel URL..." style="margin-top:6px"/>
     </div>
@@ -3129,7 +3157,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     </div>
     <p id="nl-msg" style="font-size:12px;margin-top:10px;color:rgba(255,255,255,.7);display:none"></p>
   </div></div>
-  <footer><div class="container">
+  <footer role="contentinfo"><div class="container">
     <div class="footer-grid">
       <div class="footer-col"><svg width="240" height="56" viewBox="0 0 520 120" xmlns="http://www.w3.org/2000/svg" style="display:block">
   <circle cx="54" cy="38" r="11" fill="#E8622A"/>
@@ -3244,7 +3272,6 @@ window.requestPushPermission=async function(){
       await fb.setDoc(fb.doc(fb.db,'users',window.CU.uid),{fcmToken:token,pushEnabled:true},{merge:true});
     }
     localStorage.setItem('rct_fcm_token',token);
-    console.log('[FCM] Token:', token);
     toast('Push bildirimleri aktif! 🔔','ok');
     return token;
   }catch(e){
@@ -3567,7 +3594,7 @@ function syncProfileUI(){
   ['dash-email','profile-email-display'].forEach(id=>{const el=document.getElementById(id);if(el)el.textContent=CU.email||'';});
   const initials=(CU.name||'U')[0].toUpperCase();
   const av=document.getElementById('dash-avatar');const pav=document.getElementById('profile-avatar-el');
-  if(CU.photoURL){if(av)av.innerHTML=`<img src="${CU.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;if(pav)pav.innerHTML=`<img src="${CU.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;}
+  if(CU.photoURL){if(av)av.innerHTML=`<img src="${CU.photoURL}" alt="Profil" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;if(pav)pav.innerHTML=`<img src="${CU.photoURL}" alt="Profil" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;}
   else{if(av)av.textContent=initials;const pi=document.getElementById('profile-initials');if(pi)pi.textContent=initials;}
   document.getElementById('pf-name').value=CU.name||'';
   document.getElementById('pf-phone').value=CU.phone||'';
@@ -3623,7 +3650,7 @@ window.handlePhotoUpload=async(input)=>{
   if(!CU||!input.files[0])return;
   const file=input.files[0];
   const reader=new FileReader();
-  reader.onload=e=>{const src=e.target.result;const av=document.getElementById('dash-avatar');if(av)av.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;const pav=document.getElementById('profile-avatar-el');if(pav)pav.innerHTML=`<img src="${src}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;};
+  reader.onload=e=>{const src=e.target.result;const av=document.getElementById('dash-avatar');if(av)av.innerHTML=`<img src="${src}" alt="Profil fotoğrafı" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;const pav=document.getElementById('profile-avatar-el');if(pav)pav.innerHTML=`<img src="${src}" alt="Profil fotoğrafı" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;};
   reader.readAsDataURL(file);
   try{const r=ref(storage,`avatars/${CU.uid}`);await uploadBytes(r,file);const url=await getDownloadURL(r);await setDoc(doc(db,'users',CU.uid),{photoURL:url},{merge:true});CU.photoURL=url;toast('Fotoğraf güncellendi ✓','ok');}catch(e){toast('Storage: '+e.message,'err');}
 };
@@ -4419,7 +4446,7 @@ window.showUserProfile=i=>{
   const initials=(u.name||'?')[0].toUpperCase();
   document.getElementById('user-profile-content').innerHTML=`
     <div style="text-align:center;margin-bottom:16px">
-      <div class="profile-popup-avatar" style="background:hsl(${i*37},50%,30%)">${u.photoURL?`<img src="${u.photoURL}"/>`:`<span>${initials}</span>`}</div>
+      <div class="profile-popup-avatar" style="background:hsl(${i*37},50%,30%)">${u.photoURL?`<img src="${u.photoURL}" alt="${u.name||'Kullanıcı'}"/>`:`<span>${initials}</span>`}</div>
       <h2 style="font-size:18px;margin-bottom:4px">${u.name||'—'}</h2>
       <div style="font-size:13px;color:var(--muted)">${u.email||'—'}</div>
       <span class="pill ${u.role==='superadmin'?'pill-or':u.role==='groupadmin'?'pill-bl':'pill-gr'}" style="margin-top:8px;display:inline-block">${u.role||'member'}</span>
@@ -4572,7 +4599,7 @@ window.approveApplication=async(appId,uid)=>{
 <table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
   <!-- HEADER -->
   <tr><td style="background:#E8622A;padding:28px 36px;text-align:center;">
-    <h1 style="margin:0;color:#fff;font-size:24px;font-weight:800;">🏃 RunClub Türkiye</h1>
+    <h2 style="margin:0;color:#fff;font-size:24px;font-weight:800;">🏃 RunClub Türkiye</h2>
     <p style="margin:8px 0 0;color:rgba(255,255,255,.85);font-size:13px;">Grup Admin Paneli — Hoş Geldin!</p>
   </td></tr>
   <!-- BODY -->
@@ -4864,7 +4891,6 @@ window.loadFirsatlarFromDB=async function(){
         bitis:dat.bitis||'',imgUrl:dat.imgUrl||'',aktif:dat.aktif!==false,
         views:dat.views||0,createdAt:dat.createdAt});
     });
-    console.log('[Firsatlar] loaded:',window.FIRSATLAR.length);
     renderFirsatlar();
   }catch(e){
     console.warn('[Firsatlar]',e.message);
@@ -5021,7 +5047,7 @@ function renderBanners(banners){
       ${b.imgUrl?`${window.bannerPicture(b.imgUrl)}<div class="banner-overlay"></div>`:`<div style="position:absolute;inset:0;background:${b.bg||'linear-gradient(135deg,#f97316,#ea580c)'}"></div>`}
       <div class="banner-content">
         ${b.badge?`<div class="banner-badge">${b.badge}</div>`:''}
-        <h1>${b.title||''}</h1>
+        <h2>${b.title||''}</h2>
         <p>${b.subtitle||''}</p>
         <div class="banner-cta">
           <button class="btn btn-or" onclick="${b.ctaUrl?`window.open('${b.ctaUrl}','_blank')`:b.ctaAction==='register'?`openAuth('register')`:`nav('${b.ctaAction||'events'}')`}">${b.ctaText||'Keşfet →'}</button>
@@ -5128,7 +5154,7 @@ function renderHomeFirsatlar(){
   el.innerHTML=items.map(f=>`
     <div class="firsat-card" onclick="openFirsatDetail('${f.id}')">
       ${f.indirim?`<div class="firsat-badge">${f.indirim}</div>`:''}
-      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="font-size:48px">🎁</span>'}</div>
+      <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik||'Fırsat'}" loading="lazy" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="font-size:48px">🎁</span>'}</div>
       <div class="firsat-body">
         <span class="tag tag-pu">${f.kategori||'Genel'}</span>
         <h3>${f.baslik}</h3>
@@ -5203,7 +5229,7 @@ window.openEvent=id=>{
     <div style="background:linear-gradient(135deg,#1a0a00,#0a0a0a);border-radius:var(--r);padding:36px;margin-bottom:20px;position:relative;overflow:hidden">
       <div style="position:absolute;right:30px;top:50%;transform:translateY(-50%);font-size:70px;opacity:.1">${e.emoji||'🏃'}</div>
       <span class="tag tag-or">${e.cat}</span>
-      <h1 style="font-size:clamp(18px,4vw,26px);margin:8px 0;color:#fff;line-height:1.2">${e.emoji||'🏃'} ${e.title}</h1>
+      <h2 style="font-size:clamp(18px,4vw,26px);margin:8px 0;color:#fff;line-height:1.2">${e.emoji||'🏃'} ${e.title}</h1>
       ${club?`<div style="color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;margin-bottom:8px">🤝 ${club.name}</div>`:''}
       <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
       ${e.desc?`<p style="color:rgba(255,255,255,0.8);font-size:13px;line-height:1.6;margin-top:12px">${e.desc}</p>`:''}
@@ -5230,7 +5256,7 @@ window.openEvent=id=>{
           <h3 style="font-size:15px;margin-bottom:10px">📍 Buluşma Noktası</h3>
           <p style="font-size:13px;color:var(--muted);margin-bottom:10px">${e.location}</p>
           <iframe src="https://www.google.com/maps?q=${encodeURIComponent(e.location)}&output=embed" width="100%" height="200" style="border:0;border-radius:8px" loading="lazy"></iframe>
-          <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}" target="_blank" class="btn btn-ghost btn-sm btn-full" style="margin-top:10px">Yol Tarifi Al →</a>
+          <a href="https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(e.location)}" target="_blank" rel="noopener noreferrer" class="btn btn-ghost btn-sm btn-full" style="margin-top:10px">Yol Tarifi Al →</a>
         </div>`:''}
       </div>
       <div>
@@ -5794,7 +5820,7 @@ if(!window.renderClubTrainings){
           +'<div style="font-size:13px;font-weight:700;color:var(--text)">'+e.title+'</div>'
           +'<div style="display:flex;gap:8px;margin-top:3px;flex-wrap:wrap">'
           +(e.time?'<span style="font-size:11px;color:var(--muted)">🕐 '+e.time+'</span>':'')
-          +(mUrl?'<a href="'+mUrl+'" target="_blank" style="font-size:11px;color:var(--or);text-decoration:none">📍 '+(e.location||'Harita')+'</a>':'')
+          +(mUrl?'<a href="'+mUrl+'" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--or);text-decoration:none">📍 '+(e.location||'Harita')+'</a>':'')
           +'</div></div>'
           +'<button onclick="event.stopPropagation();addToPersonalCalendar('+evJ+')" style="flex-shrink:0;padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:none;cursor:pointer;font-size:11px;color:var(--muted)">📅</button>'
           +'</div>';
@@ -6100,7 +6126,7 @@ function renderCountdown(ds,id){const el=document.getElementById(id);if(!el)retu
 function clubCard(c){
   const isJoined=window.CU&&localStorage.getItem(`club_${c.id}_${window.CU.uid}`);
   const imgBg=c.imgUrl
-    ?`<img src="${c.imgUrl}" alt="${c.name}" width="300" height="150" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`
+    ?`<img src="${c.imgUrl}" alt="${c.name||'Kulüp'}" loading="lazy" alt="${c.name}" width="300" height="150" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`
     :`<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,var(--or),var(--or2));font-size:40px">🏃</div>`;
   return`<div class="card" style="position:relative;cursor:pointer" onclick="openClub('${c.id}')">
     ${isJoined?`<div class="member-badge">✓ Üyesin</div>`:''}
@@ -6239,8 +6265,8 @@ window.openClub=async(id)=>{
 
       <!-- BANNER -->
       <div style="width:100%;height:200px;background:linear-gradient(135deg,var(--or),#ff6b35);overflow:hidden;position:relative">
-        ${c.bannerUrl?`<img src="${c.bannerUrl}" style="width:100%;height:100%;object-fit:cover"/>`
-          : c.imgUrl?`<img src="${c.imgUrl}" style="width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(.8)"/>` : ''}
+        ${c.bannerUrl?`<img src="${c.bannerUrl}" alt="${c.name||''} banner" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>`
+          : c.imgUrl?`<img src="${c.imgUrl}" alt="${c.name||'Kulüp'}" loading="lazy" style="width:100%;height:100%;object-fit:cover;filter:blur(2px) brightness(.8)"/>` : ''}
         <div style="position:absolute;inset:0;background:linear-gradient(to bottom,transparent 40%,rgba(0,0,0,.45))"></div>
       </div>
 
@@ -6248,9 +6274,9 @@ window.openClub=async(id)=>{
       <div style="position:relative;padding:0 16px">
         <div style="position:absolute;top:-40px;left:16px;width:80px;height:80px;border-radius:16px;border:3px solid var(--card);background:var(--card);overflow:hidden;box-shadow:0 4px 16px rgba(0,0,0,.2)">
           ${c.logoUrl
-            ? `<img src="${c.logoUrl}" style="width:100%;height:100%;object-fit:cover"/>`
+            ? `<img src="${c.logoUrl}" alt="${c.name||''} logo" style="width:100%;height:100%;object-fit:cover"/>`
             : c.imgUrl
-              ? `<img src="${c.imgUrl}" style="width:100%;height:100%;object-fit:cover"/>`
+              ? `<img src="${c.imgUrl}" alt="${c.name||'Kulüp'}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>`
               : `<div style="width:100%;height:100%;background:linear-gradient(135deg,var(--or),#ff9500);display:flex;align-items:center;justify-content:center;font-size:30px">🏃</div>`}
         </div>
       </div>
@@ -6286,27 +6312,27 @@ window.openClub=async(id)=>{
       <!-- SOSYAL MEDYA -->
       <div style="display:flex;flex-wrap:wrap;gap:10px;margin-bottom:6px">
         ${(c.socialLinks&&c.socialLinks.instagram)||c.insta
-          ?`<a href="https://instagram.com/${((c.socialLinks&&c.socialLinks.instagram)||c.insta||'').replace('@','')}" target="_blank"
+          ?`<a href="https://instagram.com/${((c.socialLinks&&c.socialLinks.instagram)||c.insta||'').replace('@','')}" target="_blank" rel="noopener noreferrer"
               style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
               📸 Instagram
             </a>` : ''}
         ${(c.socialLinks&&c.socialLinks.linkedin)
-          ?`<a href="${c.socialLinks.linkedin}" target="_blank"
+          ?`<a href="${c.socialLinks.linkedin}" target="_blank" rel="noopener noreferrer"
               style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
               💼 LinkedIn
             </a>` : ''}
         ${(c.socialLinks&&c.socialLinks.website)
-          ?`<a href="${c.socialLinks.website}" target="_blank"
+          ?`<a href="${c.socialLinks.website}" target="_blank" rel="noopener noreferrer"
               style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
               🌐 Web Sitesi
             </a>` : ''}
         ${c.strava
-          ?`<a href="${c.strava}" target="_blank"
+          ?`<a href="${c.strava}" target="_blank" rel="noopener noreferrer"
               style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
               🟠 Strava
             </a>` : ''}
         ${c.mapUrl
-          ?`<a href="${c.mapUrl}" target="_blank"
+          ?`<a href="${c.mapUrl}" target="_blank" rel="noopener noreferrer"
               style="display:inline-flex;align-items:center;gap:6px;padding:6px 12px;background:var(--bg2);border-radius:20px;font-size:12px;font-weight:600;text-decoration:none;color:var(--text)">
               📍 Haritada Gör
             </a>` : ''}
@@ -6444,7 +6470,7 @@ window.openRace=id=>{
         ${r.imgUrl?`<img src="${r.imgUrl}" alt="${r.name}" width="820" height="430" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:80px">${r.emoji||'\ud83c\udfc6'}</span>`}
       </div>
       <div style="padding:28px">
-        <h1 style="font-size:26px;margin-bottom:10px;font-family:var(--font-head)">${r.name}</h1>
+        <h2 style="font-size:26px;margin-bottom:10px;font-family:var(--font-head)">${r.name}</h1>
         <div class="ev-meta" style="margin-bottom:16px">
           <span class="meta">📅 ${r.date||'—'}</span>
           <span class="meta">📍 ${r.location||'—'}</span>
@@ -6458,7 +6484,7 @@ window.openRace=id=>{
         <div style="background:var(--bg2);border-radius:12px;padding:16px 20px;margin-bottom:20px;border:1px solid var(--border)">
           <h3 style="font-size:14px;font-weight:700;margin-bottom:12px;color:var(--dark2);text-transform:uppercase;letter-spacing:.5px">📋 İletişim & Bilgi</h3>
           <div style="display:flex;flex-direction:column;gap:10px">
-            ${r.website?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="color:var(--or);font-size:16px">🌐</span><a href="${r.website.startsWith('http')?r.website:'https://'+r.website}" target="_blank" style="color:var(--or);font-weight:600;text-decoration:none">${r.website}</a></div>`:''}
+            ${r.website?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="color:var(--or);font-size:16px">🌐</span><a href="${r.website.startsWith('http')?r.website:'https://'+r.website}" target="_blank" rel="noopener noreferrer" style="color:var(--or);font-weight:600;text-decoration:none">${r.website}</a></div>`:''}
             ${r.email?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="font-size:16px">📧</span><a href="mailto:${r.email}" style="color:var(--text)">${r.email}</a></div>`:''}
             ${r.phone?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="font-size:16px">📞</span><a href="tel:${r.phone}" style="color:var(--text)">${r.phone}</a></div>`:''}
             ${r.contact?`<div style="display:flex;align-items:center;gap:10px;font-size:13px"><span style="font-size:16px">ℹ️</span><span style="color:var(--muted2)">${r.contact}</span></div>`:''}
@@ -7213,7 +7239,7 @@ window.openBlog=id=>{
   document.getElementById('blog-detail-content').innerHTML=`
     <div style="width:100%;padding-top:52.5%;border-radius:var(--r);overflow:hidden;margin-bottom:24px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;position:relative">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="820" height="430" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="font-size:70px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">${p.emoji||'\ud83d\udcf0'}</span>`}</div>
     <div style="display:flex;gap:6px;margin-bottom:10px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>
-    <h1 style="font-size:26px;margin-bottom:10px;line-height:1.2">${p.title}</h1>
+    <h2 style="font-size:26px;margin-bottom:10px;line-height:1.2">${p.title}</h2>
     <div style="font-size:12px;color:var(--muted);margin-bottom:20px">✍️ ${p.authorName||'Editör'} · ${p.publishedAt||''}</div>
     <div class="blog-body-content" style="font-size:15px;line-height:1.85;color:var(--text);margin-bottom:24px">${p.body||''}</div>
     <div class="blog-social">
@@ -7697,7 +7723,7 @@ window.syncMasterDrawer=function(){
     // Avatar
     const av=document.getElementById('mdr-avatar');
     if(av){
-      if(cu.photoURL)av.innerHTML=`<img src="${cu.photoURL}" style="width:100%;height:100%;object-fit:cover"/>`;
+      if(cu.photoURL)av.innerHTML=`<img src="${cu.photoURL}" alt="Profil" style="width:100%;height:100%;object-fit:cover"/>`;
       else av.textContent=(cu.name||'U')[0].toUpperCase();
     }
     const nameEl=document.getElementById('mdr-name');
@@ -7897,7 +7923,7 @@ window.raceResultCard = function(r, showDelete) {
       </div>
       <div style="display:flex;flex-direction:column;gap:6px;align-items:flex-end;flex-shrink:0">
         <button onclick="shareRaceResult('${r.id}')" style="background:var(--or);color:#fff;border:none;padding:6px 12px;border-radius:8px;font-size:12px;cursor:pointer;font-weight:600">📤 Paylaş</button>
-        ${r.resultUrl?`<a href="${r.resultUrl}" target="_blank" style="font-size:11px;color:var(--or);text-decoration:none">🔗 Resmi Sonuç</a>`:''}
+        ${r.resultUrl?`<a href="${r.resultUrl}" target="_blank" rel="noopener noreferrer" style="font-size:11px;color:var(--or);text-decoration:none">🔗 Resmi Sonuç</a>`:''}
         ${showDelete?`<button onclick="deleteRaceResult('${r.id}')" style="background:none;border:none;color:#e55;font-size:11px;cursor:pointer;padding:2px">🗑 Sil</button>`:''}
       </div>
     </div>
@@ -8158,7 +8184,7 @@ window.loadAllRaceResults = async function(filterUid) {
             ${window.racePlaceBadge(r.place)}
           </div>
         </div>
-        <div style="font-size:11px;color:var(--muted);margin-top:6px">${r.date?'📅 '+r.date:''} ${r.resultUrl?`<a href="${r.resultUrl}" target="_blank" style="color:var(--or)">🔗 Sonuç</a>`:''}</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:6px">${r.date?'📅 '+r.date:''} ${r.resultUrl?`<a href="${r.resultUrl}" target="_blank" rel="noopener noreferrer" style="color:var(--or)">🔗 Sonuç</a>`:''}</div>
       </div>`).join('');
   } catch(e) { el.innerHTML='<p style="color:var(--muted)">Hata: '+e.message+'</p>'; }
 };
@@ -8862,7 +8888,6 @@ window.openFirsatDetail=id=>{
   // Debug: Görsel kontrolü
   if(!f.imgUrl){
     console.warn('[Fırsat] ⚠️ Bu fırsatta görsel YOK:', f.baslik);
-    console.log('[Fırsat] Fırsat objesi:', f);
   } else {
     console.log('[Fırsat] ✅ Görsel URL:', f.imgUrl);
   }
@@ -8872,10 +8897,10 @@ window.openFirsatDetail=id=>{
   trackFirsatView(f.id);
   document.getElementById('firsat-detail-content').innerHTML=`
     <div class="firsat-detail-hero" style="${f.imgUrl?'':'background:linear-gradient(135deg,#1a0500,#2a0800)'}">
-      ${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="hero-overlay"></div>`:''}
+      ${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik||'Fırsat'}" loading="lazy" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="hero-overlay"></div>`:''}
       <div class="hero-inner" style="position:relative;z-index:1;text-align:center">
         ${f.indirim?`<div style="background:var(--or);color:#fff;padding:6px 16px;border-radius:20px;font-size:15px;font-weight:700;display:inline-block;margin-bottom:12px">${f.indirim} İNDİRİM</div>`:'<div style="font-size:60px;margin-bottom:12px">🎁</div>'}
-        <h1 style="font-size:clamp(20px,3vw,32px);font-weight:700;color:#fff;margin-bottom:8px">${f.baslik}</h1>
+        <h2 style="font-size:clamp(20px,3vw,32px);font-weight:700;color:#fff;margin-bottom:8px">${f.baslik}</h1>
         <p style="color:rgba(255,255,255,.8);font-size:15px">${f.marka||''}</p>
       </div>
     </div>
@@ -8908,7 +8933,7 @@ window.openFirsatDetail=id=>{
                 <button class="kc-btn">📋 Kopyala</button>
               </div>
             `:`<div style="background:var(--bg3);border-radius:8px;padding:12px;margin:14px 0;font-size:13px;color:var(--muted)">Bu fırsat için kod gerekmez.</div>`}
-            ${f.link?`<a href="${f.link}" target="_blank" class="btn btn-or btn-full" style="margin-bottom:8px;display:flex;justify-content:center" onclick="trackFirsatClick('${f.id}')">🌐 ${f.marka} Sitesine Git →</a>`:''}
+            ${f.link?`<a href="${f.link}" target="_blank" rel="noopener noreferrer" class="btn btn-or btn-full" style="margin-bottom:8px;display:flex;justify-content:center" onclick="trackFirsatClick('${f.id}')">🌐 ${f.marka} Sitesine Git →</a>`:''}
             <button class="btn btn-ghost btn-full" onclick="nav('firsatlar')">← Tüm Fırsatlar</button>
             <div class="firsat-views" style="justify-content:center;margin-top:8px">👁 ${(f.views||0)} kez görüntülendi</div>
           `:`
@@ -9195,7 +9220,7 @@ function buildDashboard(){
   document.getElementById('dash-email').textContent=CU.email||'';
   const initials=(CU.name||'U')[0].toUpperCase();
   const av=document.getElementById('dash-avatar');
-  if(CU.photoURL&&av)av.innerHTML=`<img src="${CU.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+  if(CU.photoURL&&av)av.innerHTML=`<img src="${CU.photoURL}" alt="Profil" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
   else if(av)av.textContent=initials;
   const isAdmin=CU.role==='superadmin';const isGrp=CU.role==='groupadmin'||CU.role==='subadmin';
   document.getElementById('dash-role-badge').innerHTML=isAdmin?'<span class="tag tag-or">⭐ Süper Admin</span>':isGrp?'<span class="tag tag-bl">🔑 Grup Admin</span>':'<span class="tag tag-gr">👤 Üye</span>';
@@ -9205,7 +9230,7 @@ function buildDashboard(){
   const drawerRole=document.getElementById('dash-drawer-role');
   if(drawerName)drawerName.textContent=CU.name||CU.email||'Kullanıcı';
   if(drawerAvatar){
-    if(CU.photoURL)drawerAvatar.innerHTML=`<img src="${CU.photoURL}" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
+    if(CU.photoURL)drawerAvatar.innerHTML=`<img src="${CU.photoURL}" alt="Profil" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>`;
     else drawerAvatar.textContent=(CU.name||'U')[0].toUpperCase();
   }
   const roleLabels={superadmin:'⭐ Süper Admin',groupadmin:'🤝 Grup Admin',member:'🏃 Üye'};
@@ -9399,7 +9424,7 @@ async function loadMyClubs(){
         : null
       ) || {name:m.clubName||'Kulüp',city:m.city||'',imgUrl:m.imgUrl||'',id:m.clubId};
       html+=`<div class="card">
-        <div class="card-img" style="height:100px">${club.imgUrl?`<img src="${club.imgUrl}"/>`:'🏃'}</div>
+        <div class="card-img" style="height:100px">${club.imgUrl?`<img src="${club.imgUrl}" alt="${club.name||'Kulüp'}"/>`:'🏃'}</div>
         <div class="card-body">
           <span class="tag tag-gr">${club.city||''}</span>
           <h3 style="margin-bottom:4px">${club.name}</h3>
@@ -9461,7 +9486,7 @@ function imgUploadHtml(id,label,hint){
     <div class="img-upload-area" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDropGeneric(event,'${id}','${id}-preview')">
       <input type="file" accept="image/*" id="${id}" onchange="previewImg(this,'${id}-preview')"/>
       <div style="font-size:12px;color:var(--muted)">📁 Tıkla veya sürükle · ${hint}</div>
-      <img class="img-preview" id="${id}-preview"/>
+      <img class="img-preview" id="${id}-preview" alt=""/>
     </div>
     <input type="text" id="${id.replace('-input','-url')}" placeholder="veya görsel URL..." style="margin-top:6px" oninput="previewFromUrl(this.value,'${id}-preview')"/>
   </div>`;
@@ -9516,7 +9541,7 @@ function renderAdminSection(sec){
           <div class="ai-loading" id="ai-race-status" style="display:none"><div class="spinner"></div><span>AI yarış bilgilerini çözümlüyor...</span></div>
         </div>
 
-        ${imgUploadHtml('ar-img-input','Yarış Görseli','800×500px')+`<img id="ar-img-preview-thumb" src="" style="display:none;max-height:80px;border-radius:8px;margin:6px 0" />`}
+        ${imgUploadHtml('ar-img-input','Yarış Görseli','800×500px')+`<img id="ar-img-preview-thumb" src="" alt="" style="display:none;max-height:80px;border-radius:8px;margin:6px 0" />`}
         <div class="form-row"><div class="form-grp"><label>Yarış Adı</label><input id="ar-name"/></div><div class="form-grp"><label>Tarih</label><input id="ar-date" type="date"/></div></div>
         <div class="form-grp"><label>Konum</label><input id="ar-loc"/></div>
         <div class="form-grp">
@@ -9936,7 +9961,7 @@ window.loadPendingEvents=async()=>{
     snap.forEach(d=>{
       const {id:_,...e}=d.data();
       html+=`<tr>
-        <td style="width:60px">${e.imgUrl?`<img src="${e.imgUrl}" style="width:56px;height:40px;object-fit:cover;border-radius:6px"/>`:'<div style="width:56px;height:40px;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px">'+(e.emoji||'🏃')+'</div>'}</td>
+        <td style="width:60px">${e.imgUrl?`<img src="${e.imgUrl}" alt="${e.title||'Etkinlik'}" loading="lazy" style="width:56px;height:40px;object-fit:cover;border-radius:6px"/>`:'<div style="width:56px;height:40px;background:var(--bg3);border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:20px">'+(e.emoji||'🏃')+'</div>'}</td>
         <td><b>${e.title}</b><br><span style="font-size:10px;color:var(--muted)">${e.cat||''} · ${e.dist||''}</span>${e.desc?`<br><span style="font-size:10px;color:var(--muted)">${(e.desc||'').substring(0,60)}${e.desc.length>60?'...':''}</span>`:''}</td>
         <td><span style="font-size:11px;font-weight:600">${e.clubName||'—'}</span><br><span style="font-size:10px;color:var(--muted)">${e.groupAdminName||'—'}</span></td>
         <td>${e.date||'—'}</td>
@@ -10011,7 +10036,7 @@ function renderBannerSlots(){
       <div class="img-upload-area" ondragover="event.preventDefault();this.classList.add('drag-over')" ondragleave="this.classList.remove('drag-over')" ondrop="handleDropGeneric(event,'bs-file-${i}','bs-file-${i}-preview')">
         <input type="file" accept="image/*" id="bs-file-${i}" onchange="previewImg(this,'bs-file-${i}-preview')"/>
         <div style="font-size:12px;color:var(--muted)">📁 Tıkla veya sürükle · 1440×460px</div>
-        <img class="img-preview" id="bs-file-${i}-preview" ${b?.imgUrl?`src="${b.imgUrl}" style="display:block"`:''}/>
+        <img class="img-preview" id="bs-file-${i}-preview" ${b?.imgUrl?`src="${b.imgUrl}" alt="${b.title||'Blog'}" loading="lazy" style="display:block"`:''}/>
       </div>
       <div class="form-grp" style="margin-top:8px"><label>Görsel URL</label><input type="text" id="bs-imgurl-${i}" value="${b?.imgUrl||''}" placeholder="https://" oninput="previewFromUrl(this.value,'bs-file-${i}-preview')"/></div>
       <div class="form-row">
@@ -10204,7 +10229,7 @@ function renderGroupSection(sec){
           <div class="img-upload-area" onclick="document.getElementById('ge-img-file').click()" style="cursor:pointer;position:relative">
             <input type="file" id="ge-img-file" accept="image/*" style="display:none" onchange="gPreviewEventImg(this)"/>
             <div id="ge-img-placeholder" style="font-size:12px;color:var(--muted);padding:8px 0">📷 Galeriden görsel seç (opsiyonel)</div>
-            <img id="ge-img-preview" style="display:none;width:100%;max-height:140px;object-fit:cover;border-radius:6px;margin-top:8px"/>
+            <img id="ge-img-preview" alt="" style="display:none;width:100%;max-height:140px;object-fit:cover;border-radius:6px;margin-top:8px"/>
           </div>
           <input type="text" id="ge-img-url" placeholder="veya görsel URL gir..." style="margin-top:6px;font-size:12px" oninput="gPreviewEventUrl(this.value)"/>
         </div>
@@ -10456,12 +10481,12 @@ window.gPreviewLogo=function(input){
   const file=input.files[0];if(!file)return;
   const prev=document.getElementById('gs-logo-preview');
   const reader=new FileReader();
-  reader.onload=e=>{if(prev)prev.innerHTML=`<img src="${e.target.result}" style="width:100%;height:100%;object-fit:cover"/>`;};
+  reader.onload=e=>{if(prev)prev.innerHTML=`<img src="${e.target.result}" alt="Yüklenen görsel" style="width:100%;height:100%;object-fit:cover"/>`;};
   reader.readAsDataURL(file);
 };
 window.gPreviewLogoUrl=function(url){
   const prev=document.getElementById('gs-logo-preview');
-  if(prev)prev.innerHTML=url?`<img src="${url}" style="width:100%;height:100%;object-fit:cover"/>`:'🏃';
+  if(prev)prev.innerHTML=url?`<img src="${url}" alt="Görsel önizleme" style="width:100%;height:100%;object-fit:cover"/>`:'🏃';
 };
 
 window.
@@ -10581,7 +10606,7 @@ window.gSaveSettings=async()=>{
     toast('Kulüp bilgileri güncellendi ✓','ok');
     // Logo preview güncelle
     const prev=document.getElementById('gs-logo-preview');
-    if(prev&&clubImg)prev.innerHTML=`<img src="${clubImg}" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>`;
+    if(prev&&clubImg)prev.innerHTML=`<img src="${clubImg}" alt="Kulüp görseli" style="width:100%;height:100%;object-fit:cover;border-radius:12px"/>`;
     // Kulüpler listesini yenile
     if(window.renderClubsPage){
       window.CLUBS=[];
@@ -11398,7 +11423,7 @@ function renderPageBanner(page){
     </div>
     <div class="pb-content container">
       ${d.badge||def.badge?`<div class="pb-badge">${d.badge||def.badge}</div>`:''}
-      <h1>${d.title||def.title}</h1>
+      <h2>${d.title||def.title}</h1>
       <p class="pb-sub">${d.subtitle||def.subtitle||''}</p>
       ${stats?`<div class="pb-stats">${stats}</div>`:''}
       ${(d.ctaText||def.ctaText)?`<div class="pb-cta"><button class="btn btn-or" onclick="if(window._pbCtaUrl)window.open(window._pbCtaUrl)">${d.ctaText||def.ctaText}</button><button class="btn btn-ghost" style="color:#fff;border-color:rgba(255,255,255,.3)" onclick="nav('home')">Ana Sayfa</button></div>`:''}
@@ -11428,7 +11453,7 @@ function renderPageBannerAdmin(){
       <div class="img-upload-area" ondragover="event.preventDefault()" ondrop="handleDropGeneric(event,'pb-file-${page}','pb-prev-${page}')">
         <input type="file" accept="image/*" id="pb-file-${page}" onchange="previewImg(this,'pb-prev-${page}')"/>
         <div style="font-size:12px;color:var(--muted)">📁 Banner görseli yükle · Önerilen: 1440×320px</div>
-        <img class="img-preview" id="pb-prev-${page}" ${b?.imgUrl?`src="${b.imgUrl}" style="display:block"`:''}/>
+        <img class="img-preview" id="pb-prev-${page}" ${b?.imgUrl?`src="${b.imgUrl}" alt="${b.title||'Blog'}" loading="lazy" style="display:block"`:''}/>
       </div>
       <div class="form-grp" style="margin-top:10px"><label>Görsel URL</label><input type="text" id="pb-imgurl-${page}" value="${b?.imgUrl||''}" placeholder="https://..."/></div>
       <div class="form-grp"><label>Rozet Metni</label><input type="text" id="pb-badge-${page}" value="${b?.badge||''}" placeholder="örn: 📅 Etkinlikler"/></div>
@@ -11469,18 +11494,18 @@ function renderSinglePageBannerAdmin(page){
       </div>
       ${b?`<button class="btn btn-red btn-sm" onclick="clearPageBanner('${page}')">🗑 Sil</button>`:''}
     </div>
-    ${b?.imgUrl?`<div style="height:120px;border-radius:10px;overflow:hidden;margin-bottom:14px;position:relative"><img src="${b.imgUrl}" style="width:100%;height:100%;object-fit:cover"/><div style="position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:12px;font-family:'Raleway',sans-serif">Mevcut Banner Görseli</span></div></div>`:''}
+    ${b?.imgUrl?`<div style="height:120px;border-radius:10px;overflow:hidden;margin-bottom:14px;position:relative"><img src="${b.imgUrl}" alt="${b.title||'Blog'}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/><div style="position:absolute;inset:0;background:rgba(0,0,0,.4);display:flex;align-items:center;justify-content:center"><span style="color:#fff;font-size:12px;font-family:'Raleway',sans-serif">Mevcut Banner Görseli</span></div></div>`:''}
     <div class="img-upload-area" ondragover="event.preventDefault()" ondrop="handleDropGeneric(event,'pb-file-${page}','pb-prev-${page}')">
       <input type="file" accept="image/*" id="pb-file-${page}" onchange="previewImg(this,'pb-prev-${page}')"/>
       <div style="font-size:12px;color:var(--muted)">📁 Banner görseli yükle · Önerilen: 1440×320px</div>
-      <img class="img-preview" id="pb-prev-${page}"/>
+      <img class="img-preview" id="pb-prev-${page}" alt=""/>
     </div>
     <div class="form-grp" style="margin-top:10px"><label>İçerik Metni <span style="font-size:10px;color:var(--muted)">(opsiyonel)</span></label><textarea id="pb-body-${page}" rows="3" placeholder="Banner altına ek metin...">${b?.body||''}</textarea></div>
     <div class="form-grp"><label>Görsel URL (Masaüstü)</label><input type="text" id="pb-imgurl-${page}" value="${b?.imgUrl||''}" placeholder="https://..."/></div>
     <div class="form-grp"><label>📱 Mobil Görsel URL <span style="font-size:10px;color:var(--muted)">(max 768px — boş kalırsa masaüstü kullanılır)</span></label>
       <input type="file" accept="image/*" id="pb-mobile-file-${page}" style="margin-bottom:6px" onchange="previewImg(this,'pb-mobile-prev-${page}')"/>
       <input type="text" id="pb-mobileurl-${page}" value="${b?.mobileImageUrl||''}" placeholder="https://..."/>
-      <img class="img-preview" id="pb-mobile-prev-${page}" ${`${b?.mobileImageUrl||''}`?`src="${b?.mobileImageUrl}" style="display:block;max-height:70px;border-radius:6px;margin-top:6px"`:''}/>
+      <img alt="" class="img-preview" id="pb-mobile-prev-${page}" ${`${b?.mobileImageUrl||''}`?`src="${b?.mobileImageUrl}" style="display:block;max-height:70px;border-radius:6px;margin-top:6px"`:''}/>
     </div>
     <div class="form-grp"><label>Rozet Metni</label><input type="text" id="pb-badge-${page}" value="${b?.badge||''}" placeholder="örn: 📅 Etkinlikler"/></div>
     <div class="form-row">
@@ -11580,7 +11605,7 @@ const LEGAL={
   riza:{title:'Açık Rıza Metni',content:`<h2>Açık Rıza Beyanı</h2><p>E-posta, telefon ve koşu verilerimin bildirim ve analiz amaçlı işlenmesine rıza veriyorum.</p>`},
   cerez:{title:'Çerez Politikası',content:`<h2>Çerezler</h2><p>Oturum, tercih ve analitik çerezler kullanılmaktadır.</p>`}
 };
-window.renderLegalPage=key=>{const d=LEGAL[key];if(!d)return;const el=document.getElementById('legal-'+key);if(el)el.innerHTML=`<div style="max-width:800px;margin:0 auto"><button class="btn btn-ghost btn-sm" onclick="nav('home')" style="margin-bottom:20px">← Geri</button><h1 style="margin-bottom:6px">${d.title}</h1><p style="color:var(--muted);font-size:13px;margin-bottom:24px">Son güncelleme: Mart 2025</p>${d.content}</div>`;};
+window.renderLegalPage=key=>{const d=LEGAL[key];if(!d)return;const el=document.getElementById('legal-'+key);if(el)el.innerHTML=`<div style="max-width:800px;margin:0 auto"><button class="btn btn-ghost btn-sm" onclick="nav('home')" style="margin-bottom:20px">← Geri</button><h2 style="margin-bottom:6px">${d.title}</h1><p style="color:var(--muted);font-size:13px;margin-bottom:24px">Son güncelleme: Mart 2025</p>${d.content}</div>`;};
 
 // ── TOAST / NOTIF ──
 window.toast=(msg,type='')=>{const t=document.getElementById('toast');t.textContent=msg;t.className=type==='ok'?'on ok':type==='err'?'on err':type==='info'?'on info':'on';setTimeout(()=>t.classList.remove('on'),3500);};
@@ -11634,7 +11659,7 @@ window.loadCommunityPage = async function() {
     // Kullanıcı avatarını ayarla
     const myAv = document.getElementById('comm-my-avatar');
     if(myAv) myAv.innerHTML = window.CU.photoURL
-      ? '<img src="'+window.CU.photoURL+'" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>'
+      ? '<img src="'+window.CU.photoURL+'" alt="Profil" style="width:100%;height:100%;border-radius:50%;object-fit:cover"/>'
       : (window.CU.displayName||'?')[0].toUpperCase();
   } else {
     if(createWrap)  createWrap.style.display  = 'none';
@@ -11695,7 +11720,7 @@ function renderPostCard(p) {
   const ts  = p.createdAt?.seconds ? new Date(p.createdAt.seconds*1000) : (p.createdAtMs ? new Date(p.createdAtMs) : new Date());
   const ago = timeAgo(ts);
   const av  = p.userPhoto
-    ? '<img src="'+p.userPhoto+'" style="width:100%;height:100%;object-fit:cover"/>'
+    ? '<img src="'+p.userPhoto+'" alt="Kullanıcı" style="width:100%;height:100%;object-fit:cover"/>'
     : (p.userName||'K')[0].toUpperCase();
   const typeLabel = {text:'💬 Yazı', run:'🏃 Koşu', photo:'📸 Fotoğraf'}[p.type]||'💬';
   const liked = window.CU && (p.likes||[]).includes(window.CU.uid);
@@ -11712,7 +11737,7 @@ function renderPostCard(p) {
       +(p.runData.pace?'<div class="comm-run-stat"><span>'+p.runData.pace+'</span><span>dk/km</span></div>':'')
       +'</div>';
   }
-  if(p.photoUrl) body += '<img class="comm-post-img" src="'+p.photoUrl+'" loading="lazy"/>';
+  if(p.photoUrl) body += '<img class="comm-post-img" src="'+p.photoUrl+'" alt="Kullanıcı" loading="lazy"/>';
 
   const ownerBtns = (isOwner || isSA)
     ? '<button class="comm-action-btn" data-pid="'+pid+'" data-txt="'+escHtml(p.text||'')+'" onclick="editPost(this.dataset.pid,this.dataset.txt)" title="Düzenle">✏️</button>'
@@ -12051,7 +12076,7 @@ window.loadActiveUsers = async function() {
       (function(u2){
         const nm = u2.displayName||'Koşucu';
         return '<div class="comm-active-avatar" title="'+nm+'" data-nm="'+nm+'" onclick="toast(this.dataset.nm,\'info\')" >'
-          +(u2.photoURL ? '<img src="'+u2.photoURL+'" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>'
+          +(u2.photoURL ? '<img src="'+u2.photoURL+'" alt="Kullanıcı" style="width:100%;height:100%;object-fit:cover;border-radius:50%"/>'
                         : nm[0].toUpperCase())
           +'</div>';
       })(u)
@@ -12097,7 +12122,7 @@ window.loadTopClubs = function() {
     return;
   }
   el.innerHTML = clubs.map(c => {
-    const img = c.imgUrl ? '<img src="'+c.imgUrl+'" style="width:100%;height:100%;object-fit:cover"/>' : '🏃';
+    const img = c.imgUrl ? '<img src="'+c.imgUrl+'" alt="Kulüp" style="width:100%;height:100%;object-fit:cover"/>' : '🏃';
     return '<div class="comm-club-row" onclick="nav(\'clubs\')">'
       +'<div class="comm-club-icon">'+img+'</div>'
       +'<div class="comm-club-info"><div class="comm-club-name">'+escHtml(c.name||'Kulüp')+'</div>'
@@ -13425,6 +13450,134 @@ if(_origRHD){
     },400);
   };
 }
+
+// ── SportsEvent Schema.org (SEO) ──────────────────────────
+window.injectRaceSchema = function(r) {
+  var existing = document.getElementById('race-schema-ld');
+  if (existing) existing.remove();
+  if (!r || !r.name) return;
+  var schema = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": r.name,
+    "startDate": r.date || "",
+    "location": {
+      "@type": "Place",
+      "name": r.location || "Türkiye",
+      "address": {"@type": "PostalAddress", "addressCountry": "TR", "addressLocality": r.location || ""}
+    },
+    "organizer": {"@type": "Organization", "name": "RunClubTürkiye", "url": "https://www.runclubturkiye.com"},
+    "sport": "Running",
+    "url": r.website || ("https://www.runclubturkiye.com/yaris/" + (r.id || ""))
+  };
+  if (r.distance) schema.description = r.distance + " koşu yarışı — " + (r.location || "Türkiye");
+  var el = document.createElement('script');
+  el.id = 'race-schema-ld';
+  el.type = 'application/ld+json';
+  el.textContent = JSON.stringify(schema);
+  document.head.appendChild(el);
+};
+
+// openRace tetiklenince schema inject et
+var _origOpenRace = window.openRace;
+if (_origOpenRace) {
+  window.openRace = function(id) {
+    _origOpenRace(id);
+    setTimeout(function() {
+      var r = (window.RACES || []).find(function(x) { return x.id === id; });
+      if (r) window.injectRaceSchema(r);
+    }, 200);
+  };
+}
+
+// Event schema
+window.injectEventSchema = function(e) {
+  var existing = document.getElementById('event-schema-ld');
+  if (existing) existing.remove();
+  if (!e || !e.title) return;
+  var schema = {
+    "@context": "https://schema.org",
+    "@type": "SportsEvent",
+    "name": e.title,
+    "startDate": e.date || "",
+    "location": {"@type": "Place", "name": e.location || e.city || "Türkiye"},
+    "organizer": {"@type": "Organization", "name": e.clubName || "RunClubTürkiye"},
+    "sport": "Running",
+    "description": e.description || (e.title + " koşu etkinliği")
+  };
+  var el = document.createElement('script');
+  el.id = 'event-schema-ld';
+  el.type = 'application/ld+json';
+  el.textContent = JSON.stringify(schema);
+  document.head.appendChild(el);
+};
+
+// ═══ GLOBAL ERROR BOUNDARY ═══════════════════════════════
+(function() {
+  var _errCount = 0;
+  var _lastErr = 0;
+  var _ignorePatterns = [
+    'ResizeObserver', 'Non-Error', 'ChunkLoadError',
+    'Loading chunk', 'Script error', 'Extension context',
+    'blocked by CORS', 'FCM', 'firebase'
+  ];
+
+  function shouldIgnore(msg) {
+    if (!msg) return true;
+    return _ignorePatterns.some(function(p) { return msg.indexOf(p) > -1; });
+  }
+
+  function showErrorBoundary(msg, retry) {
+    var now = Date.now();
+    if (now - _lastErr < 3000) return; // debounce
+    _lastErr = now;
+    _errCount++;
+    if (_errCount > 3) return; // max 3 kez göster
+
+    var el = document.getElementById('error-boundary');
+    if (!el) return;
+
+    var friendly = 'Bir sorun oluştu. Sayfayı yenileyerek tekrar deneyin.';
+    if (msg && msg.indexOf('NetworkError') > -1) friendly = 'İnternet bağlantısı kesildi. Kontrol edip tekrar deneyin.';
+    else if (msg && msg.indexOf('Firebase') > -1) friendly = 'Veri yüklenirken sorun oluştu. Lütfen bekleyin.';
+    else if (msg && msg.indexOf('permission') > -1) friendly = 'Bu işlem için yetkiniz yok.';
+
+    el.querySelector('p').textContent = friendly;
+    el.classList.add('show');
+
+    var retryBtn = el.querySelector('.err-retry');
+    if (retryBtn) {
+      retryBtn.onclick = function() {
+        el.classList.remove('show');
+        if (retry) retry(); else location.reload();
+      };
+    }
+    setTimeout(function() { el.classList.remove('show'); }, 8000);
+  }
+
+  window.showErrorBoundary = showErrorBoundary;
+
+  window.onerror = function(msg, src, line, col, err) {
+    if (shouldIgnore(String(msg))) return false;
+    showErrorBoundary(String(msg));
+    return false;
+  };
+
+  window.addEventListener('unhandledrejection', function(e) {
+    var msg = e.reason ? String(e.reason.message || e.reason) : '';
+    if (shouldIgnore(msg)) return;
+    showErrorBoundary(msg);
+  });
+})();
+
+document.addEventListener('click',function(e){
+  if(e.target.classList.contains('err-dismiss')){
+    var eb=document.getElementById('error-boundary');
+    if(eb)eb.classList.remove('show');
+  }
+});
 </script>
+
+<div id="error-boundary"><h4>Bir Sorun Olustu</h4><p>Bir sorun olustu. Sayfayi yenileyerek tekrar deneyin.</p><div class="err-btns"><button class="err-retry">Yenile</button><button class="err-dismiss">Kapat</button></div></div>
 </body>
 </html>

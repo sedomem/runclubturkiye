@@ -4215,6 +4215,7 @@ function showAiBlogManualMode(){
 // ── BLOG ──
 window.saveBlogFromAdmin=async()=>{
   const editId=document.getElementById('ab-edit-id')?.value||'';
+  const _blogTitleForSlug=document.getElementById('ab-title')?.value||'';
   const imgInput=document.getElementById('ab-img-input');
   let coverUrl=document.getElementById('ab-img-url')?.value||'';
   if(!coverUrl&&imgInput?.files[0])coverUrl=await handleImgUpload(imgInput,'blog')||'';
@@ -4295,7 +4296,7 @@ window.saveBannerFromAdmin=async(slotIdx)=>{
   if(!imgUrl&&imgInput?.files[0])imgUrl=await handleImgUpload(imgInput,'banners')||'';
   const title=document.getElementById(`bs-title-${slotIdx}`)?.value||'';
   if(!imgUrl&&!title){toast('Görsel veya başlık girin','err');return;}
-  const data={imgUrl,title,subtitle:document.getElementById(`bs-sub-${slotIdx}`)?.value||'',ctaText:document.getElementById(`bs-cta-${slotIdx}`)?.value||'',ctaUrl:document.getElementById(`bs-url-${slotIdx}`)?.value||'',order:slotIdx,active:true};
+  const data={imgUrl,title,slug:(typeof window.makeSlug==='function'?window.makeSlug(title):title.toLowerCase().replace(/[^a-z0-9]+/g,'-')),subtitle:document.getElementById(`bs-sub-${slotIdx}`)?.value||'',ctaText:document.getElementById(`bs-cta-${slotIdx}`)?.value||'',ctaUrl:document.getElementById(`bs-url-${slotIdx}`)?.value||'',order:slotIdx,active:true};
   window.BANNER_SLOTS[slotIdx]=data;
   try{await setDoc(doc(db,'banners','slot'+slotIdx),{...data,updatedAt:serverTimestamp()});}catch(e){}
   toast(`Ana Sayfa Banner ${slotIdx+1} kaydedildi ✓`,'ok');loadBannersFromSlots();renderBannerSlots();
@@ -4871,6 +4872,21 @@ loadAllFromDB();
 </script>
 
 <script>
+// ═══ SEO URL SLUG SİSTEMİ ═══════════════════════════════════
+window.makeSlug = function(text) {
+  if (!text) return '';
+  var tr = {'ş':'s','ğ':'g','ü':'u','ö':'o','ı':'i','ç':'c',
+            'Ş':'s','Ğ':'g','Ü':'u','Ö':'o','İ':'i','Ç':'c'};
+  return text
+    .split('').map(function(c){return tr[c]||c;}).join('')
+    .toLowerCase()
+    .replace(/[^a-z0-9\s-]/g, '')
+    .trim()
+    .replace(/[\s_]+/g, '-')
+    .replace(/-+/g, '-')
+    .slice(0, 80);
+};
+
 // ── LOCAL DATA ──
 // ── LOCAL FALLBACK DATA (Firestore boşsa gösterilir) ──
 window.EVENTS=[];
@@ -5873,8 +5889,30 @@ function routerInit(){
     {prefix:'/yaris/',    listNav:'races',      openFn: id=>{
       if(typeof window.openRace!=='function'){console.error('[Router] openRace henüz yüklenmedi');return;}
       const tryOpen=()=>{const r=window.RACES&&window.RACES.find(x=>x.id===id||x.slug===id);if(r){window.openRace(r.id);}else if(window.loadRacesFromDB){window.loadRacesFromDB().then(()=>{const r2=window.RACES&&window.RACES.find(x=>x.id===id||x.slug===id);if(r2)window.openRace(r2.id);});}};tryOpen();}},
-    {prefix:'/kulup/',    listNav:'clubs',      openFn: id=>{window.nav('clubs');setTimeout(()=>window.openClub&&window.openClub(id),400);}},
-    {prefix:'/firsat/',   listNav:'firsatlar',  openFn: id=>{window.nav('firsatlar');setTimeout(()=>window.openFirsatDetail&&window.openFirsatDetail(id),400);}},
+    {prefix:'/kulup/',    listNav:'clubs',      openFn: id=>{
+      window.nav('clubs');
+      const tryClub=(attempt)=>{
+        const found=(window.CLUBS||[]).find(c=>c.slug===id||c.id===id);
+        if(found){window.openClub&&window.openClub(found.id);return;}
+        if(attempt<5)setTimeout(()=>tryClub(attempt+1),400);
+        else if(window.loadClubsFromDB){
+          window.loadClubsFromDB().then(()=>{
+            const c2=(window.CLUBS||[]).find(c=>c.slug===id||c.id===id);
+            if(c2)window.openClub&&window.openClub(c2.id);
+          });
+        }
+      };
+      setTimeout(()=>tryClub(0),250);
+    }},
+    {prefix:'/firsat/',   listNav:'firsatlar',  openFn: id=>{
+      window.nav('firsatlar');
+      const tryFirsat=(attempt)=>{
+        const found=(window.FIRSATLAR||[]).find(f=>f.slug===id||f.id===id);
+        if(found){window.openFirsatDetail&&window.openFirsatDetail(found.id);return;}
+        if(attempt<5)setTimeout(()=>tryFirsat(attempt+1),400);
+      };
+      setTimeout(()=>tryFirsat(0),250);
+    }},
   ];
   for(const {prefix,listNav,openFn} of prefixMap){
     if(path.startsWith(prefix)){
@@ -6357,7 +6395,7 @@ window.openClub=async(id)=>{
   if(typeof window.renderClubTrainings==='function') window.renderClubTrainings(c.id);
   if(typeof window.renderClubPublicEvents==='function') window.renderClubPublicEvents(c.id);
   if(typeof window.renderClubRaces==='function') window.renderClubRaces(c.id);
-  if(typeof routerPush==='function')routerPush('club-detail', c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
+  if(typeof routerPush==='function')routerPush('club-detail', c.slug||c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
 };
 
 window.renderClubPublicEvents = async function(clubId) {
@@ -7200,6 +7238,8 @@ window.addDiscRace = async function(){
     const r = await fb.addDoc(fb.collection(fb.db,'races'), {
       name, date: date||'', location: loc||'',
       fee, regDeadline, distance,
+      slug: typeof window.makeSlug==='function'?window.makeSlug(name):'',
+
       userId: window.CU.uid,
       report: { parkurPuan, orgPuan, teknik, ozet },
       slug: name.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''),
@@ -8470,10 +8510,12 @@ window.gasSaveClubProfile=async function(){
   if(statusEl)statusEl.textContent="⏳ Kaydediliyor...";
   var fb=window._fb;
   var g=function(id){var el=document.getElementById(id);return el?el.value.trim():"";};
+  var clubNameForSlug=g("ga-club-name")||(window.CU&&window.CU.clubName)||'';
   var updateData={
     desc:     g("ga-club-desc"),
     category: g("ga-club-cat"),
-    timezone: g("ga-club-tz")||"Europe/Istanbul",
+    timezone: g("ga-club-tz"),
+    slug: (typeof window.makeSlug==='function'&&clubNameForSlug?window.makeSlug(clubNameForSlug):undefined)||"Europe/Istanbul",
     socialLinks:{
       instagram: g("ga-club-insta"),
       linkedin:  g("ga-club-linkedin"),
@@ -10059,7 +10101,9 @@ window.saveClubEdit=async()=>{
   const imgInput=document.getElementById('edit-club-img');
   let imgUrl=document.getElementById('edit-club-imgurl').value||'';
   if(!imgUrl&&imgInput?.files[0]&&window.handleImgUpload)imgUrl=await window.handleImgUpload(imgInput,'clubs')||'';
-  const data={name:document.getElementById('edit-club-name').value,city:document.getElementById('edit-club-city').value,desc:document.getElementById('edit-club-desc').value,imgUrl,open:document.getElementById('edit-club-open').value==='true'};
+  const _clubName=document.getElementById('edit-club-name').value;
+  const _clubSlug=typeof window.makeSlug==='function'?window.makeSlug(_clubName)+'-'+Date.now().toString(36):''+Date.now().toString(36);
+  const data={name:_clubName,city:document.getElementById('edit-club-city').value,desc:document.getElementById('edit-club-desc').value,imgUrl,open:document.getElementById('edit-club-open').value==='true',slug:_clubSlug};
   try{
     if(id){
       // Firestore'da clubs koleksiyonuna yaz
@@ -10106,7 +10150,7 @@ window.saveEventEdit=async()=>{
       await fb.setDoc(fb.doc(fb.db,'events',id),{...data,updatedAt:fb.serverTimestamp()},{merge:true});
       const e=EVENTS.find(x=>x.id===id);if(e)Object.assign(e,data);
     }else{
-      const {id:_eid,...dataNoId}=data;const r=await fb.addDoc(fb.collection(fb.db,'events'),{...dataNoId,reg:0,createdAt:fb.serverTimestamp()});
+      const {id:_eid,...dataNoId}=data;const r=await fb.addDoc(fb.collection(fb.db,'events'),{...dataNoId,slug:(typeof window.makeSlug==='function'&&dataNoId.title?window.makeSlug(dataNoId.title):''),reg:0,createdAt:fb.serverTimestamp()});
       EVENTS.unshift({id:r.id,reg:0,...data});
     }
     closeModal('edit-event-modal');toast('Kaydedildi ✓','ok');
@@ -13354,6 +13398,7 @@ window.saveFirsatFromAdmin=async function(){
       aciklama:aciklama||"",kod:kod||"",bitis:bitis||"",link:link||"",
       imgUrl,aktif:true,views:0,clicks:0,createdAt:fb.serverTimestamp()};
     var {id:_,...dataNoId}=data;
+    if(typeof window.makeSlug==='function'&&!dataNoId.slug)dataNoId.slug=window.makeSlug(baslik);
     await fb.addDoc(fb.collection(fb.db,"firsatlar"),dataNoId);
     toast("Fırsat eklendi ✓","ok");
     // Form temizle

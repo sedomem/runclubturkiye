@@ -1,0 +1,3 @@
+# Cloudflare Pages — SPA fallback routing
+# Tüm URL'ler index.html'e yönlendirilir (SPA router üstlenir)
+/*    /index.html   200

@@ -1319,6 +1319,55 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .firsat-views{font-size:11px;color:var(--muted);display:flex;align-items:center;gap:4px;margin-top:6px}
 .gated-blur{filter:blur(5px);user-select:none;pointer-events:none}
 .gated-overlay{background:linear-gradient(to bottom,transparent 0%,var(--card) 40%);position:absolute;inset:0;display:flex;align-items:flex-end;justify-content:center;padding-bottom:20px}
+
+/* ═══ ANA SAYFA MODERNİZASYON ═══ */
+#hero-banner{background:linear-gradient(135deg,#1a0500 0%,#2d0e00 50%,#1a0500 100%)}
+#hero-cta-bar{background:linear-gradient(90deg,rgba(232,98,42,.1),transparent);border-bottom:1px solid rgba(232,98,42,.15);padding:14px 0;display:none}
+#hero-cta-bar .container{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px}
+#hero-cta-bar h2{margin:0;font-size:16px;font-weight:700;color:var(--text)}
+#hero-cta-bar p{margin:0;font-size:13px;color:var(--muted)}
+.hero-cta-btns{display:flex;gap:8px;flex-wrap:wrap}
+.impact-bar{background:var(--dark);padding:18px 0;border-top:1px solid rgba(232,98,42,.2);border-bottom:1px solid rgba(232,98,42,.2)}
+.impact-bar .how-stats{margin-top:0;padding-top:0;border-top:none}
+.impact-bar .how-stat-n{color:var(--or)}
+.impact-bar .how-stat-l{color:rgba(255,255,255,.7)}
+.impact-bar .how-stat-div{background:rgba(255,255,255,.15)}
+@media(max-width:768px){
+  .scroll-row{display:flex!important;overflow-x:auto;gap:12px;padding-bottom:10px;-webkit-overflow-scrolling:touch;scrollbar-width:none;scroll-snap-type:x mandatory;grid-template-columns:none!important}
+  .scroll-row::-webkit-scrollbar{display:none}
+  .scroll-row .ev-card,.scroll-row .race-card,.scroll-row .blog-card,.scroll-row .firsat-card,.scroll-row .card{flex:0 0 280px!important;scroll-snap-align:start;min-width:0}
+  .scroll-row [class*="club"]{flex:0 0 200px!important;scroll-snap-align:start}
+  .scroll-dots{display:flex;justify-content:center;gap:6px;margin-top:10px}
+  .scroll-dot{width:6px;height:6px;border-radius:50%;background:var(--border);transition:all .2s}
+  .scroll-dot.active{background:var(--or);width:18px;border-radius:4px}
+  #hero-banner{height:320px}
+  #hero-cta-bar .container{flex-direction:column;align-items:flex-start}
+  .hero-cta-btns{width:100%}
+  #home-footer-cta{padding:48px 0}
+  .footer-cta-btns{flex-direction:column;align-items:center}
+  .footer-cta-btns .btn-white,.footer-cta-btns .btn-outline-white{width:100%;max-width:300px}
+}
+.fade-up{opacity:0;transform:translateY(24px);transition:opacity .65s ease,transform .65s ease}
+.fade-up.visible{opacity:1;transform:translateY(0)}
+.sec-head h2{position:relative;padding-left:14px}
+.sec-head h2::before{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:4px;height:70%;border-radius:2px;background:var(--or)}
+.ev-card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.ev-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(232,98,42,.15);border-color:var(--or)}
+.blog-card{transition:transform .2s ease,box-shadow .2s ease,border-color .2s ease}
+.blog-card:hover{transform:translateY(-4px);box-shadow:0 12px 28px rgba(16,185,129,.12);border-color:#10b981}
+.sec-sep{height:1px;background:linear-gradient(90deg,transparent,var(--border),transparent);border:none;margin:0}
+#home-footer-cta{background:linear-gradient(135deg,#1a0500,#2d0e00);padding:64px 0;text-align:center;position:relative;overflow:hidden}
+#home-footer-cta h2{font-size:clamp(22px,4vw,36px);font-weight:900;color:#fff;margin:0 0 12px;font-family:var(--font-head);letter-spacing:-.5px}
+#home-footer-cta p{color:rgba(255,255,255,.72);font-size:15px;margin:0 0 28px;max-width:460px;margin-left:auto;margin-right:auto;line-height:1.7}
+.footer-cta-btns{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-bottom:20px}
+.btn-white{background:#fff;color:var(--or);font-weight:800;padding:14px 32px;border-radius:12px;font-size:15px;border:none;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.btn-white:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(255,255,255,.2)}
+.btn-outline-white{background:transparent;color:#fff;font-weight:700;padding:14px 32px;border-radius:12px;font-size:15px;border:2px solid rgba(255,255,255,.4);cursor:pointer;transition:all .2s}
+.btn-outline-white:hover{border-color:#fff;background:rgba(255,255,255,.1)}
+.footer-cta-trust{display:flex;gap:20px;justify-content:center;flex-wrap:wrap;font-size:13px;color:rgba(255,255,255,.5)}
+.footer-cta-trust span{display:flex;align-items:center;gap:5px}
+.how-step{transition:transform .2s}
+.how-step:hover{transform:translateY(-4px)}
 </style>
 </head>
 <body>
@@ -1508,6 +1557,30 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     <div class="banner-dots" id="banner-dots"></div>
     <div id="banner-slides"></div>
   </div>
+  <!-- HERO CTA BAR -->
+  <div id="hero-cta-bar">
+    <div class="container">
+      <div><h2>Türkiyenin Kosu Toplulugu</h2><p>250+ kulüp - 12.000+ sporcu - 450+ etkinlik</p></div>
+      <div class="hero-cta-btns">
+        <button class="btn btn-or" onclick="nav('clubs')" style="font-weight:700">Kulüp Bul</button>
+        <button class="btn btn-ghost" onclick="nav('events')">Etkinliklere Katil</button>
+      </div>
+    </div>
+  </div>
+  <!-- IMPACT STATS BAR -->
+  <div class="impact-bar">
+    <div class="container"><div class="how-stats">
+      <div class="how-stat"><span class="how-stat-n" id="impact-clubs">250+</span><span class="how-stat-l">Kulüp</span></div>
+      <div class="how-stat-div"></div>
+      <div class="how-stat"><span class="how-stat-n" id="impact-members">12K+</span><span class="how-stat-l">Sporcu</span></div>
+      <div class="how-stat-div"></div>
+      <div class="how-stat"><span class="how-stat-n">450+</span><span class="how-stat-l">Etkinlik</span></div>
+      <div class="how-stat-div"></div>
+      <div class="how-stat"><span class="how-stat-n">81</span><span class="how-stat-l">Il</span></div>
+      <div class="how-stat-div"></div>
+      <div class="how-stat"><span class="how-stat-n">100</span><span class="how-stat-l">Ucretsiz</span></div>
+    </div></div>
+  </div>
   <!-- KAYAN YAZI ŞERİDİ -->
   <div id="ticker-wrap">
     <div class="ticker-track" id="ticker-track"></div>
@@ -1520,22 +1593,22 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
       </div>
       <button class="btn btn-or" onclick="nav('events')" style="font-weight:600">Tüm Etkinlikleri Gör →</button>
     </div>
-    <div class="grid g2" id="home-events"></div>
+    <div class="grid g2 scroll-row" id="home-events"></div>
   </div></div>
-  <div class="divider"></div>
+  <div class="sec-sep"></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Popüler Kulüpler<span class="sec-sub">Şehrindeki aktif koşu grupları</span></h2><button class="btn btn-ghost btn-sm" onclick="nav('clubs')">Tümünü Gör →</button></div>
-    <div class="grid g4" id="home-clubs"></div>
+    <div class="grid g4 scroll-row" id="home-clubs"></div>
   </div></div>
-  <div class="divider"></div>
+  <div class="sec-sep"></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Yaklaşan Yarışlar<span class="sec-sub">Maraton, trail ve yol koşuları</span></h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
-    <div class="grid g4" id="home-races"></div>
+    <div class="grid g4 scroll-row" id="home-races"></div>
   </div></div>
-  <div class="divider"></div>
+  <div class="sec-sep"></div>
   <div class="sec"><div class="container">
     <div class="sec-head"><h2>Son Haberler<span class="sec-sub">Koşu dünyasından güncel içerikler</span></h2><button class="btn btn-ghost btn-sm" onclick="nav('blog')">Tümünü Gör →</button></div>
-    <div class="grid g4" id="home-blog"></div>
+    <div class="grid g4 scroll-row" id="home-blog"></div>
   </div></div>
   <div class="divider"></div>
   <!-- ✅ YENİ: Ana Sayfa Fırsatlar Bölümü -->
@@ -1570,6 +1643,24 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
     </div>
     <div class="grid g3" id="home-firsatlar"></div>
   </div></div>
+  <!-- FOOTER CTA -->
+  <div id="home-footer-cta">
+    <div class="container">
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">Türkiyenin En Büyük Koşu Topluluğu</div>
+      <h2>Bugün Baslat Yarin Kos</h2>
+      <p>Sehrindeki kulübü bul, etkinliklere katil, yaris takvimini takip et.</p>
+      <div class="footer-cta-btns">
+        <button class="btn-white" onclick="openAuth('register')">Ucretsiz Üye Ol</button>
+        <button class="btn-outline-white" onclick="nav('clubs')">Kulüpleri Kesfe</button>
+      </div>
+      <div class="footer-cta-trust">
+        <span>Tamamen Ucretsiz</span>
+        <span>Guvenli</span>
+        <span>Mobil Uyumlu</span>
+        <span>250+ Kulüp</span>
+      </div>
+    </div>
+  </div>
   <div class="sec-sm"><div class="container">
     <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:20px;text-transform:uppercase">Sponsorlarımız</p>
     <div class="sponsor-strip" id="sponsors-strip"></div>
@@ -13271,6 +13362,69 @@ window.toggleFirsatAktif=async function(id,current){
     toast((!current?"Aktif edildi":"Pasif edildi")+" ✓","ok");
   }catch(e){toast("Hata: "+e.message,"err");}
 };
+
+window.initHomeModern=function(){
+  var ctaBar=document.getElementById('hero-cta-bar');
+  if(ctaBar)ctaBar.style.display='block';
+  // fade-up observer
+  if(window.IntersectionObserver){
+    var obs=new IntersectionObserver(function(entries){
+      entries.forEach(function(e){
+        if(e.isIntersecting){e.target.classList.add('visible');obs.unobserve(e.target);}
+      });
+    },{threshold:0.12,rootMargin:'0px 0px -30px 0px'});
+    document.querySelectorAll('#pg-home .sec,#pg-home .sec-head,.impact-bar,.social-proof-sec,.how-section,#home-footer-cta').forEach(function(el){
+      el.classList.add('fade-up');
+      obs.observe(el);
+    });
+  }
+  // scroll dots
+  if(window.innerWidth<=768){
+    ['home-events','home-clubs','home-races','home-blog'].forEach(function(id){
+      window.initScrollDots&&window.initScrollDots(id);
+    });
+  }
+  window.updateImpactStats&&window.updateImpactStats();
+};
+window.initScrollDots=function(containerId){
+  var c=document.getElementById(containerId);
+  if(!c||window.innerWidth>768)return;
+  var existing=document.getElementById('dots-'+containerId);
+  if(existing)existing.remove();
+  var dw=document.createElement('div');
+  dw.id='dots-'+containerId;
+  dw.className='scroll-dots';
+  if(c.parentNode)c.parentNode.insertBefore(dw,c.nextSibling);
+  function upd(){
+    var count=Math.min(c.children.length,8);
+    if(!count)return;
+    var ratio=c.scrollLeft/(c.scrollWidth-c.clientWidth)||0;
+    var active=Math.round(ratio*(count-1));
+    dw.innerHTML='';
+    for(var i=0;i<count;i++){
+      var d=document.createElement('div');
+      d.className='scroll-dot'+(i===active?' active':'');
+      dw.appendChild(d);
+    }
+  }
+  c.addEventListener('scroll',upd,{passive:true});
+  setTimeout(upd,600);
+};
+window.updateImpactStats=function(){
+  var clubs=(window.CLUBS||[]).length;
+  var el=document.getElementById('impact-clubs');
+  if(el&&clubs>0)el.textContent=clubs+'+';
+};
+// renderHomeData tamamlayınca initHomeModern tetikle
+var _origRHD=window.renderHomeData;
+if(_origRHD){
+  window.renderHomeData=function(){
+    _origRHD.apply(this,arguments);
+    setTimeout(function(){
+      window.initHomeModern&&window.initHomeModern();
+    },400);
+  };
+}
 </script>
 </body>
 </html>

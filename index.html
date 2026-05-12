@@ -1394,6 +1394,22 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 #error-boundary button{font-size:12px;padding:6px 12px;border-radius:8px;cursor:pointer;border:none;font-weight:600}
 .err-retry{background:var(--or);color:#fff}
 .err-dismiss{background:rgba(255,255,255,.1);color:rgba(255,255,255,.7)}
+
+/* ── Email bildirim toggle ── */
+.notif-settings-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:22px;margin-top:20px}
+.notif-settings-card h3{margin:0 0 16px;font-size:15px;display:flex;align-items:center;gap:8px}
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border-bottom:none;padding-bottom:0}
+.toggle-label{flex:1}
+.toggle-label strong{display:block;font-size:13px;font-weight:600;color:var(--text);margin-bottom:2px}
+.toggle-label span{font-size:12px;color:var(--muted);line-height:1.4}
+.sw{position:relative;display:inline-block;width:44px;height:24px;flex-shrink:0}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw-slider{position:absolute;inset:0;background:var(--border);border-radius:24px;cursor:pointer;transition:background .2s}
+.sw-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.sw input:checked + .sw-slider{background:var(--or)}
+.sw input:checked + .sw-slider::before{transform:translateX(20px)}
+.sw input:focus-visible + .sw-slider{outline:3px solid var(--or);outline-offset:2px}
 </style>
 </head>
 <body>
@@ -2846,6 +2862,42 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button class="btn btn-or" style="margin-top:16px;width:100%" onclick="saveProfile()">🚑 Sağlık Bilgilerini Kaydet</button>
   </div>
 
+  <!-- BİLDİRİM TERCİHLERİ -->
+  <div class="notif-settings-card">
+    <h3>🔔 Bildirim Tercihleri</h3>
+    <div class="toggle-row">
+      <div class="toggle-label">
+        <strong>E-posta Bildirimleri</strong>
+        <span>Yeni yarışlar, etkinlikler, blog yazıları ve haftalık özet</span>
+      </div>
+      <label class="sw" aria-label="E-posta bildirimlerini aç/kapat">
+        <input type="checkbox" id="pf-email-opt" onchange="saveEmailOptIn(this.checked)">
+        <span class="sw-slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-label">
+        <strong>Haftalık Özet</strong>
+        <span>Her Pazartesi: geçen haftanın yarış, etkinlik ve haberlerinin özeti</span>
+      </div>
+      <label class="sw" aria-label="Haftalık özet e-postası aç/kapat">
+        <input type="checkbox" id="pf-email-weekly" onchange="saveEmailOptInWeekly(this.checked)">
+        <span class="sw-slider"></span>
+      </label>
+    </div>
+    <div class="toggle-row">
+      <div class="toggle-label">
+        <strong>Push Bildirimleri</strong>
+        <span>Tarayıcı üzerinden anlık bildirimler</span>
+      </div>
+      <label class="sw" aria-label="Push bildirimlerini aç/kapat">
+        <input type="checkbox" id="pf-push-toggle" onchange="togglePushFromProfile(this.checked)">
+        <span class="sw-slider"></span>
+      </label>
+    </div>
+    <p id="notif-save-status" style="font-size:12px;color:var(--muted);margin:12px 0 0;display:none"></p>
+  </div>
+
 </div></div>
 
 <!-- SUPER ADMIN -->
@@ -3611,6 +3663,13 @@ function syncProfileUI(){
   const pfBd=document.getElementById('pf-birthdate');if(pfBd)pfBd.value=CU.birthDate||'';
   const pfTs=document.getElementById('pf-tshirt');if(pfTs)pfTs.value=CU.tshirtSize||'';
 }
+// Email opt-in toggle'larını CU'dan doldur
+  const emailOptToggle = document.getElementById('pf-email-opt');
+  if(emailOptToggle) emailOptToggle.checked = CU.emailOptIn !== false;
+  const weeklyToggle = document.getElementById('pf-email-weekly');
+  if(weeklyToggle) weeklyToggle.checked = CU.emailOptInWeekly !== false;
+  const pushToggle = document.getElementById('pf-push-toggle');
+  if(pushToggle) pushToggle.checked = !!(CU.pushEnabled);
 window.syncProfileUI=syncProfileUI;
 window.saveProfile=async()=>{
   if(!CU)return;
@@ -3638,6 +3697,7 @@ window.saveProfile=async()=>{
     medicalNotes:medical,
     updatedAt:serverTimestamp()
   };
+  // emailOptIn alanını saveProfile'den bağımsız tut — ayrı toggle ile yönetilir
   try{
     await setDoc(doc(db,'users',CU.uid),data,{merge:true});
     // Optimistic update: CU'yu hemen güncelle, UI yenile
@@ -13621,6 +13681,70 @@ document.addEventListener('click',function(e){
     if(eb)eb.classList.remove('show');
   }
 });
+
+// ═══ BİLDİRİM TERCİHLERİ ═══════════════════════════════════
+window.saveEmailOptIn = async function(checked) {
+  if (!window.CU) return;
+  var fb = window._fb;
+  var status = document.getElementById('notif-save-status');
+  try {
+    await fb.updateDoc(fb.doc(fb.db, 'users', window.CU.uid), {emailOptIn: checked});
+    window.CU.emailOptIn = checked;
+    if (status) {
+      status.textContent = checked ? '✅ E-posta bildirimleri açık' : '🔕 E-posta bildirimleri kapalı';
+      status.style.display = 'block';
+      setTimeout(function() { status.style.display = 'none'; }, 3000);
+    }
+    toast(checked ? 'E-posta bildirimleri açık 📧' : 'E-posta bildirimleri kapalı', 'ok');
+  } catch(e) {
+    toast('Hata: ' + e.message, 'err');
+    // Hata olursa toggle'ı geri al
+    var el = document.getElementById('pf-email-opt');
+    if (el) el.checked = !checked;
+  }
+};
+
+window.saveEmailOptInWeekly = async function(checked) {
+  if (!window.CU) return;
+  var fb = window._fb;
+  try {
+    await fb.updateDoc(fb.doc(fb.db, 'users', window.CU.uid), {emailOptInWeekly: checked});
+    window.CU.emailOptInWeekly = checked;
+    toast(checked ? 'Haftalık özet açık 📅' : 'Haftalık özet kapalı', 'ok');
+  } catch(e) {
+    toast('Hata: ' + e.message, 'err');
+    var el = document.getElementById('pf-email-weekly');
+    if (el) el.checked = !checked;
+  }
+};
+
+window.togglePushFromProfile = async function(checked) {
+  var el = document.getElementById('pf-push-toggle');
+  if (checked) {
+    // Push izni iste
+    if (typeof window.requestPushPermission === 'function') {
+      var ok = await window.requestPushPermission();
+      if (!ok && el) el.checked = false;
+    } else if (typeof window.requestNotificationPermission === 'function') {
+      await window.requestNotificationPermission();
+    }
+  } else {
+    // Push kapat
+    if (!window.CU) return;
+    var fb = window._fb;
+    try {
+      await fb.updateDoc(fb.doc(fb.db, 'users', window.CU.uid), {
+        pushEnabled: false,
+        fcmToken: fb.deleteField ? fb.deleteField() : null
+      });
+      window.CU.pushEnabled = false;
+      toast('Push bildirimleri kapalı 🔕', 'ok');
+    } catch(e) {
+      toast('Hata: ' + e.message, 'err');
+      if (el) el.checked = true;
+    }
+  }
+};
 </script>
 
 <div id="error-boundary"><h4>Bir Sorun Olustu</h4><p>Bir sorun olustu. Sayfayi yenileyerek tekrar deneyin.</p><div class="err-btns"><button class="err-retry">Yenile</button><button class="err-dismiss">Kapat</button></div></div>

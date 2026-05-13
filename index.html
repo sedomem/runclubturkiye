@@ -3251,7 +3251,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <!-- Leaflet CSS: harita sayfasına kadar kritik değil → non-blocking -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'"/>
 <noscript><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"/></noscript>
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+
 <!-- Leaflet, QRCode ve Quill → yalnızca belirli sayfalarda gerekli, defer ile yükle -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
@@ -3468,14 +3468,10 @@ onAuthStateChanged(auth,async user=>{
     if(typeof window.syncMobileMenu==='function')window.syncMobileMenu();
     document.getElementById('nav-guest').style.display='flex';
     document.getElementById('nav-user').style.display='none';
+    // Guest kullanıcı için router tetikle
+    window._onRouterAuthReady&&window._onRouterAuthReady();
   }
   loadPopup();
-  // Auth hazır — router'a bildir
-  window._authReady = true;
-  if (typeof window._pendingRouterInit === 'function') {
-    window._pendingRouterInit();
-    window._pendingRouterInit = null;
-  }
 });
 
 // Güvenlik ağı: 8 saniye içinde loading kapanmazsa zorla kapat
@@ -4937,7 +4933,10 @@ loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
 loadAllFromDB();
 </script>
 
-<script>
+<script>window.CU=window.CU||null;var CU=window.CU;
+// CU güncellenince local ref da güncelle
+Object.defineProperty(window,"__cuSync",{get:function(){CU=window.CU;return true;},configurable:true});
+
 // ═══ SEO URL SLUG SİSTEMİ ═══════════════════════════════════
 window.makeSlug = function(text) {
   if (!text) return '';
@@ -5076,7 +5075,7 @@ window.nav=id=>{
   const gf=document.getElementById('global-footer');
   if(gf)gf.style.display=['admin','panel','dashboard','profile'].includes(id)?'none':'block';
   if((id==='dashboard'||id==='admin'||id==='panel')&&!window.CU){openAuth('login');return;}
-  if(id==='dashboard'){if(typeof buildDashboard==='function')buildDashboard();}
+  if(id==='dashboard'){if(typeof CU!=='undefined'&&CU&&typeof buildDashboard==='function')buildDashboard();}
   if(id==='map-view')setTimeout(initMap,100);
   if(id==='admin'&&CU?.role==='superadmin'){renderAdminSection('dashboard');loadAdminBadges&&loadAdminBadges();}
   if(id==='panel')loadGroupPanel();
@@ -5104,6 +5103,7 @@ window.nav=id=>{
       renderSkeletons('home-blog',4,'160px');
     }
     if(window.loadAllFromDB)window.loadAllFromDB();setTimeout(function(){window.initNotifSystem&&window.initNotifSystem();},1500);
+    window._onRouterAuthReady&&window._onRouterAuthReady();
   }
 };
 window.openAuth=type=>{
@@ -5938,19 +5938,23 @@ function routerInit(){
       if(typeof window.openEvent!=='function'){console.error('[Router] openEvent henüz yüklenmedi');return;}
       const tryOpen=()=>{const e=window.EVENTS&&window.EVENTS.find(x=>x.id===id||x.slug===id);if(e){window.openEvent(e.id);}else if(window.loadEventsFromDB){window.loadEventsFromDB().then(()=>{const e2=window.EVENTS&&window.EVENTS.find(x=>x.id===id||x.slug===id);if(e2)window.openEvent(e2.id);});}};tryOpen();}},
     {prefix:'/haber/',    listNav:'blog',       openFn: slug=>{
-      if(typeof window.openBlog!=='function'){console.error('[Router] openBlog henüz yüklenmedi');return;}
-      const tryOpen=()=>{
-        const p=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);
-        if(p){window.openBlog(p.id);}
-        else if(window.loadBlogFromDB){
-          window.loadBlogFromDB().then(()=>{
-            const p2=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);
+      // openBlog + BLOG_POSTS için retry mekanizması
+      var attempt=0;
+      var tryBlog=function(){
+        if(typeof window.openBlog!=='function'){
+          if(attempt++<10)setTimeout(tryBlog,300);return;
+        }
+        var p=window.BLOG_POSTS&&window.BLOG_POSTS.find(function(x){return x.slug===slug||x.id===slug;});
+        if(p){window.openBlog(p.id);return;}
+        if(window.loadBlogFromDB){
+          window.loadBlogFromDB().then(function(){
+            var p2=window.BLOG_POSTS&&window.BLOG_POSTS.find(function(x){return x.slug===slug||x.id===slug;});
             if(p2)window.openBlog(p2.id);
-            else{console.warn('[Router] slug bulunamadı:',slug);}
-          });
+            else console.warn('[Router] Blog slug bulunamadı:',slug);
+          }).catch(function(e){console.warn('[Router] loadBlog err:',e.message);});
         }
       };
-      tryOpen();
+      tryBlog();
     }},
     {prefix:'/yaris/',    listNav:'races',      openFn: id=>{
       if(typeof window.openRace!=='function'){console.error('[Router] openRace henüz yüklenmedi');return;}
@@ -8364,10 +8368,8 @@ window.initNotifSystem=function(){
   if(!fb||!fb.onSnapshot)return;
   if(window._notifUnsub)window._notifUnsub();
   try{
-    // NOT: announcements koleksiyonu için Firestore'da composite index gereklidir:
-    // targetUid (ASC) + createdAt (DESC)
-    // Index eksikse sadece targetUid ile fallback sorgusuna geç
-    var q=fb.query(fb.collection(fb.db,'announcements'),fb.where('targetUid','==',uid),fb.orderBy('createdAt','desc'));
+    var q;
+    try{q=fb.query(fb.collection(fb.db,'announcements'),fb.where('targetUid','==',uid),fb.orderBy('createdAt','desc'));}catch(qe){console.warn('[Notif]',qe.message);return;}
     window._notifUnsub=fb.onSnapshot(q,function(snap){
       var notifs=[];
       snap.forEach(function(d){
@@ -8376,28 +8378,7 @@ window.initNotifSystem=function(){
       });
       window._notifCache=notifs.slice(0,20);
       window.renderNotifBadge&&window.renderNotifBadge();
-    },function(err){
-      // Index eksik hatası — orderBy olmadan tekrar dene
-      if(err.code==='failed-precondition'||err.message.indexOf('index')!==-1){
-        console.warn('[Notif] Composite index eksik, orderBy olmadan tekrar deneniyor. Firestore Console\'da index oluşturun: announcements > targetUid ASC + createdAt DESC');
-        try{
-          var qFallback=fb.query(fb.collection(fb.db,'announcements'),fb.where('targetUid','==',uid));
-          window._notifUnsub=fb.onSnapshot(qFallback,function(snap2){
-            var notifs2=[];
-            snap2.forEach(function(d){
-              var dat=d.data();
-              notifs2.push({id:d.id,title:dat.title,body:dat.body,readAt:dat.readAt,createdAt:dat.createdAt,isWelcome:dat.isWelcome});
-            });
-            // Client-side sırala
-            notifs2.sort(function(a,b){var ta=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;var tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;return tb-ta;});
-            window._notifCache=notifs2.slice(0,20);
-            window.renderNotifBadge&&window.renderNotifBadge();
-          },function(err2){console.warn('[Notif fallback]',err2.message);});
-        }catch(e2){console.warn('[Notif fallback init]',e2.message);}
-      } else {
-        console.warn('[Notif]',err.message);
-      }
-    });
+    },function(err){console.warn('[Notif]',err.message);});
   }catch(e){console.warn('[Notif init]',e.message);}
 };
 window.renderNotifBadge=function(){
@@ -9347,14 +9328,8 @@ window.downloadQR=()=>{
 
 // ── DASHBOARD ──
 function buildDashboard(){
-  // Guard: BADGE_RULES henüz yüklenmediyse 300ms sonra tekrar dene
-  if(typeof BADGE_RULES === 'undefined'){
-    console.warn('[Dashboard] BADGE_RULES henüz hazır değil, 300ms sonra tekrar deneniyor...');
-    setTimeout(buildDashboard, 300);
-    return;
-  }
-  // Guard: CU (Current User) henüz tanımlı değilse çık
-  if(typeof CU === 'undefined' || !CU) return;
+  if(typeof CU==='undefined'||!CU)return;
+  if(typeof BADGE_RULES==='undefined'){setTimeout(function(){if(typeof buildDashboard==='function')buildDashboard();},500);return;}
   document.getElementById('dash-name').textContent=CU.name||'';
   document.getElementById('dash-email').textContent=CU.email||'';
   const initials=(CU.name||'U')[0].toUpperCase();
@@ -9582,7 +9557,7 @@ async function loadMyClubs(){
 // ── DASHBOARD: ETKİNLİKLERİM ──
 async function loadMyEvents(){
   const el=document.getElementById('dash-my-events-list');if(!el)return;
-  if(typeof CU === 'undefined' || !CU) return;
+  if(!window.CU)return;
   try{
     const fb2=window._fb;const snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'rsvps'),fb2.where('userId','==',CU.uid)));
     if(snap.empty){
@@ -10317,7 +10292,7 @@ window.deleteBlogItem=async(id)=>{
 
 // ── GROUP PANEL ──
 function loadGroupPanel(){
-  if(!CU)return;
+  if(!window.CU)return;
   const active=window._gpActiveSection||'events';
   renderGroupSection(active);
   // Bekleyen başvuru sayısını badge'e yaz
@@ -11407,7 +11382,7 @@ async function loadKmEvents(){
   }catch(e){el.innerHTML=`<p style="color:var(--muted)">Yüklenemedi</p>`;}
 }
 window.saveEventKm=(eventId,km)=>{
-  if(!CU)return;
+  if(!window.CU)return;
   localStorage.setItem('event_km_'+eventId+'_'+CU.uid,parseFloat(km)||0);
 };
 window.autoFillEventKm=(eventId,km)=>{
@@ -13296,28 +13271,20 @@ window.gShowRaceParticipants = async function(raceId, raceName) {
   } catch(e) { listEl.innerHTML = '<p style="color:var(--muted)">Yüklenemedi: '+e.message+'</p>'; }
 };
 
-// URL routing — Firebase Auth hazır olduktan SONRA routerInit'i çalıştır
-// Bu, derin linklerle girildiğinde CU henüz tanımlı olmadan sayfa açılmasını önler
-(function() {
-  function runRouter() {
-    try { if (typeof routerInit === 'function') routerInit(); } catch(e) {}
-  }
-  if (window._authReady) {
-    // Auth zaten tamamlandı (sync durum)
-    setTimeout(runRouter, 50);
-  } else {
-    // Auth bekleniyor — onAuthStateChanged tetiklediğinde çalışacak
-    window._pendingRouterInit = runRouter;
-    // Failsafe: 5 saniye sonra auth gelmezse yine de çalıştır
-    setTimeout(function() {
-      if (window._pendingRouterInit) {
-        console.warn('[Router] Auth 5s içinde gelmedi, router zorla çalıştırılıyor');
-        runRouter();
-        window._pendingRouterInit = null;
-      }
-    }, 5000);
-  }
-})();
+// URL routing — sayfa yüklenince mevcut URL'yi kontrol et
+// Router: auth hazır olana kadar bekle, sonra çalıştır
+var _routerRan=false;
+function _runRouter(){
+  if(_routerRan)return;
+  _routerRan=true;
+  try{if(typeof routerInit==='function')routerInit();}catch(e){console.warn('[Router]',e.message);}
+}
+// Auth gelince çalıştır (max 3sn bekle)
+var _routerAuthTimeout=setTimeout(function(){_runRouter();},3000);
+window._onRouterAuthReady=function(){
+  clearTimeout(_routerAuthTimeout);
+  setTimeout(_runRouter,100);
+};
 
 window.loadPRs=async function(){
   var uid=window.CU&&window.CU.uid;if(!uid)return;

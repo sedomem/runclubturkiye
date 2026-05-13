@@ -16,7 +16,7 @@ const messaging = firebase.messaging();
 // CACHE STRATEJİSİ — Offline Mode
 // Versiyon numarasını değiştirmek tüm cache'i temizler
 // ═══════════════════════════════════════════════════════════════════
-const CACHE_VERSION  = 'rct-v3';
+const CACHE_VERSION  = 'rct-v5';
 const STATIC_CACHE   = CACHE_VERSION + '-static';
 const DYNAMIC_CACHE  = CACHE_VERSION + '-dynamic';
 const IMAGE_CACHE    = CACHE_VERSION + '-images';
@@ -26,11 +26,7 @@ const STATIC_ASSETS = [
   '/',
   '/index.html',
   '/icon-192.png',
-  '/icon-512.png',
-  'https://fonts.googleapis.com/css2?family=Raleway:wght@700;800;900&display=swap',
-  'https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js',
-  'https://cdn.quilljs.com/1.3.7/quill.snow.css',
-  'https://cdn.quilljs.com/1.3.7/quill.min.js',
+  // '/icon-512.png', // sadece dosya gerçekten varsa ekle
 ];
 
 // Bu URL pattern'ları için NETWORK FIRST (her zaman taze veri):

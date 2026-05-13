@@ -4933,9 +4933,10 @@ loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
 loadAllFromDB();
 </script>
 
-<script>window.CU=window.CU||null;var CU=window.CU;
-// CU güncellenince local ref da güncelle
-Object.defineProperty(window,"__cuSync",{get:function(){CU=window.CU;return true;},configurable:true});
+<script>// CU Global Guard
+if(typeof window.CU==="undefined")window.CU=null;
+try{Object.defineProperty(window,"CU",{get:function(){return window._CU||null;},set:function(v){window._CU=v;},configurable:true});}catch(e){}
+
 
 // ═══ SEO URL SLUG SİSTEMİ ═══════════════════════════════════
 window.makeSlug = function(text) {

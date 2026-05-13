@@ -3664,14 +3664,15 @@ function syncProfileUI(){
   const pfGen=document.getElementById('pf-gender');if(pfGen)pfGen.value=CU.gender||'';
   const pfBd=document.getElementById('pf-birthdate');if(pfBd)pfBd.value=CU.birthDate||'';
   const pfTs=document.getElementById('pf-tshirt');if(pfTs)pfTs.value=CU.tshirtSize||'';
+  // Email/Push bildirim toggle'larını doldur
+  var emailOptToggle=document.getElementById('pf-email-opt');
+  if(emailOptToggle)emailOptToggle.checked=CU.emailOptIn!==false;
+  var weeklyToggle=document.getElementById('pf-email-weekly');
+  if(weeklyToggle)weeklyToggle.checked=CU.emailOptInWeekly!==false;
+  var pushToggle=document.getElementById('pf-push-toggle');
+  if(pushToggle)pushToggle.checked=!!(CU.pushEnabled);
 }
-// Email opt-in toggle'larını CU'dan doldur
-  const emailOptToggle = document.getElementById('pf-email-opt');
-  if(emailOptToggle) emailOptToggle.checked = CU.emailOptIn !== false;
-  const weeklyToggle = document.getElementById('pf-email-weekly');
-  if(weeklyToggle) weeklyToggle.checked = CU.emailOptInWeekly !== false;
-  const pushToggle = document.getElementById('pf-push-toggle');
-  if(pushToggle) pushToggle.checked = !!(CU.pushEnabled);
+
 window.syncProfileUI=syncProfileUI;
 window.saveProfile=async()=>{
   if(!CU)return;
@@ -4933,12 +4934,7 @@ loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
 loadAllFromDB();
 </script>
 
-<script>// CU Global Guard
-if(typeof window.CU==="undefined")window.CU=null;
-try{Object.defineProperty(window,"CU",{get:function(){return window._CU||null;},set:function(v){window._CU=v;},configurable:true});}catch(e){}
-
-
-// ═══ SEO URL SLUG SİSTEMİ ═══════════════════════════════════
+<script>// ═══ SEO URL SLUG SİSTEMİ ═══════════════════════════════════
 window.makeSlug = function(text) {
   if (!text) return '';
   var tr = {'ş':'s','ğ':'g','ü':'u','ö':'o','ı':'i','ç':'c',

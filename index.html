@@ -3468,6 +3468,8 @@ onAuthStateChanged(auth,async user=>{
     if(typeof window.syncMobileMenu==='function')window.syncMobileMenu();
     document.getElementById('nav-guest').style.display='flex';
     document.getElementById('nav-user').style.display='none';
+    // Guest kullanıcı için router tetikle
+    window._onRouterAuthReady&&window._onRouterAuthReady();
   }
   loadPopup();
 });
@@ -9323,6 +9325,7 @@ window.downloadQR=()=>{
 // ── DASHBOARD ──
 function buildDashboard(){
   if(!CU)return;
+  if(typeof BADGE_RULES==="undefined"){setTimeout(function(){if(typeof buildDashboard==="function")buildDashboard();},400);return;}
   if(typeof BADGE_RULES==='undefined'){setTimeout(function(){if(typeof buildDashboard==='function')buildDashboard();},400);return;}
   document.getElementById('dash-name').textContent=CU.name||'';
   document.getElementById('dash-email').textContent=CU.email||'';

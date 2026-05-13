@@ -3470,6 +3470,12 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('nav-user').style.display='none';
   }
   loadPopup();
+  // Auth hazır — router'a bildir
+  window._authReady = true;
+  if (typeof window._pendingRouterInit === 'function') {
+    window._pendingRouterInit();
+    window._pendingRouterInit = null;
+  }
 });
 
 // Güvenlik ağı: 8 saniye içinde loading kapanmazsa zorla kapat
@@ -8358,6 +8364,9 @@ window.initNotifSystem=function(){
   if(!fb||!fb.onSnapshot)return;
   if(window._notifUnsub)window._notifUnsub();
   try{
+    // NOT: announcements koleksiyonu için Firestore'da composite index gereklidir:
+    // targetUid (ASC) + createdAt (DESC)
+    // Index eksikse sadece targetUid ile fallback sorgusuna geç
     var q=fb.query(fb.collection(fb.db,'announcements'),fb.where('targetUid','==',uid),fb.orderBy('createdAt','desc'));
     window._notifUnsub=fb.onSnapshot(q,function(snap){
       var notifs=[];
@@ -8367,7 +8376,28 @@ window.initNotifSystem=function(){
       });
       window._notifCache=notifs.slice(0,20);
       window.renderNotifBadge&&window.renderNotifBadge();
-    },function(err){console.warn('[Notif]',err.message);});
+    },function(err){
+      // Index eksik hatası — orderBy olmadan tekrar dene
+      if(err.code==='failed-precondition'||err.message.indexOf('index')!==-1){
+        console.warn('[Notif] Composite index eksik, orderBy olmadan tekrar deneniyor. Firestore Console\'da index oluşturun: announcements > targetUid ASC + createdAt DESC');
+        try{
+          var qFallback=fb.query(fb.collection(fb.db,'announcements'),fb.where('targetUid','==',uid));
+          window._notifUnsub=fb.onSnapshot(qFallback,function(snap2){
+            var notifs2=[];
+            snap2.forEach(function(d){
+              var dat=d.data();
+              notifs2.push({id:d.id,title:dat.title,body:dat.body,readAt:dat.readAt,createdAt:dat.createdAt,isWelcome:dat.isWelcome});
+            });
+            // Client-side sırala
+            notifs2.sort(function(a,b){var ta=a.createdAt&&a.createdAt.toMillis?a.createdAt.toMillis():0;var tb=b.createdAt&&b.createdAt.toMillis?b.createdAt.toMillis():0;return tb-ta;});
+            window._notifCache=notifs2.slice(0,20);
+            window.renderNotifBadge&&window.renderNotifBadge();
+          },function(err2){console.warn('[Notif fallback]',err2.message);});
+        }catch(e2){console.warn('[Notif fallback init]',e2.message);}
+      } else {
+        console.warn('[Notif]',err.message);
+      }
+    });
   }catch(e){console.warn('[Notif init]',e.message);}
 };
 window.renderNotifBadge=function(){
@@ -9317,7 +9347,14 @@ window.downloadQR=()=>{
 
 // ── DASHBOARD ──
 function buildDashboard(){
-  if(!CU)return;
+  // Guard: BADGE_RULES henüz yüklenmediyse 300ms sonra tekrar dene
+  if(typeof BADGE_RULES === 'undefined'){
+    console.warn('[Dashboard] BADGE_RULES henüz hazır değil, 300ms sonra tekrar deneniyor...');
+    setTimeout(buildDashboard, 300);
+    return;
+  }
+  // Guard: CU (Current User) henüz tanımlı değilse çık
+  if(typeof CU === 'undefined' || !CU) return;
   document.getElementById('dash-name').textContent=CU.name||'';
   document.getElementById('dash-email').textContent=CU.email||'';
   const initials=(CU.name||'U')[0].toUpperCase();
@@ -9545,7 +9582,7 @@ async function loadMyClubs(){
 // ── DASHBOARD: ETKİNLİKLERİM ──
 async function loadMyEvents(){
   const el=document.getElementById('dash-my-events-list');if(!el)return;
-  if(!CU)return;
+  if(typeof CU === 'undefined' || !CU) return;
   try{
     const fb2=window._fb;const snap=await fb2.getDocs(fb2.query(fb2.collection(fb2.db,'rsvps'),fb2.where('userId','==',CU.uid)));
     if(snap.empty){
@@ -13259,8 +13296,28 @@ window.gShowRaceParticipants = async function(raceId, raceName) {
   } catch(e) { listEl.innerHTML = '<p style="color:var(--muted)">Yüklenemedi: '+e.message+'</p>'; }
 };
 
-// URL routing — sayfa yüklenince mevcut URL'yi kontrol et
-setTimeout(()=>{try{if(typeof routerInit==='function')routerInit();}catch(e){}},300);
+// URL routing — Firebase Auth hazır olduktan SONRA routerInit'i çalıştır
+// Bu, derin linklerle girildiğinde CU henüz tanımlı olmadan sayfa açılmasını önler
+(function() {
+  function runRouter() {
+    try { if (typeof routerInit === 'function') routerInit(); } catch(e) {}
+  }
+  if (window._authReady) {
+    // Auth zaten tamamlandı (sync durum)
+    setTimeout(runRouter, 50);
+  } else {
+    // Auth bekleniyor — onAuthStateChanged tetiklediğinde çalışacak
+    window._pendingRouterInit = runRouter;
+    // Failsafe: 5 saniye sonra auth gelmezse yine de çalıştır
+    setTimeout(function() {
+      if (window._pendingRouterInit) {
+        console.warn('[Router] Auth 5s içinde gelmedi, router zorla çalıştırılıyor');
+        runRouter();
+        window._pendingRouterInit = null;
+      }
+    }, 5000);
+  }
+})();
 
 window.loadPRs=async function(){
   var uid=window.CU&&window.CU.uid;if(!uid)return;

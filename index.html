@@ -3468,8 +3468,6 @@ onAuthStateChanged(auth,async user=>{
     if(typeof window.syncMobileMenu==='function')window.syncMobileMenu();
     document.getElementById('nav-guest').style.display='flex';
     document.getElementById('nav-user').style.display='none';
-    // Guest kullanıcı için router tetikle
-    window._onRouterAuthReady&&window._onRouterAuthReady();
   }
   loadPopup();
 });
@@ -5100,7 +5098,6 @@ window.nav=id=>{
       renderSkeletons('home-blog',4,'160px');
     }
     if(window.loadAllFromDB)window.loadAllFromDB();setTimeout(function(){window.initNotifSystem&&window.initNotifSystem();},1500);
-    window._onRouterAuthReady&&window._onRouterAuthReady();
   }
 };
 window.openAuth=type=>{
@@ -5935,23 +5932,19 @@ function routerInit(){
       if(typeof window.openEvent!=='function'){console.error('[Router] openEvent henüz yüklenmedi');return;}
       const tryOpen=()=>{const e=window.EVENTS&&window.EVENTS.find(x=>x.id===id||x.slug===id);if(e){window.openEvent(e.id);}else if(window.loadEventsFromDB){window.loadEventsFromDB().then(()=>{const e2=window.EVENTS&&window.EVENTS.find(x=>x.id===id||x.slug===id);if(e2)window.openEvent(e2.id);});}};tryOpen();}},
     {prefix:'/haber/',    listNav:'blog',       openFn: slug=>{
-      // openBlog + BLOG_POSTS için retry mekanizması
-      var attempt=0;
-      var tryBlog=function(){
-        if(typeof window.openBlog!=='function'){
-          if(attempt++<10)setTimeout(tryBlog,300);return;
-        }
-        var p=window.BLOG_POSTS&&window.BLOG_POSTS.find(function(x){return x.slug===slug||x.id===slug;});
-        if(p){window.openBlog(p.id);return;}
-        if(window.loadBlogFromDB){
-          window.loadBlogFromDB().then(function(){
-            var p2=window.BLOG_POSTS&&window.BLOG_POSTS.find(function(x){return x.slug===slug||x.id===slug;});
+      if(typeof window.openBlog!=='function'){console.error('[Router] openBlog henüz yüklenmedi');return;}
+      const tryOpen=()=>{
+        const p=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);
+        if(p){window.openBlog(p.id);}
+        else if(window.loadBlogFromDB){
+          window.loadBlogFromDB().then(()=>{
+            const p2=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);
             if(p2)window.openBlog(p2.id);
-            else console.warn('[Router] Blog slug bulunamadı:',slug);
-          }).catch(function(e){console.warn('[Router] loadBlog err:',e.message);});
+            else{console.warn('[Router] slug bulunamadı:',slug);}
+          });
         }
       };
-      tryBlog();
+      tryOpen();
     }},
     {prefix:'/yaris/',    listNav:'races',      openFn: id=>{
       if(typeof window.openRace!=='function'){console.error('[Router] openRace henüz yüklenmedi');return;}
@@ -9325,8 +9318,6 @@ window.downloadQR=()=>{
 // ── DASHBOARD ──
 function buildDashboard(){
   if(!CU)return;
-  if(typeof BADGE_RULES==="undefined"){setTimeout(function(){if(typeof buildDashboard==="function")buildDashboard();},400);return;}
-  if(typeof BADGE_RULES==='undefined'){setTimeout(function(){if(typeof buildDashboard==='function')buildDashboard();},400);return;}
   document.getElementById('dash-name').textContent=CU.name||'';
   document.getElementById('dash-email').textContent=CU.email||'';
   const initials=(CU.name||'U')[0].toUpperCase();
@@ -13269,19 +13260,7 @@ window.gShowRaceParticipants = async function(raceId, raceName) {
 };
 
 // URL routing — sayfa yüklenince mevcut URL'yi kontrol et
-// Router: auth hazır olana kadar bekle, sonra çalıştır
-var _routerRan=false;
-function _runRouter(){
-  if(_routerRan)return;
-  _routerRan=true;
-  try{if(typeof routerInit==='function')routerInit();}catch(e){console.warn('[Router]',e.message);}
-}
-// Auth gelince çalıştır (max 3sn bekle)
-var _routerAuthTimeout=setTimeout(function(){_runRouter();},3000);
-window._onRouterAuthReady=function(){
-  clearTimeout(_routerAuthTimeout);
-  setTimeout(_runRouter,100);
-};
+setTimeout(()=>{try{if(typeof routerInit==='function')routerInit();}catch(e){}},300);
 
 window.loadPRs=async function(){
   var uid=window.CU&&window.CU.uid;if(!uid)return;

@@ -1,0 +1,15 @@
+# RunClubTürkiye robots.txt
+User-agent: *
+Allow: /
+
+# Sitemap
+Sitemap: https://www.runclubturkiye.com/sitemap.xml
+
+# Admin, dashboard ve profil sayfalarını indeksleme
+Disallow: /admin
+Disallow: /dashboard
+Disallow: /profil
+Disallow: /panel
+
+# Cloudflare internal
+Disallow: /cdn-cgi/

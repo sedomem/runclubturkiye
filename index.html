@@ -28,6 +28,7 @@
 
 <!-- Canonical URL -->
 <link rel="canonical" href="https://www.runclubturkiye.com/"/>
+<link rel="sitemap" type="application/xml" href="/sitemap.xml"/>
 
 <!-- Open Graph / Facebook — Enhanced -->
 <meta property="og:type" content="website"/>
@@ -141,36 +142,7 @@
 
 <!-- BreadcrumbList Schema -->
 <script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "BreadcrumbList",
-  "itemListElement": [
-    {
-      "@type": "ListItem",
-      "position": 1,
-      "name": "Ana Sayfa",
-      "item": "https://www.runclubturkiye.com"
-    },
-    {
-      "@type": "ListItem",
-      "position": 2,
-      "name": "Etkinlikler",
-      "item": "https://www.runclubturkiye.com/#/events"
-    },
-    {
-      "@type": "ListItem",
-      "position": 3,
-      "name": "Topluluklar",
-      "item": "https://www.runclubturkiye.com/#/clubs"
-    },
-    {
-      "@type": "ListItem",
-      "position": 4,
-      "name": "Yarış Takvimi",
-      "item": "https://www.runclubturkiye.com/#/races"
-    }
-  ]
-}
+{"@context":"https://schema.org","@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Ana Sayfa","item":"https://www.runclubturkiye.com/"},{"@type":"ListItem","position":2,"name":"Etkinlikler","item":"https://www.runclubturkiye.com/etkinlikler"},{"@type":"ListItem","position":3,"name":"Koşu Kulüpleri","item":"https://www.runclubturkiye.com/kulupler"},{"@type":"ListItem","position":4,"name":"Yarış Takvimi","item":"https://www.runclubturkiye.com/yaris-takvimi"},{"@type":"ListItem","position":5,"name":"Blog","item":"https://www.runclubturkiye.com/haberler"},{"@type":"ListItem","position":6,"name":"Hakkımızda","item":"https://www.runclubturkiye.com/hakkimizda"}]}
 </script>
 
 <!-- LocalBusiness Schema for SEO -->
@@ -207,6 +179,9 @@
     "closes": "23:59"
   }
 }
+</script>
+<script type="application/ld+json">
+{"@context":"https://schema.org","@graph":[{"@type":"SiteNavigationElement","name":"Etkinlikler","url":"https://www.runclubturkiye.com/etkinlikler"},{"@type":"SiteNavigationElement","name":"Koşu Kulüpleri","url":"https://www.runclubturkiye.com/kulupler"},{"@type":"SiteNavigationElement","name":"Yarış Takvimi","url":"https://www.runclubturkiye.com/yaris-takvimi"},{"@type":"SiteNavigationElement","name":"Blog","url":"https://www.runclubturkiye.com/haberler"},{"@type":"SiteNavigationElement","name":"Fırsatlar","url":"https://www.runclubturkiye.com/firsatlar"},{"@type":"SiteNavigationElement","name":"Hakkımızda","url":"https://www.runclubturkiye.com/hakkimizda"},{"@type":"SiteNavigationElement","name":"İletişim","url":"https://www.runclubturkiye.com/iletisim"}]}
 </script>
 
 <style>
@@ -1410,6 +1385,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .sw input:checked + .sw-slider{background:var(--or)}
 .sw input:checked + .sw-slider::before{transform:translateX(20px)}
 .sw input:focus-visible + .sw-slider{outline:3px solid var(--or);outline-offset:2px}
+
+/* Nav crawlable links (button gibi görünür) */
+.nav-center a{color:inherit;text-decoration:none;cursor:pointer}
+.nav-center a:hover{color:var(--or)}
 </style>
 </head>
 <body>
@@ -1441,16 +1420,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <text x="178" y="68" font-family="Raleway,sans-serif" font-weight="800" font-size="52" fill="#2C1810">Club</text>
 </svg></div>
   <div class="nav-center">
-    <button onclick="nav('home')" id="nb-home" aria-label="Ana Sayfa">Ana Sayfa</button>
-    <button onclick="nav('events')" id="nb-events" aria-label="Koşu Etkinlikleri">Etkinlikler</button>
-    <button onclick="nav('clubs')" id="nb-clubs" aria-label="Koşu Kulüpleri ve Topluluklar">Topluluklar/Kulüpler</button>
-    <button onclick="nav('races')" id="nb-races" aria-label="Yarış Takvimi ve Maratonlar">Yarış Takvimi</button>
-    <button onclick="nav('discussions')" id="nb-discussions" aria-label="Yarış Tartışma Merkezi">💬 Tartışmalar</button>
-    <button onclick="nav('firsatlar')" id="nb-firsatlar" aria-label="Koşu Ekipmanı Fırsatları">🎁 Fırsatlar</button>
-    <button onclick="nav('blog')" id="nb-blog" aria-label="Koşu Blog ve Yazılar">Blog</button>
-    <button onclick="nav('community')" id="nb-community" aria-label="Topluluk Akışı">🏃 Topluluk</button>
-    <button onclick="nav('hakkimizda')" id="nb-hakkimizda" aria-label="RunClubTürkiye Hakkında">Hakkımızda</button>
-    <button onclick="nav('contact')" id="nb-contact" aria-label="İletişim Formu">İletişim</button>
+    <a href="/" onclick="event.preventDefault();nav('home')" id="nb-home" aria-label="Ana Sayfa">Ana Sayfa</a>
+    <a href="/etkinlikler" onclick="event.preventDefault();nav('events')" id="nb-events" aria-label="Koşu Etkinlikleri">Etkinlikler</a>
+    <a href="/kulupler" onclick="event.preventDefault();nav('clubs')" id="nb-clubs" aria-label="Koşu Kulüpleri ve Topluluklar">Topluluklar/Kulüpler</a>
+    <a href="/yaris-takvimi" onclick="event.preventDefault();nav('races')" id="nb-races" aria-label="Yarış Takvimi ve Maratonlar">Yarış Takvimi</a>
+    <a href="/tartismalar" onclick="event.preventDefault();nav('discussions')" id="nb-discussions" aria-label="Yarış Tartışma Merkezi">Tartışmalar</a>
+    <a href="/firsatlar" onclick="event.preventDefault();nav('firsatlar')" id="nb-firsatlar" aria-label="Koşu Ekipmanı Fırsatları">Fırsatlar</a>
+    <a href="/haberler" onclick="event.preventDefault();nav('blog')" id="nb-blog" aria-label="Koşu Blog ve Yazılar">Blog</a>
+    <a href="/topluluk" onclick="event.preventDefault();nav('community')" id="nb-community" aria-label="Topluluk Akışı">Topluluk</a>
+    <a href="/hakkimizda" onclick="event.preventDefault();nav('hakkimizda')" id="nb-hakkimizda" aria-label="RunClubTürkiye Hakkında">Hakkımızda</a>
+    <a href="/iletisim" onclick="event.preventDefault();nav('contact')" id="nb-contact" aria-label="İletişim Formu">İletişim</a>
   </div>
   <div class="nav-right">
     <!-- TEMA BUTONU KALDIRILDI -->

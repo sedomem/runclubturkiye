@@ -605,6 +605,21 @@ exports.onBlogPublished = onDocumentCreated(
         </p>
       </div>`;
 
+    // Push bildirimi gönder (tüm pushEnabled kullanıcılara)
+    try {
+      const pushTitle = '📰 Yeni Blog Yazısı!';
+      const pushBody  = title + (author ? ' — ' + author : '');
+      const pushUrl   = url;
+      const tokens = await getTargetTokens('', '');
+      if (tokens.length) {
+        await sendBatch(tokens, pushTitle, pushBody, pushUrl, '');
+        console.log('[Blog Push] ' + tokens.length + ' kişiye gönderildi');
+      }
+    } catch(pushErr) {
+      console.warn('[Blog Push] Hata:', pushErr.message);
+    }
+
+    // Email digest gönder
     await sendDigestToAllUsers(
       `📰 Yeni Yazı: ${title}`,
       bodyHtml,

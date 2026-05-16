@@ -13698,7 +13698,21 @@ window.injectEventSchema = function(e) {
   var _ignorePatterns = [
     'ResizeObserver', 'Non-Error', 'ChunkLoadError',
     'Loading chunk', 'Script error', 'Extension context',
-    'blocked by CORS', 'FCM', 'firebase'
+    'blocked by CORS', 'FCM', 'firebase',
+    'Could not establish connection',
+    'Receiving end does not exist',
+    'message channel closed',
+    'beforeinstallprompt',
+    'The service worker navigation preload request failed',
+    'Failed to fetch',
+    'Load failed',
+    'NetworkError',
+    'AbortError',
+    'NotAllowedError',
+    'net::',
+    'a])',
+    'cancelled',
+    'TypeError: Failed to register'
   ];
 
   function shouldIgnore(msg) {

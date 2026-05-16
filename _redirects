@@ -1,11 +1,18 @@
 # Cloudflare Pages — SPA fallback routing
-# Statik dosyalar kendileri serve edilir
+# Statik dosyalar
 /cdn-cgi/*    /cdn-cgi/:splat    200
 /firebase-messaging-sw.js    /firebase-messaging-sw.js    200
 /icon-192.png    /icon-192.png    200
 /manifest.json    /manifest.json    200
-/sitemap.xml    /sitemap.xml    200
 /robots.txt    /robots.txt    200
 
-# Tüm diğer URL'ler → SPA router
+# Sitemap — Worker veya statik fallback
+/sitemap.xml    /sitemap.xml    200
+/sitemap-pages.xml    /sitemap-pages.xml    200
+/sitemap-blog.xml    /sitemap-blog.xml    200
+/sitemap-events.xml    /sitemap-events.xml    200
+/sitemap-clubs.xml    /sitemap-clubs.xml    200
+/sitemap-races.xml    /sitemap-races.xml    200
+
+# Tüm diger URL'ler — SPA router
 /*    /index.html    200

@@ -2,10 +2,15 @@
 User-agent: *
 Allow: /
 
-# Sitemap
+# Sitemaps
 Sitemap: https://www.runclubturkiye.com/sitemap.xml
+Sitemap: https://www.runclubturkiye.com/sitemap-pages.xml
+Sitemap: https://www.runclubturkiye.com/sitemap-blog.xml
+Sitemap: https://www.runclubturkiye.com/sitemap-events.xml
+Sitemap: https://www.runclubturkiye.com/sitemap-clubs.xml
+Sitemap: https://www.runclubturkiye.com/sitemap-races.xml
 
-# Admin, dashboard ve profil sayfalarını indeksleme
+# Admin ve profil sayfalarini indeksleme
 Disallow: /admin
 Disallow: /dashboard
 Disallow: /profil

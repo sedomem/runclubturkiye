@@ -5429,7 +5429,7 @@ window.openEvent=id=>{
     </div>`;
   fomoRenderCountdown(e.date,'ev-cd');
   nav('event-detail');
-  if(typeof routerPush==='function')routerPush('event-detail', e.slug||e.id, e.title+' — RunClubTürkiye', e.desc||'');
+  if(typeof routerPush==='function')routerPush('event-detail', e.slug||e.id, e.title+' — RunClubTürkiye', e.desc||'', e.imgUrl||'');
   setTimeout(()=>fomoLoadParticipants(e.id),100);
   fomoStartRealtime(e.id);
 };
@@ -5683,25 +5683,34 @@ const PATH_TO_ID = {};
 Object.entries(ROUTES).forEach(([id,r])=>{PATH_TO_ID[r.path]=id;});
 
 // SEO meta güncelle
-function routerUpdateMeta(pageId, dynamicTitle, dynamicDesc){
-  const route=ROUTES[pageId];
-  const title=dynamicTitle||(route?.title)||"RunClubTürkiye";
-  const desc=dynamicDesc||(route?.desc)||"Kosu toplulugu platformu.";
+function routerUpdateMeta(pageId, dynamicTitle, dynamicDesc, dynamicImg){
+  var route=ROUTES[pageId];
+  var title=dynamicTitle||(route?route.title:'')||'RunClubTurkiye';
+  var desc=dynamicDesc||(route?route.desc:'')||'Kosu toplulugu.';
+  var fullUrl='https://www.runclubturkiye.com'+window.location.pathname;
   document.title=title;
-  let metaDesc=document.querySelector('meta[name="description"]');
-  if(!metaDesc){metaDesc=document.createElement('meta');metaDesc.name='description';document.head.appendChild(metaDesc);}
-  metaDesc.content=desc;
-  // OG tags
-  let ogTitle=document.querySelector('meta[property="og:title"]');
-  if(!ogTitle){ogTitle=document.createElement('meta');ogTitle.setAttribute('property','og:title');document.head.appendChild(ogTitle);}
-  ogTitle.content=title;
-  let ogDesc=document.querySelector('meta[property="og:description"]');
-  if(!ogDesc){ogDesc=document.createElement('meta');ogDesc.setAttribute('property','og:description');document.head.appendChild(ogDesc);}
-  ogDesc.content=desc;
+  var md=document.querySelector('meta[name="description"]');
+  if(!md){md=document.createElement('meta');md.name='description';document.head.appendChild(md);}
+  md.content=desc;
+  var can=document.querySelector('link[rel="canonical"]');
+  if(can)can.href=fullUrl;
+  var ogTags={'og:title':title,'og:description':desc,'og:url':fullUrl};
+  if(dynamicImg)ogTags['og:image']=dynamicImg;
+  for(var p in ogTags){
+    var el=document.querySelector('meta[property="'+p+'"]');
+    if(!el){el=document.createElement('meta');el.setAttribute('property',p);document.head.appendChild(el);}
+    el.content=ogTags[p];
+  }
+  var twTags={'twitter:title':title,'twitter:description':desc};
+  if(dynamicImg)twTags['twitter:image']=dynamicImg;
+  for(var t in twTags){
+    var te=document.querySelector('meta[name="'+t+'"]');
+    if(!te){te=document.createElement('meta');te.name=t;document.head.appendChild(te);}
+    te.content=twTags[t];
+  }
 }
-
 // URL push
-function routerPush(pageId, dynamicSlug, dynamicTitle, dynamicDesc){
+function routerPush(pageId, dynamicSlug, dynamicTitle, dynamicDesc, dynamicImg){
   const route=ROUTES[pageId];
   if(!route)return;
   let path=route.path;
@@ -5709,7 +5718,7 @@ function routerPush(pageId, dynamicSlug, dynamicTitle, dynamicDesc){
   if(window.location.pathname!==path){
     window.history.pushState({pageId,dynamicSlug},'',path);
   }
-  routerUpdateMeta(pageId, dynamicTitle, dynamicDesc);
+  routerUpdateMeta(pageId, dynamicTitle, dynamicDesc, dynamicImg);
 }
 
 // Sayfa yüklenince URL'yi oku ve yönlendir
@@ -6515,7 +6524,7 @@ window.openClub=async(id)=>{
   if(typeof window.renderClubTrainings==='function') window.renderClubTrainings(c.id);
   if(typeof window.renderClubPublicEvents==='function') window.renderClubPublicEvents(c.id);
   if(typeof window.renderClubRaces==='function') window.renderClubRaces(c.id);
-  if(typeof routerPush==='function')routerPush('club-detail', c.slug||c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'');
+  if(typeof routerPush==='function')routerPush('club-detail', c.slug||c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'', c.imgUrl||c.bannerUrl||'');
 };
 
 window.renderClubPublicEvents = async function(clubId) {
@@ -6747,7 +6756,7 @@ window.openRace=id=>{
       </div>
     </div>`;
   nav('race-detail');
-  if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'');
+  if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'', r.imgUrl||'');
   setTimeout(()=>loadDiscussions&&loadDiscussions(r.id),100);
 };
 
@@ -7424,7 +7433,8 @@ window.openBlog=id=>{
       </div>
     </div>`;
   nav('blog-detail');
-  if(typeof routerPush==='function')routerPush('blog-detail', p.slug||p.id, p.title+' — RunClubTürkiye', (p.body||'').substring(0,150));
+  if(typeof routerPush==='function')routerPush('blog-detail', p.slug||p.id, p.title+' — RunClubTürkiye', (p.body||'').substring(0,150), p.coverUrl||'');
+  window.injectBlogSchema&&window.injectBlogSchema(p);
   setTimeout(()=>loadBlogComments(p.id), 100);
 };
 window.copyBlogLink=(slug)=>{

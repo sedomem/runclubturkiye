@@ -1437,6 +1437,17 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   background:var(--or);
   border-radius:2px;
 }
+
+/* ── Etkinlik boş → Avantaj kartları ── */
+.benefits-grid{display:flex;gap:10px;overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x mandatory;padding-bottom:4px}
+.benefits-grid::-webkit-scrollbar{display:none}
+.benefit-card{flex:1 1 0%;min-width:160px;max-width:220px;background:var(--card);border:1.5px solid var(--border);border-radius:var(--r);padding:16px;transition:transform .2s,box-shadow .2s,border-color .2s;scroll-snap-align:start}
+.benefit-card:hover{transform:translateY(-2px);box-shadow:0 6px 16px rgba(232,98,42,.1);border-color:var(--or)}
+.benefit-icon{width:36px;height:36px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;margin-bottom:10px}
+.benefit-card h4{margin:0 0 4px;font-size:13px;font-weight:700;color:var(--text)}
+.benefit-card p{margin:0;font-size:11.5px;color:var(--muted);line-height:1.5}
+.benefits-cta{text-align:center;margin-top:14px}
+@media(max-width:768px){.benefit-card{flex:0 0 160px}}
 </style>
 </head>
 <body>
@@ -13808,6 +13819,70 @@ window.togglePushFromProfile = async function(checked) {
     }
   }
 };
+
+window.checkHomeEmptyStates=function(){
+  var evEl=document.getElementById("home-events");
+  if(evEl&&(!evEl.children.length||!evEl.innerHTML.trim()||evEl.querySelector(".skeleton"))){
+    evEl.innerHTML='<div class="benefits-grid">'
+      +'<div class="benefit-card">'
+      +'<div class="benefit-icon" style="background:rgba(232,98,42,.1)">🤝</div>'
+      +'<h4>Kulüp Bul, Hemen Katıl</h4>'
+      +'<p>Sehrindeki kosu kulübünü kesfet. Tek tikla üye ol, haftalik kokulara katil.</p>'
+      +'</div>'
+      +'<div class="benefit-card">'
+      +'<div class="benefit-icon" style="background:rgba(59,130,246,.1)">📅</div>'
+      +'<h4>Etkinlikleri Takip Et</h4>'
+      +'<p>Kulüplerin düzenledigi kosu etkinliklerini gör, kaydol. QR ile check-in yap.</p>'
+      +'</div>'
+      +'<div class="benefit-card">'
+      +'<div class="benefit-icon" style="background:rgba(16,185,129,.1)">🏆</div>'
+      +'<h4>Yaris Takvimi</h4>'
+      +'<p>Türkiye genelindeki tüm maraton, trail ve ultra yarislarini takip et.</p>'
+      +'</div>'
+      +'<div class="benefit-card">'
+      +'<div class="benefit-icon" style="background:rgba(168,85,247,.1)">🎁</div>'
+      +'<h4>Kosucuya Özel Firsatlar</h4>'
+      +'<p>Kosu ekipmani ve beslenme markalarindan üyelere özel indirim kodlari.</p>'
+      +'</div>'
+      +'</div>'
+      +'<div class="benefits-cta">'
+      +'<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Kulüpler etkinlik ekledikce burada görünecek</p>'
+      +'<button class="btn btn-or" onclick="nav(\'clubs\')" style="font-weight:700">Kulüpleri Kesfet</button>'
+      +'</div>';
+  }
+  var clEl=document.getElementById("home-clubs");
+  if(clEl&&(!clEl.children.length||!clEl.innerHTML.trim()||clEl.querySelector(".skeleton"))){
+    clEl.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px 16px">'
+      +'<div style="font-size:48px;margin-bottom:12px">🏃</div>'
+      +'<h3 style="font-size:16px;margin-bottom:6px">Kulüpler Yükleniyor</h3>'
+      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Kosu kulüpleri hazirlaniyor. Kendi kulübünü de acabilirsin!</p>'
+      +'<button class="btn btn-ghost" onclick="openAuth(\'register\')" style="margin-top:14px">Ücretsiz Üye Ol</button>'
+      +'</div>';
+  }
+  var rcEl=document.getElementById("home-races");
+  if(rcEl&&(!rcEl.children.length||!rcEl.innerHTML.trim()||rcEl.querySelector(".skeleton"))){
+    rcEl.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px 16px">'
+      +'<div style="font-size:48px;margin-bottom:12px">🏅</div>'
+      +'<h3 style="font-size:16px;margin-bottom:6px">Yaris Takvimi</h3>'
+      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Türkiye genelindeki kosu yarislarini takip et, kayit tarihlerini kacirma.</p>'
+      +'<button class="btn btn-or" onclick="nav(\'races\')" style="margin-top:14px">Yaris Takvimini Gör</button>'
+      +'</div>';
+  }
+  var blEl=document.getElementById("home-blog");
+  if(blEl&&(!blEl.children.length||!blEl.innerHTML.trim()||blEl.querySelector(".skeleton"))){
+    blEl.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px 16px">'
+      +'<div style="font-size:48px;margin-bottom:12px">📰</div>'
+      +'<h3 style="font-size:16px;margin-bottom:6px">Blog Yazilari</h3>'
+      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Kosu haberleri, antrenman ipuclari ve yaris rehberleri cok yakinda.</p>'
+      +'</div>';
+  }
+};
+var _origRHD2=window.renderHomeData;
+window.renderHomeData=function(){
+  if(typeof _origRHD2==="function")_origRHD2.apply(this,arguments);
+  setTimeout(function(){window.checkHomeEmptyStates&&window.checkHomeEmptyStates();},800);
+};
+setTimeout(function(){window.checkHomeEmptyStates&&window.checkHomeEmptyStates();},4000);
 </script>
 
 <div id="error-boundary"><h4>Bir Sorun Olustu</h4><p>Bir sorun olustu. Sayfayi yenileyerek tekrar deneyin.</p><div class="err-btns"><button class="err-retry">Yenile</button><button class="err-dismiss">Kapat</button></div></div>

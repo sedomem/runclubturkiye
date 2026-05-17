@@ -1451,7 +1451,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 </style>
 </head>
 <body>
-<a href="#main-content" class="skip-link">Ana icerige gec</a>
+<a href="#main-content" class="skip-link">Ana içeriğe geç</a>
 <div class="loading" id="loading" style="background:#F5F0E8"><svg width="90" height="90" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" style="display:block">
   <rect x="0" y="0" width="200" height="200" rx="44" fill="#E8622A"/>
   <circle cx="112" cy="60" r="18" fill="#fff"/>
@@ -1642,10 +1642,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <!-- HERO CTA BAR -->
   <div id="hero-cta-bar">
     <div class="container">
-      <div><h2>Türkiyenin Kosu Toplulugu</h2><p>250+ kulüp - 12.000+ sporcu - 450+ etkinlik</p></div>
+      <div><h2>Türkiye'nin Koşu Topluluğu</h2><p>250+ kulüp - 12.000+ sporcu - 450+ etkinlik</p></div>
       <div class="hero-cta-btns">
         <button class="btn btn-or" onclick="nav('clubs')" style="font-weight:700">Kulüp Bul</button>
-        <button class="btn btn-ghost" onclick="nav('events')">Etkinliklere Katil</button>
+        <button class="btn btn-ghost" onclick="nav('events')">Etkinliklere Katıl</button>
       </div>
     </div>
   </div>
@@ -1658,9 +1658,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
       <div class="how-stat-div"></div>
       <div class="how-stat"><span class="how-stat-n">450+</span><span class="how-stat-l">Etkinlik</span></div>
       <div class="how-stat-div"></div>
-      <div class="how-stat"><span class="how-stat-n">81</span><span class="how-stat-l">Il</span></div>
+      <div class="how-stat"><span class="how-stat-n">81</span><span class="how-stat-l">İl</span></div>
       <div class="how-stat-div"></div>
-      <div class="how-stat"><span class="how-stat-n">100</span><span class="how-stat-l">Ucretsiz</span></div>
+      <div class="how-stat"><span class="how-stat-n">%100</span><span class="how-stat-l">Ücretsiz</span></div>
     </div></div>
   </div>
   <!-- KAYAN YAZI ŞERİDİ -->
@@ -1728,16 +1728,16 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <!-- FOOTER CTA -->
   <div id="home-footer-cta">
     <div class="container">
-      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">Türkiyenin En Büyük Koşu Topluluğu</div>
-      <h2>Bugün Baslat Yarin Kos</h2>
-      <p>Sehrindeki kulübü bul, etkinliklere katil, yaris takvimini takip et.</p>
+      <div style="font-size:12px;font-weight:700;color:rgba(255,255,255,.45);text-transform:uppercase;letter-spacing:1.5px;margin-bottom:14px">Türkiye'nin En Büyük Koşu Topluluğu</div>
+      <h2>Bugün Başla, Yarın Koş</h2>
+      <p>Şehrindeki kulübü bul, etkinliklere katıl, yarış takvimini takip et.</p>
       <div class="footer-cta-btns">
         <button class="btn-white" onclick="openAuth('register')">Ucretsiz Üye Ol</button>
-        <button class="btn-outline-white" onclick="nav('clubs')">Kulüpleri Kesfe</button>
+        <button class="btn-outline-white" onclick="nav('clubs')">Kulüpleri Keşfet</button>
       </div>
       <div class="footer-cta-trust">
-        <span>Tamamen Ucretsiz</span>
-        <span>Guvenli</span>
+        <span>Tamamen Ücretsiz</span>
+        <span>Güvenli</span>
         <span>Mobil Uyumlu</span>
         <span>250+ Kulüp</span>
       </div>
@@ -13479,7 +13479,7 @@ window.loadEventAttendees=async function(eventId,containerEl){
     snap.forEach(function(d){
       var dat=d.data();
       var ini=(dat.name||"K").slice(0,1).toUpperCase();
-      chips+="<div class='attendee-chip'><div class='att-av'>"+ini+"</div><span>"+(dat.name||"Katilimci")+"</span></div>";
+      chips+="<div class='attendee-chip'><div class='att-av'>"+ini+"</div><span>"+(dat.name||"Katılımcı")+"</span></div>";
     });
     containerEl.innerHTML="<div class='attendee-list'>"+chips+"</div>";
   }catch(e){containerEl.innerHTML="<p style='font-size:11px;color:var(--muted)'>Yuklenemedi</p>";}
@@ -13851,7 +13851,7 @@ window.checkHomeEmptyStates=function(){
       +'<div class="benefit-card">'
       +'<div class="benefit-icon" style="background:rgba(232,98,42,.1)">🤝</div>'
       +'<h4>Kulüp Bul, Hemen Katıl</h4>'
-      +'<p>Sehrindeki kosu kulübünü kesfet. Tek tikla üye ol, haftalik kokulara katil.</p>'
+      +'<p>Şehrindeki koşu kulübünü keşfet. Tek tıkla üye ol, haftalık koşulara katıl.</p>'
       +'</div>'
       +'<div class="benefit-card">'
       +'<div class="benefit-icon" style="background:rgba(59,130,246,.1)">📅</div>'
@@ -13860,18 +13860,18 @@ window.checkHomeEmptyStates=function(){
       +'</div>'
       +'<div class="benefit-card">'
       +'<div class="benefit-icon" style="background:rgba(16,185,129,.1)">🏆</div>'
-      +'<h4>Yaris Takvimi</h4>'
-      +'<p>Türkiye genelindeki tüm maraton, trail ve ultra yarislarini takip et.</p>'
+      +'<h4>Yarış Takvimi</h4>'
+      +'<p>Türkiye genelindeki tüm maraton, trail ve ultra yarışlarını takip et.</p>'
       +'</div>'
       +'<div class="benefit-card">'
       +'<div class="benefit-icon" style="background:rgba(168,85,247,.1)">🎁</div>'
-      +'<h4>Kosucuya Özel Firsatlar</h4>'
-      +'<p>Kosu ekipmani ve beslenme markalarindan üyelere özel indirim kodlari.</p>'
+      +'<h4>Koşucuya Özel Fırsatlar</h4>'
+      +'<p>Koşu ekipmanı ve beslenme markalarından üyelere özel indirim kodları.</p>'
       +'</div>'
       +'</div>'
       +'<div class="benefits-cta">'
-      +'<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Kulüpler etkinlik ekledikce burada görünecek</p>'
-      +'<button class="btn btn-or" onclick="nav(\'clubs\')" style="font-weight:700">Kulüpleri Kesfet</button>'
+      +'<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Kulüpler etkinlik ekledikçe burada görünecek</p>'
+      +'<button class="btn btn-or" onclick="nav(\'clubs\')" style="font-weight:700">Kulüpleri Keşfett</button>'
       +'</div>';
   }
   var clEl=document.getElementById("home-clubs");
@@ -13879,7 +13879,7 @@ window.checkHomeEmptyStates=function(){
     clEl.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px 16px">'
       +'<div style="font-size:48px;margin-bottom:12px">🏃</div>'
       +'<h3 style="font-size:16px;margin-bottom:6px">Kulüpler Yükleniyor</h3>'
-      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Kosu kulüpleri hazirlaniyor. Kendi kulübünü de acabilirsin!</p>'
+      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Koşu kulüpleri hazırlanıyor. Kendi kulübünü de açabilirsin!</p>'
       +'<button class="btn btn-ghost" onclick="openAuth(\'register\')" style="margin-top:14px">Ücretsiz Üye Ol</button>'
       +'</div>';
   }
@@ -13887,17 +13887,17 @@ window.checkHomeEmptyStates=function(){
   if(rcEl&&(!rcEl.children.length||!rcEl.innerHTML.trim()||rcEl.querySelector(".skeleton"))){
     rcEl.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px 16px">'
       +'<div style="font-size:48px;margin-bottom:12px">🏅</div>'
-      +'<h3 style="font-size:16px;margin-bottom:6px">Yaris Takvimi</h3>'
-      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Türkiye genelindeki kosu yarislarini takip et, kayit tarihlerini kacirma.</p>'
-      +'<button class="btn btn-or" onclick="nav(\'races\')" style="margin-top:14px">Yaris Takvimini Gör</button>'
+      +'<h3 style="font-size:16px;margin-bottom:6px">Yarış Takvimi</h3>'
+      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Türkiye genelindeki kosu yarışlarını takip et, kayıt tarihlerini kaçırma.</p>'
+      +'<button class="btn btn-or" onclick="nav(\'races\')" style="margin-top:14px">Yarış Takvimini Gör</button>'
       +'</div>';
   }
   var blEl=document.getElementById("home-blog");
   if(blEl&&(!blEl.children.length||!blEl.innerHTML.trim()||blEl.querySelector(".skeleton"))){
     blEl.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:32px 16px">'
       +'<div style="font-size:48px;margin-bottom:12px">📰</div>'
-      +'<h3 style="font-size:16px;margin-bottom:6px">Blog Yazilari</h3>'
-      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Kosu haberleri, antrenman ipuclari ve yaris rehberleri cok yakinda.</p>'
+      +'<h3 style="font-size:16px;margin-bottom:6px">Blog Yazıları</h3>'
+      +'<p style="font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.6">Kosu haberleri, antrenman ipuçları ve yarış rehberleri çok yakında.</p>'
       +'</div>';
   }
 };
@@ -13909,6 +13909,6 @@ window.renderHomeData=function(){
 setTimeout(function(){window.checkHomeEmptyStates&&window.checkHomeEmptyStates();},4000);
 </script>
 
-<div id="error-boundary"><h4>Bir Sorun Olustu</h4><p>Bir sorun olustu. Sayfayi yenileyerek tekrar deneyin.</p><div class="err-btns"><button class="err-retry">Yenile</button><button class="err-dismiss">Kapat</button></div></div>
+<div id="error-boundary"><h4>Bir Sorun Oluştu</h4><p>Bir sorun oluştu. Sayfayı yenileyerek tekrar deneyin.</p><div class="err-btns"><button class="err-retry">Yenile</button><button class="err-dismiss">Kapat</button></div></div>
 </body>
 </html>

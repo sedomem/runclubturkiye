@@ -4972,7 +4972,55 @@ loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
 loadAllFromDB();
 </script>
 
-<script>// ═══ SEO URL SLUG SİSTEMİ ═══════════════════════════════════
+<script>
+// ═══ SEO META GÜNCELLEME ═════════════════════════════════════
+function updateSEOMeta(title, description, url) {
+  var safeDesc = description ? description.substring(0, 155) : '';
+  document.title = title ? title + ' | RunClub Türkiye' : 'RunClub Türkiye';
+
+  var metaDesc = document.querySelector('meta[name="description"]');
+  if (!metaDesc) {
+    metaDesc = document.createElement('meta');
+    metaDesc.setAttribute('name', 'description');
+    document.head.appendChild(metaDesc);
+  }
+  metaDesc.setAttribute('content', safeDesc);
+
+  var canonical = document.querySelector('link[rel="canonical"]');
+  if (!canonical) {
+    canonical = document.createElement('link');
+    canonical.setAttribute('rel', 'canonical');
+    document.head.appendChild(canonical);
+  }
+  canonical.setAttribute('href', url || window.location.href);
+
+  var ogTitle = document.querySelector('meta[property="og:title"]');
+  if (!ogTitle) {
+    ogTitle = document.createElement('meta');
+    ogTitle.setAttribute('property', 'og:title');
+    document.head.appendChild(ogTitle);
+  }
+  ogTitle.setAttribute('content', title || '');
+
+  var ogDesc = document.querySelector('meta[property="og:description"]');
+  if (!ogDesc) {
+    ogDesc = document.createElement('meta');
+    ogDesc.setAttribute('property', 'og:description');
+    document.head.appendChild(ogDesc);
+  }
+  ogDesc.setAttribute('content', safeDesc);
+
+  var ogUrl = document.querySelector('meta[property="og:url"]');
+  if (!ogUrl) {
+    ogUrl = document.createElement('meta');
+    ogUrl.setAttribute('property', 'og:url');
+    document.head.appendChild(ogUrl);
+  }
+  ogUrl.setAttribute('content', url || window.location.href);
+}
+window.updateSEOMeta = updateSEOMeta;
+
+// ═══ SEO URL SLUG SİSTEMİ ═══════════════════════════════════
 window.makeSlug = function(text) {
   if (!text) return '';
   var tr = {'ş':'s','ğ':'g','ü':'u','ö':'o','ı':'i','ç':'c',
@@ -5130,6 +5178,7 @@ window.nav=id=>{
     loadCommunityPage&&loadCommunityPage();
   }
   if(id==='home'){
+    updateSEOMeta('RunClub Türkiye', 'Türkiye\'nin koşu kulüpleri topluluğu', 'https://www.runclubturkiye.com/');
     // Skeleton göster ve veriyi yenile
     if(typeof renderSkeletons==='function'){
       renderSkeletons('home-events',4,'120px');
@@ -5430,6 +5479,7 @@ window.openEvent=id=>{
   fomoRenderCountdown(e.date,'ev-cd');
   nav('event-detail');
   if(typeof routerPush==='function')routerPush('event-detail', e.slug||e.id, e.title+' — RunClubTürkiye', e.desc||'', e.imgUrl||'');
+  updateSEOMeta(e.title || '', e.desc || '', 'https://www.runclubturkiye.com/etkinlik/' + (e.slug||e.id||''));
   setTimeout(()=>fomoLoadParticipants(e.id),100);
   fomoStartRealtime(e.id);
 };
@@ -6525,6 +6575,8 @@ window.openClub=async(id)=>{
   if(typeof window.renderClubPublicEvents==='function') window.renderClubPublicEvents(c.id);
   if(typeof window.renderClubRaces==='function') window.renderClubRaces(c.id);
   if(typeof routerPush==='function')routerPush('club-detail', c.slug||c.id, c.name+' Koşu Kulübü — RunClubTürkiye', c.desc||'', c.imgUrl||c.bannerUrl||'');
+  var clubSlug = (c.slug || c.id || '');
+  updateSEOMeta(c.name || '', c.desc || '', 'https://www.runclubturkiye.com/kulup/' + clubSlug);
 };
 
 window.renderClubPublicEvents = async function(clubId) {
@@ -6757,6 +6809,7 @@ window.openRace=id=>{
     </div>`;
   nav('race-detail');
   if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'', r.imgUrl||'');
+  updateSEOMeta(r.name || '', (r.location||'')+' '+(r.date||''), 'https://www.runclubturkiye.com/yaris/' + (r.slug||r.id||''));
   setTimeout(()=>loadDiscussions&&loadDiscussions(r.id),100);
 };
 
@@ -7435,6 +7488,8 @@ window.openBlog=id=>{
   nav('blog-detail');
   if(typeof routerPush==='function')routerPush('blog-detail', p.slug||p.id, p.title+' — RunClubTürkiye', (p.body||'').substring(0,150), p.coverUrl||'');
   window.injectBlogSchema&&window.injectBlogSchema(p);
+  var newsSlug = (p.slug || p.id || '');
+  updateSEOMeta(p.title || '', (p.body||'').substring(0,155), 'https://www.runclubturkiye.com/haber/' + newsSlug);
   setTimeout(()=>loadBlogComments(p.id), 100);
 };
 window.copyBlogLink=(slug)=>{
@@ -13907,6 +13962,55 @@ window.renderHomeData=function(){
   setTimeout(function(){window.checkHomeEmptyStates&&window.checkHomeEmptyStates();},800);
 };
 setTimeout(function(){window.checkHomeEmptyStates&&window.checkHomeEmptyStates();},4000);
+
+// ═══ SEO URL PARSE — Ek güvenlik katmanı ═════════════════════
+(function() {
+  var path = window.location.pathname;
+  // routerInit zaten çalışıyor — bu sadece SEO meta'yı günceller
+  // ve routerInit'in yakalayamadığı durumlar için fallback sağlar
+  setTimeout(function() {
+    if (path.indexOf('/haber/') === 0) {
+      var slug = path.replace('/haber/', '');
+      if (slug && window._fb && window._fb.db) {
+        var fb = window._fb;
+        fb.getDocs(fb.query(fb.collection(fb.db, 'blog'), fb.where('slug','==',slug))).then(function(snap) {
+          if (!snap.empty) {
+            snap.forEach(function(d) {
+              var data = d.data();
+              updateSEOMeta(data.title || '', (data.body||'').substring(0,155), 'https://www.runclubturkiye.com/haber/' + slug);
+            });
+          }
+        }).catch(function(e) { console.log('[SEO] haber parse:', e.message); });
+      }
+    } else if (path.indexOf('/kulup/') === 0) {
+      var clubSlug = path.replace('/kulup/', '');
+      if (clubSlug) {
+        var found = (window.CLUBS || []).find(function(c) { return c.slug === clubSlug || c.id === clubSlug; });
+        if (found) {
+          updateSEOMeta(found.name || '', found.desc || '', 'https://www.runclubturkiye.com/kulup/' + clubSlug);
+        }
+      }
+    } else if (path.indexOf('/yaris/') === 0) {
+      var raceSlug = path.replace('/yaris/', '');
+      if (raceSlug) {
+        var rFound = (window.RACES || []).find(function(r) { return r.slug === raceSlug || r.id === raceSlug; });
+        if (rFound) {
+          updateSEOMeta(rFound.name || '', (rFound.location||'')+' '+(rFound.date||''), 'https://www.runclubturkiye.com/yaris/' + raceSlug);
+        }
+      }
+    } else if (path.indexOf('/etkinlik/') === 0) {
+      var evSlug = path.replace('/etkinlik/', '');
+      if (evSlug) {
+        var eFound = (window.EVENTS || []).find(function(e) { return e.slug === evSlug || e.id === evSlug; });
+        if (eFound) {
+          updateSEOMeta(eFound.title || '', eFound.desc || '', 'https://www.runclubturkiye.com/etkinlik/' + evSlug);
+        }
+      }
+    } else if (path === '/' || path === '') {
+      updateSEOMeta('RunClub Türkiye', 'Türkiye\'nin koşu kulüpleri topluluğu', 'https://www.runclubturkiye.com/');
+    }
+  }, 3500); // Veriler yüklendikten sonra çalış
+})();
 </script>
 
 <div id="error-boundary"><h4>Bir Sorun Oluştu</h4><p>Bir sorun oluştu. Sayfayı yenileyerek tekrar deneyin.</p><div class="err-btns"><button class="err-retry">Yenile</button><button class="err-dismiss">Kapat</button></div></div>

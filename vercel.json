@@ -1,22 +1,5 @@
 {
   "rewrites": [
-    { "source": "/((?!firebase-messaging-sw\\.js|sw\\.js|manifest\\.json|icon.*\\.png|sitemap\\.xml|robots\\.txt).*)", "destination": "/index.html" }
-  ],
-  "headers": [
-    {
-      "source": "/firebase-messaging-sw.js",
-      "headers": [
-        { "key": "Content-Type", "value": "application/javascript" },
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" },
-        { "key": "Service-Worker-Allowed", "value": "/" }
-      ]
-    },
-    {
-      "source": "/sw.js",
-      "headers": [
-        { "key": "Content-Type", "value": "application/javascript" },
-        { "key": "Cache-Control", "value": "no-cache, no-store, must-revalidate" }
-      ]
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }

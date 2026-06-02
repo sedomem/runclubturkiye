@@ -10513,7 +10513,7 @@ function renderGroupSection(sec){
             <button class="btn btn-or btn-sm" onclick="gOpenAddEvent()">+ Etkinlik Ekle</button>
         </div>
       </div>
-      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Eklediğin etkinlikler Süper Admin onayından sonra sitede yayınlanır.</p>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Eklediğin etkinlikler doğrudan sitede yayınlanır.</p>
       <div id="ga-analytics-container" style="margin-bottom:20px"></div>
       <div class="card" style="padding:20px;margin-bottom:18px;display:none" id="g-add-event-form">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Etkinlik</h3>
@@ -10553,7 +10553,7 @@ function renderGroupSection(sec){
         <div class="form-grp"><label>Mesafe Seçenekleri <span style="font-weight:400;color:var(--muted);text-transform:none">(virgülle ayır, örn: 5K, 10K, 21K)</span></label><input id="ge-distances" placeholder="5K, 10K, 21K"/></div>
         <div class="form-grp"><label>Açıklama</label><textarea id="ge-desc" rows="3"></textarea></div>
         <div style="display:flex;gap:8px">
-          <button class="btn btn-or" onclick="gSaveEvent()">Onaya Gönder</button>
+          <button class="btn btn-or" onclick="gSaveEvent()">Etkinliği Yayınla</button>
           <button class="btn btn-ghost" onclick="document.getElementById('g-add-event-form').style.display='none'">İptal</button>
         </div>
       </div>
@@ -10946,6 +10946,7 @@ window.loadGAAnalytics=async function(){
 };
 
 async function gLoadEvents(){
+  if(!window.CU)return;
   const el=document.getElementById('g-events-list');if(!el)return;
   try{
     const fb=window._fb;
@@ -11002,7 +11003,7 @@ window.gEditEvent=async(eventId)=>{
     }
     // Edit modunu işaretle — gSaveEvent bu ID ile güncelleme yapacak
     window._gEditingEventId=eventId;
-    // "Onaya Gönder" butonunu "Güncelle" olarak değiştir
+    // "Etkinliği Yayınla" butonunu "Güncelle" olarak değiştir
     const submitBtn=form.querySelector('button[onclick="gSaveEvent()"]');
     if(submitBtn)submitBtn.textContent='✏️ Güncelle';
     // Forma scroll
@@ -11022,6 +11023,7 @@ window.gDeleteEvent=async(id)=>{
 };
 
 async function gLoadMembers(){
+  if(!window.CU)return;
   const el=document.getElementById('g-members-list');if(!el)return;
   try{
     const fb=window._fb;
@@ -11269,7 +11271,7 @@ window.gSaveEvent=async()=>{
     // Düzenleme modu — pending olarak tekrar gönder
     delete form.dataset.editId;
     const saveBtn=form.querySelector('button');
-    if(saveBtn)saveBtn.textContent='Onaya Gönder';
+    if(saveBtn)saveBtn.textContent='Etkinliği Yayınla';
     // Mevcut belgeyi güncelle
     const fb=window._fb;
     const title=document.getElementById('ge-title')?.value?.trim();
@@ -11310,6 +11312,7 @@ window.gSaveEvent=async()=>{
 
 
 async function gLoadAnnouncements(){
+  if(!window.CU)return;
   const el=document.getElementById('g-announcements-list');if(!el)return;
   try{
     const fb=window._fb;
@@ -11345,6 +11348,7 @@ window.gDeleteAnnouncement=async(id)=>{
 };
 
 async function gLoadChat(){
+  if(!window.CU)return;
   const room='admin-chat';
   const container=document.getElementById('g-chat-box');
   if(!container){console.warn('[gLoadChat] g-chat-box bulunamadı');return;}

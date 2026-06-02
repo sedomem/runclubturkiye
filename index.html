@@ -1494,6 +1494,41 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .club-pill .cp-val{font-size:14px}
   .member-grid{grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px}
 }
+
+/* ═══ REVİZE: Dashboard + GA + Mobil ═══ */
+.club-rank-card{background:linear-gradient(135deg,rgba(232,98,42,.06),rgba(232,98,42,.02));border:1.5px solid rgba(232,98,42,.15);border-radius:14px;padding:16px;margin-bottom:14px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:border-color .2s}
+.club-rank-card:hover{border-color:var(--or)}
+.club-rank-num{font-size:28px;font-weight:900;color:var(--or);font-family:var(--font-head);min-width:40px;text-align:center}
+.club-rank-info{flex:1;min-width:0}
+.club-rank-info h4{margin:0;font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.club-rank-info p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.ga-stat-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:10px;margin-bottom:18px}
+.ga-stat-box{background:var(--card);border:1.5px solid var(--border);border-radius:12px;padding:14px;text-align:center}
+.ga-stat-box .n{font-size:24px;font-weight:800;color:var(--or);font-family:var(--font-head)}
+.ga-stat-box .l{font-size:11px;color:var(--muted);margin-top:2px}
+.ga-top5{margin-top:14px}
+.ga-top5-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.ga-top5-row:last-child{border-bottom:none}
+.ga-top5-rank{font-size:16px;font-weight:800;color:var(--or);min-width:28px;text-align:center}
+.ga-top5-name{flex:1;font-size:13px;font-weight:600}
+.ga-top5-stat{font-size:13px;font-weight:700;color:var(--text)}
+.profile-clubs-list{display:flex;flex-direction:column;gap:8px;margin-top:12px}
+.profile-club-row{display:flex;align-items:center;gap:12px;padding:12px;background:var(--bg2);border-radius:12px;cursor:pointer;transition:background .2s}
+.profile-club-row:hover{background:var(--card)}
+@media(max-width:768px){
+  .club-tabs{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .club-tabs::-webkit-scrollbar{display:none}
+  .club-tab{white-space:nowrap;flex:0 0 auto;padding:12px 16px}
+  .lb-table{font-size:12px}
+  .lb-table th,.lb-table td{padding:8px 6px}
+  .lb-avatar{width:28px;height:28px}
+  .member-grid{grid-template-columns:repeat(auto-fill,minmax(110px,1fr));gap:6px}
+  .member-tile{padding:8px;gap:8px}
+  .member-tile img{width:30px;height:30px}
+  .ga-stat-row{grid-template-columns:repeat(2,1fr)}
+  .club-rank-card{padding:12px;gap:10px}
+  .club-rank-num{font-size:22px}
+}
 </style>
 </head>
 <body>
@@ -2982,6 +3017,22 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <p id="notif-save-status" style="font-size:12px;color:var(--muted);margin:12px 0 0;display:none"></p>
   </div>
 
+  <!-- KULÜP ÜYELİKLERİM -->
+  <div class="notif-settings-card">
+    <h3>🤝 Kulüp Üyeliklerim</h3>
+    <div id="profile-clubs-container">
+      <p style="font-size:13px;color:var(--muted)">Yükleniyor...</p>
+    </div>
+  </div>
+
+  <!-- ROZET ÖZETİ -->
+  <div class="notif-settings-card">
+    <h3>🏅 Rozetlerim</h3>
+    <div id="profile-badges-container">
+      <p style="font-size:13px;color:var(--muted)">Yükleniyor...</p>
+    </div>
+  </div>
+
 </div></div>
 
 <!-- SUPER ADMIN -->
@@ -3028,6 +3079,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button onclick="gNav('calendar',this)">🗓 Etkinlik Takvimi</button>
     <button onclick="gNav('club_races',this)">🏆 Kulüp Yarış Takvimi</button>
     <button onclick="gNav('settings',this)">⚙ Kulüp Ayarları</button>
+    <button onclick="gNav('stats',this)">📊 İstatistikler</button>
     <button onclick="gNav('performances',this)">🏅 Performanslar</button>
     <button onclick="nav('home')" style="margin-top:8px">← Siteye Dön</button>
     <button class="logout-btn" onclick="logout()">🚪 Çıkış Yap</button>
@@ -9513,6 +9565,7 @@ function buildDashboard(){
       <div style="margin-bottom:14px">
         <button class="btn btn-ghost btn-sm" style="gap:8px" onclick="window.inviteFriend&&inviteFriend()">👫 Arkadaşını Davet Et</button>
       </div>
+      <div id="dash-club-rank" style="margin-bottom:14px"></div>
       <div id="overview-recent-events"></div>
       <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
         <button class="btn btn-or" style="width:100%" onclick="showMyQR()">📲 Dijital Kartımı Göster</button>
@@ -10082,6 +10135,7 @@ function renderAdminSection(sec){
     },100);
     return;
   }
+  if(sec==='stats'){window.renderGaStats&&window.renderGaStats();return;}
   if(sec==='performances'){
     main.innerHTML=`<h2 style="margin-bottom:18px">🏅 Yarış Performansları</h2>
       <div class="card" style="padding:20px;margin-bottom:16px">
@@ -14141,6 +14195,191 @@ window.loadClubMembers = async function() {
     body.innerHTML = '<p style="color:var(--muted);font-size:13px">Üye listesi yüklenemedi</p>';
   }
 };
+
+// ═══ REVİZE: Dashboard Kulüp Sıralama + Profil + GA İstatistik ═══
+
+// Dashboard — kulüp sıralamalarını göster
+window.loadDashClubRank = async function() {
+  var container = document.getElementById('dash-club-rank');
+  if (!container || !window.CU) return;
+  var fb = window._fb;
+  if (!fb) return;
+  try {
+    var uid = window.CU.uid;
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db, 'memberships'), fb.where('userId', '==', uid)));
+    var clubIds = [];
+    snap.forEach(function(d) { var data = d.data(); if (data.clubId) clubIds.push(data.clubId); });
+    if (!clubIds.length) {
+      container.innerHTML = '<div class="club-rank-card" onclick="nav(\'clubs\')" style="justify-content:center"><span style="font-size:13px;color:var(--muted)">Henüz bir kulübe üye değilsin. <strong style="color:var(--or)">Kulüp Bul →</strong></span></div>';
+      return;
+    }
+    var html = '';
+    for (var i = 0; i < clubIds.length; i++) {
+      var cid = clubIds[i];
+      var club = (window.CLUBS || []).find(function(c) { return c.id === cid; });
+      var clubName = club ? (club.name || 'Kulüp') : 'Kulüp';
+      // Etkinlik katılımlarını say
+      try {
+        var evSnap = await fb.getDocs(fb.query(fb.collection(fb.db, 'events'), fb.where('clubId', '==', cid)));
+        var myCount = 0;
+        var total = 0;
+        for (var j = 0; j < evSnap.size; j++) {
+          var eDocs = [];
+          evSnap.forEach(function(d) { eDocs.push(d.id); });
+        }
+        for (var k = 0; k < eDocs.length; k++) {
+          try {
+            var attSnap = await fb.getDocs(fb.collection(fb.db, 'events', eDocs[k], 'attendees'));
+            attSnap.forEach(function(a) {
+              total++;
+              if (a.id === uid) myCount++;
+            });
+          } catch(e2) {}
+        }
+        html += '<div class="club-rank-card" onclick="openClub(\'' + cid + '\')">'
+          + '<div class="club-rank-num">' + myCount + '</div>'
+          + '<div class="club-rank-info">'
+          + '<h4>' + clubName + '</h4>'
+          + '<p>' + myCount + ' etkinlik katılımı</p>'
+          + '</div>'
+          + '<span style="font-size:12px;color:var(--or);font-weight:600">Detay →</span>'
+          + '</div>';
+      } catch(e3) {
+        html += '<div class="club-rank-card" onclick="openClub(\'' + cid + '\')"><div class="club-rank-info"><h4>' + clubName + '</h4></div></div>';
+      }
+    }
+    container.innerHTML = html || '';
+  } catch(e) { container.innerHTML = ''; }
+};
+
+// Profil — kulüp üyelikleri göster
+window.loadProfileClubs = async function() {
+  var container = document.getElementById('profile-clubs-container');
+  if (!container || !window.CU) { if(container) container.innerHTML='<p style="font-size:13px;color:var(--muted)">Giriş yapınca kulüplerin görünür</p>'; return; }
+  var fb = window._fb;
+  if (!fb) return;
+  try {
+    var snap = await fb.getDocs(fb.query(fb.collection(fb.db, 'memberships'), fb.where('userId', '==', window.CU.uid)));
+    var clubs = [];
+    snap.forEach(function(d) { var data = d.data(); clubs.push({ clubId: data.clubId, clubName: data.clubName || data.name || '' }); });
+    if (!clubs.length) {
+      container.innerHTML = '<p style="font-size:13px;color:var(--muted)">Henüz bir kulübe üye değilsin. <a href="javascript:nav(\'clubs\')" style="color:var(--or);font-weight:600">Kulüp Bul →</a></p>';
+      return;
+    }
+    var html = '<div class="profile-clubs-list">';
+    clubs.forEach(function(c) {
+      var club = (window.CLUBS || []).find(function(x) { return x.id === c.clubId; });
+      var name = (club && club.name) || c.clubName || 'Kulüp';
+      var city = (club && club.city) || '';
+      var initials = name.substring(0, 2).toUpperCase();
+      html += '<div class="profile-club-row" onclick="openClub(\'' + c.clubId + '\')">'
+        + '<div style="width:40px;height:40px;border-radius:10px;background:var(--or);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0">' + initials + '</div>'
+        + '<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">' + name + '</div>'
+        + (city ? '<div style="font-size:12px;color:var(--muted)">📍 ' + city + '</div>' : '') + '</div>'
+        + '<span style="font-size:12px;color:var(--or)">→</span></div>';
+    });
+    html += '</div>';
+    container.innerHTML = html;
+  } catch(e) { container.innerHTML = '<p style="font-size:13px;color:var(--muted)">Yüklenemedi</p>'; }
+};
+
+// Profil — rozetler özet
+window.loadProfileBadges = function() {
+  var container = document.getElementById('profile-badges-container');
+  if (!container || !window.CU) return;
+  var myBadges = (window.CU && window.CU.badges) || [];
+  if (typeof BADGE_RULES === 'undefined') {
+    container.innerHTML = '<p style="font-size:13px;color:var(--muted)">Rozetler yükleniyor...</p>';
+    return;
+  }
+  var earned = BADGE_RULES.filter(function(b) { return myBadges.indexOf(b.id) > -1; });
+  if (!earned.length) {
+    container.innerHTML = '<p style="font-size:13px;color:var(--muted)">Henüz rozet kazanmadın. <a href="javascript:showDash(\'badges\')" style="color:var(--or);font-weight:600">Tüm Rozetler →</a></p>';
+    return;
+  }
+  var html = '<div style="display:flex;flex-wrap:wrap;gap:8px">';
+  earned.forEach(function(b) {
+    html += '<div style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(232,98,42,.08);border-radius:20px;font-size:12px;font-weight:600"><span style="font-size:16px">' + b.ico + '</span>' + b.name + '</div>';
+  });
+  html += '</div>';
+  container.innerHTML = html;
+};
+
+// GA — İstatistikler tab render
+window.renderGaStats = async function() {
+  var main = document.getElementById('panel-main');
+  if (!main) return;
+  var fb = window._fb;
+  if (!fb || !window.CU) return;
+  var clubId = window.CU.clubId || window.CU.uid;
+  main.innerHTML = '<h2 style="margin-bottom:18px">📊 Kulüp İstatistikleri</h2><div class="spinner" style="margin:30px auto"></div>';
+  try {
+    // Üye sayısı
+    var memSnap = await fb.getDocs(fb.query(fb.collection(fb.db, 'memberships'), fb.where('clubId', '==', clubId)));
+    var memberCount = memSnap.size;
+    // Etkinlikler
+    var evSnap = await fb.getDocs(fb.query(fb.collection(fb.db, 'events'), fb.where('clubId', '==', clubId)));
+    var eventCount = 0;
+    var eventIds = [];
+    evSnap.forEach(function(d) { eventIds.push(d.id); eventCount++; });
+    // Toplam katılım + en aktif üyeler
+    var userStats = {};
+    var totalAttend = 0;
+    for (var i = 0; i < eventIds.length; i++) {
+      try {
+        var attSnap = await fb.getDocs(fb.collection(fb.db, 'events', eventIds[i], 'attendees'));
+        attSnap.forEach(function(a) {
+          var uid = a.id;
+          var data = a.data();
+          if (!userStats[uid]) userStats[uid] = { name: data.name || data.displayName || 'Koşucu', count: 0 };
+          userStats[uid].count++;
+          totalAttend++;
+        });
+      } catch(e2) {}
+    }
+    var top5 = Object.values(userStats).sort(function(a, b) { return b.count - a.count; }).slice(0, 5);
+    var avgAttend = eventCount > 0 ? Math.round(totalAttend / eventCount) : 0;
+    var medals = ['🥇', '🥈', '🥉', '4.', '5.'];
+    var top5Html = '';
+    top5.forEach(function(u, idx) {
+      top5Html += '<div class="ga-top5-row"><span class="ga-top5-rank">' + medals[idx] + '</span><span class="ga-top5-name">' + u.name + '</span><span class="ga-top5-stat">' + u.count + ' katılım</span></div>';
+    });
+    main.innerHTML = '<h2 style="margin-bottom:18px">📊 Kulüp İstatistikleri</h2>'
+      + '<div class="ga-stat-row">'
+      + '<div class="ga-stat-box"><div class="n">' + memberCount + '</div><div class="l">Toplam Üye</div></div>'
+      + '<div class="ga-stat-box"><div class="n">' + eventCount + '</div><div class="l">Etkinlik</div></div>'
+      + '<div class="ga-stat-box"><div class="n">' + totalAttend + '</div><div class="l">Toplam Katılım</div></div>'
+      + '<div class="ga-stat-box"><div class="n">' + avgAttend + '</div><div class="l">Ort. Katılım</div></div>'
+      + '</div>'
+      + (top5Html ? '<div style="background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:16px"><h3 style="font-size:15px;font-weight:700;margin:0 0 12px">🏆 En Aktif Üyeler</h3><div class="ga-top5">' + top5Html + '</div></div>' : '')
+      + '<p style="font-size:12px;color:var(--muted);margin-top:14px;text-align:center">Veriler etkinlik katılımlarına göre hesaplanır</p>';
+  } catch(e) {
+    main.innerHTML = '<h2 style="margin-bottom:18px">📊 Kulüp İstatistikleri</h2><p style="color:var(--muted)">İstatistikler yüklenemedi</p>';
+  }
+};
+
+// syncProfileUI sonrası profil kulüplerini ve rozetlerini yükle
+var _origSyncProfile = window.syncProfileUI;
+if (_origSyncProfile) {
+  window.syncProfileUI = function() {
+    _origSyncProfile.apply(this, arguments);
+    setTimeout(function() {
+      window.loadProfileClubs && window.loadProfileClubs();
+      window.loadProfileBadges && window.loadProfileBadges();
+    }, 500);
+  };
+}
+
+// buildDashboard sonrası kulüp sıralamasını yükle
+var _origBuildDash = window.buildDashboard;
+if (typeof _origBuildDash === 'function') {
+  window.buildDashboard = function() {
+    _origBuildDash.apply(this, arguments);
+    setTimeout(function() {
+      window.loadDashClubRank && window.loadDashClubRank();
+    }, 600);
+  };
+}
 </script>
 
 <div id="error-boundary"><h4>Bir Sorun Oluştu</h4><p>Bir sorun oluştu. Sayfayı yenileyerek tekrar deneyin.</p><div class="err-btns"><button class="err-retry">Yenile</button><button class="err-dismiss">Kapat</button></div></div>

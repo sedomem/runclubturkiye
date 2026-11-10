@@ -12173,7 +12173,7 @@ function renderComments(pid, cmts) {
       +'<textarea class="comm-create-input" id="cmt-input-'+pid+'" placeholder="Yorum yaz... (max 140 karakter)" maxlength="140" rows="2" oninput="commCmtCount(this,\'cmt-cnt-char-'+pid+'\')" style="min-height:40px;font-size:13px"></textarea>'
       +'<span id="cmt-cnt-char-'+pid+'" style="position:absolute;bottom:6px;right:8px;font-size:10px;color:var(--muted)">140</span>'
       +'</div>'
-      +'<button class="btn btn-or btn-sm" style="flex-shrink:0" data-pid="'+pid+'" onclick="submitComment(this.dataset.pid)">Gönder</button>'
+      +'<button class="btn btn-or btn-sm" style="flex-shrink:0" data-pid="'+pid+'" onclick="submitPostComment(this.dataset.pid)">Gönder</button>'
       +'</div>'
       +'</div>';
   }
@@ -12186,7 +12186,7 @@ window.commCmtCount = function(ta, counterId) {
   if(el) { el.textContent = rem; el.style.color = rem < 20 ? '#e55' : 'var(--muted)'; }
 };
 
-window.submitComment = async function(pid) {
+window.submitPostComment = async function(pid) {
   if(!window.CU){ openAuth('login'); return; }
   const inp = document.getElementById('cmt-input-'+pid);
   const txt = inp ? inp.value.trim() : '';

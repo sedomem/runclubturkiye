@@ -1,7 +1,15 @@
 {
+  "functions": {
+    "api/render.js": { "includeFiles": "index.html" }
+  },
   "rewrites": [
     { "source": "/sitemap.xml", "destination": "/api/sitemap?type=index" },
     { "source": "/sitemap-:type.xml", "destination": "/api/sitemap?type=:type" },
+    { "source": "/haber/:slug", "destination": "/api/render?t=haber&s=:slug" },
+    { "source": "/yaris/:slug", "destination": "/api/render?t=yaris&s=:slug" },
+    { "source": "/kulup/:slug", "destination": "/api/render?t=kulup&s=:slug" },
+    { "source": "/etkinlik/:slug", "destination": "/api/render?t=etkinlik&s=:slug" },
+    { "source": "/:page(yaris-takvimi|kulupler|haberler|etkinlikler|topluluk|tartismalar|firsatlar|hakkimizda|iletisim|sss|kvkk|gizlilik|kullanim-kosullari)", "destination": "/api/render?t=page&s=:page" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

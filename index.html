@@ -3407,7 +3407,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
 import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut,sendPasswordResetEmail,updatePassword,reauthenticateWithCredential,EmailAuthProvider}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
-import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,deleteField}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getStorage,ref,uploadBytes,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import{getMessaging,getToken,onMessage}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
 
@@ -3576,7 +3576,7 @@ window.resetServiceWorker = async function() {
 const storage=getStorage(app);
 const gp=new GoogleAuthProvider();
 const SUPER_EMAIL='sedomem@gmail.com';
-window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL,sendPasswordResetEmail,updatePassword,reauthenticateWithCredential,EmailAuthProvider};
+window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,deleteField,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL,sendPasswordResetEmail,updatePassword,reauthenticateWithCredential,EmailAuthProvider};
 
 onAuthStateChanged(auth,async user=>{
   // Auth state geldi — loading'i HEMEN kapat
@@ -3587,6 +3587,19 @@ onAuthStateChanged(auth,async user=>{
     const d=snap.exists()?snap.data():{};
     const role=user.email===SUPER_EMAIL?'superadmin':(d.role||'member');
     window.CU={uid:user.uid,email:user.email,name:d.name||user.displayName||user.email.split('@')[0],role,totalKm:d.totalKm||0,eventCount:d.eventCount||0,clubCount:d.clubCount||0,badges:d.badges||[],...d};
+    // KVKK: sağlık/acil durum bilgileri ayrı, yalnızca kişinin kendisinin okuyabildiği alanda
+    try{
+      const HK=['bloodType','medicalNotes','emergencyContact'];
+      const hRef=doc(db,'users',user.uid,'private','health');
+      const hs=await getDoc(hRef);
+      const legacy={};HK.forEach(k=>{if(d[k]!==undefined&&d[k]!==null)legacy[k]=d[k];});
+      const merged=Object.assign({},legacy,hs.exists()?hs.data():{});
+      Object.assign(window.CU,merged);
+      if(Object.keys(legacy).length){
+        await setDoc(hRef,Object.assign({},merged,{updatedAt:serverTimestamp()}),{merge:true});
+        await updateDoc(doc(db,'users',user.uid),{bloodType:deleteField(),medicalNotes:deleteField(),emergencyContact:deleteField()});
+      }
+    }catch(e){console.warn('[health]',e.message);}
     // GroupAdmin için clubId cache — memberships'ten al
     if(role==='groupadmin'&&!window.CU.clubId){
       // Senkron yap — gNav açılmadan önce clubId hazır olsun
@@ -3607,7 +3620,7 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('nav-user').style.display='flex';
     setupRoleBtn();buildDashboard();syncProfileUI();
     if(typeof window.syncMobileMenu==='function')window.syncMobileMenu();
-    if(role==='superadmin')loadAdminBadges();
+    if(role==='superadmin'){loadAdminBadges();setTimeout(()=>window.migrateHealthData&&window.migrateHealthData(),4000);}
     // Push bildirim izni banner'ı göster
     setTimeout(()=>{if(typeof window.checkAndRequestPush==='function')window.checkAndRequestPush();},2000);
   }else{
@@ -3849,10 +3862,14 @@ window.saveProfile=async()=>{
     updatedAt:serverTimestamp()
   };
   // emailOptIn alanını saveProfile'den bağımsız tut — ayrı toggle ile yönetilir
+  // KVKK: sağlık/acil durum bilgilerini özel alana yaz, ana profilden kaldır
+  const health={emergencyContact:data.emergencyContact,bloodType:data.bloodType,medicalNotes:data.medicalNotes};
+  delete data.emergencyContact;delete data.bloodType;delete data.medicalNotes;
   try{
-    await setDoc(doc(db,'users',CU.uid),data,{merge:true});
+    await setDoc(doc(db,'users',CU.uid,'private','health'),Object.assign({},health,{updatedAt:serverTimestamp()}),{merge:true});
+    await setDoc(doc(db,'users',CU.uid),Object.assign({},data,{bloodType:deleteField(),medicalNotes:deleteField(),emergencyContact:deleteField()}),{merge:true});
     // Optimistic update: CU'yu hemen güncelle, UI yenile
-    Object.assign(CU, data);
+    Object.assign(CU, data, health);
     syncProfileUI();
     toast('Profil güncellendi ✓','ok');
   }catch(e){toast(e.message,'err');}
@@ -11062,11 +11079,11 @@ async function gLoadMembers(){
       el.innerHTML=`<div class="card" style="padding:24px;text-align:center;color:var(--muted)"><div style="font-size:36px;margin-bottom:10px">👥</div><p>Henüz üye yok.</p></div>`;
       return;
     }
-    const uids=[];snap.forEach(d=>uids.push(d.data().userId||d.data().uid));
-    const userSnaps=await Promise.all(uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid))));
-    // Kullanıcı verilerini topla
+    const mems=[];snap.forEach(d=>{const m=d.data();mems.push({uid:m.userId||m.uid,name:m.userName,email:m.userEmail});});
+    const userSnaps=await Promise.all(mems.map(m=>fb.getDoc(fb.doc(fb.db,'users',m.uid)).catch(()=>null)));
+    // Kullanıcı verilerini topla (profil okunamazsa üyelik kaydındaki ad/e-posta kullanılır)
     window._gMemberData=[];
-    userSnaps.forEach(s=>{if(s.exists())window._gMemberData.push({id:s.id,...s.data()});});
+    userSnaps.forEach((s,i)=>{if(s&&s.exists())window._gMemberData.push({id:s.id,...s.data()});else if(mems[i].uid)window._gMemberData.push({id:mems[i].uid,name:mems[i].name,email:mems[i].email});});
     let tbl='<div style="overflow-x:auto"><table style="min-width:700px"><thead><tr><th>Ad Soyad</th><th>E-posta</th><th>Telefon</th><th>Cinsiyet</th><th>Doğum Tarihi</th><th>Tişört</th><th>Şehir</th><th>Toplam km</th></tr></thead><tbody>';
     window._gMemberData.forEach(u=>{
       tbl+=`<tr>
@@ -11640,9 +11657,9 @@ window.gLoadEventAttendees=async(eventId,eventTitle)=>{
     const uids=[...new Set(rsvpRows.map(r=>r.userId).filter(Boolean))];
     const userMap={};
     if(uids.length){
-      const userProms=uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)));
+      const userProms=uids.map(uid=>fb.getDoc(fb.doc(fb.db,'users',uid)).catch(()=>null));
       const userDocs=await Promise.all(userProms);
-      userDocs.forEach(s=>{if(s.exists())userMap[s.id]=s.data();});
+      userDocs.forEach(s=>{if(s&&s.exists())userMap[s.id]=s.data();});
     }
     let tbl=`<p style="font-size:13px;color:var(--muted);margin-bottom:12px">Toplam <b style="color:var(--text)">${rsvpRows.length}</b> katılımcı</p>
       <div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse">
@@ -14452,6 +14469,27 @@ body.is-guest div.guest-only{display:flex!important}
 </script>
 
 <script id="fix-2026-11-13">
+// KVKK: süper admin girişinde eski profillerdeki sağlık bilgilerini özel alana taşır (tek seferlik)
+window.migrateHealthData=async function(){
+  var fb=window._fb;if(!fb||!fb.deleteField||!window.CU||window.CU.role!=='superadmin')return;
+  try{
+    var snap=await fb.getDocs(fb.collection(fb.db,'users'));var n=0;
+    for(var i=0;i<snap.docs.length;i++){
+      var d=snap.docs[i],u=d.data(),h={};
+      ['bloodType','medicalNotes','emergencyContact'].forEach(function(k){if(u[k]!==undefined)h[k]=u[k];});
+      if(!Object.keys(h).length)continue;
+      try{
+        var hRef=fb.doc(fb.db,'users',d.id,'private','health');
+        var ex=await fb.getDoc(hRef);
+        await fb.setDoc(hRef,Object.assign({},h,ex.exists()?ex.data():{},{updatedAt:fb.serverTimestamp()}),{merge:true});
+        await fb.updateDoc(fb.doc(fb.db,'users',d.id),{bloodType:fb.deleteField(),medicalNotes:fb.deleteField(),emergencyContact:fb.deleteField()});
+        n++;
+      }catch(e){console.warn('[migrateHealth]',d.id,e.message);}
+    }
+    if(n)console.log('[migrateHealth] taşınan profil:',n);
+    window.__healthMigrated=n;
+  }catch(e){console.warn('[migrateHealth]',e.message);}
+};
 // /yonetici adresi doğrudan süper admin giriş penceresini açar
 (function(){
   var wantSA=location.pathname.replace(/\/+$/,'')==='/yonetici';

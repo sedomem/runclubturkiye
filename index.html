@@ -14525,7 +14525,164 @@ body.is-guest div.guest-only{display:flex!important}
 })();
 </script>
 
+
+<style id="disc-v2">
+#pg-discussions .disc-hero{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:16px}
+#pg-discussions .disc-stats{display:flex;gap:8px;flex-wrap:wrap}
+#pg-discussions .disc-stat{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--muted)}
+#pg-discussions .disc-stat b{color:var(--text)}
+#pg-discussions .disc-hub-grid{grid-template-columns:330px 1fr;gap:18px;align-items:start}
+#pg-discussions .disc-sidebar{padding:12px;max-height:calc(100vh - 110px);display:flex;flex-direction:column;overflow:hidden}
+#pg-discussions #disc-races-list{overflow-y:auto;flex:1;margin:0 -4px;padding:0 4px}
+.disc-seg{display:flex;background:var(--bg2,#f3eee8);border-radius:10px;padding:3px;gap:3px;margin-bottom:10px}
+.disc-seg button{flex:1;border:none;background:none;padding:7px 4px;border-radius:8px;font-size:12px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap}
+.disc-seg button.on{background:var(--card);color:var(--or);box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.disc-ri{display:flex;gap:10px;align-items:center;padding:9px 8px;border-radius:10px;cursor:pointer;border:1px solid transparent;margin-bottom:2px}
+.disc-ri:hover{background:var(--bg2,#f6f1eb)}
+.disc-ri.active{background:rgba(232,98,42,.09);border-color:rgba(232,98,42,.45)}
+.disc-date{width:44px;flex-shrink:0;text-align:center;border-radius:8px;background:var(--bg2,#f3eee8);padding:4px 0;line-height:1.1}
+.disc-date .d{font-size:16px;font-weight:800;color:var(--text)}
+.disc-date .m{font-size:10px;font-weight:700;color:var(--or);text-transform:uppercase}
+.disc-ri.past .disc-date .m{color:var(--muted)}
+.disc-ri .t{font-size:13px;font-weight:600;color:var(--text);line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.disc-ri .l{font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.disc-cnt{flex-shrink:0;font-size:11px;font-weight:700;border-radius:12px;padding:2px 8px;background:var(--bg2,#f3eee8);color:var(--muted)}
+.disc-cnt.has{background:rgba(232,98,42,.12);color:var(--or)}
+.disc-head{display:flex;gap:14px;align-items:flex-start;padding-bottom:14px;margin-bottom:14px;border-bottom:1px solid var(--border)}
+.disc-head .disc-date{width:56px;padding:6px 0}.disc-head .disc-date .d{font-size:22px}
+.disc-tabs{display:flex;gap:4px;border-bottom:1px solid var(--border);margin-bottom:14px}
+.disc-tabs button{border:none;background:none;padding:10px 12px;font-size:13px;font-weight:700;color:var(--muted);border-bottom:2px solid transparent;cursor:pointer}
+.disc-tabs button.on{color:var(--or);border-bottom-color:var(--or)}
+.disc-compose{background:var(--bg2,#f6f1eb);border-radius:12px;padding:12px;margin-bottom:16px}
+.disc-compose textarea{width:100%;border:1px solid var(--border);border-radius:10px;padding:10px;font-size:14px;background:var(--card);color:var(--text);resize:vertical;min-height:70px;box-sizing:border-box}
+.disc-chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.disc-chips label{cursor:pointer}
+.disc-chips input{display:none}
+.disc-chips span{display:inline-block;font-size:12px;padding:5px 10px;border-radius:14px;border:1px solid var(--border);background:var(--card);color:var(--muted)}
+.disc-chips input:checked+span{background:var(--or);border-color:var(--or);color:#fff}
+.disc-stars{display:flex;gap:2px;align-items:center;font-size:12px;color:var(--muted)}
+.disc-stars button{border:none;background:none;font-size:20px;cursor:pointer;color:#d6cfc7;padding:0 1px;line-height:1}
+.disc-stars button.on{color:#f5a623}
+.disc-feed-item{padding:12px 0;border-bottom:1px solid var(--border);cursor:pointer}
+.disc-feed-item:hover .ft{color:var(--or)}
+.disc-back{display:none}
+@media(max-width:860px){
+  #pg-discussions .disc-hub-grid{grid-template-columns:1fr;gap:12px}
+  #pg-discussions .disc-sidebar{position:relative;top:0;max-height:none;display:flex;flex-direction:column;white-space:normal;overflow:visible;padding:10px;border-bottom:1px solid var(--border)}
+  #pg-discussions #disc-races-list{overflow:visible}
+  #pg-discussions .disc-ri{min-width:0;margin-right:0}
+  #pg-discussions .disc-main{padding:14px;min-height:0}
+  #pg-discussions .disc-hub-grid.sel .disc-sidebar{display:none}
+  #pg-discussions .disc-hub-grid:not(.sel) .disc-main{display:none}
+  #pg-discussions .disc-hub-grid:not(.sel).feed .disc-main{display:block}
+  .disc-back{display:inline-flex;margin-bottom:10px}
+  .disc-head{gap:10px}.disc-head h2{font-size:17px!important}
+  .disc-tabs button{flex:1}
+}
+</style>
 <script id="fix-2026-11-13">
+// ═══ YARIŞ TARTIŞMA MERKEZİ v2 ═══
+(function(){
+  var MON=['OCA','ŞUB','MAR','NİS','MAY','HAZ','TEM','AĞU','EYL','EKİ','KAS','ARA'];
+  window._discFilter=window._discFilter||'up';
+  window._discAll=null;
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function dbadge(d){var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(d||'');return '<div class="disc-date"><div class="d">'+(m?+m[3]:'–')+'</div><div class="m">'+(m?MON[+m[2]-1]:'')+'</div></div>';}
+  function today(){return new Date().toISOString().slice(0,10);}
+  function counts(){var c={};(window._discAll||[]).forEach(function(d){if(d.isApproved!==false)c[d.raceId]=(c[d.raceId]||0)+1;});return c;}
+  async function loadAll(){
+    var fb=window._fb;if(!fb)return;
+    try{var sn=await fb.getDocs(fb.collection(fb.db,'discussions'));window._discAll=sn.docs.map(function(d){return Object.assign({id:d.id},d.data());});}catch(e){window._discAll=[];}
+  }
+  function hero(){
+    var pg=document.getElementById('pg-discussions');if(!pg)return;
+    var h=pg.querySelector('.disc-hero');
+    if(!h){var h2=pg.querySelector('h2');var p=h2&&h2.nextElementSibling;h=document.createElement('div');h.className='disc-hero';
+      h.innerHTML='<div><h2 style="margin-bottom:4px">💬 Yarış Tartışma Merkezi</h2><p style="color:var(--muted);font-size:13px;margin:0">Koştuğun yarışı değerlendir, koşacağın yarış için ipucu al.</p></div><div class="disc-stats" id="disc-stats"></div>';
+      if(h2){h2.parentNode.insertBefore(h,h2);h2.remove();if(p&&p.tagName==='P')p.remove();}}
+    var c=counts(),races=window.RACES||[],up=races.filter(function(r){return r.date>=today();}).length;
+    var st=document.getElementById('disc-stats');if(st)st.innerHTML='<span class="disc-stat"><b>'+up+'</b> yaklaşan yarış</span><span class="disc-stat"><b>'+Object.values(c).reduce(function(a,b){return a+b;},0)+'</b> yorum</span><span class="disc-stat"><b>'+Object.keys(c).length+'</b> yorumlu yarış</span>';
+    // segment
+    var side=pg.querySelector('.disc-sidebar'),list=document.getElementById('disc-races-list');
+    if(side&&list&&!document.getElementById('disc-seg')){var sg=document.createElement('div');sg.className='disc-seg';sg.id='disc-seg';
+      sg.innerHTML='<button data-f="up">Yaklaşan</button><button data-f="past">Geçmiş</button><button data-f="talk">Yorumlu</button>';
+      sg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;window._discFilter=b.dataset.f;window.renderDiscRacesList();});
+      list.parentNode.insertBefore(sg,list);}
+    var srch=document.getElementById('disc-search');if(srch)srch.placeholder='🔍 Yarış veya şehir ara...';
+  }
+  window.renderDiscRacesList=function(){
+    var el=document.getElementById('disc-races-list');if(!el)return;
+    var q=(document.getElementById('disc-search')||{}).value||'';q=q.toLocaleLowerCase('tr').trim();
+    var c=counts(),t=today(),f=window._discFilter;
+    document.querySelectorAll('#disc-seg button').forEach(function(b){b.classList.toggle('on',b.dataset.f===f);});
+    var races=(window.RACES||[]).slice();
+    if(q)races=races.filter(function(r){return ((r.name||'')+' '+(r.location||'')).toLocaleLowerCase('tr').indexOf(q)>-1;});
+    else if(f==='up')races=races.filter(function(r){return r.date>=t;});
+    else if(f==='past')races=races.filter(function(r){return r.date&&r.date<t;});
+    else if(f==='talk')races=races.filter(function(r){return c[r.id];});
+    races.sort(function(a,b){if(f==='talk'&&!q)return (c[b.id]||0)-(c[a.id]||0);return f==='past'&&!q?(a.date<b.date?1:-1):(a.date<b.date?-1:1);});
+    if(!races.length){el.innerHTML='<p style="color:var(--muted);text-align:center;padding:24px 8px;font-size:13px">'+(f==='talk'&&!q?'Henüz yorum yapılmış yarış yok. İlk yorumu sen yap!':'Yarış bulunamadı.')+'</p>';return;}
+    el.innerHTML=races.map(function(r){var n=c[r.id]||0;return '<div class="disc-ri'+(window._selectedDiscRaceId===r.id?' active':'')+(r.date<t?' past':'')+'" onclick="selectDiscRace(\''+r.id+'\')">'+dbadge(r.date)+'<div style="flex:1;min-width:0"><div class="t">'+esc(r.name||'Yarış')+'</div><div class="l">📍 '+esc(r.location||'—')+'</div></div><span class="disc-cnt'+(n?' has':'')+'">💬 '+n+'</span></div>';}).join('');
+  };
+  window.filterDiscRaces=function(){window.renderDiscRacesList();};
+  function feed(){
+    var main=document.getElementById('disc-content');if(!main)return;
+    var items=(window._discAll||[]).filter(function(d){return d.isApproved!==false;}).sort(function(a,b){return ((b.timestamp&&b.timestamp.seconds)||0)-((a.timestamp&&a.timestamp.seconds)||0);}).slice(0,8);
+    var c=counts(),t=today();
+    var soon=(window.RACES||[]).filter(function(r){return r.date>=t;}).sort(function(a,b){return a.date<b.date?-1:1;}).slice(0,4);
+    main.innerHTML='<h3 style="font-size:16px;margin-bottom:4px">🕑 Son yorumlar</h3><p style="font-size:12px;color:var(--muted);margin-bottom:6px">Koşucuların yarışlar hakkında son paylaşımları</p>'
+      +(items.length?items.map(function(d){var date=d.timestamp&&d.timestamp.toDate?d.timestamp.toDate().toLocaleDateString('tr-TR',{day:'numeric',month:'short'}):'';return '<div class="disc-feed-item" onclick="selectDiscRace(\''+d.raceId+'\',true)"><div class="ft" style="font-size:12px;font-weight:700;color:var(--text)">🏁 '+esc(d.raceName||'Yarış')+'</div><div style="font-size:13px;margin:4px 0;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">'+esc(window.discText?window.discText(d):d.comment)+'</div><div style="font-size:11px;color:var(--muted)">'+esc(d.userName||'Koşucu')+' · '+date+' · ▲ '+((d.upvotes||[]).length)+'</div></div>';}).join('')
+        :'<div style="text-align:center;padding:26px 10px;color:var(--muted);font-size:13px"><div style="font-size:36px">💬</div>Henüz yorum yok. Koştuğun bir yarışı seç ve ilk değerlendirmeyi sen yaz!</div>')
+      +'<h3 style="font-size:16px;margin:22px 0 8px">🔥 Yaklaşan yarışlar — soru sor, ipucu al</h3>'
+      +soon.map(function(r){return '<div class="disc-ri" onclick="selectDiscRace(\''+r.id+'\')">'+dbadge(r.date)+'<div style="flex:1;min-width:0"><div class="t">'+esc(r.name)+'</div><div class="l">📍 '+esc(r.location||'')+'</div></div><span class="disc-cnt'+(c[r.id]?' has':'')+'">💬 '+(c[r.id]||0)+'</span></div>';}).join('');
+  }
+  window.renderDiscHub=async function(){
+    var adminEl=document.getElementById('disc-admin-add');if(adminEl)adminEl.style.display=(window.CU&&window.CU.role==='superadmin')?'block':'none';
+    var grid=document.querySelector('#pg-discussions .disc-hub-grid');
+    hero();window.renderDiscRacesList();
+    if(window._discAll===null){await loadAll();hero();window.renderDiscRacesList();}
+    if(!window._selectedDiscRaceId){if(grid){grid.classList.remove('sel');grid.classList.toggle('feed',window.innerWidth>860);}feed();}
+  };
+  window.discBack=function(){window._selectedDiscRaceId=null;var g=document.querySelector('#pg-discussions .disc-hub-grid');if(g)g.classList.remove('sel');window.renderDiscRacesList();feed();window.scrollTo(0,0);};
+  window.discTab=function(tab,id){['ozet','tartisma'].forEach(function(k){var t=document.getElementById('tab-'+k+'-'+id);if(t)t.style.display=k===tab?'block':'none';var b=document.getElementById('btn-'+k+'-'+id);if(b)b.classList.toggle('on',k===tab);});};
+  window.switchDiscTab=window.discTab;
+  window.discStar=function(id,n){var sel=document.getElementById('disc-user-rating-'+id);if(sel)sel.value=String(n);document.querySelectorAll('#disc-stars-'+id+' button').forEach(function(b,i){b.classList.toggle('on',i<n);});};
+  window.selectDiscRace=function(raceId){
+    window._selectedDiscRaceId=raceId;
+    var r=(window.RACES||[]).find(function(x){return x.id===raceId;});
+    var grid=document.querySelector('#pg-discussions .disc-hub-grid');if(grid)grid.classList.add('sel');
+    window.renderDiscRacesList();
+    var main=document.getElementById('disc-content');if(!main)return;
+    if(!r){main.innerHTML='<p style="color:var(--muted);padding:20px">Bu yarış artık takvimde değil.</p>';return;}
+    var isSA=window.CU&&window.CU.role==='superadmin';var rep=r.report||{};var hasRep=rep.ozet||rep.parkurPuan||rep.teknik;
+    var nm=(r.name||'').replace(/\\/g,'').replace(/'/g,"\\'");
+    var tags=['Parkur','Ekipman','Beslenme','Lojistik','Konaklama','Organizasyon','Ölçüm'];
+    var stars=function(n){n=+n||0;return '⭐'.repeat(n)+'☆'.repeat(5-n);};
+    var past=r.date&&r.date<today();
+    main.innerHTML='<button class="btn btn-ghost btn-sm disc-back" onclick="discBack()">← Yarışlar</button>'
+      +'<div class="disc-head">'+dbadge(r.date)+'<div style="flex:1;min-width:0"><h2 style="font-size:19px;margin:0 0 4px;line-height:1.25">'+esc(r.name)+'</h2>'
+      +'<div style="font-size:12px;color:var(--muted)">📍 '+esc(r.location||'—')+(r.distance?' · 📏 '+esc(r.distance):'')+' · <span id="disc-count-'+r.id+'">…</span></div>'
+      +'<div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px"><a class="btn btn-ghost btn-sm" href="/yaris/'+esc(r.slug||r.id)+'" onclick="event.preventDefault();openRace(\''+r.id+'\')" style="font-size:11px">🏁 Yarış sayfası</a>'
+      +(isSA?'<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="editDiscRace(\''+r.id+'\')">✏️ Rapor</button><button class="btn btn-red btn-sm" style="font-size:11px" onclick="deleteDiscRace(\''+r.id+'\')">🗑</button>':'')
+      +'</div></div></div>'
+      +'<div class="disc-tabs"><button id="btn-tartisma-'+r.id+'" class="on" onclick="discTab(\'tartisma\',\''+r.id+'\')">💬 Yorumlar</button><button id="btn-ozet-'+r.id+'" onclick="discTab(\'ozet\',\''+r.id+'\')">📋 Yarış Raporu'+(hasRep?'':' <span style="font-weight:400;font-size:11px">(yok)</span>')+'</button></div>'
+      +'<div id="tab-ozet-'+r.id+'" style="display:none">'+(hasRep?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--muted)">PARKUR</div><div style="font-size:16px;margin-top:4px">'+stars(rep.parkurPuan)+'</div></div><div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--muted)">ORGANİZASYON</div><div style="font-size:16px;margin-top:4px">'+stars(rep.orgPuan)+'</div></div></div>'+(rep.teknik?'<p style="font-size:13px;margin-bottom:10px"><b>Teknik detaylar:</b> '+esc(rep.teknik)+'</p>':'')+(rep.ozet?'<div style="font-size:13px;line-height:1.6;color:var(--text)">'+String(rep.ozet).replace(/<script[\s\S]*?<\/script>/gi,'')+'</div>':''):'<div style="text-align:center;padding:30px 10px;color:var(--muted);font-size:13px">Bu yarış için henüz değerlendirme raporu yok.'+(isSA?'<br><button class="btn btn-or btn-sm" style="margin-top:10px" onclick="editDiscRace(\''+r.id+'\')">+ Rapor ekle</button>':'')+'</div>')+'</div>'
+      +'<div id="tab-tartisma-'+r.id+'">'
+      +(window.CU?'<div class="disc-compose"><textarea id="disc-input-'+r.id+'" maxlength="1500" placeholder="'+(past?'Bu yarışı koştun mu? Parkur, organizasyon, ipuçları…':'Bu yarışa hazırlanıyor musun? Soru sor ya da ipucu paylaş…')+'" oninput="updateDiscCharCount(\''+r.id+'\')"></textarea>'
+        +'<div class="disc-chips">'+tags.map(function(t){return '<label><input type="checkbox" class="disc-tag-'+r.id+'" value="'+t+'"/><span>#'+t+'</span></label>';}).join('')+'</div>'
+        +'<div style="display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><div class="disc-stars" id="disc-stars-'+r.id+'"><span style="margin-right:4px">Puanın:</span>'+[1,2,3,4,5].map(function(n){return '<button type="button" onclick="discStar(\''+r.id+'\','+n+')" aria-label="'+n+' yıldız">★</button>';}).join('')+'</div><select id="disc-user-rating-'+r.id+'" style="display:none"><option value=""></option><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select>'
+        +'<div style="display:flex;align-items:center;gap:10px"><span id="disc-char-'+r.id+'" style="font-size:11px;color:var(--muted)">0 / 1500</span><button class="btn btn-or btn-sm" onclick="postDiscussion(\''+r.id+'\',\''+nm+'\')">Paylaş</button></div></div></div>'
+       :'<div class="disc-compose" style="text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için ücretsiz üye ol ya da giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth(\'register\')">Üye Ol</button> <button class="btn btn-ghost btn-sm" onclick="openAuth(\'login\')">Giriş Yap</button></div>')
+      +'<div style="display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:8px"><button class="filt on" onclick="filterDiscussions(\''+r.id+'\',\'\',this)">Tümü</button>'+tags.map(function(t){return '<button class="filt" onclick="filterDiscussions(\''+r.id+'\',\''+t+'\',this)">#'+t+'</button>';}).join('')+'</div>'
+      +'<div id="discussions-list-'+r.id+'" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div></div>';
+    if(window.loadDiscussions)window.loadDiscussions(raceId);
+    if(window.innerWidth<=860)window.scrollTo(0,(document.getElementById('pg-discussions').offsetTop||0));
+  };
+  // Yeni yorum sonrası sayıları tazele
+  var _post=window.postDiscussion;
+  if(_post&&!_post._v2){window.postDiscussion=async function(){await _post.apply(this,arguments);await loadAll();hero();window.renderDiscRacesList();};window.postDiscussion._v2=1;}
+})();
+
 // ═══ SÜPER ADMİN: KOMPAKT GENEL BAKIŞ ═══
 window.renderAdminOverview=async function(el){
   var fb=window._fb;if(!el||!fb)return;

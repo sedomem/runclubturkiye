@@ -1948,7 +1948,9 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <span id="club-count-label" style="font-size:12px;color:var(--muted);margin-left:auto"></span>
   </div>
   <div class="grid g3" id="clubs-list"></div>
+  <div id="club-city-links" style="margin-top:28px"></div>
 </div></div>
+<div class="pg" id="pg-city"><div class="container sec" id="city-content"></div></div>
 <div class="pg" id="pg-club-detail"><div class="container sec"><button class="btn btn-ghost btn-sm" onclick="nav('clubs')" style="margin-bottom:18px">← Geri</button><div id="club-detail-content"></div></div>  <div class="sec-sm" style="padding:24px 0 16px"><div class="container">
     <p style="text-align:center;font-size:11px;color:var(--muted);letter-spacing:1px;margin-bottom:16px;text-transform:uppercase">Sponsorlarımız</p>
     <div class="sponsor-strip sponsor-strip-inline"></div>
@@ -6158,6 +6160,8 @@ window.cleanSlug = function(slug) {
 };
 function routerInit(){
   const path=window.location.pathname;
+  // Şehir sayfaları: /kulupler/istanbul
+  if(/^\/kulupler\/[^/]+\/?$/.test(path)&&window.openCity){window.openCity(decodeURIComponent(path.split('/')[2]),true);return;}
   if(path==='/'||path===''){
     routerUpdateMeta('home');
     return;
@@ -14484,6 +14488,60 @@ body.is-guest div.guest-only{display:flex!important}
 </script>
 
 <script id="fix-2026-11-13">
+// ═══ ŞEHİR SAYFALARI: /kulupler/{il} ═══
+(function(){
+  var P=['Adana','Adıyaman','Afyonkarahisar','Ağrı','Aksaray','Amasya','Ankara','Antalya','Ardahan','Artvin','Aydın','Balıkesir','Bartın','Batman','Bayburt','Bilecik','Bingöl','Bitlis','Bolu','Burdur','Bursa','Çanakkale','Çankırı','Çorum','Denizli','Diyarbakır','Düzce','Edirne','Elazığ','Erzincan','Erzurum','Eskişehir','Gaziantep','Giresun','Gümüşhane','Hakkari','Hatay','Iğdır','Isparta','İstanbul','İzmir','Kahramanmaraş','Karabük','Karaman','Kars','Kastamonu','Kayseri','Kilis','Kırıkkale','Kırklareli','Kırşehir','Kocaeli','Konya','Kütahya','Malatya','Manisa','Mardin','Mersin','Muğla','Muş','Nevşehir','Niğde','Ordu','Osmaniye','Rize','Sakarya','Samsun','Şanlıurfa','Siirt','Sinop','Sivas','Şırnak','Tekirdağ','Tokat','Trabzon','Tunceli','Uşak','Van','Yalova','Yozgat','Zonguldak'];
+  var AL={urfa:'Şanlıurfa',maras:'Kahramanmaraş',afyon:'Afyonkarahisar',antep:'Gaziantep',icel:'Mersin',izmit:'Kocaeli'};
+  function sl(x){return String(x||'').replace(/İ/g,'i').replace(/I/g,'ı').toLowerCase().replace(/ç/g,'c').replace(/ğ/g,'g').replace(/ı/g,'i').replace(/ö/g,'o').replace(/ş/g,'s').replace(/ü/g,'u').replace(/â/g,'a').replace(/î/g,'i').replace(/û/g,'u').replace(/[^a-z0-9]+/g,'-').replace(/^-+|-+$/g,'');}
+  var BY={};P.forEach(function(p){BY[sl(p)]=p;});
+  function cityOf(t){if(!t)return null;var parts=String(t).split(',');function sc(x){var k=sl(x).split('-');for(var i=k.length-1;i>=0;i--){if(BY[k[i]])return BY[k[i]];if(AL[k[i]])return AL[k[i]];}return null;}return sc(parts[parts.length-1])||sc(t);}
+  function loc(n){var l=String(n).replace(/I/g,'ı').replace(/İ/g,'i').toLowerCase();var v=(l.match(/[aıoueiöü]/g)||['e']).pop();return n+"'"+(/[çfhkpsşt]$/.test(l)?'t':'d')+(/[aıou]/.test(v)?'a':'e');}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  window.cityOf=cityOf;window.citySlug=sl;
+  function data(){
+    var today=new Date().toISOString().slice(0,10),map={};
+    function g(c){return map[c]=map[c]||{name:c,slug:sl(c),clubs:[],races:[]};}
+    (window.CLUBS||[]).filter(function(c){return c.name;}).forEach(function(c){var ct=cityOf(c.city);if(ct)g(ct).clubs.push(c);});
+    (window.RACES||[]).filter(function(r){return r.date&&r.date>=today;}).forEach(function(r){var ct=cityOf(r.location);if(ct)g(ct).races.push(r);});
+    Object.keys(map).forEach(function(k){map[k].races.sort(function(a,b){return a.date<b.date?-1:1;});});
+    var list=Object.keys(map).map(function(k){return map[k];}).filter(function(x){return x.clubs.length>=1||x.races.length>=2;}).sort(function(a,b){return (b.clubs.length*5+b.races.length)-(a.clubs.length*5+a.races.length);});
+    return {map:map,list:list};
+  }
+  function chips(list,cur){return '<div style="display:flex;flex-wrap:wrap;gap:8px">'+list.filter(function(x){return x.name!==cur;}).map(function(x){return '<a href="/kulupler/'+x.slug+'" onclick="event.preventDefault();openCity(\''+x.slug+'\')" class="tag" style="cursor:pointer;padding:6px 12px;font-size:13px;text-decoration:none">📍 '+esc(x.name)+(x.clubs.length?' · '+x.clubs.length+' kulüp':'')+'</a>';}).join('')+'</div>';}
+  window.renderClubCityLinks=function(){
+    var el=document.getElementById('club-city-links');if(!el)return;
+    var d=data();if(!d.list.length){el.innerHTML='';return;}
+    el.innerHTML='<h3 style="font-size:16px;margin-bottom:12px">📍 Şehrine göre koşu kulüpleri ve koşu grupları</h3>'+chips(d.list);
+  };
+  function ready(){return (window.CLUBS||[]).length&&(window.RACES||[]).length;}
+  window.openCity=function(slug,fromRouter){
+    slug=sl(slug);var name=BY[slug];
+    if(!name){if(window.nav)nav('clubs');return;}
+    if(!ready()){var n=0;(function w(){if(ready()||n++>40)window.openCity(slug,fromRouter);else setTimeout(w,250);})();return;}
+    if(window.nav)nav('city');
+    var path='/kulupler/'+slug;
+    if(location.pathname!==path)history.pushState({pageId:'clubs',dynamicSlug:slug},'',path);
+    var d=data(),x=d.map[name]||{name:name,slug:slug,clubs:[],races:[]},L=loc(name);
+    var el=document.getElementById('city-content');if(!el)return;
+    var clubsHtml=x.clubs.length?'<div class="grid g3">'+x.clubs.map(function(c){return window.clubCard?window.clubCard(c):'<div class="card" onclick="openClub(\''+c.id+'\')">'+esc(c.name)+'</div>';}).join('')+'</div>'
+      :'<div class="card" style="padding:22px;text-align:center"><p style="margin-bottom:12px">Henüz '+esc(L)+' kayıtlı koşu kulübü yok. Bir kulüp ya da koşu grubu yönetiyorsan ücretsiz ekleyebilirsin.</p><button class="btn btn-or" onclick="openAuth(\'groupadmin\')">Kulübünü Ekle</button></div>';
+    var racesHtml=x.races.length?'<div class="card" style="padding:6px 0">'+x.races.map(function(r){return '<a href="/yaris/'+esc(r.slug||r.id)+'" onclick="event.preventDefault();openRace(\''+r.id+'\')" style="display:flex;gap:12px;align-items:center;padding:12px 16px;border-bottom:1px solid var(--border);text-decoration:none;color:inherit"><div style="min-width:74px;font-weight:700;color:var(--or);font-size:13px">'+esc(window.fmtTRDate?fmtTRDate(r.date):r.date)+'</div><div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">'+esc(r.name)+'</div><div style="font-size:12px;color:var(--muted)">'+esc(r.location||'')+(r.distance?' · '+esc(r.distance):'')+'</div></div><div style="color:var(--muted)">›</div></a>';}).join('')+'</div>'
+      :'<p style="color:var(--muted)">Şu anda '+esc(L)+' listelenen yarış yok. <a href="/yaris-takvimi" onclick="event.preventDefault();nav(\'races\')" style="color:var(--or)">Tüm yarış takvimine bak →</a></p>';
+    el.innerHTML='<nav style="font-size:13px;color:var(--muted);margin-bottom:14px"><a href="/" onclick="event.preventDefault();nav(\'home\')" style="color:var(--muted)">Ana Sayfa</a> › <a href="/kulupler" onclick="event.preventDefault();nav(\'clubs\')" style="color:var(--muted)">Koşu Kulüpleri</a> › '+esc(name)+'</nav>'
+      +'<h1 style="font-size:clamp(24px,4vw,34px);margin-bottom:10px">'+esc(name)+' Koşu Kulüpleri ve Koşu Grupları</h1>'
+      +'<p style="color:var(--muted);max-width:720px;line-height:1.65;margin-bottom:8px">'+esc(L)+' birlikte koşacak bir grup ya da hedef koyacak bir yarış mı arıyorsun? Bu sayfada '+esc(name)+' koşu kulüplerini ve önümüzdeki aylarda '+esc(L)+' düzenlenecek koşu yarışlarını bir arada bulabilirsin. Kulüp profillerinde koşu programlarını ve buluşma noktalarını görebilir, ücretsiz üye olarak katılabilirsin.</p>'
+      +'<p style="font-size:13px;margin-bottom:22px"><b>'+x.clubs.length+'</b> kulüp · <b>'+x.races.length+'</b> yaklaşan yarış</p>'
+      +(window.CU?'':'<div style="margin-bottom:24px"><button class="btn btn-or" onclick="openAuth(\'register\')">Ücretsiz Üye Ol</button></div>')
+      +'<h2 style="font-size:20px;margin:8px 0 14px">'+esc(L)+'ki koşu kulüpleri</h2>'+clubsHtml
+      +'<h2 style="font-size:20px;margin:30px 0 14px">'+esc(L)+' yaklaşan koşu yarışları</h2>'+racesHtml
+      +(d.list.length?'<h2 style="font-size:18px;margin:30px 0 12px">Diğer şehirlerde koşu kulüpleri</h2>'+chips(d.list,name):'');
+    if(window.updateSEOMeta)updateSEOMeta(name+' Koşu Kulüpleri ve Koşu Grupları',name+' koşu kulüpleri ve koşu grupları: '+(x.clubs.length?x.clubs.length+' kulüp':'kulüpler')+(x.races.length?', '+x.races.length+' yaklaşan yarış':'')+'. '+L+' birlikte koşacak grubu ve hedef yarışını bul, ücretsiz katıl.','https://www.runclubturkiye.com'+path);
+    window.scrollTo(0,0);
+  };
+  // Kulüpler sayfasında şehir bağlantılarını göster
+  var t=0,iv=setInterval(function(){if(ready()){window.renderClubCityLinks();clearInterval(iv);}else if(++t>80)clearInterval(iv);},500);
+})();
+
 // ═══ SÜPER ADMİN BİLDİRİMLERİ ═══
 window.notifyAdmin=function(type,title,body,section){
   try{

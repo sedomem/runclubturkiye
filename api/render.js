@@ -4,6 +4,7 @@
 // Uygulama yüklendiğinde ön-render bloğu kaldırılır; kullanıcı aynı içeriği SPA'da görür.
 const fs = require('fs');
 const path = require('path');
+const { slugify, cityOf, loc, BY_SLUG } = require('./_cities');
 
 const SITE = 'https://www.runclubturkiye.com';
 const FS = 'https://firestore.googleapis.com/v1/projects/runclubturkiye/databases/(default)/documents';
@@ -50,6 +51,33 @@ async function byId(collection, id) {
   return obj(await r.json());
 }
 
+async function listAll(collection, fields) {
+  const out = []; let token = '';
+  for (let i = 0; i < 10; i++) {
+    const p = new URLSearchParams({ pageSize: '300' }); fields.forEach(f => p.append('mask.fieldPaths', f)); if (token) p.set('pageToken', token);
+    const r = await fetch(`${FS}/${collection}?${p}`); if (!r.ok) throw new Error('firestore ' + r.status);
+    const j = await r.json(); (j.documents || []).forEach(d => out.push(obj(d))); if (!j.nextPageToken) break; token = j.nextPageToken;
+  }
+  return out;
+}
+// Şehir verisi: kulüpler + yaklaşan yarışlar, ile göre gruplu
+async function cityData() {
+  const [clubs, races] = await Promise.all([listAll('clubs', ['name', 'city', 'desc']), listAll('races', ['name', 'slug', 'date', 'location', 'distance'])]);
+  const today = new Date().toISOString().slice(0, 10);
+  const map = {};
+  const get = c => (map[c] = map[c] || { name: c, slug: slugify(c), clubs: [], races: [] });
+  clubs.filter(c => c.name).forEach(c => { const ct = cityOf(c.city); if (ct) get(ct).clubs.push(c); });
+  races.filter(r => r.date && r.date >= today).forEach(r => { const ct = cityOf(r.location); if (ct) get(ct).races.push(r); });
+  Object.values(map).forEach(x => x.races.sort((a, b) => a.date < b.date ? -1 : 1));
+  const qualifies = x => x.clubs.length >= 1 || x.races.length >= 2;
+  const list = Object.values(map).filter(qualifies).sort((a, b) => (b.clubs.length * 5 + b.races.length) - (a.clubs.length * 5 + a.races.length));
+  return { map, list, qualifies };
+}
+function cityLinks(list, current) {
+  return '<ul style="display:flex;flex-wrap:wrap;gap:8px;list-style:none;padding:0">' + list.filter(x => x.name !== current).map(x =>
+    `<li><a href="/kulupler/${x.slug}">${esc(x.name)} koşu kulüpleri</a></li>`).join('') + '</ul>';
+}
+
 const esc = s => String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
 const plain = s => String(s || '').replace(/<[^>]*>/g, ' ').replace(/&nbsp;/g, ' ').replace(/\s+/g, ' ').trim();
 function short(s, n) { s = plain(s); if (s.length <= n) return s; s = s.slice(0, n - 3); return s.slice(0, Math.max(s.lastIndexOf(' '), n - 40)) + '…'; }
@@ -86,6 +114,7 @@ function apply(html, m) {
   html = html.replace(/<meta name="twitter:title"[^>]*>/g, `<meta name="twitter:title" content="${t}"/>`);
   html = html.replace(/<meta name="twitter:description"[^>]*>/g, `<meta name="twitter:description" content="${d}"/>`);
   html = html.replace(/<meta name="twitter:image"[^>]*>/g, `<meta name="twitter:image" content="${img}"/>`);
+  if (m.noindex) html = html.replace(/<meta name="robots"[^>]*>/g, '').replace('</head>', '<meta name="robots" content="noindex, follow"/>\n</head>');
   if (m.jsonld) html = html.replace('</head>', `<script type="application/ld+json">${JSON.stringify(m.jsonld).replace(/</g, '\\u003c')}</script>\n</head>`);
   if (m.content) {
     const block = `<div id="ssr-seo" style="max-width:820px;margin:0 auto;padding:96px 16px 32px;font-family:system-ui,sans-serif;line-height:1.6">${m.content}</div>` +
@@ -98,7 +127,33 @@ function apply(html, m) {
 async function meta(t, s) {
   if (t === 'page') {
     const p = PAGES[s]; if (!p) return null;
-    return { title: `${p[0]} | ${BRAND}`, desc: p[1], url: `${SITE}/${s}` };
+    const m = { title: `${p[0]} | ${BRAND}`, desc: p[1], url: `${SITE}/${s}` };
+    if (s === 'kulupler') {
+      const d = await cityData();
+      m.content = `<h1>Koşu Kulüpleri ve Koşu Grupları</h1><p>${esc(p[1])}</p><h2>Şehrine göre koşu kulüpleri</h2>${cityLinks(d.list)}`;
+    }
+    return m;
+  }
+  if (t === 'city') {
+    const name = BY_SLUG[s]; if (!name) return null;
+    const d = await cityData();
+    const x = d.map[name] || { name, slug: s, clubs: [], races: [] };
+    const L = loc(name);
+    const url = `${SITE}/kulupler/${s}`;
+    const desc = short(`${name} koşu kulüpleri ve koşu grupları: ${x.clubs.length ? x.clubs.length + ' kulüp' : 'kulüpler'}${x.races.length ? ', ' + x.races.length + ' yaklaşan yarış' : ''}. ${L} birlikte koşacak grubu ve hedef yarışını bul, ücretsiz katıl.`, 158);
+    const items = x.clubs.map(c => ({ name: c.name, url: `${SITE}/kulup/${c.id}` })).concat(x.races.map(r => ({ name: r.name, url: `${SITE}/yaris/${r.slug || r.id}` })));
+    return {
+      title: `${name} Koşu Kulüpleri ve Koşu Grupları | ${BRAND}`, desc, url, noindex: !d.qualifies(x),
+      jsonld: { '@context': 'https://schema.org', '@type': 'CollectionPage', name: `${name} Koşu Kulüpleri ve Koşu Grupları`, description: desc, url, inLanguage: 'tr-TR',
+        breadcrumb: { '@type': 'BreadcrumbList', itemListElement: [{ '@type': 'ListItem', position: 1, name: 'Ana Sayfa', item: SITE + '/' }, { '@type': 'ListItem', position: 2, name: 'Koşu Kulüpleri', item: SITE + '/kulupler' }, { '@type': 'ListItem', position: 3, name, item: url }] },
+        mainEntity: { '@type': 'ItemList', itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, url: it.url })) } },
+      content: `<nav style="font-size:13px"><a href="/">Ana Sayfa</a> › <a href="/kulupler">Koşu Kulüpleri</a> › ${esc(name)}</nav>
+<h1>${esc(name)} Koşu Kulüpleri ve Koşu Grupları</h1>
+<p>${esc(L)} birlikte koşacak bir grup ya da hedef koyacak bir yarış mı arıyorsun? Bu sayfada ${esc(name)} koşu kulüplerini ve önümüzdeki aylarda ${esc(L)} düzenlenecek koşu yarışlarını bir arada bulabilirsin.</p>
+<h2>${esc(L)}ki koşu kulüpleri</h2>${x.clubs.length ? '<ul>' + x.clubs.map(c => `<li><a href="/kulup/${c.id}">${esc(c.name)}</a>${c.desc ? ' — ' + esc(short(c.desc, 140)) : ''}</li>`).join('') + '</ul>' : `<p>Henüz ${esc(L)} kayıtlı kulüp yok. Kulübünü ücretsiz ekleyebilirsin.</p>`}
+<h2>${esc(L)} yaklaşan koşu yarışları</h2>${x.races.length ? '<ul>' + x.races.map(r => `<li><a href="/yaris/${esc(r.slug || r.id)}">${esc(r.name)}</a> — ${esc(trDate(r.date))}${r.location ? ', ' + esc(r.location) : ''}${r.distance ? ' (' + esc(r.distance) + ')' : ''}</li>`).join('') + '</ul>' : '<p>Şu anda listelenen yarış yok. Tüm yarışlar için <a href="/yaris-takvimi">yarış takvimine</a> bak.</p>'}
+<h2>Diğer şehirlerde koşu kulüpleri</h2>${cityLinks(d.list, name)}`,
+    };
   }
   if (t === 'haber') {
     const b = await bySlug('blog', s); if (!b || (b.status && b.status !== 'published')) return null;

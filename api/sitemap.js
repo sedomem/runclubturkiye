@@ -2,6 +2,7 @@
 // /sitemap.xml, /sitemap-pages.xml, /sitemap-blog.xml, /sitemap-races.xml,
 // /sitemap-clubs.xml, /sitemap-events.xml adresleri vercel.json ile buraya yönlenir.
 const SITE = 'https://www.runclubturkiye.com';
+const { slugify, cityOf } = require('./_cities');
 const FS = 'https://firestore.googleapis.com/v1/projects/runclubturkiye/databases/(default)/documents';
 
 function val(v) {
@@ -68,9 +69,16 @@ async function build(type) {
       freq: (r.date && r.date >= today) ? 'weekly' : 'yearly', pri: (r.date && r.date >= today) ? '0.8' : '0.4' })));
   }
   if (type === 'clubs') {
-    const clubs = await list('clubs', ['name', 'slug', 'updatedAt', 'createdAt']);
-    return urlset(clubs.filter(c => c.name).map(c => ({
-      loc: '/kulup/' + c.id, lastmod: c.updatedAt || c.createdAt, freq: 'weekly', pri: '0.6' })));
+    const clubs = await list('clubs', ['name', 'city', 'slug', 'updatedAt', 'createdAt']);
+    const items = clubs.filter(c => c.name).map(c => ({
+      loc: '/kulup/' + c.id, lastmod: c.updatedAt || c.createdAt, freq: 'weekly', pri: '0.6' }));
+    // Şehir sayfaları: en az 1 kulüp veya 2 yaklaşan yarış olan iller
+    const races = await list('races', ['date', 'location']);
+    const today = day(); const cnt = {};
+    clubs.filter(c => c.name).forEach(c => { const ct = cityOf(c.city); if (ct) (cnt[ct] = cnt[ct] || { c: 0, r: 0 }).c++; });
+    races.filter(r => r.date && r.date >= today).forEach(r => { const ct = cityOf(r.location); if (ct) (cnt[ct] = cnt[ct] || { c: 0, r: 0 }).r++; });
+    Object.entries(cnt).filter(([, v]) => v.c >= 1 || v.r >= 2).forEach(([name, v]) => items.push({ loc: '/kulupler/' + slugify(name), freq: 'weekly', pri: v.c ? '0.8' : '0.6' }));
+    return urlset(items);
   }
   if (type === 'events') {
     const events = await list('events', ['slug', 'status', 'updatedAt', 'createdAt']);

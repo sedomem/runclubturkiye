@@ -3861,7 +3861,7 @@ window.saveProfile=async()=>{
     name:document.getElementById('pf-name')?.value||'',
     phone:document.getElementById('pf-phone')?.value||'',
     stravaLink:document.getElementById('pf-strava')?.value||'',
-    city:document.getElementById('pf-city')?.value||'',
+    city:document.getElementById('pf-city')?.value||(window.CU&&CU.city)||'',
     pace,
     gender,
     birthDate,
@@ -9874,6 +9874,7 @@ function renderAdminSection(sec){
       </div>
       ${window._adminMsgCount>0?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between"><div>🔴 <b>${window._adminMsgCount}</b> okunmamış mesaj var</div><button class="btn btn-or btn-sm" onclick="aNav('messages',null)">Mesajlara Git →</button></div>`:''}
       ${window._adminAppCount>0?`<div style="background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between"><div>🟠 <b>${window._adminAppCount}</b> bekleyen başvuru var</div><button class="btn btn-or btn-sm" onclick="aNav('applications',null)">Başvurulara Git →</button></div>`:''}
+      <div id="admin-demographics"></div>
       <div id="admin-analytics-container"></div>
       <div class="card" style="padding:18px"><p style="color:var(--muted);font-size:13px">Sol menüden yönetmek istediğin bölümü seç.</p></div>`,
     groups:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><h2>🏢 Gruplar</h2><button class="btn btn-or btn-sm" onclick="openModal('edit-club-modal');document.getElementById('edit-club-title').textContent='Yeni Grup';document.getElementById('edit-club-id').value=''">+ Grup Ekle</button></div>
@@ -10093,6 +10094,7 @@ function renderAdminSection(sec){
     setTimeout(()=>loadTotalUserCount&&loadTotalUserCount(),100);
     setTimeout(()=>updatePendingBadge&&updatePendingBadge(),300);
     setTimeout(()=>renderAdminAnalytics&&renderAdminAnalytics(),500);
+    setTimeout(()=>window.renderUserDemographics&&window.renderUserDemographics(),300);
   }
   if(sec==='messages')setTimeout(()=>loadAdminMessages&&loadAdminMessages(),100);
   if(sec==='applications')setTimeout(()=>loadApplications&&loadApplications(),100);
@@ -14514,6 +14516,51 @@ body.is-guest div.guest-only{display:flex!important}
 </script>
 
 <script id="fix-2026-11-13">
+// ═══ SÜPER ADMİN: ÜYE DEMOGRAFİSİ (yaş, şehir, cinsiyet — yalnızca toplu sayılar) ═══
+window.renderUserDemographics=async function(){
+  var el=document.getElementById('admin-demographics');var fb=window._fb;
+  if(!el||!fb||!window.CU||window.CU.role!=='superadmin')return;
+  el.innerHTML='<div class="card" style="padding:18px;margin-bottom:20px"><div class="spinner" style="margin:10px auto"></div></div>';
+  try{
+    var snap=await fb.getDocs(fb.collection(fb.db,'users'));
+    var total=0,ages=[],gender={},city={},withAge=0,withGender=0,withCity=0;
+    var now=new Date();
+    snap.forEach(function(d){
+      var u=d.data();total++;
+      // Yaş
+      var b=u.birthDate;var bd=null;
+      if(b&&typeof b==='string'&&/^\d{4}-\d{2}-\d{2}/.test(b))bd=new Date(b);
+      else if(b&&b.toDate)bd=b.toDate();
+      if(bd&&!isNaN(bd)){var a=now.getFullYear()-bd.getFullYear()-((now.getMonth()<bd.getMonth()||(now.getMonth()===bd.getMonth()&&now.getDate()<bd.getDate()))?1:0);if(a>=10&&a<=90){ages.push(a);withAge++;}}
+      // Cinsiyet
+      var g=String(u.gender||'').trim();var gk=/^(erkek|male|e)$/i.test(g)?'Erkek':/^(kad[ıi]n|female|k)$/i.test(g)?'Kadın':'';
+      if(gk){gender[gk]=(gender[gk]||0)+1;withGender++;}
+      // Şehir (il bazında)
+      var c=window.cityOf?window.cityOf(u.city):(u.city||'').trim();
+      if(c){city[c]=(city[c]||0)+1;withCity++;}
+    });
+    var groups=[['18 yaş altı',0,17],['18–24',18,24],['25–34',25,34],['35–44',35,44],['45–54',45,54],['55+',55,200]];
+    var ageRows=groups.map(function(g){return [g[0],ages.filter(function(a){return a>=g[1]&&a<=g[2];}).length];});
+    var avg=ages.length?Math.round(ages.reduce(function(x,y){return x+y;},0)/ages.length):null;
+    var cityRows=Object.keys(city).map(function(k){return [k,city[k]];}).sort(function(a,b){return b[1]-a[1];});
+    var topCity=cityRows.slice(0,10);var rest=cityRows.slice(10).reduce(function(s,r){return s+r[1];},0);if(rest)topCity.push(['Diğer iller',rest]);
+    var genderRows=[['Erkek',gender['Erkek']||0],['Kadın',gender['Kadın']||0]];
+    function bars(rows,base,color){
+      if(!base)return '<p style="color:var(--muted);font-size:12px;padding:8px 0">Henüz veri yok.</p>';
+      return rows.map(function(r){var pct=Math.round(r[1]*100/base);return '<div style="display:flex;align-items:center;gap:8px;margin:7px 0;font-size:12px"><div style="width:92px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+r[0]+'</div><div style="flex:1;background:var(--bg2,#f1ece6);border-radius:6px;height:16px;overflow:hidden"><div style="width:'+pct+'%;height:100%;background:'+color+';border-radius:6px"></div></div><div style="width:64px;text-align:right;color:var(--muted)"><b style="color:var(--text)">'+r[1]+'</b> · %'+pct+'</div></div>';}).join('');
+    }
+    function card(title,sub,body){return '<div class="card" style="padding:18px"><h3 style="font-size:15px;margin-bottom:2px">'+title+'</h3><p style="font-size:11px;color:var(--muted);margin-bottom:10px">'+sub+'</p>'+body+'</div>';}
+    function cov(n){return n+' / '+total+' üye bu bilgiyi doldurmuş (%'+(total?Math.round(n*100/total):0)+')';}
+    el.innerHTML='<h3 style="font-size:17px;margin:6px 0 12px">👥 Üye Demografisi</h3>'
+      +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:16px;margin-bottom:22px">'
+      +card('🎂 Yaş Dağılımı'+(avg?' <span style="font-weight:400;font-size:12px;color:var(--muted)">· ortalama '+avg+'</span>':''),cov(withAge),bars(ageRows,withAge,'#E8622A'))
+      +card('⚧ Cinsiyet',cov(withGender),bars(genderRows,withGender,'#2C3E50'))
+      +card('📍 Şehirler (ilk 10)',cov(withCity),bars(topCity,withCity,'#2E7D32'))
+      +'</div>'
+      +'<p style="font-size:11px;color:var(--muted);margin:-12px 0 20px">Yalnızca toplu sayılar gösterilir. Yaş, cinsiyet ve şehir profilde isteğe bağlıdır; doldurma oranı arttıkça tablo daha doğru olur.</p>';
+  }catch(e){el.innerHTML='<div class="card" style="padding:14px;margin-bottom:20px;color:var(--muted);font-size:13px">Demografi yüklenemedi: '+(e.code||e.message)+'</div>';}
+};
+
 // Analytics/Ads dönüşüm olayları (kayıt, kulüp başvurusu)
 window.rcTrack=function(name,params){try{if(window.gtag)gtag('event',name,params||{});}catch(e){}};
 // ═══ ŞEHİR SAYFALARI: /kulupler/{il} ═══
@@ -14525,7 +14572,11 @@ window.rcTrack=function(name,params){try{if(window.gtag)gtag('event',name,params
   function cityOf(t){if(!t)return null;var parts=String(t).split(',');function sc(x){var k=sl(x).split('-');for(var i=k.length-1;i>=0;i--){if(BY[k[i]])return BY[k[i]];if(AL[k[i]])return AL[k[i]];}return null;}return sc(parts[parts.length-1])||sc(t);}
   function loc(n){var l=String(n).replace(/I/g,'ı').replace(/İ/g,'i').toLowerCase();var v=(l.match(/[aıoueiöü]/g)||['e']).pop();return n+"'"+(/[çfhkpsşt]$/.test(l)?'t':'d')+(/[aıou]/.test(v)?'a':'e');}
   function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
-  window.cityOf=cityOf;window.citySlug=sl;
+  window.cityOf=cityOf;window.citySlug=sl;window.TR_PROVINCES=P;
+  // Profil şehir seçimi: 81 il (önceden yalnızca 5 şehir vardı)
+  (function(){var sel=document.getElementById('pf-city');if(!sel||sel.options.length>20)return;var cur=sel.value;
+    sel.innerHTML='<option value="">— İl Seçin —</option>'+P.map(function(p){return '<option value="'+p+'">'+p+'</option>';}).join('');
+    if(window.CU&&window.CU.city)sel.value=cityOf(window.CU.city)||'';})();
   function data(){
     var today=new Date().toISOString().slice(0,10),map={};
     function g(c){return map[c]=map[c]||{name:c,slug:sl(c),clubs:[],races:[]};}

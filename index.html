@@ -1654,6 +1654,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button class="mdr-btn" onclick="nav('blog');closeMasterDrawer()"><span class="mdr-ico">📰</span><span>Blog</span></button>
     <button class="mdr-btn" onclick="nav('discussions');closeMasterDrawer()"><span class="mdr-ico">💬</span><span>Yarış Tartışma Merkezi</span></button>
     <button class="mdr-btn" onclick="nav('hakkimizda');closeMasterDrawer()"><span class="mdr-ico">ℹ️</span><span>Hakkımızda</span></button>
+    <button class="mdr-btn" onclick="closeMasterDrawer();openAuth('superadmin')"><span class="mdr-ico">⭐</span><span>Yönetici Girişi</span></button>
 
     <!-- Divider -->
     <div style="height:1px;background:var(--border);margin:8px 16px"></div>
@@ -14448,6 +14449,19 @@ body.is-guest div.guest-only{display:flex!important}
 </script>
 
 <script id="fix-2026-11-13">
+// /yonetici adresi doğrudan süper admin giriş penceresini açar
+(function(){
+  function openSA(){
+    if(location.pathname.replace(/\/+$/,'')!=='/yonetici')return;
+    var tries=0;(function t(){
+      if(window.CU&&window.CU.role==='superadmin'){if(window.nav)nav('admin');return;}
+      if(window.openAuth&&document.getElementById('form-superadmin')){openAuth('superadmin');return;}
+      if(++tries<40)setTimeout(t,250);
+    })();
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){setTimeout(openSA,1500);});else setTimeout(openSA,1500);
+})();
+
 window.forgotPassword=async function(inputId){
   var fb=window._fb;var el=document.getElementById(inputId);var email=(el&&el.value||'').trim();
   if(!email){toast('Önce e-posta adresini yaz, sonra "Şifremi unuttum"a bas','err');if(el)el.focus();return;}

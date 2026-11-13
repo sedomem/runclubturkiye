@@ -3934,6 +3934,8 @@ window.joinClub=async(clubId)=>{
   const memKey=`club_${clubId}_${CU.uid}`;
   if(localStorage.getItem(memKey)){toast('Bu kulübe zaten üyesin 🤝','ok');return;}
   try{
+    const exMem=await getDoc(doc(db,'memberships',clubId+'_'+CU.uid));
+    if(exMem.exists()){localStorage.setItem(memKey,'1');toast('Bu kulübe zaten üyesin 🤝','ok');return;}
     const club=window.CLUBS.find(c=>c.id===clubId)||{name:'Kulüp',adminUid:clubId};
     await setDoc(doc(db,'memberships',clubId+'_'+CU.uid),{
       uid:CU.uid,userId:CU.uid,clubId,clubName:club.name||'',
@@ -9729,9 +9731,11 @@ async function loadMyClubs(){
         <p>Henüz hiçbir kulübe katılmadın.</p>
         <button class="btn btn-or btn-sm" style="margin-top:12px" onclick="nav('clubs')">Kulüpleri Keşfet →</button>
       </div>`;
+      window.syncClubCount&&window.syncClubCount(0);
       return;
     }
     const mems=[];snap.forEach(d=>mems.push(d.data()));
+    window.syncClubCount&&window.syncClubCount(new Set(mems.map(m=>m.clubId)).size);
     let html='<div class="grid g3">';
     mems.forEach(m=>{
       // Önce CLUBS array'den bak, yoksa membership'teki bilgilerle göster
@@ -9770,25 +9774,31 @@ async function loadMyEvents(){
       </div>`;
       return;
     }
-    const eventIds=[];snap.forEach(d=>eventIds.push(d.data().eventId));
-    // Yerel arrayde bul, yoksa göster
-    const myEvts=window.EVENTS.filter(e=>eventIds.includes(e.id));
+    const eventIds=[];snap.forEach(d=>{const id=d.data().eventId;if(id&&!eventIds.includes(id))eventIds.push(id);});
+    const myEvts=(window.EVENTS||[]).filter(e=>eventIds.includes(e.id));
+    const missing=eventIds.filter(id=>!myEvts.some(e=>e.id===id));
+    for(const id of missing){try{const ds=await fb2.getDoc(fb2.doc(fb2.db,'events',id));if(ds.exists())myEvts.push({id:ds.id,...ds.data()});}catch(_){}}
     if(!myEvts.length){
-      el.innerHTML=`<p style="color:var(--muted)">Etkinlik bilgisi yüklenemedi.</p>`;
+      el.innerHTML=`<div style="text-align:center;padding:30px;color:var(--muted)">
+        <div style="font-size:40px;margin-bottom:10px">📅</div>
+        <p>Kayıt olduğun etkinlikler sona ermiş ya da kaldırılmış.</p>
+        <button class="btn btn-or btn-sm" style="margin-top:12px" onclick="nav('events')">Yeni Etkinlikleri Keşfet →</button>
+      </div>`;
       return;
     }
+    const todayStr=new Date().toISOString().slice(0,10);
+    myEvts.sort((a,b)=>String(b.date||'').localeCompare(String(a.date||'')));
     let html='';
     myEvts.forEach(e=>{
-      const d=new Date(e.date);
-
-      html+=`<div class="ev-card" style="cursor:default;margin-bottom:10px">
-        <div class="ev-date-box"><div class="day">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]||''}</div></div>
+      const d=new Date(e.date);const past=String(e.date||'')<todayStr;
+      html+=`<div class="ev-card" style="cursor:pointer;margin-bottom:10px;${past?'opacity:.6':''}" onclick="openEvent&&openEvent('${e.id}')">
+        <div class="ev-date-box"><div class="day">${isNaN(d)?'':d.getDate()}</div><div class="mon">${isNaN(d)?'':(MONTHS[d.getMonth()]||'')}</div></div>
         <div class="ev-info">
-          <span class="tag tag-or">${e.cat||''}</span>
-          <h3>${e.emoji||'🏃'} ${e.title}</h3>
-          <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span><span class="meta">💳 ${e.fee}</span></div>
+          <span class="tag ${past?'tag-gr':'tag-or'}">${past?'Geçmiş':(e.cat||'Yaklaşan')}</span>
+          <h3>${e.emoji||'🏃'} ${e.title||'Etkinlik'}</h3>
+          <div class="ev-meta">${e.city?`<span class="meta">📍 ${e.city}</span>`:''}${e.dist?`<span class="meta">📏 ${e.dist}</span>`:''}${e.fee?`<span class="meta">💳 ${e.fee}</span>`:''}</div>
         </div>
-        <button class="btn btn-red btn-sm" style="flex-shrink:0;align-self:center" onclick="leaveEvent('${e.id}')">İptal</button>
+        ${past?'':`<button class="btn btn-red btn-sm" style="flex-shrink:0;align-self:center" onclick="event.stopPropagation();leaveEvent('${e.id}')">İptal</button>`}
       </div>`;
     });
     el.innerHTML=html;
@@ -14476,6 +14486,11 @@ window.injectBlogSchema=function(p){
   }
   if(document.readyState==='complete')wrap();else window.addEventListener('load',wrap);
 })();
+window.syncClubCount=function(n){
+  try{if(!window.CU||window.CU.clubCount===n)return;window.CU.clubCount=n;var fb=window._fb;fb.setDoc(fb.doc(fb.db,'users',window.CU.uid),{clubCount:n},{merge:true});
+    var cards=document.querySelectorAll('#dp-overview .s-card');cards.forEach(function(c){var l=c.querySelector('.l');if(l&&l.textContent.trim()==='Kulüp'){var v=c.querySelector('.n');if(v)v.textContent=n;}});
+  }catch(_){}
+};
 </script>
 </body>
 </html>

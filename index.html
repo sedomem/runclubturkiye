@@ -14531,7 +14531,7 @@ body.is-guest div.guest-only{display:flex!important}
 #pg-discussions .disc-stats{display:flex;gap:8px;flex-wrap:wrap}
 #pg-discussions .disc-stat{background:var(--card);border:1px solid var(--border);border-radius:20px;padding:6px 12px;font-size:12px;color:var(--muted)}
 #pg-discussions .disc-stat b{color:var(--text)}
-#pg-discussions .disc-hub-grid{grid-template-columns:330px 1fr;gap:18px;align-items:start}
+#pg-discussions .disc-hub-grid{grid-template-columns:330px minmax(0,1fr);gap:18px;align-items:start}
 #pg-discussions .disc-sidebar{padding:12px;max-height:calc(100vh - 110px);display:flex;flex-direction:column;overflow:hidden}
 #pg-discussions #disc-races-list{overflow-y:auto;flex:1;margin:0 -4px;padding:0 4px}
 .disc-seg{display:flex;background:var(--bg2,#f3eee8);border-radius:10px;padding:3px;gap:3px;margin-bottom:10px}
@@ -14567,7 +14567,9 @@ body.is-guest div.guest-only{display:flex!important}
 .disc-feed-item:hover .ft{color:var(--or)}
 .disc-back{display:none}
 @media(max-width:860px){
-  #pg-discussions .disc-hub-grid{grid-template-columns:1fr;gap:12px}
+  #pg-discussions .disc-hub-grid{grid-template-columns:minmax(0,1fr);gap:12px}
+  #pg-discussions .disc-sidebar,#pg-discussions .disc-main{min-width:0;width:auto;box-sizing:border-box}
+  #pg-discussions #disc-search{min-width:0;width:100%}
   #pg-discussions .disc-sidebar{position:relative;top:0;max-height:none;display:flex;flex-direction:column;white-space:normal;overflow:visible;padding:10px;border-bottom:1px solid var(--border)}
   #pg-discussions #disc-races-list{overflow:visible}
   #pg-discussions .disc-ri{min-width:0;margin-right:0}

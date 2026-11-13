@@ -8749,7 +8749,8 @@ window.gNav=function(sec,btn){
   if(sec==='profil'){
     var pm=document.getElementById('panel-main');
     var cps=document.getElementById('ga-club-profile-section');
-    if(pm)pm.style.display='none';
+    // Hesap bilgileri + şifre değiştirme kulüp profiliyle birlikte görünsün
+    if(pm){pm.style.display='';if(typeof renderGroupSection==='function')renderGroupSection('profil');}
     if(cps)cps.style.display='block';
     setTimeout(function(){
 
@@ -8794,7 +8795,7 @@ window.gasSaveClubProfile=async function(){
     desc:     g("ga-club-desc"),
     category: g("ga-club-cat"),
     timezone: g("ga-club-tz"),
-    slug: (typeof window.makeSlug==='function'&&clubNameForSlug?window.makeSlug(clubNameForSlug):undefined)||"Europe/Istanbul",
+    slug: (typeof window.makeSlug==='function'&&clubNameForSlug?window.makeSlug(clubNameForSlug):undefined)||null,
     socialLinks:{
       instagram: g("ga-club-insta"),
       linkedin:  g("ga-club-linkedin"),
@@ -8802,6 +8803,7 @@ window.gasSaveClubProfile=async function(){
     },
     updatedAt:fb.serverTimestamp(),
   };
+  if(!updateData.slug)delete updateData.slug;
   try{
     // Banner yükle
     var bannerFile=document.getElementById("ga-banner-input");
@@ -10529,6 +10531,7 @@ function loadGroupPanel(){
 function renderGroupSection(sec){
   window._gpActiveSection=sec;
   const main=document.getElementById('panel-main');if(!main)return;
+  if(sec==='stats'&&window.renderGaStats){window.renderGaStats();return;}
 
   const sections={
     events:`

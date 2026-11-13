@@ -49,14 +49,24 @@ service cloud.firestore {
       }
     }
 
-    match /races/{id} { allow read: if true; allow write: if isSuperAdmin(); }
-    match /blog/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    // Üyeler yalnızca beğeni sayacını değiştirebilir
+    match /races/{id} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+      allow update: if isAuth() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
+    }
+    match /blog/{id} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+      allow update: if isAuth() && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']);
+    }
 
     match /blog_comments/{id} {
       allow read: if true;
       allow create: if isAuth();
-      allow update: if isAuth() && uid() == resource.data.userUid;
-      allow delete: if isSuperAdmin() || (isAuth() && uid() == resource.data.userUid);
+      // Yorum sahibi düzenler; diğer üyeler yalnızca beğeni sayısını değiştirebilir
+      allow update: if isAuth() && (uid() == resource.data.authorUid || uid() == resource.data.userUid || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']));
+      allow delete: if isSuperAdmin() || (isAuth() && (uid() == resource.data.authorUid || uid() == resource.data.userUid));
     }
 
     match /popup/{id}    { allow read: if true; allow write: if isSuperAdmin(); }
@@ -112,14 +122,14 @@ service cloud.firestore {
     match /posts/{id} {
       allow read: if true;
       allow create: if isAuth();
-      allow update: if isAuth() && uid() == resource.data.userUid;
+      allow update: if isAuth() && (uid() == resource.data.userUid || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes','commentCount']));
       allow delete: if isSuperAdmin() || (isAuth() && uid() == resource.data.userUid);
     }
 
     match /comments/{id} {
       allow read: if true;
       allow create: if isAuth();
-      allow update: if isAuth() && uid() == resource.data.userUid;
+      allow update: if isAuth() && (uid() == resource.data.userUid || request.resource.data.diff(resource.data).affectedKeys().hasOnly(['likes']));
       allow delete: if isSuperAdmin() || (isAuth() && uid() == resource.data.userUid);
     }
 

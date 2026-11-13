@@ -10,7 +10,7 @@
     { "source": "/kulup/:slug", "destination": "/api/render?t=kulup&s=:slug" },
     { "source": "/kulupler/:city", "destination": "/api/render?t=city&s=:city" },
     { "source": "/etkinlik/:slug", "destination": "/api/render?t=etkinlik&s=:slug" },
-    { "source": "/:page(yaris-takvimi|kulupler|haberler|etkinlikler|topluluk|tartismalar|firsatlar|hakkimizda|iletisim|sss|kvkk|gizlilik|kullanim-kosullari)", "destination": "/api/render?t=page&s=:page" },
+    { "source": "/:page(yaris-takvimi|kulupler|haberler|etkinlikler|topluluk|tartismalar|firsatlar|hakkimizda|iletisim|sss|kvkk|gizlilik|kullanim-kosullari|cerez-politikasi)", "destination": "/api/render?t=page&s=:page" },
     { "source": "/((?!api/).*)", "destination": "/index.html" }
   ]
 }

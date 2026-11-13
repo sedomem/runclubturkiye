@@ -97,8 +97,9 @@ const PAGES = {
   'iletisim': ['İletişim', 'RunClub Türkiye ile iletişime geç: runclubturkiye@gmail.com'],
   'sss': ['Sıkça Sorulan Sorular', 'RunClub Türkiye üyelik, kulüp, yarış takvimi ve etkinlikler hakkında sıkça sorulan sorular.'],
   'kvkk': ['KVKK Aydınlatma Metni', 'RunClub Türkiye kişisel verilerin korunması aydınlatma metni.'],
-  'gizlilik': ['Gizlilik Politikası', 'RunClub Türkiye gizlilik politikası.'],
+  'gizlilik': ['Gizlilik Politikası', 'RunClub Türkiye gizlilik politikası: toplanan bilgiler, reklam ve analiz çerezleri, veri güvenliği ve haklarınız.'],
   'kullanim-kosullari': ['Kullanım Koşulları', 'RunClub Türkiye kullanım koşulları.'],
+  'cerez-politikasi': ['Çerez Politikası', 'RunClub Türkiye çerez politikası: kullanılan çerez türleri ve çerezleri yönetme.'],
 };
 
 function apply(html, m) {
@@ -128,6 +129,12 @@ async function meta(t, s) {
   if (t === 'page') {
     const p = PAGES[s]; if (!p) return null;
     const m = { title: `${p[0]} | ${BRAND}`, desc: p[1], url: `${SITE}/${s}` };
+    const LK = { gizlilik: 'gizlilik', kvkk: 'kvkk', 'kullanim-kosullari': 'kosullar', 'cerez-politikasi': 'cerez' }[s];
+    if (LK) {
+      const base = await baseHtml();
+      const mm = new RegExp('\\n  ' + LK + ":\\{title:'([^']*)'[^`]*`([\\s\\S]*?)`\\}").exec(base);
+      if (mm) m.content = `<h1>${esc(mm[1])}</h1>` + safeBody(mm[2]).replace(/ onclick="[^"]*"/g, '');
+    }
     if (s === 'kulupler') {
       const d = await cityData();
       m.content = `<h1>Koşu Kulüpleri ve Koşu Grupları</h1><p>${esc(p[1])}</p><h2>Şehrine göre koşu kulüpleri</h2>${cityLinks(d.list)}`;

@@ -14451,8 +14451,9 @@ body.is-guest div.guest-only{display:flex!important}
 <script id="fix-2026-11-13">
 // /yonetici adresi doğrudan süper admin giriş penceresini açar
 (function(){
+  var wantSA=location.pathname.replace(/\/+$/,'')==='/yonetici';
   function openSA(){
-    if(location.pathname.replace(/\/+$/,'')!=='/yonetici')return;
+    if(!wantSA)return;
     var tries=0;(function t(){
       if(window.CU&&window.CU.role==='superadmin'){if(window.nav)nav('admin');return;}
       if(window.openAuth&&document.getElementById('form-superadmin')){openAuth('superadmin');return;}

@@ -19,17 +19,28 @@ service cloud.firestore {
 
     function isSuperOrGroup() { return isSuperAdmin() || isGroupAdmin(); }
 
+    // Grup adminin kendi kulübü mü? (kulüp id = GA uid veya profildeki clubId)
+    function isMyClub(clubId) {
+      return isGroupAdmin() && (clubId == uid() || clubId == getUserData().get('clubId', ''));
+    }
+
+    // KVKK: kullanıcı profilleri (telefon, doğum tarihi, sağlık notları vb.) yalnızca
+    // kişinin kendisi, süper admin ve grup adminleri tarafından okunabilir.
+    // Üyeler kendi rollerini değiştiremez (yetki yükseltme engeli).
     match /users/{userId} {
-      allow read: if isAuth();
-      allow create: if isAuth() && uid() == userId;
-      allow update: if (isAuth() && uid() == userId) || isSuperAdmin();
+      allow read: if (isAuth() && uid() == userId) || isSuperOrGroup();
+      allow create: if isAuth() && uid() == userId
+        && (!('role' in request.resource.data) || request.resource.data.role in ['member', 'pending_groupadmin']);
+      allow update: if isSuperAdmin()
+        || (isAuth() && uid() == userId && !request.resource.data.diff(resource.data).affectedKeys().hasAny(['role']));
       allow delete: if isSuperAdmin();
     }
 
     match /clubs/{id} {
       allow read: if true;
-      allow create: if isSuperAdmin() || isAuth();
-      allow update: if isSuperAdmin() || (isAuth() && resource.data.adminUid == uid());
+      allow create: if isSuperAdmin() || (isGroupAdmin() && id == uid());
+      allow update: if isSuperAdmin() || (isAuth() && resource.data.adminUid == uid()
+        && request.resource.data.adminUid == uid());
       allow delete: if isSuperAdmin();
     }
 
@@ -40,7 +51,7 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
 
       match /attendees/{userId} {
-        allow read: if isAuth();
+        allow read: if isSuperOrGroup() || (isAuth() && uid() == userId);
         allow create, update: if isAuth() && (
           request.auth.token.email == 'sedomem@gmail.com' ||
           get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'groupadmin'
@@ -75,17 +86,24 @@ service cloud.firestore {
     match /firsatlar/{id}{ allow read: if true; allow write: if isSuperAdmin(); }
     match /ticker/{id}   { allow read: if true; allow write: if isSuperAdmin(); }
 
+    // KVKK: katılım kayıtları e-posta içerir; yalnızca sahibi ve yöneticiler okur.
+    // Kulüp yarışı katılımları (e-posta içermez) giriş yapmış üyelere açıktır.
+    function ownsDoc(d) { return isAuth() && (d.get('uid', '') == uid() || d.get('userId', '') == uid()); }
+
     match /rsvps/{id} {
-      allow read: if true;
-      allow create: if isAuth();
-      allow update: if (isAuth() && uid() == resource.data.uid) || isSuperOrGroup();
-      allow delete: if isAuth() && uid() == resource.data.uid;
+      allow read: if isSuperOrGroup() || ownsDoc(resource.data)
+        || (isAuth() && resource.data.type == 'club_race');
+      allow create: if ownsDoc(request.resource.data);
+      allow update: if ownsDoc(resource.data) || isSuperOrGroup();
+      allow delete: if ownsDoc(resource.data) || isSuperOrGroup();
     }
 
+    // KVKK: üyelik kayıtları e-posta içerir; yalnızca sahibi ve yöneticiler okur.
     match /memberships/{id} {
-      allow read: if isAuth();
-      allow create: if isAuth();
-      allow update, delete: if isSuperOrGroup() || (isAuth() && (resource.data.uid == uid() || resource.data.userId == uid()));
+      allow read: if isSuperOrGroup() || ownsDoc(resource.data);
+      allow create: if isSuperAdmin() || ownsDoc(request.resource.data);
+      allow update: if isSuperOrGroup();
+      allow delete: if isSuperOrGroup() || ownsDoc(resource.data);
     }
 
     match /contactMessages/{id} {
@@ -100,9 +118,10 @@ service cloud.firestore {
       allow update, delete: if isSuperAdmin();
     }
 
+    // Yönetim sohbeti: yalnızca süper admin ve grup adminleri
     match /chats/{room}/{document=**} {
-      allow read: if isAuth();
-      allow create: if isAuth();
+      allow read: if isSuperOrGroup();
+      allow create: if isSuperOrGroup();
       allow update, delete: if isSuperAdmin();
     }
 
@@ -160,17 +179,17 @@ service cloud.firestore {
     // Kulüp Etkinlik Takvimi
     match /club_events/{id} {
       allow read: if true;
-      allow create: if isAuth();
-      allow update: if isAuth() && (isSuperAdmin() || resource.data.clubId == request.resource.data.clubId);
-      allow delete: if isAuth() && (isSuperAdmin() || resource.data.clubId != null);
+      allow create: if isSuperAdmin() || isMyClub(request.resource.data.clubId);
+      allow update: if isSuperAdmin() || (isMyClub(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId);
+      allow delete: if isSuperAdmin() || isMyClub(resource.data.clubId);
     }
 
     // Koşu / Antrenman Takvimi
     match /club_trainings/{id} {
       allow read: if true;
-      allow create: if isAuth();
-      allow update: if isAuth() && (isSuperAdmin() || resource.data.clubId == request.resource.data.clubId);
-      allow delete: if isAuth() && (isSuperAdmin() || resource.data.clubId != null);
+      allow create: if isSuperAdmin() || isMyClub(request.resource.data.clubId);
+      allow update: if isSuperAdmin() || (isMyClub(resource.data.clubId) && request.resource.data.clubId == resource.data.clubId);
+      allow delete: if isSuperAdmin() || isMyClub(resource.data.clubId);
     }
 
     // Kulüp Yarış Takvimi
@@ -195,7 +214,8 @@ service cloud.firestore {
     }
 
     match /messages/{id} {
-      allow read, create: if isAuth();
+      allow read: if isSuperAdmin();
+      allow create: if isAuth();
       allow update, delete: if isSuperAdmin();
     }
 
@@ -209,6 +229,11 @@ service cloud.firestore {
         request.resource.data.diff(resource.data).affectedKeys().hasOnly(['upvotes'])
       ));
       allow delete: if isSuperAdmin() || (isAuth() && resource.data.userId == uid());
+    }
+
+    match /mail/{id} {
+      allow create: if isSuperAdmin();
+      allow read, update, delete: if false;
     }
 
   }

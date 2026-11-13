@@ -3147,7 +3147,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <div id="form-login">
       <div class="form-grp"><label for="l-email">E-posta</label><input type="email" id="l-email" autocomplete="email" inputmode="email"/></div>
       <div class="form-grp"><label for="l-pass">Şifre</label><input type="password" id="l-pass" autocomplete="current-password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
-      <button class="btn btn-or btn-full" style="margin-bottom:10px" onclick="doLogin()">Giriş Yap</button>
+      <button class="btn btn-or btn-full" style="margin-bottom:6px" onclick="doLogin()">Giriş Yap</button>
+      <div style="text-align:right;margin-bottom:10px"><button type="button" onclick="forgotPassword('l-email')" style="background:none;border:none;color:var(--or);font-size:12px;font-weight:600;cursor:pointer;padding:4px 0">Şifremi unuttum</button></div>
       <div class="div-or">veya</div>
       <button class="btn-google" onclick="doGoogle()"><svg width="15" height="15" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/><path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.18 1.48-4.97 2.36-8.16 2.36-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Google ile Giriş</button>
     </div>
@@ -3189,6 +3190,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
         <div class="form-grp"><label>E-posta</label><input type="email" id="ga-email"/></div>
         <div class="form-grp"><label>Şifre</label><input type="password" id="ga-pass"/></div>
         <button class="btn btn-navy btn-full" onclick="doLogin('ga')">Grup Admin Girişi</button>
+        <div style="text-align:right;margin-top:6px"><button type="button" onclick="forgotPassword('ga-email')" style="background:none;border:none;color:var(--or);font-size:12px;font-weight:600;cursor:pointer;padding:4px 0">Şifremi unuttum</button></div>
       </div>
       <div id="register-ga" style="display:none">
         <div class="form-row"><div class="form-grp"><label>Ad</label><input type="text" id="ga-rname"/></div><div class="form-grp"><label>Soyad</label><input type="text" id="ga-rsname"/></div></div>
@@ -3379,14 +3381,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 </div>
 
 <!-- KULUP BASVURU FLOATING CTA -->
-<div id="club-cta-float" style="position:fixed;bottom:24px;left:24px;z-index:190;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 32px rgba(44,24,16,.18);border:1.5px solid #E0D8CC;display:flex;align-items:center;gap:14px;max-width:320px;animation:ctaSlideIn .5s cubic-bezier(.34,1.56,.64,1) .8s both;">
+<div id="club-cta-float" role="dialog" aria-label="Kulüp başvurusu" style="position:fixed;bottom:24px;left:24px;z-index:190;background:#fff;border-radius:16px;padding:14px 18px;box-shadow:0 8px 32px rgba(44,24,16,.18);border:1.5px solid #E0D8CC;display:none;align-items:center;gap:14px;max-width:320px;animation:ctaSlideIn .5s cubic-bezier(.34,1.56,.64,1) both;">
   <div style="width:40px;height:40px;border-radius:12px;background:linear-gradient(135deg,#E8622A,#c94e1c);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:20px">&#127939;</div>
   <div style="flex:1;min-width:0">
     <div style="font-size:12px;font-weight:700;color:#2C1810;font-family:'Raleway',sans-serif;line-height:1.2;margin-bottom:2px">Kulübünüz Burada Yok mu?</div>
     <div style="font-size:11px;color:#8A7060;font-family:'Open Sans',sans-serif">Kulübünüzü hemen kaydedin</div>
   </div>
-  <button onclick="openAuth('groupadmin')" style="background:#E8622A;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">Başvur</button>
-  <button onclick="document.getElementById('club-cta-float').style.display='none'" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#B09880;font-size:16px;cursor:pointer;line-height:1;padding:2px">x</button>
+  <button onclick="window.dismissClubCta&&window.dismissClubCta(3);openAuth('groupadmin');switchGATab&&switchGATab('register-ga',document.querySelectorAll('#form-groupadmin .tab-btn')[1])" style="background:#E8622A;color:#fff;border:none;padding:8px 14px;border-radius:10px;font-size:12px;font-weight:700;font-family:'Raleway',sans-serif;cursor:pointer;white-space:nowrap;flex-shrink:0">Başvur</button>
+  <button onclick="window.dismissClubCta&&window.dismissClubCta(14)" aria-label="Kapat" style="position:absolute;top:8px;right:10px;background:none;border:none;color:#B09880;font-size:16px;cursor:pointer;line-height:1;padding:2px">x</button>
 </div>
 <div id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 <div id="toast"></div>
@@ -3403,7 +3405,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/quill/1.3.7/quill.min.js"></script>
 <script type="module">
 import{initializeApp}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
+import{getAuth,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,GoogleAuthProvider,onAuthStateChanged,signOut,sendPasswordResetEmail,updatePassword,reauthenticateWithCredential,EmailAuthProvider}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 import{getFirestore,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,serverTimestamp,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 import{getStorage,ref,uploadBytes,getDownloadURL}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-storage.js';
 import{getMessaging,getToken,onMessage}from'https://www.gstatic.com/firebasejs/10.12.0/firebase-messaging.js';
@@ -3573,7 +3575,7 @@ window.resetServiceWorker = async function() {
 const storage=getStorage(app);
 const gp=new GoogleAuthProvider();
 const SUPER_EMAIL='sedomem@gmail.com';
-window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL};
+window._fb={auth,db,storage,gp,SUPER_EMAIL,serverTimestamp,doc,setDoc,getDoc,collection,addDoc,getDocs,query,orderBy,updateDoc,deleteDoc,where,increment,getCountFromServer,onSnapshot,createUserWithEmailAndPassword,signInWithEmailAndPassword,signInWithPopup,signOut,ref,uploadBytes,getDownloadURL,sendPasswordResetEmail,updatePassword,reauthenticateWithCredential,EmailAuthProvider};
 
 onAuthStateChanged(auth,async user=>{
   // Auth state geldi — loading'i HEMEN kapat
@@ -3680,7 +3682,7 @@ window.doRegister=async()=>{
     try{
       await addDoc(collection(db,'announcements'),{
         title:'🎉 RunClub Türkiye\'ye Hoş Geldin!',
-        body:'Merhaba '+name+'! Türkiye\'nin en büyük koşu topluluğuna katıldın. Yakındaki kulüpleri keşfet, etkinliklere katıl ve koşu arkadaşları bul.',
+        body:'Merhaba '+name+'! Türkiye\'nin koşu topluluğuna katıldın. Yakındaki kulüpleri keşfet, etkinliklere katıl ve koşu arkadaşları bul.',
         authorUid:'system',
         authorName:'RunClub Türkiye',
         targetUid:cred.user.uid,
@@ -3706,7 +3708,7 @@ window.doRegister=async()=>{
       },2000);
     }
     document.getElementById('club-select-area').style.display='block';
-  }catch(e){const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı'};toast(m[e.code]||e.message,'err');}
+  }catch(e){const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı. Giriş yapmayı deneyin.','auth/invalid-email':'Geçerli bir e-posta adresi girin','auth/weak-password':'Şifre en az 6 karakter olmalı','auth/network-request-failed':'Bağlantı hatası, tekrar deneyin'};toast(m[e.code]||e.message,'err');}
 };
 window.filterRegisterClubs=city=>{
   const el=document.getElementById('club-select-list');if(!city){el.innerHTML='';return;}
@@ -3732,7 +3734,7 @@ window.submitGroupAdminApplication=async()=>{
     await addDoc(collection(db,'applications'),{name,email,phone:document.getElementById('ga-rphone').value,city:document.getElementById('ga-city').value,clubName:club,uid:cred.user.uid,status:'pending',createdAt:serverTimestamp()});
     closeModal('auth-modal');toast('Başvurunuz alındı!','ok');
     await signOut(auth);
-  }catch(e){const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı'};toast(m[e.code]||e.message,'err');}
+  }catch(e){const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı. Giriş yapmayı deneyin.','auth/invalid-email':'Geçerli bir e-posta adresi girin','auth/weak-password':'Şifre en az 6 karakter olmalı','auth/network-request-failed':'Bağlantı hatası, tekrar deneyin'};toast(m[e.code]||e.message,'err');}
 };
 window.logout=async()=>{
   const fb=window._fb;
@@ -14385,12 +14387,27 @@ body.is-guest div.guest-only{display:flex!important}
 [tabindex="0"]:focus-visible,button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:3px solid var(--or);outline-offset:2px}
 .chk-row a{color:var(--or);text-decoration:underline}
 @media(max-width:768px){#bottom-nav .bn-item{min-width:58px}}
+@media(max-width:768px){#club-cta-float{left:12px!important;right:12px!important;bottom:84px!important;max-width:none!important;padding:10px 14px!important}}
 </style>
-
 <script id="ux-2026-11-js">
 (function(){
   var AY=['Oca','Şub','Mar','Nis','May','Haz','Tem','Ağu','Eyl','Eki','Kas','Ara'];
   window.fmtTRDate=function(d){if(!d||!/^\d{4}-\d{2}-\d{2}/.test(d))return d||'';var p=d.split('-');return (+p[2])+' '+AY[+p[1]-1]+' '+p[0];};
+  // Kulüp başvuru kutusu: hemen değil, ilgi gösteren ziyaretçiye; kapatınca 14 gün gösterme
+  (function(){
+    var KEY='rc_clubcta_until',shown=false;
+    window.dismissClubCta=function(days){var el=document.getElementById('club-cta-float');if(el)el.style.display='none';try{localStorage.setItem(KEY,String(Date.now()+days*864e5));}catch(e){}};
+    function allowed(){
+      try{if(+localStorage.getItem(KEY)>Date.now())return false;}catch(e){}
+      if(window.CU&&window.CU.role&&window.CU.role!=='user')return false;
+      if(document.querySelector('.overlay.on'))return false;
+      var on=document.querySelector('.pg.on');return !on||/^pg-(home|clubs|events)$/.test(on.id);
+    }
+    function show(){if(shown||!allowed())return;var el=document.getElementById('club-cta-float');if(!el)return;shown=true;el.style.display='flex';setTimeout(function(){if(el.style.display==='flex')el.style.display='none';},20000);}
+    var t0=Date.now();
+    window.addEventListener('scroll',function(){var h=document.documentElement;if(Date.now()-t0>15000&&(h.scrollTop+innerHeight)/h.scrollHeight>0.6)show();},{passive:true});
+    setTimeout(function(){var h=document.documentElement;if(h.scrollTop>innerHeight)show();},45000);
+  })();
   if(!window.CU)document.body.classList.add('is-guest');
   // Klavye ile kullanım: tıklanabilir div/span/a öğelerini odaklanabilir yap
   var SEL='[onclick]:not(button):not(input):not(select):not(textarea):not(label):not([tabindex]):not(a[href])';
@@ -14409,6 +14426,55 @@ body.is-guest div.guest-only{display:flex!important}
   function init(){enhance();fillCities();if(window.updateImpactStats)window.updateImpactStats();}
   if(document.readyState!=='loading')init();else document.addEventListener('DOMContentLoaded',init);
   [2500,6000,12000].forEach(function(ms){setTimeout(function(){if(window.updateImpactStats)window.updateImpactStats();},ms);});
+})();
+</script>
+
+<script id="fix-2026-11-13">
+window.forgotPassword=async function(inputId){
+  var fb=window._fb;var el=document.getElementById(inputId);var email=(el&&el.value||'').trim();
+  if(!email){toast('Önce e-posta adresini yaz, sonra "Şifremi unuttum"a bas','err');if(el)el.focus();return;}
+  try{await fb.sendPasswordResetEmail(fb.auth,email);toast('Şifre sıfırlama bağlantısı '+email+' adresine gönderildi. Spam klasörünü de kontrol et.','ok');}
+  catch(e){var m={'auth/invalid-email':'Geçerli bir e-posta gir','auth/user-not-found':'Bu e-posta ile kayıt bulunamadı','auth/too-many-requests':'Çok fazla deneme, biraz bekle'};toast(m[e.code]||('Hata: '+e.code),'err');}
+};
+window.gaSaveProfile=async function(){
+  var fb=window._fb;if(!window.CU)return;
+  var name=((document.getElementById('ga-pf-name')||{}).value||'').trim();
+  if(!name){toast('Ad Soyad boş olamaz','err');return;}
+  try{await fb.updateDoc(fb.doc(fb.db,'users',window.CU.uid),{name:name,updatedAt:fb.serverTimestamp()});window.CU.name=name;if(window.syncProfileUI)syncProfileUI();toast('Profil güncellendi ✓','ok');}
+  catch(e){toast('Hata: '+e.message,'err');}
+};
+window.gaChangePassword=async function(){
+  var fb=window._fb;var u=fb.auth.currentUser;if(!u)return;
+  var oldP=(document.getElementById('ga-pf-oldpass')||{}).value||'',n1=(document.getElementById('ga-pf-newpass')||{}).value||'',n2=(document.getElementById('ga-pf-newpass2')||{}).value||'';
+  if(!oldP||!n1){toast('Mevcut ve yeni şifreyi gir','err');return;}
+  if(n1.length<6){toast('Yeni şifre en az 6 karakter olmalı','err');return;}
+  if(n1!==n2){toast('Yeni şifreler eşleşmiyor','err');return;}
+  try{await fb.reauthenticateWithCredential(u,fb.EmailAuthProvider.credential(u.email,oldP));await fb.updatePassword(u,n1);
+    ['ga-pf-oldpass','ga-pf-newpass','ga-pf-newpass2'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});toast('Şifre değiştirildi ✓','ok');}
+  catch(e){var m={'auth/invalid-credential':'Mevcut şifre hatalı','auth/wrong-password':'Mevcut şifre hatalı','auth/weak-password':'Yeni şifre çok zayıf','auth/too-many-requests':'Çok fazla deneme, biraz bekle'};toast(m[e.code]||('Hata: '+e.code),'err');}
+};
+window.injectBlogSchema=function(p){
+  var ex=document.getElementById('blog-schema-ld');if(ex)ex.remove();
+  if(!p||!p.title)return;
+  var url='https://www.runclubturkiye.com/haber/'+(p.slug||p.id||'');
+  var schema={"@context":"https://schema.org","@type":"BlogPosting","headline":p.title.slice(0,110),"description":p.metaDesc||'',"image":p.coverUrl?[p.coverUrl]:undefined,"datePublished":p.publishedAt||undefined,"dateModified":p.publishedAt||undefined,"author":{"@type":"Organization","name":p.authorName||"RunClub Türkiye"},"publisher":{"@type":"Organization","name":"RunClubTürkiye","url":"https://www.runclubturkiye.com"},"mainEntityOfPage":url,"keywords":(p.tags||[]).join(', ')};
+  var el=document.createElement('script');el.id='blog-schema-ld';el.type='application/ld+json';el.textContent=JSON.stringify(schema);document.head.appendChild(el);
+};
+// Misafir bir üye işlemi denediğinde sadece uyarı göstermek yerine kayıt penceresini aç
+(function(){
+  function wrap(){
+    var orig=window.toast; if(!orig||orig.__wrapped)return;
+    var w=function(msg,type){
+      if(!window.CU&&type==='err'&&/giriş yap/i.test(String(msg||''))&&window.openAuth){
+        window.openAuth('register');
+        var sub=document.getElementById('auth-subtitle');if(sub)sub.textContent=String(msg).replace(/giriş yapın?/i,'ücretsiz üye ol veya giriş yap');
+        return;
+      }
+      return orig.apply(this,arguments);
+    };
+    w.__wrapped=true; window.toast=w;
+  }
+  if(document.readyState==='complete')wrap();else window.addEventListener('load',wrap);
 })();
 </script>
 </body>

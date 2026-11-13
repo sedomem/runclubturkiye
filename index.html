@@ -7005,7 +7005,7 @@ window.renderDiscussions = function(raceId){
             ${d.userRating ? `<span style="font-size:11px;color:var(--or)" title="Kullanıcının Puanı: ${d.userRating}/5">${'⭐'.repeat(d.userRating)}</span>` : ''}
             <span style="font-size:11px;color:var(--muted)">${date}</span>
           </div>
-          <p style="font-size:13px;line-height:1.6;margin-bottom:8px;white-space:pre-wrap">${(d.comment||'').replace(/</g,'&lt;')}</p>
+          <p style="font-size:13px;line-height:1.6;margin-bottom:8px;white-space:pre-wrap">${window.discText(d).replace(/</g,'&lt;')}</p>
           ${tags?`<div style="display:flex;gap:4px;flex-wrap:wrap">${tags}</div>`:''}
         </div>
       </div>
@@ -7017,7 +7017,7 @@ window.renderDiscussions = function(raceId){
           <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑</button>
         `:''}
         ${(!isAdmin && d.userId===myUid)?`
-          <button class="btn btn-ghost btn-sm" onclick="editMyDiscussion('${d.id}', '${(d.comment||'').replace(/'/g,"\\'")}')" style="font-size:11px">✏️ Düzenle</button>
+          <button class="btn btn-ghost btn-sm" onclick="editMyDiscussion('${d.id}', '${window.discText(d).replace(/'/g,"\\'")}')" style="font-size:11px">✏️ Düzenle</button>
           <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>
         `:''}
       </div>
@@ -7163,11 +7163,11 @@ window.loadMyDiscussions = async function(){
             <b style="font-size:13px">🏆 ${d.raceName||'Yarış'}</b>
             <span style="font-size:11px;color:var(--muted)">${d.timestamp?.toDate?.()?.toLocaleDateString('tr')||''}</span>
           </div>
-          <p style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px">${(d.comment||'').replace(/</g,'&lt;')}</p>
+          <p style="font-size:12px;color:var(--text);line-height:1.5;margin-bottom:8px">${window.discText(d).replace(/</g,'&lt;')}</p>
           <div style="display:flex;justify-content:space-between;align-items:center;border-top:1px solid var(--border);padding-top:10px">
             <span style="font-size:11px;color:var(--or);font-weight:700">▲ ${(d.upvotes||[]).length} beğeni</span>
             <div style="display:flex;gap:6px">
-              <button class="btn btn-ghost btn-sm" onclick="editMyDiscussion('${d.id}', '${(d.comment||'').replace(/'/g,"\\'")}')" style="font-size:11px">✏️ Düzenle</button>
+              <button class="btn btn-ghost btn-sm" onclick="editMyDiscussion('${d.id}', '${window.discText(d).replace(/'/g,"\\'")}')" style="font-size:11px">✏️ Düzenle</button>
               <button class="btn btn-red btn-sm" onclick="deleteDiscussion('${d.id}')" style="font-size:11px">🗑 Sil</button>
             </div>
           </div>
@@ -7176,6 +7176,8 @@ window.loadMyDiscussions = async function(){
   }catch(e){ el.innerHTML='<p style="color:var(--muted)">Yüklenemedi.</p>'; }
 };
 
+// Yorum metnini her zaman düz yazıya çevir (dizi/sayı/boş olabilir)
+window.discText=function(d){var c=d&&d.comment;if(Array.isArray(c))c=c.join(' ');return c==null?'':String(c);};
 window.loadAdminDiscussions = async function(){
   const el = document.getElementById('admin-discussions-list');
   if(!el) return;
@@ -7190,7 +7192,7 @@ window.loadAdminDiscussions = async function(){
       items.map(d=>`<tr>
         <td style="font-size:11px">${d.raceName||'—'}</td>
         <td style="font-size:11px">${d.userName||'—'}${d.isVerifiedFinisher?' ✓':''}</td>
-        <td style="font-size:11px;max-width:280px"><div style="max-height:60px;overflow:auto">${(d.comment||'').replace(/</g,'&lt;').substring(0,200)}</div></td>
+        <td style="font-size:11px;max-width:280px"><div style="max-height:60px;overflow:auto">${window.discText(d).replace(/</g,'&lt;').substring(0,200)}</div></td>
         <td style="font-size:11px">${(d.upvotes||[]).length}</td>
         <td style="font-size:11px">${d.isPinned?'📌':''} <span class="pill ${d.isApproved===false?'pill-re':'pill-gr'}">${d.isApproved===false?'🚫 Gizli':'✓ Onaylı'}</span></td>
         <td class="action-btns">

@@ -12705,10 +12705,16 @@ window.renderAdminAnalytics = async () => {
       usersSnap.forEach(d => {
         const createdAt = d.data().createdAt?.toDate?.();
         if (createdAt) {
-          const monthKey = createdAt.toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' });
+          const monthKey = createdAt.getFullYear() + '-' + String(createdAt.getMonth() + 1).padStart(2, '0');
           monthlyUsers[monthKey] = (monthlyUsers[monthKey] || 0) + 1;
         }
       });
+      // Ayları kronolojik sırala ve Türkçe etiketle
+      const _mk = Object.keys(monthlyUsers).sort();
+      const _sorted = {};
+      _mk.forEach(k => { const [y, m] = k.split('-'); _sorted[new Date(+y, +m - 1, 1).toLocaleDateString('tr-TR', { year: 'numeric', month: 'short' })] = monthlyUsers[k]; });
+      Object.keys(monthlyUsers).forEach(k => delete monthlyUsers[k]);
+      Object.assign(monthlyUsers, _sorted);
       
       container.innerHTML = `
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-bottom:30px">

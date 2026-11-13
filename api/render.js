@@ -38,13 +38,15 @@ async function bySlug(collection, slug) {
     method: 'POST', headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ structuredQuery: { from: [{ collectionId: collection }], where: { fieldFilter: { field: { fieldPath: 'slug' }, op: 'EQUAL', value: { stringValue: slug } } }, limit: 1 } }),
   });
-  if (r.ok) { const j = await r.json(); const d = (j || []).find(x => x.document); if (d) return obj(d.document); }
+  if (!r.ok) throw new Error('firestore ' + r.status);
+  const j = await r.json(); const d = (j || []).find(x => x.document); if (d) return obj(d.document);
   return byId(collection, slug);
 }
 async function byId(collection, id) {
   if (!/^[A-Za-z0-9_-]{1,100}$/.test(id)) return null;
   const r = await fetch(`${FS}/${collection}/${id}`);
-  if (!r.ok) return null;
+  if (r.status === 404) return null;
+  if (!r.ok) throw new Error('firestore ' + r.status);
   return obj(await r.json());
 }
 
@@ -150,9 +152,14 @@ module.exports = async (req, res) => {
   try {
     const m = s ? await meta(t, s) : null;
     if (m) html = apply(html, m);
+    else if (t !== 'page') {
+      // Bulunamayan detay sayfası: arama motorları dizine eklemesin (soft 404 önlemi)
+      html = html.replace(/<meta name="robots"[^>]*>/g, '').replace('</head>', '<meta name="robots" content="noindex, follow"/>\n</head>');
+      res.statusCode = 404;
+    }
   } catch (e) { /* hata olursa uygulama HTML'i olduğu gibi döner */ }
   res.setHeader('Content-Type', 'text/html; charset=utf-8');
   res.setHeader('Cache-Control', 'public, max-age=0, s-maxage=3600, stale-while-revalidate=86400');
-  res.statusCode = 200;
+  if (!res.statusCode || res.statusCode === 200) res.statusCode = 200;
   res.end(html);
 };

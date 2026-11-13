@@ -171,9 +171,26 @@ service cloud.firestore {
       allow delete: if isSuperAdmin();
     }
 
+    // Süper admine giden uyarılar (yeni üye, başvuru, mesaj, grup admin işlemleri)
+    match /adminNotifications/{id} {
+      allow read, update, delete: if isSuperAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['type','title','body','section','read','createdAt','actorUid','actorName'])
+        && request.resource.data.type in ['new_user','ga_application','club_join','contact','ga_event','ga_calendar','ga_announcement','chat']
+        && request.resource.data.title is string && request.resource.data.title.size() <= 120
+        && request.resource.data.body is string && request.resource.data.body.size() <= 300
+        && request.resource.data.read == false;
+    }
+
     match /pushNotifications/{id} {
       allow read: if isSuperAdmin();
-      allow create: if isSuperOrGroup();
+      // Grup/süper admin herkese; diğerleri yalnızca süper admine kısa uyarı gönderebilir
+      allow create: if isSuperOrGroup() || (
+        request.resource.data.keys().hasOnly(['title','body','url','targetRole','status','adminAlert','createdAt'])
+        && request.resource.data.targetRole == 'superadmin'
+        && request.resource.data.status == 'pending'
+        && request.resource.data.url == 'https://www.runclubturkiye.com/yonetici'
+        && request.resource.data.title is string && request.resource.data.title.size() <= 130
+        && request.resource.data.body is string && request.resource.data.body.size() <= 300);
       allow update: if false;
       allow delete: if isSuperAdmin();
     }

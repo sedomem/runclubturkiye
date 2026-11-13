@@ -3591,6 +3591,8 @@ onAuthStateChanged(auth,async user=>{
     const d=snap.exists()?snap.data():{};
     const role=user.email===SUPER_EMAIL?'superadmin':(d.role||'member');
     window.CU={uid:user.uid,email:user.email,name:d.name||user.displayName||user.email.split('@')[0],role,totalKm:d.totalKm||0,eventCount:d.eventCount||0,clubCount:d.clubCount||0,badges:d.badges||[],...d};
+    // Aktiflik ölçümü: oturum başına bir kez son görülme zamanı
+    try{if(!sessionStorage.getItem('rc_seen_'+user.uid)){sessionStorage.setItem('rc_seen_'+user.uid,'1');setDoc(doc(db,'users',user.uid),{lastSeen:serverTimestamp()},{merge:true}).catch(()=>{});}}catch(e){}
     // KVKK: sağlık/acil durum bilgileri ayrı, yalnızca kişinin kendisinin okuyabildiği alanda
     try{
       const HK=['bloodType','medicalNotes','emergencyContact'];
@@ -9874,8 +9876,8 @@ function renderAdminSection(sec){
       </div>
       ${window._adminMsgCount>0?`<div style="background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between"><div>🔴 <b>${window._adminMsgCount}</b> okunmamış mesaj var</div><button class="btn btn-or btn-sm" onclick="aNav('messages',null)">Mesajlara Git →</button></div>`:''}
       ${window._adminAppCount>0?`<div style="background:rgba(255,107,0,.1);border:1px solid rgba(255,107,0,.3);border-radius:8px;padding:14px;margin-bottom:12px;display:flex;align-items:center;justify-content:space-between"><div>🟠 <b>${window._adminAppCount}</b> bekleyen başvuru var</div><button class="btn btn-or btn-sm" onclick="aNav('applications',null)">Başvurulara Git →</button></div>`:''}
-      <div id="admin-demographics"></div>
       <div id="admin-analytics-container"></div>
+      <div id="admin-demographics"></div>
       <div class="card" style="padding:18px"><p style="color:var(--muted);font-size:13px">Sol menüden yönetmek istediğin bölümü seç.</p></div>`,
     groups:`<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px"><h2>🏢 Gruplar</h2><button class="btn btn-or btn-sm" onclick="openModal('edit-club-modal');document.getElementById('edit-club-title').textContent='Yeni Grup';document.getElementById('edit-club-id').value=''">+ Grup Ekle</button></div>
       <table><thead><tr><th>Kulüp</th><th>Şehir</th><th>Üye</th><th>Tip</th><th>İşlem</th></tr></thead>
@@ -12678,6 +12680,7 @@ window.addToCalendar = (event) => {
 
 // ── ANALİTİK DASHBOARD - CHART.JS ──
 window.renderAdminAnalytics = async () => {
+  if (window.CU?.role === 'superadmin' && window.renderAdminOverview) { const c = document.getElementById('admin-analytics-container'); if (c) await window.renderAdminOverview(c); return; }
   if (!window.Chart) {
     console.log('Chart.js yüklenmedi');
     return;
@@ -12691,6 +12694,7 @@ window.renderAdminAnalytics = async () => {
     const container = document.getElementById('admin-analytics-container');
     if (!container) return;
     
+    if (isSuper && window.renderAdminOverview) { await window.renderAdminOverview(container); return; }
     if (isSuper) {
       // Süper Admin: Şehir bazlı dağılım & Aylık üye artışı
       const eventsSnap = await fb.getDocs(fb.collection(fb.db, 'events'));
@@ -14522,6 +14526,72 @@ body.is-guest div.guest-only{display:flex!important}
 </script>
 
 <script id="fix-2026-11-13">
+// ═══ SÜPER ADMİN: KOMPAKT GENEL BAKIŞ ═══
+window.renderAdminOverview=async function(el){
+  var fb=window._fb;if(!el||!fb)return;
+  el.innerHTML='<div class="card" style="padding:18px;margin-bottom:20px"><div class="spinner" style="margin:10px auto"></div></div>';
+  var DAY=864e5,now=Date.now();
+  function ts(v){if(!v)return 0;if(v.toDate)return v.toDate().getTime();if(v.seconds)return v.seconds*1000;var t=Date.parse(v);return isNaN(t)?0:t;}
+  async function all(c){try{return (await fb.getDocs(fb.collection(fb.db,c))).docs.map(function(d){return Object.assign({id:d.id},d.data());});}catch(e){return [];}}
+  var R=await Promise.all([all('users'),all('memberships'),all('rsvps'),all('posts'),all('blog_comments'),all('contactMessages'),all('applications'),all('events'),all('discussions'),all('newsletter')]);
+  var users=R[0],mem=R[1],rsvps=R[2],posts=R[3],bcom=R[4],msgs=R[5],apps=R[6],events=R[7],disc=R[8],news=R[9];
+  var clubs=(window.CLUBS||[]),races=(window.RACES||[]),blogs=(window.BLOG_POSTS||[]);
+  var since=function(arr,f,d){return arr.filter(function(x){var t=ts(x[f]);return t&&t>now-d*DAY;}).length;};
+  var between=function(arr,f,a,b){return arr.filter(function(x){var t=ts(x[f]);return t&&t<=now-a*DAY&&t>now-b*DAY;}).length;};
+  var new7=since(users,'createdAt',7),new30=since(users,'createdAt',30),prev30=between(users,'createdAt',30,60);
+  var active7=since(users,'lastSeen',7),active30=since(users,'lastSeen',30);
+  var push=users.filter(function(u){return u.pushEnabled&&u.fcmToken;}).length;
+  var mail=users.filter(function(u){return u.emailOptIn;}).length;
+  var inClub=new Set(mem.filter(function(m){return m.status!=='rejected';}).map(function(m){return m.userId||m.uid;})).size;
+  var pendMem=mem.filter(function(m){return m.status==='pending';}).length;
+  var today=new Date().toISOString().slice(0,10),in30=new Date(now+30*DAY).toISOString().slice(0,10);
+  var upRaces=races.filter(function(r){return r.date&&r.date>=today;});
+  var soon=upRaces.filter(function(r){return r.date<=in30;}).sort(function(a,b){return a.date<b.date?-1:1;});
+  var lastBlog=blogs.map(function(b){return ts(b.publishedAt)||ts(b.createdAt);}).sort(function(a,b){return b-a;})[0]||0;
+  var daysSinceBlog=lastBlog?Math.floor((now-lastBlog)/DAY):null;
+  // 12 haftalık yeni üye
+  var weeks=[];for(var i=11;i>=0;i--){weeks.push(between(users,'createdAt',i*7,(i+1)*7));}
+  var maxW=Math.max.apply(null,weeks.concat([1]));
+  var spark='<svg viewBox="0 0 240 56" style="width:100%;height:56px">'+weeks.map(function(w,i){var h=Math.max(2,Math.round(w/maxW*48));return '<rect x="'+(i*20+3)+'" y="'+(52-h)+'" width="14" height="'+h+'" rx="3" fill="'+(i===11?'#E8622A':'#F0B898')+'"><title>'+(12-i)+' hafta önce: '+w+'</title></rect>';}).join('')+'</svg>';
+  function pct(a,b){return b?Math.round(a*100/b):0;}
+  function delta(a,b){if(!b)return a?'<span style="color:#2E7D32">yeni</span>':'';var d=Math.round((a-b)*100/b);return '<span style="color:'+(d>=0?'#2E7D32':'#c0392b')+'">'+(d>=0?'▲':'▼')+' %'+Math.abs(d)+'</span>';}
+  function tile(ico,label,val,sub){return '<div class="card" style="padding:12px 14px;min-width:0"><div style="font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+ico+' '+label+'</div><div style="font-size:22px;font-weight:800;line-height:1.2;margin-top:2px">'+val+'</div><div style="font-size:11px;color:var(--muted);margin-top:2px">'+(sub||'')+'</div></div>';}
+  function esc(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});}
+  function list(rows){return rows.length?rows.map(function(r){return '<div style="display:flex;justify-content:space-between;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:12px"><span style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+r[0]+'</span><b style="flex-shrink:0">'+r[1]+'</b></div>';}).join(''):'<p style="font-size:12px;color:var(--muted)">Henüz veri yok.</p>';}
+  // Kulüp üye sayıları
+  var cm={};mem.filter(function(m){return m.status!=='rejected';}).forEach(function(m){cm[m.clubId]=(cm[m.clubId]||0)+1;});
+  var topClubs=clubs.map(function(c){return [esc(c.name),cm[c.id]||0];}).sort(function(a,b){return b[1]-a[1];}).slice(0,5);
+  var topBlogs=blogs.slice().sort(function(a,b){return (b.likes||0)-(a.likes||0);}).slice(0,5).map(function(b){return [esc(b.title),'❤ '+(b.likes||0)];});
+  var nextRaces=soon.slice(0,5).map(function(r){return [esc(r.name)+' <span style="color:var(--muted)">· '+esc(r.location||'')+'</span>',esc(window.fmtTRDate?fmtTRDate(r.date):r.date)];});
+  // Yapılacaklar
+  var todo=[];
+  var pendGA=apps.filter(function(a){return a.status==='pending';}).length;if(pendGA)todo.push(['🔑 Bekleyen kulüp başvurusu',pendGA,'applications']);
+  var pendEv=events.filter(function(e){return e.status==='pending';}).length;if(pendEv)todo.push(['📅 Onay bekleyen etkinlik',pendEv,'approvals']);
+  var unread=msgs.filter(function(m){return m.read===false;}).length;if(unread)todo.push(['✉️ Okunmamış mesaj',unread,'messages']);
+  if(pendMem)todo.push(['🤝 Kulüp üyelik onayı bekleyen (grup adminlerde)',pendMem,'']);
+  if(daysSinceBlog!==null&&daysSinceBlog>=3)todo.push(['📰 Son blog yazısından bu yana geçen gün',daysSinceBlog,'blog']);
+  var noClub=clubs.length?0:1;
+  var todoHtml=todo.length?todo.map(function(t){return '<div onclick="'+(t[2]?"aNav('"+t[2]+"',document.querySelector('#pg-admin .admin-sb button[onclick*=\\'"+t[2]+"\\']'))":'')+'" style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;margin:6px 0;border-radius:8px;background:rgba(232,98,42,.08);font-size:13px;'+(t[2]?'cursor:pointer':'')+'"><span>'+t[0]+'</span><b style="color:var(--or)">'+t[1]+(t[2]?' ›':'')+'</b></div>';}).join(''):'<p style="font-size:13px;color:#2E7D32">✓ Bekleyen iş yok.</p>';
+  el.innerHTML=
+    '<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:14px">'
+    +tile('🆕','Yeni üye (30 gün)',new30,delta(new30,prev30)+' önceki 30 güne göre')
+    +tile('📈','Yeni üye (7 gün)',new7,'')
+    +tile('🟢','Aktif üye (7 gün)',active7,'30 günde '+active30+' · giriş yapanlar')
+    +tile('🤝','Kulübe katılmış üye',inClub,'%'+pct(inClub,users.length)+' · '+users.length+' üyeden')
+    +tile('🔔','Bildirim açık',push,'%'+pct(push,users.length)+' push abonesi')
+    +tile('📧','E-posta izni',mail+(news.length?' + '+news.length:''),'üye'+(news.length?' + bülten aboneleri':''))
+    +tile('🏁','Yaklaşan yarış',upRaces.length,soon.length+' tanesi 30 gün içinde')
+    +tile('💬','Etkileşim (30 gün)',since(bcom,'createdAt',30)+since(posts,'createdAt',30)+since(disc,'createdAt',30),'yorum + gönderi + tartışma')
+    +'</div>'
+    +'<div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px;margin-bottom:22px">'
+    +'<div class="card" style="padding:14px 16px"><h3 style="font-size:14px;margin-bottom:6px">✅ Yapılacaklar</h3>'+todoHtml+'</div>'
+    +'<div class="card" style="padding:14px 16px"><h3 style="font-size:14px;margin-bottom:2px">📊 Haftalık yeni üye</h3><p style="font-size:11px;color:var(--muted);margin-bottom:6px">Son 12 hafta · bu hafta '+weeks[11]+'</p>'+spark+'</div>'
+    +'<div class="card" style="padding:14px 16px"><h3 style="font-size:14px;margin-bottom:6px">🏆 En kalabalık kulüpler</h3>'+list(topClubs)+'</div>'
+    +'<div class="card" style="padding:14px 16px"><h3 style="font-size:14px;margin-bottom:6px">🏁 30 gün içindeki yarışlar</h3>'+list(nextRaces)+'</div>'
+    +'<div class="card" style="padding:14px 16px"><h3 style="font-size:14px;margin-bottom:6px">❤ En beğenilen bloglar</h3>'+list(topBlogs)+(daysSinceBlog!==null?'<p style="font-size:11px;color:var(--muted);margin-top:6px">Son yazı '+(daysSinceBlog===0?'bugün':daysSinceBlog+' gün önce')+' · toplam '+blogs.length+' yazı</p>':'')+'</div>'
+    +'</div>';
+};
+
 // ═══ SÜPER ADMİN: ÜYE DEMOGRAFİSİ (yaş, şehir, cinsiyet — yalnızca toplu sayılar) ═══
 window.renderUserDemographics=async function(){
   var el=document.getElementById('admin-demographics');var fb=window._fb;

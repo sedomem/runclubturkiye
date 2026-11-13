@@ -1587,6 +1587,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     </div>
     <div id="nav-user" style="display:none;gap:5px" class="nav-right">
       <button class="btn btn-ghost btn-sm" id="nav-role-btn" onclick="goPanel()" style="display:none"></button>
+      <button id="sa-alert-btn" onclick="nav('admin');setTimeout(function(){showAdminAlerts(document.getElementById('sb-alerts-btn'))},400)" aria-label="Yönetici bildirimleri" title="Yönetici bildirimleri" style="display:none;position:relative;background:none;border:none;font-size:18px;cursor:pointer;padding:6px">🛎<span id="sa-alert-badge" style="display:none;position:absolute;top:0;right:0;background:#e53935;color:#fff;font-size:10px;font-weight:700;border-radius:9px;min-width:16px;height:16px;line-height:16px;text-align:center;padding:0 4px"></span></button>
       <div style="position:relative">
         <button id="notif-bell-btn" onclick="toggleNotifDropdown()" aria-label="Bildirimler" title="Bildirimler">🔔<span id="notif-badge"></span></button>
         <div id="notif-dropdown">
@@ -3052,6 +3053,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button onclick="aNav('groupadmins',this)">🔑 Grup Adminler</button>
     <button onclick="aNav('events',this)">📅 Etkinlikler</button>
     <button onclick="aNav('approvals',this)">✅ Onaylar</button>
+    <button id="sb-alerts-btn" onclick="showAdminAlerts(this)">🛎 Yönetici Bildirimleri</button>
     <button onclick="aNav('races',this)">🏆 Yarış Takvimi</button>
     <button onclick="aNav('blog',this)">📰 Blog</button>
     <button onclick="aNav('firsatlar',this)">🎁 Fırsatlar</button>
@@ -3620,7 +3622,7 @@ onAuthStateChanged(auth,async user=>{
     document.getElementById('nav-user').style.display='flex';
     setupRoleBtn();buildDashboard();syncProfileUI();
     if(typeof window.syncMobileMenu==='function')window.syncMobileMenu();
-    if(role==='superadmin'){loadAdminBadges();setTimeout(()=>window.migrateHealthData&&window.migrateHealthData(),4000);}
+    if(role==='superadmin'){loadAdminBadges();setTimeout(()=>window.startAdminAlerts&&window.startAdminAlerts(),1500);setTimeout(()=>window.migrateHealthData&&window.migrateHealthData(),4000);}
     // Push bildirim izni banner'ı göster
     setTimeout(()=>{if(typeof window.checkAndRequestPush==='function')window.checkAndRequestPush();},2000);
   }else{
@@ -3691,6 +3693,7 @@ window.doRegister=async()=>{
     const cred=await createUserWithEmailAndPassword(auth,email,pass);
     const pushEnabled=document.getElementById('chk-push')?.checked||false;
     await setDoc(doc(db,'users',cred.user.uid),{name:name+' '+sname,email,role:'member',pushEnabled,totalKm:0,eventCount:0,clubCount:0,badges:[],createdAt:serverTimestamp()});
+    window.notifyAdmin&&window.notifyAdmin('new_user','Yeni üye: '+name+' '+sname,email+' siteye üye oldu.','users');
     toast('Hoş geldin '+name+'! 🎉','ok');
     // Hoşgeldin push bildirimi kuyruğa ekle (Cloud Function işler)
     try{
@@ -3733,6 +3736,7 @@ window.doGoogle=async()=>{
   try{
     const r=await signInWithPopup(auth,gp);
     const snap=await getDoc(doc(db,'users',r.user.uid));
+    if(!snap.exists())window.notifyAdmin&&window.notifyAdmin('new_user','Yeni üye: '+(r.user.displayName||r.user.email),(r.user.email||'')+' Google ile üye oldu.','users');
     if(!snap.exists())await setDoc(doc(db,'users',r.user.uid),{name:r.user.displayName||'',email:r.user.email,role:'member',totalKm:0,eventCount:0,clubCount:0,badges:[],createdAt:serverTimestamp()});
     closeModal('auth-modal');toast('Giriş başarılı! 🏃','ok');
   }catch(e){if(e.code!=='auth/popup-closed-by-user')toast(e.message,'err');}
@@ -3746,6 +3750,7 @@ window.submitGroupAdminApplication=async()=>{
     const cred=await createUserWithEmailAndPassword(auth,email,pass);
     await setDoc(doc(db,'users',cred.user.uid),{name,email,phone:document.getElementById('ga-rphone').value,city:document.getElementById('ga-city').value,clubName:club,role:'pending_groupadmin',totalKm:0,eventCount:0,clubCount:0,badges:[],createdAt:serverTimestamp()});
     await addDoc(collection(db,'applications'),{name,email,phone:document.getElementById('ga-rphone').value,city:document.getElementById('ga-city').value,clubName:club,uid:cred.user.uid,status:'pending',createdAt:serverTimestamp()});
+    try{await window.notifyAdmin&&window.notifyAdmin('ga_application','Yeni kulüp başvurusu: '+club,name+' ('+email+') grup admin olmak için başvurdu.','applications');}catch(_){}
     closeModal('auth-modal');toast('Başvurunuz alındı!','ok');
     await signOut(auth);
   }catch(e){const m={'auth/email-already-in-use':'Bu e-posta zaten kayıtlı. Giriş yapmayı deneyin.','auth/invalid-email':'Geçerli bir e-posta adresi girin','auth/weak-password':'Şifre en az 6 karakter olmalı','auth/network-request-failed':'Bağlantı hatası, tekrar deneyin'};toast(m[e.code]||e.message,'err');}
@@ -3962,6 +3967,7 @@ window.joinClub=async(clubId)=>{
       status:club.open===false?'pending':'approved',
       joinedAt:serverTimestamp()
     });
+    window.notifyAdmin&&window.notifyAdmin('club_join',(club.open===false?'Kulüp üyelik başvurusu: ':'Kulübe yeni üye: ')+(club.name||''),(CU.name||'Bir üye')+(club.open===false?' kulübe katılmak için başvurdu.':' kulübe katıldı.'),'users');
     // users dokümanını tek seferde güncelle: clubId + clubCount
     await setDoc(doc(db,'users',CU.uid),{
       clubId, clubName:club.name||'',
@@ -4582,7 +4588,7 @@ window.sendContactMessage=async()=>{
   const name=document.getElementById('ct-name').value.trim();const email=document.getElementById('ct-email').value.trim();const msg=document.getElementById('ct-message').value.trim();
   if(!name||!email||!msg){toast('Tüm alanları doldurun','err');return;}
   if(!document.getElementById('ct-kvkk').checked){toast('KVKK onayı gerekli','err');return;}
-  try{await addDoc(collection(db,'contactMessages'),{name,email,subject:document.getElementById('ct-subject').value,message:msg,read:false,createdAt:serverTimestamp()});toast('Mesajınız gönderildi ✓','ok');['ct-name','ct-email','ct-message'].forEach(id=>document.getElementById(id).value='');}catch(e){toast(e.message,'err');}
+  try{await addDoc(collection(db,'contactMessages'),{name,email,subject:document.getElementById('ct-subject').value,message:msg,read:false,createdAt:serverTimestamp()});window.notifyAdmin&&window.notifyAdmin('contact','Yeni mesaj: '+name,(document.getElementById('ct-subject').value||'')+' — '+msg.slice(0,200),'messages');toast('Mesajınız gönderildi ✓','ok');['ct-name','ct-email','ct-message'].forEach(id=>document.getElementById(id).value='');}catch(e){toast(e.message,'err');}
 };
 
 // ── NEWSLETTER ──
@@ -6002,6 +6008,7 @@ window.gSaveClubEvent=async function(){
       toast('Güncellendi ✓','ok');
     }else{
       await fb.addDoc(fb.collection(fb.db,'club_events'),Object.assign({},data,{createdAt:fb.serverTimestamp()}));
+      window.notifyAdmin&&window.notifyAdmin('ga_calendar','Kulüp etkinliği: '+(data.title||''),(data.clubName||'Grup admin')+' takvime etkinlik ekledi ('+(data.date||'')+').','');
       toast('Eklendi ✓','ok');
     }
     var form=document.getElementById('g-cal-form-wrap');
@@ -11148,6 +11155,7 @@ window.gSaveAnnouncement=async()=>{
     if(!clubId){toast('Kulüp bilgisi bulunamadı','err');return;}
     // Duyuruyu kaydet
     await fb.addDoc(fb.collection(fb.db,'announcements'),{title,body,clubId,clubName:CU.clubName||'',authorName:CU.name,authorUid:CU.uid,createdAt:fb.serverTimestamp()});
+    window.notifyAdmin&&window.notifyAdmin('ga_announcement','Kulüp duyurusu: '+title,(CU.clubName||CU.name||'')+': '+String(body||'').slice(0,200),'');
     // Push bildirim gönder
     try{
       const pushDoc={
@@ -11351,7 +11359,7 @@ window.gSaveEvent=async()=>{
       const imgFile=document.getElementById('ge-img-file')?.files[0];
       if(!imgUrl&&imgFile){try{const r=fb.ref(fb.storage,`events/${Date.now()}_${imgFile.name}`);await fb.uploadBytes(r,imgFile);imgUrl=await fb.getDownloadURL(r);}catch(e){}}
       const data={title,cat:document.getElementById('ge-cat')?.value||'Genel',date:document.getElementById('ge-date')?.value||'',city:document.getElementById('ge-city')?.value||CU.city||'',dist:document.getElementById('ge-dist')?.value||'',cap:parseInt(document.getElementById('ge-cap')?.value)||100,fee:document.getElementById('ge-fee')?.value||'',deadline:document.getElementById('ge-deadline')?.value||'',desc:document.getElementById('ge-desc')?.value||'',imgUrl,pace,emoji:'🏃',status:'approved',groupAdminUid:CU.uid,groupAdminName:CU.name,clubName:CU.clubName||'',reg:0,createdAt:fb.serverTimestamp(),slug:title.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,'')};
-      try{await fb.addDoc(fb.collection(fb.db,'events'),data);toast('Etkinlik onaya gönderildi ✓','ok');document.getElementById('g-add-event-form').style.display='none';['ge-title','ge-dist','ge-fee','ge-desc','ge-img-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});gLoadEvents();}catch(e){toast('Hata: '+e.message,'err');}
+      try{await fb.addDoc(fb.collection(fb.db,'events'),data);window.notifyAdmin&&window.notifyAdmin('ga_event','Onay bekleyen etkinlik: '+title,(CU.clubName||CU.name||'Grup admin')+' yeni etkinlik ekledi ('+(data.date||'')+').','approvals');toast('Etkinlik onaya gönderildi ✓','ok');document.getElementById('g-add-event-form').style.display='none';['ge-title','ge-dist','ge-fee','ge-desc','ge-img-url'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});gLoadEvents();}catch(e){toast('Hata: '+e.message,'err');}
     }
   }
 };
@@ -11460,6 +11468,7 @@ window.gSendChat=async()=>{
       role:'groupadmin',
       createdAt:fb.serverTimestamp()
     });
+    window.notifyAdmin&&window.notifyAdmin('chat','Grup admin mesajı: '+(cu.clubName||cu.name||''),msg.slice(0,200),'chat');
     input.value='';
     // Listener yoksa ya da container kaybolmuşsa yenile
     const container=document.getElementById('g-chat-box');
@@ -12994,6 +13003,7 @@ window.saveTraining=async function(){
     }else{
       data.createdAt=fb.serverTimestamp();
       await fb.addDoc(fb.collection(fb.db,'club_trainings'), data);
+      window.notifyAdmin&&window.notifyAdmin('ga_calendar','Kulüp antrenmanı: '+(data.title||''),(data.clubName||'Grup admin')+' antrenman ekledi ('+(data.date||'')+').','');
     }
     toast('Antrenman kaydedildi ✓','ok');
     document.getElementById('training-modal').style.display='none';
@@ -13183,6 +13193,7 @@ window.gSaveClubEvent = async function() {
     } else {
       data.createdAt = fb.serverTimestamp();
       await fb.addDoc(fb.collection(fb.db, 'club_trainings'), data);
+      window.notifyAdmin&&window.notifyAdmin('ga_calendar','Kulüp takvimi: '+(data.title||''),(data.clubName||'Grup admin')+' takvime ekleme yaptı ('+(data.date||'')+').','');
     }
     toast('Takvim güncellendi ✓','ok');
     document.getElementById('g-cal-form-wrap').style.display = 'none';
@@ -13282,6 +13293,7 @@ window.gSaveClubRace = async function() {
     } else {
       data.createdAt = fb.serverTimestamp();
       await fb.addDoc(fb.collection(fb.db, 'club_races'), data);
+      window.notifyAdmin&&window.notifyAdmin('ga_calendar','Kulüp yarışı: '+(data.name||''),(window.CU.clubName||'Grup admin')+' kulüp yarış takvimine ekledi ('+(data.date||'')+').','');
     }
     
     // Bildirim Tetikleyici (Announcement)
@@ -14469,6 +14481,86 @@ body.is-guest div.guest-only{display:flex!important}
 </script>
 
 <script id="fix-2026-11-13">
+// ═══ SÜPER ADMİN BİLDİRİMLERİ ═══
+window.notifyAdmin=function(type,title,body,section){
+  try{
+    var fb=window._fb;if(!fb)return Promise.resolve();
+    if(window.CU&&window.CU.role==='superadmin')return Promise.resolve();
+    var u=fb.auth.currentUser;
+    var d={type:type,title:String(title||'').slice(0,120),body:String(body||'').slice(0,300),section:String(section||'').slice(0,30),read:false,createdAt:fb.serverTimestamp(),actorUid:u?u.uid:'',actorName:String((window.CU&&window.CU.name)||'').slice(0,80)};
+    var p1=fb.addDoc(fb.collection(fb.db,'adminNotifications'),d).catch(function(e){console.warn('[notifyAdmin]',e.code);});
+    var p2=fb.addDoc(fb.collection(fb.db,'pushNotifications'),{title:('🛎 '+d.title).slice(0,130),body:d.body,url:'https://www.runclubturkiye.com/yonetici',targetRole:'superadmin',status:'pending',adminAlert:true,createdAt:fb.serverTimestamp()}).catch(function(){});
+    return Promise.all([p1,p2]);
+  }catch(e){return Promise.resolve();}
+};
+var _AA_ICON={new_user:'👤',ga_application:'🔑',club_join:'🤝',contact:'✉️',ga_event:'📅',ga_calendar:'🗓',ga_announcement:'📢',chat:'💬'};
+window.startAdminAlerts=function(){
+  var fb=window._fb;if(!fb||!window.CU||window.CU.role!=='superadmin'||window._aaUnsub)return;
+  var btn=document.getElementById('sa-alert-btn');if(btn)btn.style.display='inline-block';
+  var first=true,known={};
+  window._aaUnsub=fb.onSnapshot(fb.query(fb.collection(fb.db,'adminNotifications'),fb.where('read','==',false)),function(snap){
+    var n=snap.size;window._aaUnread=n;
+    var b=document.getElementById('sa-alert-badge');if(b){b.textContent=n>99?'99+':n;b.style.display=n?'inline-block':'none';}
+    var sb=document.getElementById('sb-alerts-btn');if(sb)sb.innerHTML='🛎 Yönetici Bildirimleri'+(n?'<span class="admin-notif-badge">'+n+'</span>':'');
+    snap.docChanges().forEach(function(ch){
+      if(ch.type!=='added'||known[ch.doc.id])return;known[ch.doc.id]=1;
+      if(!first){var x=ch.doc.data();toast((_AA_ICON[x.type]||'🛎')+' '+x.title,'ok');}
+    });
+    first=false;
+    if(document.getElementById('aa-list'))window.loadAdminAlerts();
+  },function(e){console.warn('[adminAlerts]',e.code);});
+};
+window.showAdminAlerts=function(btn){
+  document.querySelectorAll('#pg-admin .admin-sb button').forEach(function(b){b.classList.remove('on');});
+  if(btn)btn.classList.add('on');
+  var m=document.getElementById('admin-main');if(!m)return;
+  m.innerHTML='<div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;margin-bottom:16px"><h2>🛎 Yönetici Bildirimleri</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-ghost btn-sm" onclick="markAllAdminAlerts()">✓ Tümünü okundu yap</button><button class="btn btn-ghost btn-sm" onclick="clearReadAdminAlerts()">🗑 Okunanları sil</button><button class="btn btn-ghost btn-sm" onclick="enableAdminPush()">📲 Telefona bildirim</button></div></div><p style="font-size:12px;color:var(--muted);margin-bottom:14px">Yeni üye, kulüp başvurusu, iletişim mesajı ve grup admin işlemleri burada görünür.</p><div id="aa-list"><div class="spinner" style="margin:20px auto"></div></div>';
+  window.loadAdminAlerts();
+};
+window.loadAdminAlerts=async function(){
+  var el=document.getElementById('aa-list');var fb=window._fb;if(!el||!fb)return;
+  try{
+    var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'adminNotifications'),fb.orderBy('createdAt','desc')));
+    if(snap.empty){el.innerHTML='<div class="card" style="padding:28px;text-align:center;color:var(--muted)">Henüz bildirim yok.</div>';return;}
+    var html='';snap.docs.slice(0,100).forEach(function(d){
+      var x=d.data();var t=x.createdAt&&x.createdAt.toDate?x.createdAt.toDate():null;
+      var when=t?t.toLocaleString('tr-TR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'';
+      var esc=function(v){return String(v||'').replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+      html+='<div class="card" data-id="'+d.id+'" style="padding:12px 14px;margin-bottom:8px;display:flex;gap:12px;align-items:flex-start;cursor:pointer;'+(x.read?'opacity:.6':'border-left:4px solid var(--or)')+'" onclick="openAdminAlert(\''+d.id+'\',\''+esc(x.section)+'\')">'
+        +'<div style="font-size:22px;line-height:1">'+(_AA_ICON[x.type]||'🛎')+'</div>'
+        +'<div style="flex:1;min-width:0"><div style="font-weight:700;font-size:14px">'+esc(x.title)+'</div><div style="font-size:12px;color:var(--muted);margin-top:2px;word-break:break-word">'+esc(x.body)+'</div></div>'
+        +'<div style="font-size:11px;color:var(--muted);white-space:nowrap">'+when+'</div></div>';
+    });
+    el.innerHTML=html;
+  }catch(e){el.innerHTML='<p style="color:var(--muted)">Bildirimler yüklenemedi: '+e.code+'</p>';}
+};
+window.openAdminAlert=async function(id,section){
+  var fb=window._fb;try{await fb.updateDoc(fb.doc(fb.db,'adminNotifications',id),{read:true});}catch(e){}
+  if(section&&window.aNav){var b=document.querySelector('#pg-admin .admin-sb button[onclick*="aNav(\''+section+'\'"]');aNav(section,b);}
+  else window.loadAdminAlerts();
+};
+window.markAllAdminAlerts=async function(){
+  var fb=window._fb;var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'adminNotifications'),fb.where('read','==',false)));
+  await Promise.all(snap.docs.map(function(d){return fb.updateDoc(d.ref,{read:true}).catch(function(){});}));
+  toast('Tümü okundu ✓','ok');window.loadAdminAlerts();
+};
+window.clearReadAdminAlerts=async function(){
+  if(!confirm('Okunmuş bildirimler silinsin mi?'))return;
+  var fb=window._fb;var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'adminNotifications'),fb.where('read','==',true)));
+  await Promise.all(snap.docs.map(function(d){return fb.deleteDoc(d.ref).catch(function(){});}));
+  toast(snap.size+' bildirim silindi','ok');window.loadAdminAlerts();
+};
+window.enableAdminPush=async function(){
+  var fb=window._fb;
+  try{await fb.setDoc(fb.doc(fb.db,'users',window.CU.uid),{role:'superadmin'},{merge:true});}catch(e){}
+  if(window.requestPushPermission){await window.requestPushPermission();}
+  else if(window.checkAndRequestPush){await window.checkAndRequestPush();}
+  setTimeout(async function(){
+    try{var u=(await fb.getDoc(fb.doc(fb.db,'users',window.CU.uid))).data()||{};
+      toast(u.pushEnabled&&u.fcmToken?'Telefon/tarayıcı bildirimleri açık ✓':'Bildirim izni verilmedi — tarayıcı ayarlarından izin ver','ok');}catch(e){}
+  },2500);
+};
+
 // KVKK: süper admin girişinde eski profillerdeki sağlık bilgilerini özel alana taşır (tek seferlik)
 window.migrateHealthData=async function(){
   var fb=window._fb;if(!fb||!fb.deleteField||!window.CU||window.CU.role!=='superadmin')return;

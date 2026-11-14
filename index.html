@@ -10138,6 +10138,7 @@ function renderAdminSection(sec){
   if(sec==='groupadmins')setTimeout(()=>loadGroupAdmins&&loadGroupAdmins(),100);
   if(sec==='newsletter')setTimeout(()=>loadNewsletterList&&loadNewsletterList(),100);
   if(sec==='firsatlar')setTimeout(()=>window.renderFirsatAdminV2&&window.renderFirsatAdminV2(),60);
+  if(sec==='sponsors')setTimeout(()=>window.renderAdminSponsorsV2&&window.renderAdminSponsorsV2(),60);
   if(sec==='blog'){setTimeout(initQuillEditor,200);setTimeout(()=>window.renderAdminBlogLists&&window.renderAdminBlogLists(),30);}
   if(sec==='races')setTimeout(initQuillRaceEditor,200);
   if(sec==='banners')setTimeout(()=>{
@@ -14790,6 +14791,80 @@ body.is-guest div.guest-only{display:flex!important}
 .fr-gal-list div.new{outline:2px solid var(--or)}
 @media(max-width:640px){.fr-x-grid{grid-template-columns:1fr}.fr-x{padding:12px}}
 </style>
+<style id="sponsors-v2">
+.spx-sec{padding:44px 0 40px}
+.spx-head{text-align:center;max-width:620px;margin:0 auto 26px}
+.spx-eye{display:inline-block;font-size:11px;font-weight:800;letter-spacing:1.6px;text-transform:uppercase;color:var(--or);background:var(--or-soft);padding:5px 12px;border-radius:999px}
+.spx-head h2{font-size:clamp(22px,3vw,30px);margin:10px 0 6px;color:var(--text)}
+.spx-head p{margin:0;color:var(--muted);font-size:14px;line-height:1.6}
+.spx-main{display:grid;grid-template-columns:220px minmax(0,1fr) auto;gap:24px;align-items:center;background:linear-gradient(135deg,#2C1810,#1A1A1A);color:#fff;border-radius:20px;padding:24px 28px;margin-bottom:16px;position:relative;overflow:hidden;cursor:pointer;text-decoration:none}
+.spx-main:after{content:"";position:absolute;right:-60px;top:-60px;width:220px;height:220px;border-radius:50%;background:radial-gradient(circle,rgba(232,98,42,.45),transparent 70%)}
+.spx-main .lg{background:#fff;border-radius:14px;height:110px;display:flex;align-items:center;justify-content:center;padding:14px}
+.spx-main .lg img{max-width:100%;max-height:82px;object-fit:contain}
+.spx-main small{font-size:11px;font-weight:800;letter-spacing:1.5px;color:var(--or-light);text-transform:uppercase}
+.spx-main h3{font-size:22px;margin:4px 0 6px;color:#fff}
+.spx-main p{margin:0;font-size:14px;opacity:.82;line-height:1.55}
+.spx-main .go{position:relative;z-index:1;background:var(--or);color:#fff;font-weight:800;font-size:13px;padding:11px 18px;border-radius:12px;white-space:nowrap}
+.spx-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:14px}
+.spx-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:16px;padding:18px;display:flex;flex-direction:column;gap:10px;text-decoration:none;color:inherit;cursor:pointer;transition:transform .2s,box-shadow .2s,border-color .2s}
+.spx-card:hover{transform:translateY(-3px);border-color:var(--or);box-shadow:0 14px 30px -18px rgba(44,24,16,.45)}
+.spx-card .lg{height:74px;background:#fff;border-radius:12px;display:flex;align-items:center;justify-content:center;padding:10px;border:1px solid var(--bg3)}
+.spx-card .lg img{max-width:100%;max-height:54px;object-fit:contain}
+.spx-card .lg b{font-size:18px;color:var(--text)}
+.spx-card .tier{font-size:10px;font-weight:800;letter-spacing:1.2px;text-transform:uppercase;color:var(--or)}
+.spx-card h4{margin:0;font-size:15px;color:var(--text)}
+.spx-card p{margin:0;font-size:13px;color:var(--muted);line-height:1.5;flex:1}
+.spx-card .lnk{font-size:12px;font-weight:700;color:var(--or)}
+.spx-cta{border-style:dashed;align-items:center;justify-content:center;text-align:center;background:transparent}
+.spx-cta .ic{font-size:30px}
+.spx-cta h4{color:var(--text)}
+.spx-logos{display:flex;flex-wrap:wrap;justify-content:center;gap:12px;margin-top:16px}
+.spx-logo{background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;height:62px;min-width:120px;padding:8px 18px;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;text-decoration:none;color:var(--text2);font-weight:700;font-size:13px}
+.spx-logo img{max-height:40px;max-width:120px;object-fit:contain;filter:grayscale(1);opacity:.75;transition:all .2s}
+.spx-logo:hover{border-color:var(--or)}
+.spx-logo:hover img{filter:none;opacity:1}
+.spx-mq{overflow:hidden;-webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent)}
+.spx-mq .tr{display:flex;gap:12px;width:max-content;animation:spxmq 40s linear infinite}
+.spx-mq:hover .tr{animation-play-state:paused}
+@keyframes spxmq{to{transform:translateX(-50%)}}
+@media(prefers-reduced-motion:reduce){.spx-mq .tr{animation:none;flex-wrap:wrap;width:auto;justify-content:center}}
+.spx-foot{text-align:center;margin-top:18px;font-size:13px;color:var(--muted)}
+.spx-foot a{color:var(--or);font-weight:700;cursor:pointer}
+/* sayfa içi şerit */
+.spx-inline{display:flex;align-items:center;gap:16px;background:var(--bg2);border:1px solid var(--border);border-radius:16px;padding:12px 16px}
+.spx-inline .lbl{flex-shrink:0;font-size:10px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase;color:var(--muted);line-height:1.3}
+.spx-inline .row{flex:1;min-width:0;display:flex;gap:10px;align-items:center;justify-content:center;flex-wrap:wrap}
+.spx-inline .spx-logo{height:50px;min-width:100px;padding:6px 14px}
+.spx-inline .spx-logo img{max-height:32px;max-width:100px}
+.spx-inline .be{flex-shrink:0;font-size:12px;font-weight:700;color:var(--or);cursor:pointer;white-space:nowrap}
+.sponsor-strip:has(.spx-inline){display:block}
+@media(max-width:760px){
+  .spx-main{grid-template-columns:1fr;text-align:center;padding:20px}
+  .spx-main .lg{height:90px}
+  .spx-main .go{justify-self:center}
+  .spx-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+  .spx-card{padding:12px;gap:8px}
+  .spx-card .lg{height:58px}
+  .spx-card p{display:none}
+  .spx-inline{flex-direction:column;gap:10px;padding:12px}
+  .spx-inline .row{width:100%}
+  .spx-inline .spx-logo{min-width:0;flex:1 1 40%}
+}
+/* admin */
+.spa-form{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.spa-form .full{grid-column:1/-1}
+.spa-form label{display:block;font-size:12px;font-weight:700;margin-bottom:4px}
+.spa-form input[type=text],.spa-form select,.spa-form textarea{width:100%;box-sizing:border-box}
+.spa-row{display:flex;align-items:center;gap:12px;padding:10px 14px;border-bottom:1px solid var(--border)}
+.spa-row .lg{width:90px;height:44px;background:#fff;border:1px solid var(--bg3);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0;padding:4px}
+.spa-row .lg img{max-width:100%;max-height:36px;object-fit:contain}
+.spa-row .ti{flex:1;min-width:0}
+.spa-row .ti b{display:block;font-size:14px}
+.spa-row .ti span{font-size:12px;color:var(--muted)}
+.spa-row .ac{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.spa-tag{display:inline-block;font-size:10px;font-weight:800;padding:2px 7px;border-radius:999px;background:var(--or-soft);color:var(--or);margin-left:6px;vertical-align:middle}
+@media(max-width:640px){.spa-form{grid-template-columns:1fr}.spa-row{flex-wrap:wrap}.spa-row .ac{width:100%;justify-content:flex-start}}
+</style>
 <script id="fix-2026-11-13">
 // ═══ FIRSATLAR v2: sayfa + iş birliği formu + admin ═══
 window.renderFirsatStats=function(){
@@ -15719,6 +15794,167 @@ window.syncClubCount=function(n){
       window.renderFirsatAdminV2();
     }catch(e){toast('Hata: '+(e.code||e.message),'err');}
     if(btn){btn.disabled=false;btn.textContent=window._frEditId?'Değişiklikleri Kaydet':'Fırsat Ekle';}
+  };
+})();
+
+// ═══ SPONSORLAR v2 ═══
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var TIERS={ana:{rank:0,lbl:'Ana sponsor'},partner:{rank:1,lbl:'Resmi partner'},destek:{rank:2,lbl:'Destekçi'}};
+  var tierOf=function(s){return TIERS[s.tier]?s.tier:'partner';};
+  var list=function(){
+    return (window.SPONSORS_DATA||[]).filter(function(s){return s.aktif!==false;}).sort(function(a,b){
+      return TIERS[tierOf(a)].rank-TIERS[tierOf(b)].rank||(a.order||0)-(b.order||0)||((a.createdAt&&a.createdAt.seconds)||0)-((b.createdAt&&b.createdAt.seconds)||0);
+    });
+  };
+  var utm=function(u,place){
+    u=String(u||'').trim();if(!u)return '';if(!/^https?:\/\//i.test(u))u='https://'+u;
+    if(!/^https?:\/\/[^\s"'<>]+$/i.test(u))return '';
+    if(/[?&]utm_source=/.test(u))return u;
+    var h='';var i=u.indexOf('#');if(i>=0){h=u.slice(i);u=u.slice(0,i);}
+    return u+(u.indexOf('?')>=0?'&':'?')+'utm_source=runclubturkiye&utm_medium=sponsor&utm_campaign='+encodeURIComponent(place||'site')+h;
+  };
+  window.spClick=function(id,place){
+    var s=(window.SPONSORS_DATA||[]).find(function(x){return x.id===id;});
+    try{var fb=window._fb;fb.updateDoc(fb.doc(fb.db,'sponsors',id),{clicks:fb.increment(1)}).catch(function(){});}catch(e){}
+    if(s)s.clicks=(s.clicks||0)+1;
+    window.rcTrack&&window.rcTrack('sponsor_click',{sponsor_id:id,sponsor_name:(s&&s.name)||'',placement:place||''});
+  };
+  window.goSponsorForm=function(){
+    nav('firsatlar');
+    setTimeout(function(){
+      var sel=document.getElementById('pr-type');
+      if(sel){if(![].some.call(sel.options,function(o){return o.value==='Platform sponsorluğu';})){var o=document.createElement('option');o.textContent='Platform sponsorluğu';sel.insertBefore(o,sel.firstChild);}sel.value='Platform sponsorluğu';}
+      var t=document.getElementById('fp-partner');if(t)t.scrollIntoView({behavior:'smooth',block:'start'});
+    },350);
+    window.rcTrack&&window.rcTrack('sponsor_cta_click',{});
+  };
+  var a=function(s,place,cls,inner){
+    var href=utm(s.url,place);
+    return href?'<a class="'+cls+'" href="'+esc(href)+'" target="_blank" rel="noopener sponsored" title="'+esc(s.name)+'" onclick="spClick(\''+s.id+'\',\''+place+'\')">'+inner+'</a>'
+      :'<div class="'+cls+'" title="'+esc(s.name)+'" style="cursor:default">'+inner+'</div>';
+  };
+  var logo=function(s){return s.imgUrl?'<img src="'+esc(s.imgUrl)+'" alt="'+esc(s.name)+'" loading="lazy">':'<b>'+esc(s.name)+'</b>';};
+  var logosRow=function(arr,place){
+    var items=arr.map(function(s){return a(s,place,'spx-logo',s.imgUrl?'<img src="'+esc(s.imgUrl)+'" alt="'+esc(s.name)+'" loading="lazy">':esc(s.name));}).join('');
+    if(arr.length>=6)return '<div class="spx-mq"><div class="tr">'+items+items+'</div></div>';
+    return items;
+  };
+  function renderHome(el){
+    var L=list();
+    var lab=el.previousElementSibling;if(lab&&lab.tagName==='P')lab.style.display='none';
+    var wrap=el.closest('.sec-sm');if(wrap)wrap.classList.add('spx-sec');
+    var ana=L.filter(function(s){return tierOf(s)==='ana';}),par=L.filter(function(s){return tierOf(s)==='partner';}),des=L.filter(function(s){return tierOf(s)==='destek';});
+    var h='<div class="spx-head"><span class="spx-eye">Sponsorlar & Partnerler</span><h2>Türkiye’de koşuyu birlikte büyütüyoruz</h2><p>RunClubTürkiye’yi ücretsiz tutan, kulüplere ve yarışlara destek olan markalar.</p></div>';
+    h+=ana.map(function(s){
+      var href=utm(s.url,'home_main');
+      var inner='<div class="lg">'+(s.imgUrl?'<img src="'+esc(s.imgUrl)+'" alt="'+esc(s.name)+'">':'<b style="color:#111;font-size:22px">'+esc(s.name)+'</b>')+'</div><div style="position:relative;z-index:1"><small>⭐ Ana sponsor</small><h3>'+esc(s.name)+'</h3><p>'+esc(s.tagline||'RunClubTürkiye topluluğunun ana destekçisi.')+'</p></div>'+(href?'<span class="go">Ziyaret et →</span>':'<span></span>');
+      return href?'<a class="spx-main" href="'+esc(href)+'" target="_blank" rel="noopener sponsored" onclick="spClick(\''+s.id+'\',\'home_main\')">'+inner+'</a>':'<div class="spx-main" style="cursor:default">'+inner+'</div>';
+    }).join('');
+    h+='<div class="spx-grid">'+par.map(function(s){
+      return a(s,'home_partner','spx-card','<div class="lg">'+logo(s)+'</div><span class="tier">Resmi partner</span><h4>'+esc(s.name)+'</h4>'+(s.tagline?'<p>'+esc(s.tagline)+'</p>':'<p></p>')+(s.url?'<span class="lnk">Siteyi ziyaret et →</span>':''));
+    }).join('')
+      +'<div class="spx-card spx-cta" onclick="goSponsorForm()" role="button" tabindex="0"><div class="ic">🤝</div><h4>Markanız burada olabilir</h4><p>Binlerce aktif koşucuya ulaşın: logo, kampanya, yarış ve kulüp sponsorluğu.</p><span class="lnk">Sponsor ol →</span></div>'
+      +'</div>';
+    if(des.length)h+='<div class="spx-head" style="margin:26px auto 0"><span class="spx-eye" style="background:var(--bg3);color:var(--muted)">Destekçilerimiz</span></div><div class="spx-logos">'+logosRow(des,'home_support')+'</div>';
+    el.innerHTML=h;
+  }
+  function renderInline(el){
+    var L=list();
+    var lab=el.previousElementSibling;if(lab&&lab.tagName==='P')lab.style.display='none';
+    if(!L.length){el.innerHTML='<div class="spx-inline"><div class="lbl">Sponsorlarımız</div><div class="row" style="font-size:13px;color:var(--muted)">Koşucu topluluğuna markanızla destek olun.</div><span class="be" onclick="goSponsorForm()">Sponsor ol →</span></div>';return;}
+    var pg=(el.closest('.pg')||{}).id||'page';
+    el.innerHTML='<div class="spx-inline"><div class="lbl">Bize güç<br>veren markalar</div><div class="row">'+logosRow(L,'inline_'+pg.replace('pg-',''))+'</div><span class="be" onclick="goSponsorForm()">Sponsor ol →</span></div>';
+  }
+  window.renderSponsors=function(){
+    var m=document.getElementById('sponsors-strip');if(m)renderHome(m);
+    document.querySelectorAll('.sponsor-strip-inline').forEach(renderInline);
+  };
+  try{renderSponsors=window.renderSponsors;}catch(e){}
+  if((window.SPONSORS_DATA||[]).length)window.renderSponsors();
+
+  // ── ADMIN ──
+  window._spEdit=null;
+  window.renderAdminSponsorsV2=function(){
+    var main=document.getElementById('admin-main');if(!main)return;
+    if(!document.getElementById('spa-form')){
+      main.innerHTML='<h2 style="margin-bottom:6px">💼 Sponsorlar</h2><p style="color:var(--muted);font-size:13px;margin:0 0 16px">Ana sayfada ve tüm sayfa altlarındaki sponsor alanında görünür. Linklere otomatik UTM eklenir (utm_source=runclubturkiye), böylece sponsor kendi Analytics’inde gelen trafiği görür.</p>'
+        +'<div class="card" style="padding:20px;margin-bottom:18px" id="spa-form"><h3 id="spa-title" style="margin:0 0 14px;font-size:15px">Yeni sponsor ekle</h3><div class="spa-form">'
+        +'<div><label>Logo (şeffaf PNG / SVG / JPG)</label><input type="file" id="spa-file" accept="image/png,image/jpeg,image/webp,image/svg+xml,image/gif" onchange="spaPrev(this)"><input type="text" id="spa-img" placeholder="veya logo URL..." style="margin-top:6px" oninput="spaPrev()"></div>'
+        +'<div style="display:flex;align-items:center;justify-content:center;background:#fff;border:1px dashed var(--border);border-radius:12px;min-height:90px"><img id="spa-pv" alt="" style="max-height:70px;max-width:90%;display:none"><span id="spa-pv0" style="font-size:12px;color:var(--muted)">Logo önizleme</span></div>'
+        +'<div><label>Sponsor adı *</label><input type="text" id="spa-name" placeholder="Örn: Sport Point Extreme"></div>'
+        +'<div><label>Web sitesi</label><input type="text" id="spa-url" placeholder="https://..."></div>'
+        +'<div><label>Kademe</label><select id="spa-tier"><option value="ana">⭐ Ana sponsor (büyük vitrin kartı)</option><option value="partner" selected>Resmi partner (kart)</option><option value="destek">Destekçi (logo şeridi)</option></select></div>'
+        +'<div><label>Sıra (küçük önce)</label><input type="text" id="spa-order" inputmode="numeric" placeholder="0"></div>'
+        +'<div class="full"><label>Kısa tanıtım cümlesi</label><input type="text" id="spa-tag" maxlength="140" placeholder="Örn: Türkiye’nin 22 mağazalı spor perakende zinciri"></div>'
+        +'<label class="full" style="display:flex;align-items:center;gap:8px;font-weight:500;cursor:pointer"><input type="checkbox" id="spa-aktif" checked style="width:16px;height:16px"> Sitede göster</label>'
+        +'</div><div style="margin-top:14px;display:flex;gap:8px"><button class="btn btn-or" id="spa-save" onclick="spaSave()">💾 Sponsor Ekle</button><button class="btn btn-ghost" id="spa-cancel" style="display:none" onclick="spaReset()">Vazgeç</button></div></div>'
+        +'<div class="card" style="padding:0;overflow:hidden"><div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0;font-size:15px">Mevcut sponsorlar</h3><span id="spa-sum" style="font-size:12px;color:var(--muted)"></span></div><div id="spa-list"></div></div>'
+        +'<div class="card" style="padding:16px;margin-top:18px;font-size:13px;color:var(--muted)">💡 Sitedeki “Sponsor ol” butonları, Fırsatlar sayfasındaki iş birliği formunu “Platform sponsorluğu” seçili açar. Gelen talepler <b>Fırsatlar → İş birliği talepleri</b> listesinde görünür.</div>';
+    }
+    var all=(window.SPONSORS_DATA||[]).slice().sort(function(a,b){return TIERS[tierOf(a)].rank-TIERS[tierOf(b)].rank||(a.order||0)-(b.order||0);});
+    var tot=all.reduce(function(n,s){return n+(s.clicks||0);},0);
+    var sum=document.getElementById('spa-sum');if(sum)sum.textContent=all.length+' sponsor · toplam '+tot+' tıklama';
+    var el=document.getElementById('spa-list');if(!el)return;
+    el.innerHTML=all.length?all.map(function(s,i){
+      return '<div class="spa-row"'+(s.aktif===false?' style="opacity:.55"':'')+'><div class="lg">'+(s.imgUrl?'<img src="'+esc(s.imgUrl)+'" alt="">':'<b style="font-size:12px">'+esc(s.name)+'</b>')+'</div>'
+        +'<div class="ti"><b>'+esc(s.name)+'<span class="spa-tag">'+TIERS[tierOf(s)].lbl+'</span></b><span>'+(s.url?esc(s.url):'link yok')+' · 🖱 '+(s.clicks||0)+' tıklama'+(s.tagline?' · '+esc(s.tagline):'')+'</span></div>'
+        +'<div class="ac"><button class="btn btn-ghost btn-sm" title="Yukarı" onclick="spaMove(\''+s.id+'\',-1)">↑</button><button class="btn btn-ghost btn-sm" title="Aşağı" onclick="spaMove(\''+s.id+'\',1)">↓</button>'
+        +'<button class="btn btn-sm '+(s.aktif===false?'btn-ghost':'btn-or')+'" onclick="spaSet(\''+s.id+'\',{aktif:'+(s.aktif===false)+'})">'+(s.aktif===false?'⏸ Gizli':'✅ Yayında')+'</button>'
+        +'<button class="btn btn-ghost btn-sm" onclick="spaEdit(\''+s.id+'\')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteSponsor(\''+s.id+'\')">🗑</button></div></div>';
+    }).join(''):'<p style="padding:16px;color:var(--muted);font-size:13px">Henüz sponsor yok.</p>';
+  };
+  window.renderAdminSponsors=function(){if(document.getElementById('admin-main')&&document.getElementById('spa-list'))window.renderAdminSponsorsV2();};
+  try{renderAdminSponsors=window.renderAdminSponsors;}catch(e){}
+  window.spaPrev=function(inp){
+    var pv=document.getElementById('spa-pv'),p0=document.getElementById('spa-pv0');var src='';
+    var f=document.getElementById('spa-file');
+    if(f&&f.files&&f.files[0]){if(f.files[0].size>3*1048576){toast('Logo en fazla 3 MB olmalı','err');f.value='';}else src=URL.createObjectURL(f.files[0]);}
+    if(!src)src=(document.getElementById('spa-img')||{}).value||'';
+    if(src){pv.src=src;pv.style.display='block';p0.style.display='none';}else{pv.style.display='none';p0.style.display='inline';}
+  };
+  window.spaReset=function(){
+    window._spEdit=null;['spa-name','spa-url','spa-img','spa-tag','spa-order'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});
+    var f=document.getElementById('spa-file');if(f)f.value='';document.getElementById('spa-tier').value='partner';document.getElementById('spa-aktif').checked=true;
+    document.getElementById('spa-save').textContent='💾 Sponsor Ekle';document.getElementById('spa-cancel').style.display='none';document.getElementById('spa-title').textContent='Yeni sponsor ekle';window.spaPrev();
+  };
+  window.spaEdit=function(id){
+    var s=(window.SPONSORS_DATA||[]).find(function(x){return x.id===id;});if(!s)return;window._spEdit=id;
+    var set=function(i,v){var e=document.getElementById(i);if(e)e.value=v==null?'':v;};
+    set('spa-name',s.name);set('spa-url',s.url);set('spa-img',s.imgUrl);set('spa-tag',s.tagline);set('spa-order',s.order||'');set('spa-tier',tierOf(s));
+    document.getElementById('spa-aktif').checked=s.aktif!==false;var f=document.getElementById('spa-file');if(f)f.value='';
+    document.getElementById('spa-save').textContent='💾 Değişiklikleri Kaydet';document.getElementById('spa-cancel').style.display='inline-flex';document.getElementById('spa-title').textContent='Sponsoru düzenle: '+s.name;
+    window.spaPrev();document.getElementById('spa-form').scrollIntoView({behavior:'smooth',block:'start'});
+  };
+  window.editSponsorModal=window.spaEdit;
+  window.spaSet=async function(id,u){
+    var fb=window._fb;try{await fb.updateDoc(fb.doc(fb.db,'sponsors',id),u);var s=(window.SPONSORS_DATA||[]).find(function(x){return x.id===id;});if(s)Object.assign(s,u);window.renderSponsors();window.renderAdminSponsorsV2();toast('Güncellendi ✓','ok');}catch(e){toast('Hata: '+(e.code||e.message),'err');}
+  };
+  window.spaMove=async function(id,dir){
+    var t=null;var all=(window.SPONSORS_DATA||[]);var s=all.find(function(x){return x.id===id;});if(!s)return;
+    var same=all.filter(function(x){return tierOf(x)===tierOf(s);}).sort(function(a,b){return (a.order||0)-(b.order||0);});
+    var i=same.indexOf(s),j=i+dir;if(j<0||j>=same.length)return;
+    same.splice(i,1);same.splice(j,0,s);
+    var fb=window._fb;try{await Promise.all(same.map(function(x,k){x.order=k+1;return fb.updateDoc(fb.doc(fb.db,'sponsors',x.id),{order:k+1});}));window.renderSponsors();window.renderAdminSponsorsV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}
+  };
+  window.spaSave=async function(){
+    var g=function(i){return ((document.getElementById(i)||{}).value||'').trim();};
+    var name=g('spa-name');if(!name){toast('Sponsor adı gerekli','err');return;}
+    var fb=window._fb;var btn=document.getElementById('spa-save');btn.disabled=true;var old=btn.textContent;btn.textContent='Kaydediliyor…';
+    try{
+      var imgUrl=g('spa-img');var f=document.getElementById('spa-file');var file=f&&f.files&&f.files[0];
+      if(file){var ref=fb.ref(fb.storage,'sponsors/'+Date.now()+'_'+file.name.replace(/[^\w.-]/g,'_'));await fb.uploadBytes(ref,file,{contentType:file.type||'image/png',cacheControl:'public,max-age=31536000'});imgUrl=await fb.getDownloadURL(ref);}
+      var data={name:name,url:g('spa-url'),imgUrl:imgUrl,tagline:g('spa-tag'),tier:g('spa-tier')||'partner',order:parseInt(g('spa-order'),10)||0,aktif:!!document.getElementById('spa-aktif').checked};
+      if(window._spEdit){
+        await fb.updateDoc(fb.doc(fb.db,'sponsors',window._spEdit),data);
+        var s=(window.SPONSORS_DATA||[]).find(function(x){return x.id===window._spEdit;});if(s)Object.assign(s,data);toast('Sponsor güncellendi ✓','ok');
+      }else{
+        data.clicks=0;data.createdAt=fb.serverTimestamp();
+        var r=await fb.addDoc(fb.collection(fb.db,'sponsors'),data);data.id=r.id;data.createdAt={seconds:Date.now()/1000};(window.SPONSORS_DATA=window.SPONSORS_DATA||[]).push(data);toast('Sponsor eklendi ✓','ok');
+      }
+      window.spaReset();window.renderSponsors();window.renderAdminSponsorsV2();
+    }catch(e){toast('Hata: '+(e.code||e.message),'err');btn.textContent=old;}
+    btn.disabled=false;
   };
 })();
 </script>

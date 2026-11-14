@@ -95,7 +95,13 @@ service cloud.firestore {
 
     match /popup/{id}    { allow read: if true; allow write: if isSuperAdmin(); }
     match /banners/{id}  { allow read: if true; allow write: if isSuperAdmin(); }
-    match /sponsors/{id} { allow read: if true; allow write: if isSuperAdmin(); }
+    match /sponsors/{id} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+      // Ziyaretçi tıklama sayacı: yalnızca clicks +1
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clicks'])
+        && request.resource.data.clicks == resource.data.get('clicks', 0) + 1;
+    }
     match /firsatlar/{id}{ allow read: if true; allow write: if isSuperAdmin(); }
     match /ticker/{id}   { allow read: if true; allow write: if isSuperAdmin(); }
 

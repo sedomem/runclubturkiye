@@ -175,10 +175,33 @@ service cloud.firestore {
     match /adminNotifications/{id} {
       allow read, update, delete: if isSuperAdmin();
       allow create: if request.resource.data.keys().hasOnly(['type','title','body','section','read','createdAt','actorUid','actorName'])
-        && request.resource.data.type in ['new_user','ga_application','club_join','contact','ga_event','ga_calendar','ga_announcement','chat']
+        && request.resource.data.type in ['new_user','ga_application','club_join','contact','ga_event','ga_calendar','ga_announcement','chat','partner']
         && request.resource.data.title is string && request.resource.data.title.size() <= 120
         && request.resource.data.body is string && request.resource.data.body.size() <= 300
         && request.resource.data.read == false;
+    }
+
+    // Sayfa görüntüleme sayaçları (yalnızca +1 artırılabilir; okuma süper admin)
+    match /pageStats/{id} {
+      allow read, delete: if isSuperAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['type','title','path','views','lastAt'])
+        && request.resource.data.views == 1 && request.resource.data.title is string && request.resource.data.title.size() <= 120;
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views','lastAt','title'])
+        && request.resource.data.views == resource.data.views + 1;
+    }
+    match /pageStatsDaily/{day} {
+      allow read, delete: if isSuperAdmin();
+      allow create, update: if request.resource.data.keys().hasOnly(['date','c']) && request.resource.data.date == day;
+    }
+
+    // Markalardan gelen iş birliği talepleri
+    match /partnerRequests/{id} {
+      allow read, update, delete: if isSuperAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['company','name','email','phone','type','budget','message','status','createdAt'])
+        && request.resource.data.company is string && request.resource.data.company.size() > 0 && request.resource.data.company.size() <= 120
+        && request.resource.data.email is string && request.resource.data.email.size() <= 120
+        && request.resource.data.message is string && request.resource.data.message.size() <= 2000
+        && request.resource.data.status == 'new';
     }
 
     match /pushNotifications/{id} {

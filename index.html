@@ -2047,23 +2047,57 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 <!-- FIRSATLAR LİSTESİ -->
 <div class="pg" id="pg-firsatlar">
-  <div style="background:linear-gradient(135deg,#0a0500,#1a0800);padding:60px 0 40px;margin-bottom:0">
-    <div class="container" style="text-align:center">
-      <div style="display:inline-flex;align-items:center;gap:8px;background:rgba(255,107,0,.15);border:1px solid rgba(255,107,0,.3);color:var(--or);padding:6px 16px;border-radius:20px;font-size:13px;margin-bottom:16px">🎁 Özel Fırsatlar</div>
-      <h2 style="font-size:clamp(24px,4vw,42px);font-weight:700;color:#fff;margin-bottom:12px">Koşucuya Özel <span style="color:var(--or)">İndirimler</span></h2>
-      <p style="color:rgba(255,255,255,.7);font-size:15px;max-width:500px;margin:0 auto">Sponsorlarımız ve iş ortaklarımızdan koşuculara özel indirim ve fırsatlar.</p>
+  <section class="fp-hero">
+    <div class="container">
+      <div class="fp-eyebrow">🎁 Fırsatlar &amp; İş Birlikleri</div>
+      <h1>Koşuculara özel fırsatlar,<br><span>markalara doğru kitle.</span></h1>
+      <p>Ekipman, beslenme, teknoloji ve etkinliklerde RunClub üyelerine özel indirimler. Markanı, ürününü veya etkinliğini Türkiye'nin koşu topluluğuyla buluşturmak için bizimle iletişime geç.</p>
+      <div class="fp-cta"><a href="#fp-deals" class="btn btn-or" onclick="event.preventDefault();document.getElementById('fp-deals').scrollIntoView({behavior:'smooth'})">Fırsatları Gör</a><a href="#fp-partner" class="btn fp-ghost" onclick="event.preventDefault();document.getElementById('fp-partner').scrollIntoView({behavior:'smooth'})">Markanı Tanıt →</a></div>
+      <div class="fp-stats" id="fp-stats"></div>
     </div>
-  </div>
-  <div class="container sec">
+  </section>
+  <div class="container sec" id="fp-deals">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+      <div><h2 style="margin:0 0 4px">Güncel Fırsatlar</h2><p style="color:var(--muted);font-size:13px;margin:0">İş ortaklarımızın RunClub üyelerine özel kampanyaları</p></div>
+    </div>
     <div class="filter-strip" id="firsat-filters">
       <button class="filt on" onclick="filterFirsatlar('tümü',this)">Tümü</button>
       <button class="filt" onclick="filterFirsatlar('Ekipman',this)">Ekipman</button>
       <button class="filt" onclick="filterFirsatlar('Beslenme',this)">Beslenme</button>
       <button class="filt" onclick="filterFirsatlar('Teknoloji',this)">Teknoloji</button>
       <button class="filt" onclick="filterFirsatlar('Etkinlik',this)">Etkinlik</button>
+      <button class="filt" onclick="filterFirsatlar('Hizmet',this)">Hizmet</button>
     </div>
     <div class="grid g3" id="firsatlar-list"></div>
   </div>
+  <section class="fp-partner" id="fp-partner">
+    <div class="container">
+      <div class="fp-sec-head"><div class="fp-eyebrow" style="background:rgba(232,98,42,.1)">🤝 Markalar için</div><h2>Markanı RunClub koşucularıyla buluştur</h2><p>Ürününü, mağazanı, yarışını veya hizmetini koşuya gerçekten ilgi duyan bir kitleye tanıt. Paketi ihtiyacına göre birlikte belirleyelim.</p></div>
+      <div class="fp-offers">
+        <div class="fp-offer"><div class="ico">🏷️</div><h3>Fırsatlar sayfasında yer al</h3><p>Üyelere özel indirim kodun, görselin ve bağlantınla fırsat kartı. Görüntülenme ve tıklama sayıları raporlanır.</p></div>
+        <div class="fp-offer"><div class="ico">⭐</div><h3>Öne çıkan kampanya</h3><p>Ana sayfada ve Fırsatlar sayfasının en üstünde öne çıkan yerleşim, sınırlı süreli kampanyalar için.</p></div>
+        <div class="fp-offer"><div class="ico">🏁</div><h3>Yarış &amp; etkinlik tanıtımı</h3><p>Organizasyonunu yarış takviminde öne çıkar, kayıt dönemlerinde koşuculara duyur.</p></div>
+        <div class="fp-offer"><div class="ico">📰</div><h3>İçerik iş birliği</h3><p>Ürün incelemesi, antrenman rehberi veya marka hikâyesi — “iş birliği” etiketiyle blogda ve sosyal medyada.</p></div>
+        <div class="fp-offer"><div class="ico">🤝</div><h3>Kulüp &amp; grup koşusu sponsorluğu</h3><p>Şehrindeki koşu kulüplerinin etkinliklerine destek ol, markanı sahada görünür kıl.</p></div>
+        <div class="fp-offer"><div class="ico">🎯</div><h3>Şehir bazlı hedefleme</h3><p>Mağazan belirli bir şehirdeyse, o şehrin kulüp ve yarış sayfalarında yerel görünürlük.</p></div>
+      </div>
+      <div class="fp-steps"><div><b>1</b><span>Formu doldur, ne tanıtmak istediğini anlat.</span></div><div><b>2</b><span>2 iş günü içinde sana uygun öneriyle dönelim.</span></div><div><b>3</b><span>İçeriği birlikte hazırlayıp yayına alalım, sonuçları raporlayalım.</span></div></div>
+      <div class="fp-form card" id="fp-form">
+        <h3 style="margin:0 0 4px">İş birliği talebi</h3><p style="font-size:13px;color:var(--muted);margin:0 0 14px">Ya da doğrudan yaz: <a href="mailto:runclubturkiye@gmail.com" style="color:var(--or)">runclubturkiye@gmail.com</a></p>
+        <div class="fp-fgrid">
+          <div class="form-grp"><label>Firma / Marka *</label><input id="pr-company" maxlength="120" autocomplete="organization"/></div>
+          <div class="form-grp"><label>Ad Soyad *</label><input id="pr-name" maxlength="80" autocomplete="name"/></div>
+          <div class="form-grp"><label>E-posta *</label><input id="pr-email" type="email" maxlength="120" autocomplete="email"/></div>
+          <div class="form-grp"><label>Telefon</label><input id="pr-phone" type="tel" maxlength="30" autocomplete="tel"/></div>
+          <div class="form-grp"><label>Ne tanıtmak istiyorsun?</label><select id="pr-type"><option>Ürün / indirim kampanyası</option><option>Yarış / etkinlik</option><option>Mağaza / hizmet</option><option>İçerik iş birliği</option><option>Kulüp sponsorluğu</option><option>Diğer</option></select></div>
+          <div class="form-grp"><label>Tahmini bütçe</label><select id="pr-budget"><option value="">Belirtmek istemiyorum</option><option>5.000 TL altı</option><option>5.000 – 15.000 TL</option><option>15.000 – 50.000 TL</option><option>50.000 TL üzeri</option><option>Ürün / barter</option></select></div>
+        </div>
+        <div class="form-grp"><label>Mesajın *</label><textarea id="pr-msg" rows="4" maxlength="2000" placeholder="Kampanyan, hedef şehir/kitle, tarih aralığı…"></textarea></div>
+        <label style="display:flex;gap:8px;align-items:flex-start;font-size:12px;color:var(--muted);margin:4px 0 12px"><input type="checkbox" id="pr-kvkk" style="margin-top:2px"/> <span>İletişim bilgilerimin bu talep için işlenmesini kabul ediyorum (<a href="/gizlilik" onclick="event.preventDefault();nav('gizlilik')" style="color:var(--or)">Gizlilik</a>).</span></label>
+        <button class="btn btn-or" id="pr-send" onclick="sendPartnerRequest()">Talebi Gönder</button>
+      </div>
+    </div>
+  </section>
 </div>
 
 <!-- ✅ YENİ: FIRSAT DETAY SAYFASI -->
@@ -10103,6 +10137,7 @@ function renderAdminSection(sec){
   if(sec==='chat')setTimeout(()=>loadChatMessages&&loadChatMessages('admin'),100);
   if(sec==='groupadmins')setTimeout(()=>loadGroupAdmins&&loadGroupAdmins(),100);
   if(sec==='newsletter')setTimeout(()=>loadNewsletterList&&loadNewsletterList(),100);
+  if(sec==='firsatlar')setTimeout(()=>window.renderFirsatAdminV2&&window.renderFirsatAdminV2(),60);
   if(sec==='blog'){setTimeout(initQuillEditor,200);setTimeout(()=>window.renderAdminBlogLists&&window.renderAdminBlogLists(),30);}
   if(sec==='races')setTimeout(initQuillRaceEditor,200);
   if(sec==='banners')setTimeout(()=>{
@@ -14598,7 +14633,193 @@ body.is-guest div.guest-only{display:flex!important}
 .abl-star.on{background:#fff4e5;border-color:#f59e0b;color:#b45309}
 @media(max-width:900px){.abl-grid{grid-template-columns:1fr}.abl-feat{position:static;order:-1}}
 </style>
+
+<style id="firsat-v2">
+.fp-hero{background:radial-gradient(1200px 400px at 80% -10%,rgba(232,98,42,.35),transparent),linear-gradient(135deg,#0d0703,#1d0b02);color:#fff;padding:64px 0 40px}
+.fp-hero h1{font-size:clamp(28px,4.6vw,48px);line-height:1.12;margin:14px 0 14px;font-weight:800;color:#fff}
+.fp-hero h1 span{color:#ff8a4c}
+.fp-hero p{color:rgba(255,255,255,.75);max-width:620px;font-size:15px;line-height:1.65;margin:0}
+.fp-eyebrow{display:inline-flex;gap:6px;align-items:center;font-size:12px;font-weight:700;letter-spacing:.3px;padding:6px 12px;border-radius:20px;background:rgba(255,255,255,.08);color:#ff8a4c}
+.fp-cta{display:flex;gap:10px;flex-wrap:wrap;margin:24px 0 28px}
+.fp-ghost{background:transparent;border:1.5px solid rgba(255,255,255,.35);color:#fff}
+.fp-ghost:hover{border-color:#fff}
+.fp-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:10px;max-width:720px}
+.fp-stats div{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);border-radius:12px;padding:12px}
+.fp-stats b{display:block;font-size:22px;color:#fff}.fp-stats span{font-size:11px;color:rgba(255,255,255,.65)}
+.fp-partner{background:var(--bg2,#f6f1eb);padding:56px 0}
+.fp-sec-head{text-align:center;max-width:680px;margin:0 auto 28px}.fp-sec-head h2{font-size:clamp(22px,3.4vw,32px);margin:12px 0 8px}.fp-sec-head p{color:var(--muted);font-size:14px;line-height:1.6}
+.fp-offers{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.fp-offer{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:18px}
+.fp-offer .ico{font-size:26px;margin-bottom:8px}.fp-offer h3{font-size:15px;margin:0 0 6px}.fp-offer p{font-size:13px;color:var(--muted);line-height:1.55;margin:0}
+.fp-steps{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin:22px 0}
+.fp-steps div{display:flex;gap:10px;align-items:center;background:var(--card);border-radius:12px;padding:12px 14px;border:1px solid var(--border);font-size:13px}
+.fp-steps b{width:30px;height:30px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.fp-form{max-width:760px;margin:0 auto;padding:22px}
+.fp-fgrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px}
+.firsat-card.featured{border:2px solid #f59e0b;box-shadow:0 6px 22px rgba(245,158,11,.18)}
+.firsat-feat-badge{position:absolute;top:10px;right:10px;z-index:3;background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff;font-size:11px;font-weight:800;padding:4px 10px;border-radius:12px}
+@media(max-width:860px){.fp-offers{grid-template-columns:1fr 1fr}.fp-steps{grid-template-columns:1fr}.fp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:560px){.fp-offers,.fp-fgrid{grid-template-columns:1fr}.fp-hero{padding:44px 0 30px}}
+</style>
 <script id="fix-2026-11-13">
+// ═══ FIRSATLAR v2: sayfa + iş birliği formu + admin ═══
+window.renderFirsatStats=function(){
+  var el=document.getElementById('fp-stats');if(!el)return;
+  var t=new Date().toISOString().slice(0,10);
+  var up=(window.RACES||[]).filter(function(r){return r.date>=t;}).length;
+  el.innerHTML='<div><b>'+((window.CLUBS||[]).length||'—')+'</b><span>koşu kulübü</span></div><div><b>'+(up||'—')+'</b><span>yaklaşan yarış</span></div><div><b>'+((window.BLOG_POSTS||[]).length||'—')+'</b><span>rehber &amp; haber</span></div><div><b>81</b><span>ilde koşucu</span></div>';
+};
+(function(){
+  var _r=window.renderFirsatlar;
+  window.renderFirsatlar=function(list){
+    var items=list||(window.FIRSATLAR||[]).filter(function(f){return f.aktif;});
+    items=items.slice().sort(function(a,b){return (b.featured?1:0)-(a.featured?1:0);});
+    if(_r)_r(items);
+    var el=document.getElementById('firsatlar-list');
+    if(el){items.forEach(function(f){if(!f.featured)return;var c=el.querySelector('.firsat-card[data-fid="'+f.id+'"]');if(c&&!c.classList.contains('featured')){c.classList.add('featured');c.style.position='relative';var b=document.createElement('div');b.className='firsat-feat-badge';b.textContent='⭐ ÖNE ÇIKAN';c.appendChild(b);}});
+      if(!items.length)el.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:36px 16px;color:var(--muted)"><div style="font-size:44px;margin-bottom:10px">🎁</div><p style="margin-bottom:12px">Bu kategoride şu an aktif fırsat yok.</p><a href="#fp-partner" class="btn btn-ghost btn-sm" onclick="event.preventDefault();document.getElementById(\'fp-partner\').scrollIntoView({behavior:\'smooth\'})">Markan burada yer alsın →</a></div>';}
+    window.renderFirsatStats();
+  };
+})();
+window.filterFirsatlar=function(kat,btn){document.querySelectorAll('#firsat-filters .filt').forEach(function(b){b.classList.remove('on');});if(btn)btn.classList.add('on');window.renderFirsatlar(kat==='tümü'?null:(window.FIRSATLAR||[]).filter(function(f){return f.aktif&&f.kategori===kat;}));};
+window.sendPartnerRequest=async function(){
+  var g=function(id){return ((document.getElementById(id)||{}).value||'').trim();};
+  var d={company:g('pr-company'),name:g('pr-name'),email:g('pr-email'),phone:g('pr-phone'),type:g('pr-type'),budget:g('pr-budget'),message:g('pr-msg')};
+  if(!d.company||!d.name||!d.email||!d.message){toast('Yıldızlı alanları doldur','err');return;}
+  if(!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(d.email)){toast('Geçerli bir e-posta gir','err');return;}
+  if(!document.getElementById('pr-kvkk').checked){toast('Onay kutusunu işaretle','err');return;}
+  var fb=window._fb;var btn=document.getElementById('pr-send');if(btn){btn.disabled=true;btn.textContent='Gönderiliyor…';}
+  try{
+    await fb.addDoc(fb.collection(fb.db,'partnerRequests'),Object.assign({},d,{name:d.name.slice(0,80),phone:d.phone.slice(0,30),status:'new',createdAt:fb.serverTimestamp()}));
+    window.notifyAdmin&&window.notifyAdmin('partner','İş birliği talebi: '+d.company.slice(0,80),d.type+(d.budget?' · '+d.budget:'')+' — '+d.message.slice(0,200),'firsatlar');
+    window.rcTrack&&window.rcTrack('generate_lead',{lead_source:'partner_form'});
+    document.getElementById('fp-form').innerHTML='<div style="text-align:center;padding:26px 10px"><div style="font-size:44px">✅</div><h3 style="margin:8px 0">Talebin bize ulaştı</h3><p style="color:var(--muted);font-size:14px">En geç 2 iş günü içinde <b>'+d.email.replace(/</g,'&lt;')+'</b> adresinden dönüş yapacağız.</p></div>';
+  }catch(e){toast('Gönderilemedi: '+(e.code||e.message),'err');if(btn){btn.disabled=false;btn.textContent='Talebi Gönder';}}
+};
+// ---- Admin: fırsat listesi, düzenleme, öne çıkarma, iş birliği talepleri ----
+window.renderFirsatAdminV2=async function(){
+  var main=document.getElementById('admin-main');if(!main)return;
+  var tbl=main.querySelector('table');if(tbl)tbl.style.display='none';
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  // form: öne çıkan + Hizmet kategorisi + kaydet butonu
+  var kat=document.getElementById('fr-kategori');if(kat&&![].some.call(kat.options,function(o){return o.value==='Hizmet';})){var o=document.createElement('option');o.textContent='Hizmet';kat.insertBefore(o,kat.lastElementChild);}
+  var saveBtn=main.querySelector('button[onclick^="saveFirsatFromAdmin"]');
+  if(saveBtn&&!document.getElementById('fr-featured')){
+    var w=document.createElement('label');w.style.cssText='display:flex;align-items:center;gap:8px;margin:4px 0 12px;font-size:13px;cursor:pointer';w.innerHTML='<input type="checkbox" id="fr-featured" style="width:17px;height:17px;accent-color:#f59e0b"> ⭐ Öne çıkan fırsat (listenin başında, rozetli)';saveBtn.parentNode.insertBefore(w,saveBtn);
+    saveBtn.setAttribute('onclick','saveFirsatV2()');saveBtn.id='fr-save-btn';
+    var c=document.createElement('button');c.className='btn btn-ghost';c.id='fr-cancel-btn';c.style.cssText='display:none;margin-left:8px';c.textContent='Vazgeç';c.onclick=function(){window.resetFirsatForm();};saveBtn.parentNode.insertBefore(c,saveBtn.nextSibling);
+  }
+  var box=document.getElementById('fr-admin-v2');if(!box){box=document.createElement('div');box.id='fr-admin-v2';main.appendChild(box);}
+  var list=(window.FIRSATLAR||[]).slice().sort(function(a,b){return (b.featured?1:0)-(a.featured?1:0)||((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0);});
+  var reqs=[];try{var fb=window._fb;var sn=await fb.getDocs(fb.collection(fb.db,'partnerRequests'));sn.forEach(function(d){reqs.push(Object.assign({id:d.id},d.data()));});reqs.sort(function(a,b){return ((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0);});}catch(e){}
+  var stLbl={new:'🆕 Yeni',contacted:'📞 Görüşüldü',won:'✅ Anlaşıldı',lost:'✖ Olmadı'};
+  box.innerHTML='<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px"><div style="padding:12px 14px;border-bottom:1px solid var(--border)"><h3 style="font-size:15px;margin:0">🎁 Fırsatlar <span style="font-weight:400;color:var(--muted);font-size:12px">('+list.length+')</span></h3></div>'
+    +(list.length?list.map(function(f){return '<div class="abl-row"'+(f.featured?' style="background:#fffaf0"':'')+'>'+(f.imgUrl?'<img src="'+esc(f.imgUrl)+'" alt="">':'<div class="ph"></div>')+'<div class="ti"><b>'+esc(f.baslik)+'</b><span>'+esc(f.marka||'—')+' · '+esc(f.kategori||'')+(f.kod?' · <code>'+esc(f.kod)+'</code>':'')+(f.bitis?' · bitiş '+esc(f.bitis):'')+' · 👁 '+(f.views||0)+'</span></div><div class="abl-act">'
+      +'<label class="abl-star'+(f.featured?' on':'')+'" style="display:inline-flex;align-items:center;gap:5px"><input type="checkbox" '+(f.featured?'checked ':'')+'onchange="setFirsatField(\''+f.id+'\',\'featured\',this.checked)" style="margin:0;accent-color:#f59e0b">⭐</label>'
+      +'<button class="btn btn-sm '+(f.aktif?'btn-or':'btn-ghost')+'" onclick="setFirsatField(\''+f.id+'\',\'aktif\','+(!f.aktif)+')">'+(f.aktif?'✅ Aktif':'⏸ Pasif')+'</button>'
+      +'<button class="btn btn-ghost btn-sm" onclick="editFirsatV2(\''+f.id+'\')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteFirsat(\''+f.id+'\')">🗑</button></div></div>';}).join(''):'<p style="padding:16px;color:var(--muted);font-size:13px">Henüz fırsat yok.</p>')+'</div>'
+    +'<div class="card" style="padding:0;overflow:hidden"><div style="padding:12px 14px;border-bottom:1px solid var(--border)"><h3 style="font-size:15px;margin:0">🤝 İş birliği talepleri <span style="font-weight:400;color:var(--muted);font-size:12px">('+reqs.length+')</span></h3><p style="font-size:11px;color:var(--muted);margin:2px 0 0">Fırsatlar sayfasındaki formdan gelen marka talepleri</p></div>'
+    +(reqs.length?reqs.map(function(r){var dt=r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toLocaleDateString('tr-TR'):'';return '<div style="padding:12px 14px;border-bottom:1px solid var(--border)"><div style="display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap"><b>'+esc(r.company)+' <span style="font-weight:400;color:var(--muted);font-size:12px">· '+esc(r.name)+' · '+dt+'</span></b><div style="display:flex;gap:6px;align-items:center"><select onchange="setPartnerStatus(\''+r.id+'\',this.value)" style="font-size:12px;padding:4px 6px;border-radius:6px;border:1px solid var(--border)">'+Object.keys(stLbl).map(function(k){return '<option value="'+k+'"'+(r.status===k?' selected':'')+'>'+stLbl[k]+'</option>';}).join('')+'</select><button class="btn btn-red btn-sm" onclick="deletePartnerReq(\''+r.id+'\')">🗑</button></div></div><div style="font-size:12px;color:var(--muted);margin:4px 0">'+esc(r.type)+(r.budget?' · '+esc(r.budget):'')+' · <a href="mailto:'+esc(r.email)+'" style="color:var(--or)">'+esc(r.email)+'</a>'+(r.phone?' · '+esc(r.phone):'')+'</div><div style="font-size:13px;white-space:pre-wrap">'+esc(r.message)+'</div></div>';}).join(''):'<p style="padding:16px;color:var(--muted);font-size:13px">Henüz talep yok.</p>')+'</div>';
+};
+window.setFirsatField=async function(id,field,val){
+  var fb=window._fb;try{var u={};u[field]=val;await fb.updateDoc(fb.doc(fb.db,'firsatlar',id),u);var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(f)f[field]=val;toast('Güncellendi ✓','ok');window.renderFirsatAdminV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}
+};
+window.setPartnerStatus=async function(id,st){var fb=window._fb;try{await fb.updateDoc(fb.doc(fb.db,'partnerRequests',id),{status:st});toast('Durum güncellendi ✓','ok');}catch(e){toast('Hata: '+(e.code||e.message),'err');}};
+window.deletePartnerReq=async function(id){if(!confirm('Bu talep silinsin mi?'))return;var fb=window._fb;try{await fb.deleteDoc(fb.doc(fb.db,'partnerRequests',id));window.renderFirsatAdminV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}};
+window.resetFirsatForm=function(){window._frEditId=null;['fr-baslik','fr-marka','fr-indirim','fr-aciklama','fr-kod','fr-bitis','fr-link'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});var fe=document.getElementById('fr-featured');if(fe)fe.checked=false;var b=document.getElementById('fr-save-btn');if(b)b.textContent='Fırsat Ekle';var c=document.getElementById('fr-cancel-btn');if(c)c.style.display='none';var fi=document.getElementById('fr-img-input');if(fi)fi.value='';};
+window.editFirsatV2=function(id){
+  var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(!f)return;window._frEditId=id;
+  var set=function(i,v){var e=document.getElementById(i);if(e)e.value=v||'';};
+  set('fr-baslik',f.baslik);set('fr-marka',f.marka);set('fr-kategori',f.kategori||'Genel');set('fr-indirim',f.indirim);set('fr-aciklama',f.aciklama);set('fr-kod',f.kod);set('fr-bitis',f.bitis);set('fr-link',f.link);
+  var fe=document.getElementById('fr-featured');if(fe)fe.checked=!!f.featured;
+  var b=document.getElementById('fr-save-btn');if(b)b.textContent='Değişiklikleri Kaydet';var c=document.getElementById('fr-cancel-btn');if(c)c.style.display='inline-flex';
+  var t=document.getElementById('fr-baslik');if(t){t.scrollIntoView({behavior:'smooth',block:'center'});t.focus();}
+};
+window.saveFirsatV2=async function(){
+  var g=function(i){return ((document.getElementById(i)||{}).value||'').trim();};
+  var baslik=g('fr-baslik');if(!baslik){toast('Başlık gerekli','err');return;}
+  var fb=window._fb;var btn=document.getElementById('fr-save-btn');if(btn)btn.disabled=true;
+  try{
+    var data={baslik:baslik,marka:g('fr-marka'),kategori:g('fr-kategori')||'Genel',indirim:g('fr-indirim'),aciklama:g('fr-aciklama'),kod:g('fr-kod').toUpperCase(),bitis:g('fr-bitis'),link:g('fr-link'),featured:!!(document.getElementById('fr-featured')||{}).checked};
+    var fi=document.getElementById('fr-img-input');var file=fi&&fi.files&&fi.files[0];
+    if(file){var ref=fb.ref(fb.storage,'firsatlar/'+Date.now()+'_'+file.name.replace(/[^\w.-]/g,'_'));await fb.uploadBytes(ref,file);data.imgUrl=await fb.getDownloadURL(ref);}
+    if(window._frEditId){await fb.updateDoc(fb.doc(fb.db,'firsatlar',window._frEditId),data);toast('Fırsat güncellendi ✓','ok');}
+    else{if(window.makeSlug)data.slug=window.makeSlug(baslik);data.imgUrl=data.imgUrl||'';data.aktif=true;data.views=0;data.clicks=0;data.createdAt=fb.serverTimestamp();await fb.addDoc(fb.collection(fb.db,'firsatlar'),data);toast('Fırsat eklendi ✓','ok');}
+    window.resetFirsatForm();
+    if(window.loadFirsatlarFromDB)await window.loadFirsatlarFromDB();
+    window.renderFirsatAdminV2();
+  }catch(e){toast('Hata: '+(e.code||e.message),'err');}
+  if(btn)btn.disabled=false;
+};
+
+// ═══ SAYFA GÖRÜNTÜLEME İSTATİSTİKLERİ ═══
+(function(){
+  var last='';
+  function keyFor(path){
+    path=(path||'/').replace(/\/+$/,'')||'/';
+    var m;
+    if((m=/^\/haber\/(.+)/.exec(path)))return ['blog',m[1]];
+    if((m=/^\/yaris\/(.+)/.exec(path)))return ['race',m[1]];
+    if((m=/^\/kulup\/(.+)/.exec(path)))return ['club',m[1]];
+    if((m=/^\/kulupler\/(.+)/.exec(path)))return ['city',m[1]];
+    if((m=/^\/etkinlik\/(.+)/.exec(path)))return ['event',m[1]];
+    if((m=/^\/firsat\/(.+)/.exec(path)))return ['deal',m[1]];
+    if(/^\/(admin|panel|dashboard|profil|yonetici)/.test(path))return null;
+    return ['page',path==='/'?'anasayfa':path.slice(1)];
+  }
+  function track(){
+    try{
+      var fb=window._fb;if(!fb||navigator.webdriver)return;
+      if(window.CU&&window.CU.role==='superadmin')return;
+      var path=decodeURIComponent(location.pathname);if(path===last)return;last=path;
+      var k=keyFor(path);if(!k)return;
+      var id=(k[0]+'__'+k[1]).toLowerCase().replace(/[^a-z0-9_-]+/g,'-').slice(0,140);
+      var title=(document.title||'').replace(/\s*[|—-]\s*RunClub ?Türkiye.*$/i,'').replace(/^RunClub ?Türkiye\s*[—-]\s*/i,'').slice(0,120)||path;
+      var day=new Date(Date.now()+3*3600e3).toISOString().slice(0,10);
+      fb.setDoc(fb.doc(fb.db,'pageStats',id),{type:k[0],title:title,path:path.slice(0,200),views:fb.increment(1),lastAt:fb.serverTimestamp()},{merge:true}).catch(function(){});
+      var c={};c[id]=fb.increment(1);
+      fb.setDoc(fb.doc(fb.db,'pageStatsDaily',day),{date:day,c:c},{merge:true}).catch(function(){});
+    }catch(e){}
+  }
+  function later(){setTimeout(track,1500);}
+  ['pushState','replaceState'].forEach(function(m){var o=history[m];history[m]=function(){var r=o.apply(this,arguments);later();return r;};});
+  window.addEventListener('popstate',later);
+  var t=0;(function w(){if(window._fb)later();else if(++t<40)setTimeout(w,250);})();
+})();
+var _TP_LBL={page:'📄 Sayfa',blog:'📰 Blog',race:'🏁 Yarış',club:'🤝 Kulüp',city:'📍 Şehir',event:'📅 Etkinlik',deal:'🎁 Fırsat'};
+var _TP_PAGES={'anasayfa':'Ana Sayfa','yaris-takvimi':'Yarış Takvimi','kulupler':'Kulüpler','haberler':'Blog / Haberler','etkinlikler':'Etkinlikler','firsatlar':'Fırsatlar','topluluk':'Topluluk','tartismalar':'Tartışma Merkezi','hakkimizda':'Hakkımızda','iletisim':'İletişim','sss':'SSS'};
+window._tp={type:'all',period:30};
+window.renderTopPages=async function(){
+  var el=document.getElementById('top-pages');var fb=window._fb;if(!el||!fb)return;
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  if(!window._tpData){
+    el.innerHTML='<div class="card" style="padding:16px"><div class="spinner" style="margin:6px auto"></div></div>';
+    try{
+      var st=await fb.getDocs(fb.collection(fb.db,'pageStats'));var meta={};st.forEach(function(d){meta[d.id]=d.data();});
+      var days={};var dl=await fb.getDocs(fb.collection(fb.db,'pageStatsDaily'));dl.forEach(function(d){days[d.id]=d.data().c||{};});
+      window._tpData={meta:meta,days:days};
+    }catch(e){el.innerHTML='<div class="card" style="padding:14px;color:var(--muted);font-size:13px">Ziyaret istatistikleri yüklenemedi ('+(e.code||e.message)+').</div>';return;}
+  }
+  var D=window._tpData,f=window._tp;
+  var counts={};
+  if(f.period==='all'){Object.keys(D.meta).forEach(function(k){counts[k]=D.meta[k].views||0;});}
+  else{var cut=new Date(Date.now()+3*3600e3-f.period*864e5).toISOString().slice(0,10);Object.keys(D.days).forEach(function(day){if(day>cut){var c=D.days[day];Object.keys(c).forEach(function(k){counts[k]=(counts[k]||0)+(c[k]||0);});}});}
+  var rows=Object.keys(counts).map(function(k){var m=D.meta[k]||{};var type=m.type||k.split('__')[0];return {k:k,type:type,title:type==='page'?(_TP_PAGES[(m.path||'').replace(/^\//,'')||'anasayfa']||m.title||m.path):(m.title||k),path:m.path||'',n:counts[k]};});
+  var byType={};rows.forEach(function(r){byType[r.type]=(byType[r.type]||0)+r.n;});
+  var total=rows.reduce(function(a,r){return a+r.n;},0);
+  if(f.type!=='all')rows=rows.filter(function(r){return r.type===f.type;});
+  rows.sort(function(a,b){return b.n-a.n;});rows=rows.slice(0,15);
+  var max=rows.length?rows[0].n:1;
+  var segT=['all','page','blog','race','club','city'].map(function(t){return '<button onclick="window._tp.type=\''+t+'\';renderTopPages()" style="border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;'+(f.type===t?'background:var(--or);color:#fff':'background:var(--bg2,#f3eee8);color:var(--muted)')+'">'+(t==='all'?'Tümü':_TP_LBL[t])+(t!=='all'&&byType[t]?' <span style="opacity:.8">'+byType[t]+'</span>':'')+'</button>';}).join('');
+  var segP=[[7,'7 gün'],[30,'30 gün'],['all','Tüm zamanlar']].map(function(p){return '<button onclick="window._tp.period='+(p[0]==='all'?"'all'":p[0])+';renderTopPages()" style="border:none;border-radius:8px;padding:6px 10px;font-size:12px;font-weight:600;cursor:pointer;'+(f.period===p[0]?'background:#2C3E50;color:#fff':'background:var(--bg2,#f3eee8);color:var(--muted)')+'">'+p[1]+'</button>';}).join('');
+  el.innerHTML='<div class="card" style="padding:14px 16px"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:10px"><h3 style="font-size:15px;margin:0">📈 En çok ziyaret edilenler <span style="font-weight:400;font-size:12px;color:var(--muted)">· '+total+' görüntüleme</span></h3><div style="display:flex;gap:4px;flex-wrap:wrap">'+segP+'<button onclick="window._tpData=null;renderTopPages()" title="Yenile" style="border:none;background:none;cursor:pointer;font-size:14px">⟳</button></div></div>'
+    +'<div style="display:flex;gap:4px;flex-wrap:wrap;margin-bottom:10px">'+segT+'</div>'
+    +(rows.length?'<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px"><thead><tr style="text-align:left;color:var(--muted);font-size:11px"><th style="padding:6px 4px;width:28px">#</th><th style="padding:6px 4px">Sayfa</th><th style="padding:6px 4px;width:90px">Tür</th><th style="padding:6px 4px;width:34%">Görüntüleme</th></tr></thead><tbody>'
+      +rows.map(function(r,i){var w=Math.max(3,Math.round(r.n*100/max));return '<tr style="border-top:1px solid var(--border)"><td style="padding:7px 4px;color:var(--muted)">'+(i+1)+'</td><td style="padding:7px 4px;max-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap"><a href="'+esc(r.path||'#')+'" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none" title="'+esc(r.path)+'">'+esc(r.title)+'</a></td><td style="padding:7px 4px;font-size:11px;color:var(--muted);white-space:nowrap">'+(_TP_LBL[r.type]||r.type)+'</td><td style="padding:7px 4px"><div style="display:flex;align-items:center;gap:8px"><div style="flex:1;background:var(--bg2,#f3eee8);border-radius:5px;height:10px"><div style="width:'+w+'%;height:100%;background:#E8622A;border-radius:5px"></div></div><b style="min-width:28px;text-align:right">'+r.n+'</b></div></td></tr>';}).join('')+'</tbody></table></div>'
+      :'<p style="font-size:13px;color:var(--muted);padding:10px 0">Bu dönem için henüz veri yok. Ziyaret takibi 14 Kasım 2026\'da başladı; veriler ziyaretçi geldikçe birikir.</p>')
+    +'<p style="font-size:11px;color:var(--muted);margin-top:8px">Senin (süper admin) ziyaretlerin sayılmaz. Daha eski geçmiş için Google Analytics\'e bakılabilir.</p></div>';
+};
+
 // ═══ ADMIN BLOG: ÖNE ÇIKANLAR PANELİ ═══
 window.renderAdminBlogLists=function(){
   var el=document.getElementById('admin-blog-lists');if(!el)return;
@@ -14610,9 +14831,9 @@ window.renderAdminBlogLists=function(){
   var list=q?posts.filter(function(p){return (p.title||'').toLocaleLowerCase('tr').indexOf(q)>-1;}):posts;
   var date=function(p){var t=ts(p);var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(t);return m?(+m[3])+'.'+m[2]+'.'+m[1]:'—';};
   var thumb=function(p){return p.coverUrl?'<img src="'+esc(p.coverUrl)+'" alt="" loading="lazy">':'<div class="ph"></div>';};
-  var row=function(p,inFeat){return '<div class="abl-row">'+thumb(p)+'<div class="ti"><b title="'+esc(p.title)+'">'+esc(p.title)+'</b><span>'+date(p)+' · ❤ '+(p.likes||0)+(p.kategori?' · '+esc(p.kategori):'')+'</span></div><div class="abl-act">'
+  var row=function(p,inFeat){return '<div class="abl-row"'+(!inFeat&&p.featured?' style="background:#fffaf0"':'')+'>'+thumb(p)+'<div class="ti"><b title="'+esc(p.title)+'">'+esc(p.title)+'</b><span>'+date(p)+' · ❤ '+(p.likes||0)+(p.kategori?' · '+esc(p.kategori):'')+'</span></div><div class="abl-act">'
     +(inFeat?'<button class="abl-star on" onclick="toggleBlogFeatured(\''+p.id+'\',false)" title="Öne çıkanlardan kaldır">✕ Kaldır</button>'
-            :'<button class="abl-star'+(p.featured?' on':'')+'" onclick="toggleBlogFeatured(\''+p.id+'\','+(!p.featured)+')" title="'+(p.featured?'Öne çıkanlardan kaldır':'Öne çıkanlara ekle')+'">'+(p.featured?'★ Öne çıkan':'☆ Öne çıkar')+'</button>')
+            :'<label class="abl-star'+(p.featured?' on':'')+'" title="Öne çıkanlara ekle / kaldır" style="display:inline-flex;align-items:center;gap:5px"><input type="checkbox" '+(p.featured?'checked ':'')+'onchange="toggleBlogFeatured(\''+p.id+'\',this.checked)" style="width:15px;height:15px;accent-color:#f59e0b;cursor:pointer;margin:0">⭐ Öne çıkan</label>')
     +'<button class="btn btn-ghost btn-sm" onclick="editBlog(\''+p.id+'\')" title="Düzenle">✏️</button><button class="btn btn-red btn-sm" onclick="deleteBlogItem(\''+p.id+'\')" title="Sil">🗑</button></div></div>';};
   el.innerHTML='<div class="abl-grid">'
     +'<div class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap"><h3 style="font-size:15px;margin:0">📚 Tüm yazılar <span style="font-weight:400;color:var(--muted);font-size:12px">('+posts.length+')</span></h3><input id="abl-search" placeholder="🔍 Yazı ara…" value="'+esc(window._ablQ||'')+'" oninput="window._ablQ=this.value;renderAdminBlogLists();var e=document.getElementById(\'abl-search\');e.focus();e.setSelectionRange(e.value.length,e.value.length)" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;min-width:180px;background:var(--card);color:var(--text)"></div>'
@@ -14797,7 +15018,8 @@ window.renderAdminOverview=async function(el){
     +'<div class="card" style="padding:14px 16px"><h3 style="font-size:14px;margin-bottom:6px">🏆 En kalabalık kulüpler</h3>'+list(topClubs)+'</div>'
     +'<div class="card" style="padding:14px 16px"><h3 style="font-size:14px;margin-bottom:6px">🏁 30 gün içindeki yarışlar</h3>'+list(nextRaces)+'</div>'
     +'<div class="card" style="padding:14px 16px"><h3 style="font-size:14px;margin-bottom:6px">❤ En beğenilen bloglar</h3>'+list(topBlogs)+(daysSinceBlog!==null?'<p style="font-size:11px;color:var(--muted);margin-top:6px">Son yazı '+(daysSinceBlog===0?'bugün':daysSinceBlog+' gün önce')+' · toplam '+blogs.length+' yazı</p>':'')+'</div>'
-    +'</div>';
+    +'</div><div id="top-pages" style="margin-bottom:22px"></div>';
+  if(window.renderTopPages)window.renderTopPages();
 };
 
 // ═══ SÜPER ADMİN: ÜYE DEMOGRAFİSİ (yaş, şehir, cinsiyet — yalnızca toplu sayılar) ═══

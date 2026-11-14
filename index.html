@@ -14767,10 +14767,12 @@ window.saveFirsatV2=async function(){
     if(/^\/(admin|panel|dashboard|profil|yonetici)/.test(path))return null;
     return ['page',path==='/'?'anasayfa':path.slice(1)];
   }
-  function track(){
+  async function track(){
     try{
       var fb=window._fb;if(!fb||navigator.webdriver)return;
-      if(window.CU&&window.CU.role==='superadmin')return;
+      try{if(fb.auth&&fb.auth.authStateReady)await fb.auth.authStateReady();}catch(e){}
+      var cu=fb.auth&&fb.auth.currentUser;
+      if((window.CU&&window.CU.role==='superadmin')||(cu&&cu.email===fb.SUPER_EMAIL))return;
       var path=decodeURIComponent(location.pathname);if(path===last)return;last=path;
       var k=keyFor(path);if(!k)return;
       var id=(k[0]+'__'+k[1]).toLowerCase().replace(/[^a-z0-9_-]+/g,'-').slice(0,140);

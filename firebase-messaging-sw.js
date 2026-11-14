@@ -14,7 +14,7 @@ firebase.initializeApp({
 const messaging = firebase.messaging();
 
 // ═══ CACHE STRATEJİSİ ═══════════════════════════════════════
-const CACHE_VERSION = 'rct-v7';
+const CACHE_VERSION = 'rct-v8';
 const DYNAMIC_CACHE = CACHE_VERSION + '-dynamic';
 const STATIC_CACHE  = CACHE_VERSION + '-static';
 const IMAGE_CACHE   = CACHE_VERSION + '-images';
@@ -139,7 +139,7 @@ messaging.onBackgroundMessage(function(payload) {
   var options = {
     body: body,
     icon: icon,
-    badge: '/icon-192.png',
+    badge: '/badge-96.png',
     data: { clickTarget: url },
     requireInteraction: false,
     tag: 'rct-push-' + Date.now(),

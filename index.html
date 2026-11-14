@@ -7529,7 +7529,7 @@ window.testPushSelf=async function(){
       new Notification('🧪 Test (Browser)',{
         body:document.getElementById('pn-body')?.value||'Test bildirimi',
         icon:'/icon-192.png',
-        badge:'/icon-192.png'
+        badge:'/badge-96.png'
       });
       toast('Browser bildirimi gösterildi (Cloud Function deploy edilmeli)','ok');
     } else {
@@ -7560,7 +7560,7 @@ window.sendPushToAll=async function(){
     if(statusEl)statusEl.innerHTML='<span style="color:var(--green)">✅ Bildirim kuyruğa alındı. Cloud Function işleyecek.</span>';
     // Admin'in kendi tarayıcısına anında göster
     if(Notification.permission==='granted'){
-      new Notification(title,{body,icon:'/icon-192.png'});
+      new Notification(title,{body,icon:'/icon-192.png',badge:'/badge-96.png'});
     }
   }catch(e){
     toast('Hata: '+e.message,'err');
@@ -8572,7 +8572,7 @@ window.sendPushSegmented=async function(){
     // Admin'e yerel bildirim (izin varsa)
     if(Notification.permission==='granted'){
       try {
-        new Notification(title,{body,icon:'/icon-192.png'});
+        new Notification(title,{body,icon:'/icon-192.png',badge:'/badge-96.png'});
       } catch(e) { console.warn('Local notification error:', e.message); }
     }
   }catch(e){

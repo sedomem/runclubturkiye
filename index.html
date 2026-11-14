@@ -15856,6 +15856,9 @@ footer.f26{background:#0E0C0B;color:rgba(255,255,255,.62);padding:64px 0 28px;ma
 .ig26-t em.rl{left:auto;right:10px;top:10px;width:26px;height:26px;border-radius:50%;background:rgba(0,0,0,.45);display:flex;align-items:center;justify-content:center;color:#fff}
 .ig26-t em.rl svg{width:13px;height:13px}
 @media(hover:none){.ig26-p span{display:none}}
+.cc-svg{width:100%;height:100%;display:block}
+.cc-hero{position:absolute;inset:0}
+.card:hover .cc-svg{transform:scale(1.03);transition:transform .4s}
 </style>
 <script id="design-2026-js">
 // ═══ TASARIM 2026: hero, arama, menü, alt menü, SSS ═══
@@ -16033,6 +16036,73 @@ footer.f26{background:#0E0C0B;color:rgba(255,255,255,.62);padding:64px 0 28px;ma
       toast('Gönderi eklendi ✓','ok');window.renderAdminIg();render();
     }catch(e){toast('Hata: '+(e.code||e.message),'err');}
   };
+})();
+
+// ═══ KULÜP VARSAYILAN KAPAK + LOGO (görsel eklenene kadar) ═══
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var PAL=[['#121010','#2C1A12','#E8622A'],['#E8622A','#B83F10','#FFD9C7'],['#0F1B2D','#1F3B60','#FF8A4C'],['#0F2A1E','#1F4D36','#FFB067'],['#2A1030','#4B1D52','#FF7A45'],['#1E2328','#3A424A','#E8622A']];
+  function hash(s){s=String(s||'');var h=0;for(var i=0;i<s.length;i++){h=(h*31+s.charCodeAt(i))|0;}return Math.abs(h);}
+  function initials(n){
+    var w=String(n||'RC').replace(/[^\wçğıöşüÇĞİÖŞÜ\s-]/g,' ').split(/[\s-]+/).filter(Boolean);
+    var stop={'koşu':1,'kosu':1,'kulübü':1,'kulubu':1,'running':1,'club':1,'team':1,'grubu':1,'ve':1,'&':1};
+    var main=w.filter(function(x){return !stop[x.toLocaleLowerCase('tr-TR')];});if(!main.length)main=w;
+    var s=main.length>=2?main[0][0]+main[1][0]:(main[0]||'RC').slice(0,2);
+    return s.toLocaleUpperCase('tr-TR');
+  }
+  window.clubPalette=function(c){return PAL[hash(c.id||c.name)%PAL.length];};
+  window.clubCover=function(c,big){
+    var p=window.clubPalette(c),id='cc'+hash((c.id||c.name)+(big?'b':''));
+    var city=(c.city||'').split(/[-,/]/)[0].trim().toLocaleUpperCase('tr-TR');
+    var ini=esc(initials(c.name));
+    var lanes='';for(var i=0;i<5;i++){var r=120+i*26;lanes+='<ellipse cx="330" cy="110" rx="'+(r+60)+'" ry="'+r+'" fill="none" stroke="#fff" stroke-opacity="'+(i===2?0:.13)+'" stroke-width="'+(i===4?3:2)+'"/>';}
+    lanes+='<ellipse cx="330" cy="110" rx="232" ry="172" fill="none" stroke="'+p[2]+'" stroke-opacity=".9" stroke-width="3" stroke-dasharray="14 10"/>';
+    return '<svg class="cc-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 220" preserveAspectRatio="xMidYMid slice" role="img" aria-label="'+esc(c.name||'Kulüp')+'">'
+      +'<defs><linearGradient id="'+id+'" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="'+p[0]+'"/><stop offset="1" stop-color="'+p[1]+'"/></linearGradient></defs>'
+      +'<rect width="400" height="220" fill="url(#'+id+')"/>'+lanes
+      +(city?'<text x="26" y="40" font-family="Inter,system-ui,sans-serif" font-size="12" font-weight="700" letter-spacing="2.4" fill="'+p[2]+'">'+esc(city)+'</text>':'')
+      +'<text x="22" y="150" font-family="Archivo,Arial Black,sans-serif" font-weight="900" font-size="92" letter-spacing="-3" fill="#fff">'+ini+'</text>'
+      +'<text x="26" y="186" font-family="Inter,system-ui,sans-serif" font-size="11.5" font-weight="600" letter-spacing="1.6" fill="#fff" fill-opacity=".62">KOŞU KULÜBÜ</text>'
+      +'</svg>';
+  };
+  window.clubLogoBox=function(c){
+    var p=window.clubPalette(c);
+    return '<div style="width:100%;height:100%;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,'+p[0]+','+p[1]+');font-family:Archivo,sans-serif;font-size:22px;font-weight:900;letter-spacing:-.5px;color:#fff">'+esc(initials(c.name))+'</div>';
+  };
+  var cc=function(c){
+    var isJoined=window.CU&&localStorage.getItem('club_'+c.id+'_'+(window.CU&&window.CU.uid||''));
+    var img=c.imgUrl||c.bannerUrl;
+    var imgBg=img?'<img src="'+esc(img)+'" alt="'+esc(c.name||'Kulüp')+'" loading="lazy" width="300" height="150" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>'
+      :'<div style="position:absolute;inset:0">'+window.clubCover(c)+'</div>';
+    var desc=c.desc||'Koşu kulübü';
+    return '<div class="card" style="position:relative;cursor:pointer" onclick="openClub(\''+c.id+'\')">'
+      +(isJoined?'<div class="member-badge">✓ Üyesin</div>':'')
+      +'<div class="card-img" style="height:220px;position:relative;overflow:hidden;border-radius:var(--r) var(--r) 0 0">'+imgBg+'</div>'
+      +'<div class="card-body">'+(c.city?'<span class="tag tag-or">'+esc(c.city)+'</span>':'')
+      +'<h3 style="margin:5px 0 4px;font-size:15px">'+esc(c.name)+'</h3>'
+      +'<p style="font-size:12px;color:var(--muted);line-height:1.5">'+esc(desc.substring(0,65))+(desc.length>65?'...':'')+'</p>'
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">'
+      +'<span style="font-size:11px;color:var(--muted);font-weight:600">👥 '+(c.members||0)+' üye</span>'
+      +'<span class="pill '+(c.open?'pill-gr':'pill-bl')+'">'+(c.open?'Açık':'Kodlu')+'</span></div></div></div>';
+  };
+  window.clubCard=cc;try{clubCard=cc;}catch(e){}
+  // mevcut listeleri yeniden çiz
+  function rerender(){
+    var C=window.CLUBS||[];if(!C.length)return;
+    var hc=document.getElementById('home-clubs');if(hc&&hc.children.length)hc.innerHTML=C.slice(0,4).map(cc).join('');
+  }
+  setTimeout(rerender,1500);setTimeout(rerender,4000);
+  // kulüp detay: banner/logo yoksa
+  var det=document.getElementById('club-detail-content');
+  if(det&&window.MutationObserver){
+    new MutationObserver(function(){
+      var hero=det.querySelector('.club-hero');if(!hero||hero.dataset.cc)return;hero.dataset.cc=1;
+      var name=(det.querySelector('.club-hero-text h2')||{}).textContent||'';
+      var c=(window.CLUBS||[]).find(function(x){return x.name===name;})||{name:name,id:name};
+      if(!hero.querySelector('img')){var d=document.createElement('div');d.className='cc-hero';d.innerHTML=window.clubCover(c,true);hero.insertBefore(d,hero.firstChild);}
+      var lw=hero.querySelector('.club-logo-wrap');if(lw&&!lw.querySelector('img'))lw.innerHTML=window.clubLogoBox(c);
+    }).observe(det,{childList:true,subtree:true});
+  }
 })();
 </script>
 </body>

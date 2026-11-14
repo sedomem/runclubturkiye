@@ -104,6 +104,7 @@ service cloud.firestore {
     }
     match /firsatlar/{id}{ allow read: if true; allow write: if isSuperAdmin(); }
     match /ticker/{id}   { allow read: if true; allow write: if isSuperAdmin(); }
+    match /igPosts/{id}  { allow read: if true; allow write: if isSuperAdmin(); }
 
     // KVKK: katılım kayıtları e-posta içerir; yalnızca sahibi ve yöneticiler okur.
     // Kulüp yarışı katılımları (e-posta içermez) giriş yapmış üyelere açıktır.

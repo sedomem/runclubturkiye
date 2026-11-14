@@ -14661,6 +14661,134 @@ body.is-guest div.guest-only{display:flex!important}
 @media(max-width:860px){.fp-offers{grid-template-columns:1fr 1fr}.fp-steps{grid-template-columns:1fr}.fp-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.fp-offers,.fp-fgrid{grid-template-columns:1fr}.fp-hero{padding:44px 0 30px}}
 </style>
+<style id="firsat-detail-v2">
+#pg-firsat-detail>.container.sec{max-width:1140px}
+.fd{--fdr:18px}
+.fd-banner{position:relative;width:100%;aspect-ratio:21/9;max-height:520px;border-radius:var(--fdr);overflow:hidden;background:linear-gradient(135deg,#2C1810,#1A1A1A);box-shadow:0 18px 50px -24px rgba(44,24,16,.55)}
+.fd-banner .bg{position:absolute;inset:-30px;width:calc(100% + 60px);height:calc(100% + 60px);object-fit:cover;filter:blur(28px) saturate(1.2);opacity:.75}
+.fd-banner .fg{position:absolute;inset:0;width:100%;height:100%;object-fit:contain}
+.fd-banner.cover .fg{object-fit:cover}
+.fd-banner .ph{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;color:#fff;text-align:center;padding:20px;background:radial-gradient(circle at 20% 20%,rgba(232,98,42,.55),transparent 55%),radial-gradient(circle at 80% 90%,rgba(240,160,112,.35),transparent 50%)}
+.fd-banner .ph b{font-size:clamp(44px,8vw,96px);line-height:1;font-weight:900;letter-spacing:-2px}
+.fd-banner .ph span{font-size:clamp(14px,2vw,20px);opacity:.85;margin-top:8px}
+.fd-chips{position:absolute;top:14px;left:14px;right:14px;display:flex;gap:8px;flex-wrap:wrap;z-index:2}
+.fd-chip{background:rgba(17,17,17,.62);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px);color:#fff;font-size:12px;font-weight:700;padding:6px 11px;border-radius:999px;display:inline-flex;align-items:center;gap:5px}
+.fd-chip.or{background:var(--or)}.fd-chip.gold{background:#f59e0b;color:#1a1a1a}.fd-chip.red{background:#dc2626}
+.fd-disc{position:absolute;right:18px;bottom:18px;z-index:2;background:var(--or);color:#fff;border-radius:16px;padding:10px 16px;text-align:center;box-shadow:0 10px 30px -8px rgba(232,98,42,.8);transform:rotate(-3deg)}
+.fd-disc b{display:block;font-size:clamp(22px,3.4vw,34px);line-height:1;font-weight:900}
+.fd-disc small{font-size:10px;letter-spacing:1.5px;font-weight:800;opacity:.9}
+.fd-head{display:flex;gap:16px;align-items:center;margin:22px 0 6px}
+.fd-logo{width:72px;height:72px;border-radius:18px;background:#fff;border:1px solid var(--border);object-fit:contain;padding:6px;flex-shrink:0;box-shadow:0 6px 18px -10px rgba(0,0,0,.35)}
+.fd-logo.txt{display:flex;align-items:center;justify-content:center;font-weight:900;font-size:28px;color:var(--or);background:var(--or-soft)}
+.fd-brand{font-size:13px;font-weight:700;color:var(--or);text-transform:uppercase;letter-spacing:1px}
+.fd-title{font-size:clamp(22px,3.2vw,34px);line-height:1.15;margin:2px 0 0;font-weight:800;color:var(--text)}
+.fd-meta{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0 22px}
+.fd-meta span{background:var(--bg3);border-radius:999px;padding:6px 12px;font-size:12px;font-weight:600;color:var(--text2)}
+.fd-meta span.warn{background:rgba(220,38,38,.1);color:#b91c1c}
+.fd-grid{display:grid;grid-template-columns:minmax(0,1fr) 350px;gap:24px;align-items:start}
+.fd-sec{background:var(--bg2);border:1px solid var(--border);border-radius:var(--fdr);padding:22px 24px;margin-bottom:18px}
+.fd-sec h2{font-size:17px;margin:0 0 12px;display:flex;align-items:center;gap:8px;color:var(--text)}
+.fd-txt{font-size:15px;line-height:1.75;color:var(--text2)}
+.fd-txt p{margin:0 0 12px}.fd-txt p:last-child{margin:0}
+.fd-hl{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+.fd-hl div{background:var(--bg);border-radius:12px;padding:12px 14px}
+.fd-hl small{display:block;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px}
+.fd-hl b{font-size:14px;color:var(--text)}
+.fd-gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:10px}
+.fd-gal button{padding:0;border:0;border-radius:12px;overflow:hidden;aspect-ratio:4/3;cursor:zoom-in;background:var(--bg3)}
+.fd-gal img{width:100%;height:100%;object-fit:cover;transition:transform .35s}
+.fd-gal button:hover img{transform:scale(1.05)}
+.fd-steps{list-style:none;margin:0;padding:0;counter-reset:s;display:grid;gap:12px}
+.fd-steps li{counter-increment:s;display:flex;gap:12px;align-items:flex-start;font-size:14px;line-height:1.55;color:var(--text2)}
+.fd-steps li:before{content:counter(s);flex-shrink:0;width:28px;height:28px;border-radius:50%;background:var(--or);color:#fff;font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
+.fd-terms{margin:0;padding:0;list-style:none;display:grid;gap:8px}
+.fd-terms li{font-size:13.5px;line-height:1.55;color:var(--text2);padding-left:22px;position:relative}
+.fd-terms li:before{content:"✓";position:absolute;left:0;color:var(--or);font-weight:900}
+.fd-about{display:flex;gap:16px;align-items:flex-start}
+.fd-about .fd-logo{width:56px;height:56px;border-radius:14px}
+.fd-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+.fd-aside{position:sticky;top:84px}
+.fd-offer{background:var(--bg2);border:1px solid var(--border);border-radius:var(--fdr);overflow:hidden;box-shadow:0 18px 40px -26px rgba(44,24,16,.45)}
+.fd-offer-top{background:linear-gradient(135deg,var(--or),#c94e1c);color:#fff;padding:18px 20px}
+.fd-offer-top small{font-size:11px;letter-spacing:1.5px;font-weight:800;opacity:.85;text-transform:uppercase}
+.fd-offer-top b{display:block;font-size:34px;line-height:1.05;font-weight:900;margin-top:2px}
+.fd-offer-top p{margin:6px 0 0;font-size:13px;opacity:.92}
+.fd-offer-body{padding:18px 20px}
+.fd-cd{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;margin-bottom:14px}
+.fd-cd div{background:var(--bg);border-radius:10px;padding:8px 4px;text-align:center}
+.fd-cd b{display:block;font-size:20px;font-weight:800;color:var(--text);font-variant-numeric:tabular-nums}
+.fd-cd small{font-size:10px;color:var(--muted);text-transform:uppercase}
+.fd-cd-lbl{font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+.fd-code{display:flex;align-items:center;gap:10px;border:2px dashed var(--or);background:var(--or-soft);border-radius:12px;padding:10px 10px 10px 14px;cursor:pointer;margin-bottom:12px}
+.fd-code .c{flex:1;min-width:0;font-family:ui-monospace,monospace;font-size:20px;font-weight:800;letter-spacing:2px;color:var(--text);overflow:hidden;text-overflow:ellipsis}
+.fd-code button{border:0;background:var(--text);color:#fff;font-weight:700;font-size:12px;border-radius:8px;padding:9px 12px;cursor:pointer;white-space:nowrap}
+.fd-code.copied{border-style:solid;border-color:#16a34a;background:rgba(22,163,74,.08)}
+.fd-code.copied button{background:#16a34a}
+.fd-gate{position:relative;border-radius:12px;overflow:hidden;margin-bottom:12px}
+.fd-gate .blur{filter:blur(6px);font-family:monospace;font-size:20px;font-weight:800;letter-spacing:3px;color:var(--or);background:var(--or-soft);padding:14px;text-align:center;user-select:none}
+.fd-gate .lock{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;color:var(--text);background:rgba(253,250,246,.35)}
+.fd-cta{width:100%;justify-content:center;display:flex!important;font-size:15px!important;padding:13px!important;margin-bottom:8px}
+.fd-share{display:flex;gap:8px;margin-top:12px}
+.fd-share button,.fd-share a{flex:1;display:flex;align-items:center;justify-content:center;gap:6px;border:1px solid var(--border);background:var(--bg);border-radius:10px;padding:9px;font-size:12px;font-weight:700;color:var(--text2);cursor:pointer;text-decoration:none}
+.fd-stats{display:flex;justify-content:center;gap:14px;margin-top:12px;font-size:12px;color:var(--muted)}
+.fd-trust{display:grid;gap:6px;margin-top:14px;padding-top:14px;border-top:1px solid var(--border);font-size:12px;color:var(--muted2)}
+.fd-exp{background:rgba(107,114,128,.12);color:var(--muted2);border-radius:12px;padding:14px;text-align:center;font-weight:700;font-size:14px;margin-bottom:12px}
+.fd-more{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px}
+.fd-more a{display:block;background:var(--bg2);border:1px solid var(--border);border-radius:14px;overflow:hidden;cursor:pointer;color:inherit;text-decoration:none;transition:transform .2s}
+.fd-more a:hover{transform:translateY(-3px)}
+.fd-more .im{aspect-ratio:16/9;background:linear-gradient(135deg,#2C1810,#1A1A1A);position:relative}
+.fd-more .im img{width:100%;height:100%;object-fit:cover}
+.fd-more .im em{position:absolute;left:8px;top:8px;background:var(--or);color:#fff;font-style:normal;font-size:11px;font-weight:800;padding:3px 8px;border-radius:999px}
+.fd-more .t{padding:10px 12px;font-size:13px;font-weight:700;line-height:1.35}
+.fd-more .t small{display:block;color:var(--muted);font-weight:600;font-size:11px;margin-top:2px}
+.fd-bar{display:none}
+.fd-lb{position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,.88);display:flex;align-items:center;justify-content:center;padding:20px;cursor:zoom-out}
+.fd-lb img{max-width:100%;max-height:100%;border-radius:10px}
+@media(max-width:900px){
+  .fd-grid{grid-template-columns:minmax(0,1fr)}
+  .fd-aside{position:static;order:-1}
+  .fd-grid{display:flex;flex-direction:column;gap:0}
+  .fd-grid>*{width:100%}
+  .fd-aside{margin-bottom:18px}
+}
+@media(max-width:640px){
+  #pg-firsat-detail>.container.sec{padding-left:12px;padding-right:12px}
+  .fd-banner{aspect-ratio:4/3;border-radius:14px;margin:0 -2px}
+  .fd-disc{right:10px;bottom:10px;padding:7px 12px;border-radius:12px}
+  .fd-chips{top:10px;left:10px}
+  .fd-chip{font-size:11px;padding:5px 9px}
+  .fd-head{gap:12px;margin-top:16px}
+  .fd-logo{width:56px;height:56px;border-radius:14px}
+  .fd-sec{padding:18px 16px;border-radius:14px}
+  .fd-offer{border-radius:14px}
+  .fd-gal{grid-template-columns:repeat(2,1fr)}
+  .fd{padding-bottom:84px}
+  .fd-bar{display:flex;position:fixed;left:0;right:0;bottom:0;z-index:900;gap:10px;align-items:center;padding:10px 14px calc(10px + env(safe-area-inset-bottom));background:rgba(253,250,246,.96);backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border-top:1px solid var(--border);box-shadow:0 -8px 24px -12px rgba(0,0,0,.25)}
+  .fd-bar .d{flex-shrink:0;line-height:1.1}
+  .fd-bar .d b{display:block;color:var(--or);font-size:20px;font-weight:900}
+  .fd-bar .d small{font-size:11px;color:var(--muted)}
+  .fd-bar .btn{flex:1;justify-content:center;display:flex;padding:12px!important;font-size:14px!important}
+}
+/* Admin: vitrin alanları */
+.fr-x{border:1px solid var(--border);border-radius:14px;padding:16px;margin:8px 0 16px;background:var(--bg)}
+.fr-x>h4{margin:0 0 4px;font-size:14px}
+.fr-x>p{margin:0 0 14px;font-size:12px;color:var(--muted)}
+.fr-x-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fr-x-grid .full{grid-column:1/-1}
+.fr-x label{display:block;font-size:12px;font-weight:700;margin-bottom:4px;color:var(--text2)}
+.fr-x input[type=text],.fr-x textarea{width:100%;box-sizing:border-box}
+.fr-x small.h{display:block;font-size:11px;color:var(--muted);margin-top:3px}
+.fr-up{border:2px dashed var(--border);border-radius:12px;padding:12px;text-align:center;background:var(--bg2);cursor:pointer;position:relative}
+.fr-up input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer}
+.fr-up .pv{margin-top:8px;max-height:160px;max-width:100%;border-radius:8px;display:none}
+.fr-up.has .pv{display:inline-block}
+.fr-gal-list{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.fr-gal-list div{position:relative;width:78px;height:60px;border-radius:8px;overflow:hidden;background:var(--bg3)}
+.fr-gal-list img{width:100%;height:100%;object-fit:cover}
+.fr-gal-list button{position:absolute;top:2px;right:2px;width:20px;height:20px;border-radius:50%;border:0;background:rgba(0,0,0,.7);color:#fff;font-size:12px;line-height:20px;padding:0;cursor:pointer}
+.fr-gal-list div.new{outline:2px solid var(--or)}
+@media(max-width:640px){.fr-x-grid{grid-template-columns:1fr}.fr-x{padding:12px}}
+</style>
 <script id="fix-2026-11-13">
 // ═══ FIRSATLAR v2: sayfa + iş birliği formu + admin ═══
 window.renderFirsatStats=function(){
@@ -15295,6 +15423,303 @@ window.syncClubCount=function(n){
     var cards=document.querySelectorAll('#dp-overview .s-card');cards.forEach(function(c){var l=c.querySelector('.l');if(l&&l.textContent.trim()==='Kulüp'){var v=c.querySelector('.n');if(v)v.textContent=n;}});
   }catch(_){}
 };
+
+// ═══ FIRSAT DETAY v2 (marka vitrini) ═══
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var safeUrl=function(u){u=String(u||'').trim();if(!u)return '';if(!/^https?:\/\//i.test(u))u='https://'+u.replace(/^\/+/,'');return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:'';};
+  var lines=function(t){return String(t||'').split(/\r?\n/).map(function(s){return s.replace(/^\s*[-•*\d.)]+\s*/,'').trim();}).filter(Boolean);};
+  var rich=function(t){
+    t=String(t||'').trim();if(!t)return '';
+    return t.split(/\n\s*\n/).map(function(p){
+      var h=esc(p).replace(/\*\*(.+?)\*\*/g,'<b>$1</b>').replace(/\n/g,'<br>');
+      return '<p>'+h+'</p>';
+    }).join('');
+  };
+  var endOf=function(b){if(!b)return null;var d=/^\d{4}-\d{2}-\d{2}$/.test(b)?new Date(b+'T23:59:59'):new Date(b);return isNaN(d)?null:d;};
+  var trDate=function(d){try{return d.toLocaleDateString('tr-TR',{day:'numeric',month:'long',year:'numeric'});}catch(e){return '';}};
+  window._fdEsc=esc;
+
+  window.fdCopy=function(id){
+    var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(!f||!f.kod)return;
+    var done=function(){
+      document.querySelectorAll('.fd-code').forEach(function(el){el.classList.add('copied');var b=el.querySelector('button');if(b)b.textContent='✓ Kopyalandı';});
+      toast('Kod kopyalandı: '+f.kod+' 📋','ok');
+      setTimeout(function(){document.querySelectorAll('.fd-code').forEach(function(el){el.classList.remove('copied');var b=el.querySelector('button');if(b)b.textContent='Kopyala';});},2500);
+      if(!window._fdCopied){window._fdCopied={};}
+      if(!window._fdCopied[id]){window._fdCopied[id]=1;window.trackFirsatClick&&window.trackFirsatClick(id);}
+      window.rcTrack&&window.rcTrack('firsat_code_copy',{firsat_id:id,brand:f.marka||''});
+    };
+    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(f.kod).then(done).catch(function(){toast('Kod: '+f.kod,'ok');});}
+    else{toast('Kod: '+f.kod,'ok');}
+  };
+  window.fdGo=function(id){
+    var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(!f)return;
+    window.trackFirsatClick&&window.trackFirsatClick(id);
+    window.rcTrack&&window.rcTrack('firsat_cta_click',{firsat_id:id,brand:f.marka||''});
+  };
+  window.fdShare=function(id,how){
+    var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(!f)return;
+    var url=location.origin+'/firsat/'+encodeURIComponent(f.slug||f.id);
+    var txt=(f.marka?f.marka+': ':'')+(f.baslik||'')+(f.indirim?' ('+f.indirim+' indirim)':'')+' — RunClubTürkiye üyelerine özel';
+    if(how==='wa'){window.open('https://wa.me/?text='+encodeURIComponent(txt+' '+url),'_blank','noopener');}
+    else if(how==='native'&&navigator.share){navigator.share({title:f.baslik,text:txt,url:url}).catch(function(){});}
+    else{(navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){toast('Bağlantı kopyalandı 🔗','ok');}).catch(function(){prompt('Bağlantı:',url);});}
+    window.rcTrack&&window.rcTrack('share',{method:how,content_type:'firsat',item_id:id});
+  };
+  window.fdZoom=function(u){
+    var d=document.createElement('div');d.className='fd-lb';d.innerHTML='<img src="'+esc(u)+'" alt="">';d.onclick=function(){d.remove();};
+    document.addEventListener('keydown',function k(e){if(e.key==='Escape'){d.remove();document.removeEventListener('keydown',k);}});
+    document.body.appendChild(d);
+  };
+  function tick(end){
+    clearInterval(window._fdTimer);
+    if(!end)return;
+    var run=function(){
+      var box=document.getElementById('fd-cd');if(!box){clearInterval(window._fdTimer);return;}
+      var ms=end.getTime()-Date.now();if(ms<0)ms=0;
+      var d=Math.floor(ms/864e5),h=Math.floor(ms%864e5/36e5),m=Math.floor(ms%36e5/6e4),s=Math.floor(ms%6e4/1e3);
+      var pad=function(n){return (n<10?'0':'')+n;};
+      box.innerHTML='<div><b>'+d+'</b><small>gün</small></div><div><b>'+pad(h)+'</b><small>saat</small></div><div><b>'+pad(m)+'</b><small>dk</small></div><div><b>'+pad(s)+'</b><small>sn</small></div>';
+      if(ms===0)clearInterval(window._fdTimer);
+    };
+    run();window._fdTimer=setInterval(run,1000);
+  }
+
+  window.openFirsatDetail=function(id){
+    var all=window.FIRSATLAR||[];
+    var f=all.find(function(x){return x.id===id||x.slug===id;});
+    if(!f){console.warn('[Fırsat] bulunamadı:',id);return;}
+    id=f.id;
+    var cont=document.getElementById('firsat-detail-content');if(!cont)return;
+    var isIn=!!window.CU;
+    window.trackFirsatView&&window.trackFirsatView(id);
+    var end=endOf(f.bitis),now=Date.now();
+    var expired=!!(end&&end.getTime()<now);
+    var daysLeft=end?Math.ceil((end.getTime()-now)/864e5):null;
+    var banner=f.bannerUrl||f.imgUrl||'';
+    var link=safeUrl(f.link),web=safeUrl(f.website)||link;
+    var ig=String(f.instagram||'').trim().replace(/^@/,'');var igUrl=ig?(/^https?:/i.test(ig)?safeUrl(ig):'https://instagram.com/'+encodeURIComponent(ig)):'';
+    var brand=f.marka||'Marka';
+    var logo=f.logoUrl?'<img class="fd-logo" src="'+esc(f.logoUrl)+'" alt="'+esc(brand)+' logo">':'<div class="fd-logo txt">'+esc(brand.charAt(0).toUpperCase())+'</div>';
+    var cta=f.ctaText||(brand+' sitesine git');
+    var gallery=Array.isArray(f.gallery)?f.gallery.filter(Boolean):[];
+    var steps=lines(f.nasilKullanilir);
+    if(!steps.length){
+      steps=[isIn?'RunClubTürkiye hesabınla giriş yaptın 👍':'Ücretsiz RunClubTürkiye üyeliği oluştur veya giriş yap.'];
+      if(f.kod)steps.push('İndirim kodunu tek tıkla kopyala.');
+      if(link)steps.push(brand+' sitesine git'+(f.kod?' ve ödeme adımında kodu uygula.':' ve fırsattan yararlan.'));
+      else if(f.kod)steps.push('Kodu '+brand+' mağazasında veya sitesinde kullan.');
+    }
+    var terms=lines(f.kosullar);
+    if(end)terms.push('Kampanya '+trDate(end)+' tarihine kadar geçerlidir.');
+    terms.push('Fırsat yalnızca RunClubTürkiye üyelerine özeldir; kampanya koşullarını '+brand+' belirler.');
+
+    var chips='';
+    if(f.featured)chips+='<span class="fd-chip gold">⭐ Öne çıkan</span>';
+    chips+='<span class="fd-chip or">🔒 Üyelere özel</span>';
+    if(f.kategori)chips+='<span class="fd-chip">'+esc(f.kategori)+'</span>';
+    if(expired)chips+='<span class="fd-chip red">Süresi doldu</span>';
+    else if(daysLeft!==null&&daysLeft<=7)chips+='<span class="fd-chip red">⏳ Son '+daysLeft+' gün</span>';
+
+    var bannerHtml='<div class="fd-banner'+(f.bannerFit==='cover'?' cover':'')+'">'
+      +(banner?'<img class="bg" src="'+esc(banner)+'" alt="" aria-hidden="true"><img class="fg" src="'+esc(banner)+'" alt="'+esc(f.baslik||'Fırsat')+'" fetchpriority="high">'
+        :'<div class="ph"><b>'+esc(f.indirim||'🎁')+'</b><span>'+esc(brand)+'</span></div>')
+      +'<div class="fd-chips">'+chips+'</div>'
+      +(f.indirim&&banner?'<div class="fd-disc"><b>'+esc(f.indirim)+'</b><small>İNDİRİM</small></div>':'')
+      +'</div>';
+
+    var meta='';
+    if(end)meta+='<span class="'+(expired||daysLeft<=7?'warn':'')+'">📅 '+(expired?'Sona erdi':'Son gün: '+trDate(end))+'</span>';
+    else meta+='<span>♾️ Süresiz fırsat</span>';
+    meta+='<span>👁 '+(f.views||0)+' görüntülenme</span>';
+    if(f.clicks)meta+='<span>🔥 '+f.clicks+' kişi kullandı</span>';
+
+    // teklif kutusu
+    var codeHtml='';
+    if(expired){codeHtml='<div class="fd-exp">Bu fırsatın süresi doldu 😔<br><small style="font-weight:500">Diğer fırsatlara aşağıdan göz at.</small></div>';}
+    else if(isIn){
+      if(f.kod)codeHtml='<div class="fd-cd-lbl">İndirim kodun</div><div class="fd-code" onclick="fdCopy(\''+id+'\')"><span class="c">'+esc(f.kod)+'</span><button type="button">Kopyala</button></div>';
+      else codeHtml='<div class="fd-hl" style="margin:0 0 12px"><div><small>Kod</small><b>Kod gerekmez — bağlantıdan yararlan</b></div></div>';
+      if(link)codeHtml+='<a class="btn btn-or fd-cta" href="'+esc(link)+'" target="_blank" rel="noopener sponsored" onclick="fdGo(\''+id+'\')">'+esc(cta)+' →</a>';
+    }else{
+      codeHtml='<div class="fd-gate"><div class="blur">'+(f.kod?'X'.repeat(Math.min(Math.max(f.kod.length,6),12)):'ÜYEYE ÖZEL')+'</div><div class="lock">🔒 Kodu görmek için üye ol</div></div>'
+        +'<button class="btn btn-or fd-cta" onclick="openAuth(\'register\')">✨ Ücretsiz üye ol, kodu al</button>'
+        +'<button class="btn btn-ghost btn-full" onclick="openAuth(\'login\')">Zaten üyeyim — giriş yap</button>';
+    }
+    var offer='<div class="fd-offer"><div class="fd-offer-top"><small>RunClub üyelerine özel</small><b>'+esc(f.indirim||'Özel fırsat')+'</b><p>'+esc(f.baslik||'')+'</p></div><div class="fd-offer-body">'
+      +(end&&!expired?'<div class="fd-cd-lbl">Kampanyanın bitmesine</div><div class="fd-cd" id="fd-cd"></div>':'')
+      +codeHtml
+      +'<div class="fd-share"><button type="button" onclick="fdShare(\''+id+'\',\'wa\')">💬 WhatsApp</button><button type="button" onclick="fdShare(\''+id+'\',\''+(navigator.share?'native':'copy')+'\')">🔗 Paylaş</button></div>'
+      +'<div class="fd-trust"><span>✅ RunClubTürkiye tarafından doğrulanmış marka</span><span>🏃 Koşucu topluluğuna özel kampanya</span><span>💸 Üyelik tamamen ücretsiz</span></div>'
+      +'</div></div>';
+
+    var hl='<div class="fd-hl">'
+      +(f.indirim?'<div><small>İndirim</small><b style="color:var(--or)">'+esc(f.indirim)+'</b></div>':'')
+      +'<div><small>Marka</small><b>'+esc(brand)+'</b></div>'
+      +(f.kategori?'<div><small>Kategori</small><b>'+esc(f.kategori)+'</b></div>':'')
+      +'<div><small>Geçerlilik</small><b>'+(end?trDate(end):'Süresiz')+'</b></div></div>';
+
+    var main=''
+      +'<section class="fd-sec"><h2>🎯 Fırsat hakkında</h2><div class="fd-txt">'+(rich(f.aciklama)||'<p>'+esc(brand)+' bu kampanyayı RunClubTürkiye üyelerine özel olarak sunuyor.</p>')+'</div>'+hl+'</section>'
+      +(gallery.length?'<section class="fd-sec"><h2>🖼 Ürün galerisi</h2><div class="fd-gal">'+gallery.map(function(u){return '<button type="button" data-u="'+esc(u)+'" onclick="fdZoom(this.dataset.u)"><img src="'+esc(u)+'" alt="'+esc(brand)+' ürün görseli" loading="lazy"></button>';}).join('')+'</div></section>':'')
+      +'<section class="fd-sec"><h2>🧭 Nasıl kullanılır?</h2><ol class="fd-steps">'+steps.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ol></section>'
+      +'<section class="fd-sec"><h2>🏷 '+esc(brand)+' hakkında</h2><div class="fd-about">'+logo+'<div style="flex:1;min-width:0"><div class="fd-txt">'+(rich(f.markaHakkinda)||'<p>'+esc(brand)+', RunClubTürkiye topluluğuyla iş birliği yapan markalardan biri.</p>')+'</div>'
+        +((web||igUrl)?'<div class="fd-links">'+(web?'<a class="btn btn-ghost btn-sm" href="'+esc(web)+'" target="_blank" rel="noopener sponsored" onclick="fdGo(\''+id+'\')">🌐 Web sitesi</a>':'')+(igUrl?'<a class="btn btn-ghost btn-sm" href="'+esc(igUrl)+'" target="_blank" rel="noopener">📸 Instagram</a>':'')+'</div>':'')
+        +'</div></div></section>'
+      +'<section class="fd-sec"><h2>📋 Kampanya koşulları</h2><ul class="fd-terms">'+terms.map(function(s){return '<li>'+esc(s)+'</li>';}).join('')+'</ul></section>';
+
+    var others=all.filter(function(x){if(x.id===id||x.aktif===false)return false;var e=endOf(x.bitis);return !(e&&e.getTime()<now);})
+      .sort(function(a,b){return (b.featured?1:0)-(a.featured?1:0)||((a.kategori===f.kategori)?-1:0)-((b.kategori===f.kategori)?-1:0);}).slice(0,3);
+    var more=others.length?'<section style="margin-top:10px"><h2 style="font-size:18px;margin:0 0 12px">🎁 Diğer fırsatlar</h2><div class="fd-more">'+others.map(function(o){var im=o.imgUrl||o.bannerUrl;return '<a onclick="openFirsatDetail(\''+o.id+'\');window.scrollTo({top:0,behavior:\'smooth\'})"><div class="im">'+(im?'<img src="'+esc(im)+'" alt="" loading="lazy">':'')+(o.indirim?'<em>'+esc(o.indirim)+'</em>':'')+'</div><div class="t">'+esc(o.baslik)+'<small>'+esc(o.marka||'')+'</small></div></a>';}).join('')+'</div></section>':'';
+
+    var bar;
+    if(expired)bar='<div class="fd-bar"><div class="d"><b>—</b><small>Süresi doldu</small></div><button class="btn btn-ghost" onclick="nav(\'firsatlar\')">Diğer fırsatlar</button></div>';
+    else if(!isIn)bar='<div class="fd-bar"><div class="d"><b>'+esc(f.indirim||'🎁')+'</b><small>üyelere özel</small></div><button class="btn btn-or" onclick="openAuth(\'register\')">Üye ol, kodu al</button></div>';
+    else if(f.kod)bar='<div class="fd-bar"><div class="d"><b>'+esc(f.indirim||'🎁')+'</b><small>'+esc(f.kod)+'</small></div><button class="btn btn-or" onclick="fdCopy(\''+id+'\')">📋 Kodu kopyala</button>'+(link?'<a class="btn btn-ghost" style="flex:0 0 auto" href="'+esc(link)+'" target="_blank" rel="noopener sponsored" onclick="fdGo(\''+id+'\')">Git →</a>':'')+'</div>';
+    else if(link)bar='<div class="fd-bar"><div class="d"><b>'+esc(f.indirim||'🎁')+'</b><small>'+esc(brand)+'</small></div><a class="btn btn-or" href="'+esc(link)+'" target="_blank" rel="noopener sponsored" onclick="fdGo(\''+id+'\')">'+esc(cta)+' →</a></div>';
+    else bar='';
+
+    cont.innerHTML='<div class="fd">'+bannerHtml
+      +'<div class="fd-head">'+logo+'<div style="min-width:0"><div class="fd-brand">'+esc(brand)+'</div><h1 class="fd-title">'+esc(f.baslik||'')+'</h1></div></div>'
+      +'<div class="fd-meta">'+meta+'</div>'
+      +'<div class="fd-grid"><div class="fd-main">'+main+'</div><aside class="fd-aside">'+offer+'</aside></div>'
+      +more+bar+'</div>';
+    if(end&&!expired)tick(end);else clearInterval(window._fdTimer);
+    nav('firsat-detail');
+    document.title=(f.baslik||'Fırsat')+(f.marka?' – '+f.marka:'')+' | RunClubTürkiye Fırsatlar';
+    try{var md=document.querySelector('meta[name="description"]');if(md)md.setAttribute('content',((f.marka?f.marka+': ':'')+(f.baslik||'')+(f.indirim?' — '+f.indirim+' indirim':'')+'. RunClubTürkiye üyelerine özel fırsat.').slice(0,160));}catch(e){}
+    window.rcTrack&&window.rcTrack('view_promotion',{promotion_id:id,promotion_name:f.baslik||'',creative_name:f.marka||''});
+  };
+
+  // ── ADMIN: vitrin alanları ──
+  var MAXMB=8;
+  function upBox(id,label,hint,multi){
+    return '<div><label>'+label+'</label><div class="fr-up" id="'+id+'-box"><input type="file" id="'+id+'" accept="image/jpeg,image/png,image/gif,image/webp"'+(multi?' multiple':'')+' onchange="frPreview(this)"><div style="font-size:12px;color:var(--muted)">📁 Tıkla veya sürükle · '+hint+'</div>'+(multi?'':'<img class="pv" id="'+id+'-pv" alt="">')+'</div></div>';
+  }
+  window.frPreview=function(inp){
+    var files=[].slice.call(inp.files||[]);
+    var big=files.filter(function(f){return f.size>MAXMB*1048576;});
+    if(big.length){toast('Dosya çok büyük (en fazla '+MAXMB+' MB): '+big.map(function(f){return f.name;}).join(', '),'err');inp.value='';return;}
+    if(inp.id==='fr-gallery-input'){renderGal();return;}
+    var pv=document.getElementById(inp.id+'-pv'),box=document.getElementById(inp.id+'-box');
+    if(files[0]&&pv){pv.src=URL.createObjectURL(files[0]);box.classList.add('has');}
+  };
+  function renderGal(){
+    var el=document.getElementById('fr-gal-list');if(!el)return;
+    var cur=window._frGallery||[];
+    var inp=document.getElementById('fr-gallery-input');var nf=[].slice.call((inp&&inp.files)||[]);
+    el.innerHTML=cur.map(function(u,i){return '<div><img src="'+esc(u)+'" alt=""><button type="button" title="Kaldır" onclick="frGalDel('+i+')">×</button></div>';}).join('')
+      +nf.map(function(f){return '<div class="new" title="Kaydedince yüklenecek"><img src="'+URL.createObjectURL(f)+'" alt=""></div>';}).join('');
+  }
+  window.frGalDel=function(i){(window._frGallery||[]).splice(i,1);renderGal();};
+  function setPv(id,url){var pv=document.getElementById(id+'-pv'),box=document.getElementById(id+'-box');if(!pv)return;if(url){pv.src=url;box.classList.add('has');}else{pv.removeAttribute('src');box.classList.remove('has');}}
+
+  function ensureAdminFields(){
+    var main=document.getElementById('admin-main');if(!main)return;
+    if(document.getElementById('fr-x'))return;
+    var anchor=document.getElementById('fr-featured');anchor=anchor&&anchor.closest('label');
+    if(!anchor){var sb=document.getElementById('fr-save-btn');anchor=sb;}
+    if(!anchor)return;
+    var cardInp=document.getElementById('fr-img-input');
+    if(cardInp){cardInp.setAttribute('accept','image/jpeg,image/png,image/gif,image/webp');var grp=cardInp.closest('.form-grp');var lb=grp&&grp.querySelector('label');if(lb&&lb.textContent.indexOf('kart')<0)lb.textContent='Kart görseli (liste kartında görünür · JPG/PNG/GIF)';}
+    var w=document.createElement('div');w.className='fr-x';w.id='fr-x';
+    w.innerHTML='<h4>🎨 Detay sayfası — marka vitrini</h4><p>Fırsata tıklanınca açılan sayfada görünür. Görseller JPG, PNG, WEBP veya <b>hareketli GIF</b> olabilir (en fazla '+MAXMB+' MB).</p>'
+      +'<div class="fr-x-grid">'
+      +'<div class="full">'+upBox('fr-banner-input','Büyük banner','önerilen 2100×900 (21:9) · GIF desteklenir')+'<input type="text" id="fr-banner-url" placeholder="veya banner URL..." style="margin-top:6px" oninput="(function(v){var p=document.getElementById(\'fr-banner-input-pv\'),b=document.getElementById(\'fr-banner-input-box\');if(v){p.src=v;b.classList.add(\'has\');}else b.classList.remove(\'has\');})(this.value.trim())">'
+        +'<label style="display:flex;align-items:center;gap:6px;font-weight:500;margin-top:8px;cursor:pointer"><input type="checkbox" id="fr-banner-cover" style="width:16px;height:16px"> Banner’ı alanı dolduracak şekilde kırp (işaretsizse görsel kırpılmadan gösterilir)</label></div>'
+      +'<div>'+upBox('fr-logo-input','Marka logosu','kare, şeffaf PNG ideal')+'<input type="text" id="fr-logo-url" placeholder="veya logo URL..." style="margin-top:6px"></div>'
+      +'<div><label>Buton yazısı</label><input type="text" id="fr-cta" placeholder="Örn: Hemen alışverişe başla"><small class="h">Boşsa: “Marka sitesine git”</small>'
+        +'<label style="margin-top:10px">Marka web sitesi</label><input type="text" id="fr-website" placeholder="https://marka.com">'
+        +'<label style="margin-top:10px">Instagram</label><input type="text" id="fr-instagram" placeholder="@marka"></div>'
+      +'<div class="full"><label>Marka hakkında</label><textarea id="fr-hakkinda" rows="3" placeholder="Marka kendini anlatsın: hikâyesi, ürünleri, koşuculara neden uygun..."></textarea><small class="h">Paragraf için boş satır bırakın · **kalın** yazılabilir. Fırsat açıklaması üstteki “Açıklama” alanından gelir.</small></div>'
+      +'<div class="full">'+upBox('fr-gallery-input','Ürün galerisi','birden fazla görsel seçebilirsiniz',true)+'<div class="fr-gal-list" id="fr-gal-list"></div></div>'
+      +'<div><label>Nasıl kullanılır? (her satır bir adım)</label><textarea id="fr-nasil" rows="4" placeholder="Kodu kopyala\nSiteye git\nSepette kodu uygula"></textarea><small class="h">Boşsa otomatik adımlar gösterilir.</small></div>'
+      +'<div><label>Kampanya koşulları (her satır bir madde)</label><textarea id="fr-kosullar" rows="4" placeholder="Minimum sepet tutarı 500 TL\nİndirimli ürünlerde geçerli değildir"></textarea><small class="h">Bitiş tarihi otomatik eklenir.</small></div>'
+      +'</div>';
+    anchor.parentNode.insertBefore(w,anchor);
+    window._frGallery=window._frGallery||[];
+  }
+  var _origRender=window.renderFirsatAdminV2;
+  window.renderFirsatAdminV2=async function(){
+    await _origRender.apply(this,arguments);
+    ensureAdminFields();
+    // listeye önizleme butonu
+    document.querySelectorAll('#fr-admin-v2 .abl-row').forEach(function(row){
+      if(row.querySelector('.fr-prev'))return;
+      var ed=row.querySelector('button[onclick^="editFirsatV2"]');if(!ed)return;
+      var id=(ed.getAttribute('onclick').match(/'([^']+)'/)||[])[1];var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(!f)return;
+      var a=document.createElement('a');a.className='btn btn-ghost btn-sm fr-prev';a.href='/firsat/'+encodeURIComponent(f.slug||f.id);a.target='_blank';a.rel='noopener';a.title='Detay sayfasını yeni sekmede aç';a.textContent='👁';
+      ed.parentNode.insertBefore(a,ed);
+    });
+  };
+  var XF=['fr-banner-url','fr-logo-url','fr-cta','fr-website','fr-instagram','fr-hakkinda','fr-nasil','fr-kosullar','fr-img-url'];
+  var _origReset=window.resetFirsatForm;
+  window.resetFirsatForm=function(){
+    _origReset&&_origReset.apply(this,arguments);
+    XF.forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});
+    ['fr-banner-input','fr-logo-input','fr-gallery-input'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});
+    var c=document.getElementById('fr-banner-cover');if(c)c.checked=false;
+    setPv('fr-banner-input','');setPv('fr-logo-input','');
+    window._frGallery=[];renderGal();
+  };
+  var _origEdit=window.editFirsatV2;
+  window.editFirsatV2=function(id){
+    ensureAdminFields();
+    _origEdit&&_origEdit.apply(this,arguments);
+    var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(!f)return;
+    var set=function(i,v){var e=document.getElementById(i);if(e)e.value=v||'';};
+    set('fr-banner-url',f.bannerUrl);set('fr-logo-url',f.logoUrl);set('fr-cta',f.ctaText);set('fr-website',f.website);set('fr-instagram',f.instagram);
+    set('fr-hakkinda',f.markaHakkinda);set('fr-nasil',f.nasilKullanilir);set('fr-kosullar',f.kosullar);set('fr-img-url',f.imgUrl);
+    var c=document.getElementById('fr-banner-cover');if(c)c.checked=f.bannerFit==='cover';
+    setPv('fr-banner-input',f.bannerUrl);setPv('fr-logo-input',f.logoUrl);
+    ['fr-banner-input','fr-logo-input','fr-gallery-input'].forEach(function(i){var e=document.getElementById(i);if(e)e.value='';});
+    window._frGallery=Array.isArray(f.gallery)?f.gallery.slice():[];renderGal();
+    var cp=document.getElementById('fr-img-input-preview');if(cp&&f.imgUrl){cp.src=f.imgUrl;cp.style.display='block';}
+  };
+  async function up(file,prefix){
+    var fb=window._fb;
+    var ref=fb.ref(fb.storage,'firsatlar/'+prefix+Date.now()+'_'+Math.random().toString(36).slice(2,6)+'_'+file.name.replace(/[^\w.-]/g,'_'));
+    await fb.uploadBytes(ref,file,{contentType:file.type||'image/jpeg',cacheControl:'public,max-age=31536000'});
+    return await fb.getDownloadURL(ref);
+  }
+  window.saveFirsatV2=async function(){
+    var g=function(i){return ((document.getElementById(i)||{}).value||'').trim();};
+    var baslik=g('fr-baslik');if(!baslik){toast('Başlık gerekli','err');return;}
+    var fb=window._fb;var btn=document.getElementById('fr-save-btn');if(btn){btn.disabled=true;btn.textContent='Kaydediliyor…';}
+    try{
+      var data={baslik:baslik,marka:g('fr-marka'),kategori:g('fr-kategori')||'Genel',indirim:g('fr-indirim'),aciklama:g('fr-aciklama'),kod:g('fr-kod').toUpperCase(),bitis:g('fr-bitis'),link:g('fr-link'),featured:!!(document.getElementById('fr-featured')||{}).checked};
+      if(document.getElementById('fr-x')){
+        data.ctaText=g('fr-cta');data.website=g('fr-website');data.instagram=g('fr-instagram');data.markaHakkinda=g('fr-hakkinda');data.nasilKullanilir=g('fr-nasil');data.kosullar=g('fr-kosullar');
+        data.bannerFit=(document.getElementById('fr-banner-cover')||{}).checked?'cover':'contain';
+        data.bannerUrl=g('fr-banner-url');data.logoUrl=g('fr-logo-url');
+        var file=function(i){var e=document.getElementById(i);return e&&e.files&&e.files[0];};
+        if(file('fr-banner-input'))data.bannerUrl=await up(file('fr-banner-input'),'banner_');
+        if(file('fr-logo-input'))data.logoUrl=await up(file('fr-logo-input'),'logo_');
+        var gal=(window._frGallery||[]).slice();
+        var gi=document.getElementById('fr-gallery-input');var gf=[].slice.call((gi&&gi.files)||[]);
+        for(var k=0;k<gf.length;k++){if(btn)btn.textContent='Galeri yükleniyor '+(k+1)+'/'+gf.length+'…';gal.push(await up(gf[k],'gal_'));}
+        data.gallery=gal.slice(0,12);
+      }
+      var ci=document.getElementById('fr-img-input');var cf=ci&&ci.files&&ci.files[0];
+      if(cf){if(cf.size>MAXMB*1048576)throw new Error('Kart görseli '+MAXMB+' MB’dan büyük');data.imgUrl=await up(cf,'');}
+      else if(g('fr-img-url'))data.imgUrl=g('fr-img-url');
+      if(!data.imgUrl&&!window._frEditId&&data.bannerUrl)data.imgUrl=data.bannerUrl;
+      if(window._frEditId){
+        var cur=(window.FIRSATLAR||[]).find(function(x){return x.id===window._frEditId;});
+        if(!data.imgUrl&&cur&&!cur.imgUrl&&data.bannerUrl)data.imgUrl=data.bannerUrl;
+        await fb.updateDoc(fb.doc(fb.db,'firsatlar',window._frEditId),data);toast('Fırsat güncellendi ✓','ok');
+      }else{
+        if(window.makeSlug)data.slug=window.makeSlug(baslik);data.imgUrl=data.imgUrl||'';data.aktif=true;data.views=0;data.clicks=0;data.createdAt=fb.serverTimestamp();
+        await fb.addDoc(fb.collection(fb.db,'firsatlar'),data);toast('Fırsat eklendi ✓','ok');
+      }
+      window.resetFirsatForm();
+      if(window.loadFirsatlarFromDB)await window.loadFirsatlarFromDB();
+      window.renderFirsatAdminV2();
+    }catch(e){toast('Hata: '+(e.code||e.message),'err');}
+    if(btn){btn.disabled=false;btn.textContent=window._frEditId?'Değişiklikleri Kaydet':'Fırsat Ekle';}
+  };
+})();
 </script>
 </body>
 </html>

@@ -15663,6 +15663,7 @@ window.syncClubCount=function(n){
       +'<div class="fd-grid"><div class="fd-main">'+main+'</div><aside class="fd-aside">'+offer+'</aside></div>'
       +more+bar+'</div>';
     if(end&&!expired)tick(end);else clearInterval(window._fdTimer);
+    try{var bn=document.getElementById('bottom-nav'),fbar=cont.querySelector('.fd-bar');if(bn&&fbar&&getComputedStyle(fbar).display!=='none'){var bh=getComputedStyle(bn).display!=='none'?bn.offsetHeight:0;fbar.style.bottom=bh+'px';if(bh)fbar.style.paddingBottom='10px';cont.querySelector('.fd').style.paddingBottom=(84+bh)+'px';}}catch(e){}
     nav('firsat-detail');
     document.title=(f.baslik||'Fırsat')+(f.marka?' – '+f.marka:'')+' | RunClubTürkiye Fırsatlar';
     try{var md=document.querySelector('meta[name="description"]');if(md)md.setAttribute('content',((f.marka?f.marka+': ':'')+(f.baslik||'')+(f.indirim?' — '+f.indirim+' indirim':'')+'. RunClubTürkiye üyelerine özel fırsat.').slice(0,160));}catch(e){}

@@ -9993,8 +9993,7 @@ function renderAdminSection(sec){
         <button class="btn btn-or" id="ab-save-btn" onclick="saveBlogFromAdmin()">Yayınla</button>
       <input type="hidden" id="ab-edit-id"/><input type="hidden" id="ab-form-title-val"/>
       </div>
-      <table><thead><tr><th>Yazı</th><th>Tarih</th><th>❤️</th><th>İşlem</th></tr></thead>
-      <tbody>${BLOG_POSTS.map(p=>`<tr><td>${p.title}</td><td>${p.publishedAt||'—'}</td><td>${p.likes||0}</td><td class="action-btns"><button class="btn btn-ghost btn-sm" onclick="editBlog('${p.id}')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteBlogItem('${p.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`,
+      <div id="admin-blog-lists"></div>`,
     firsatlar:`<h2 style="margin-bottom:18px">🎁 Fırsatlar</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Fırsat Ekle</h3>
@@ -10104,7 +10103,7 @@ function renderAdminSection(sec){
   if(sec==='chat')setTimeout(()=>loadChatMessages&&loadChatMessages('admin'),100);
   if(sec==='groupadmins')setTimeout(()=>loadGroupAdmins&&loadGroupAdmins(),100);
   if(sec==='newsletter')setTimeout(()=>loadNewsletterList&&loadNewsletterList(),100);
-  if(sec==='blog')setTimeout(initQuillEditor,200);
+  if(sec==='blog'){setTimeout(initQuillEditor,200);setTimeout(()=>window.renderAdminBlogLists&&window.renderAdminBlogLists(),30);}
   if(sec==='races')setTimeout(initQuillRaceEditor,200);
   if(sec==='banners')setTimeout(()=>{
     renderBannerSlots();
@@ -14582,7 +14581,56 @@ body.is-guest div.guest-only{display:flex!important}
   .disc-tabs button{flex:1}
 }
 </style>
+
+<style id="admin-blog-v2">
+.abl-grid{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:16px;align-items:start}
+.abl-feat{position:sticky;top:80px}
+.abl-row{display:flex;align-items:center;gap:10px;padding:9px 10px;border-bottom:1px solid var(--border)}
+.abl-row:last-child{border-bottom:none}
+.abl-row .ti{flex:1;min-width:0}
+.abl-row .ti b{display:block;font-size:13px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.abl-row .ti span{font-size:11px;color:var(--muted)}
+.abl-row img,.abl-row .ph{width:44px;height:32px;border-radius:6px;object-fit:cover;flex-shrink:0;background:var(--bg2,#f1ece6)}
+.abl-act{display:flex;gap:4px;flex-shrink:0}
+.abl-act .btn{font-size:11px;padding:5px 8px}
+.abl-star{border:1.5px solid var(--border);background:var(--card);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--muted)}
+.abl-star.on{background:#fff4e5;border-color:#f59e0b;color:#b45309}
+@media(max-width:900px){.abl-grid{grid-template-columns:1fr}.abl-feat{position:static;order:-1}}
+</style>
 <script id="fix-2026-11-13">
+// ═══ ADMIN BLOG: ÖNE ÇIKANLAR PANELİ ═══
+window.renderAdminBlogLists=function(){
+  var el=document.getElementById('admin-blog-lists');if(!el)return;
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  var q=(window._ablQ||'').toLocaleLowerCase('tr');
+  var ts=function(p){var t=p.publishedAt||(p.createdAt&&p.createdAt.seconds?new Date(p.createdAt.seconds*1000).toISOString():'');return String(t);};
+  var posts=(window.BLOG_POSTS||[]).slice().sort(function(a,b){return ts(b)<ts(a)?-1:1;});
+  var feat=posts.filter(function(p){return p.featured;});
+  var list=q?posts.filter(function(p){return (p.title||'').toLocaleLowerCase('tr').indexOf(q)>-1;}):posts;
+  var date=function(p){var t=ts(p);var m=/^(\d{4})-(\d{2})-(\d{2})/.exec(t);return m?(+m[3])+'.'+m[2]+'.'+m[1]:'—';};
+  var thumb=function(p){return p.coverUrl?'<img src="'+esc(p.coverUrl)+'" alt="" loading="lazy">':'<div class="ph"></div>';};
+  var row=function(p,inFeat){return '<div class="abl-row">'+thumb(p)+'<div class="ti"><b title="'+esc(p.title)+'">'+esc(p.title)+'</b><span>'+date(p)+' · ❤ '+(p.likes||0)+(p.kategori?' · '+esc(p.kategori):'')+'</span></div><div class="abl-act">'
+    +(inFeat?'<button class="abl-star on" onclick="toggleBlogFeatured(\''+p.id+'\',false)" title="Öne çıkanlardan kaldır">✕ Kaldır</button>'
+            :'<button class="abl-star'+(p.featured?' on':'')+'" onclick="toggleBlogFeatured(\''+p.id+'\','+(!p.featured)+')" title="'+(p.featured?'Öne çıkanlardan kaldır':'Öne çıkanlara ekle')+'">'+(p.featured?'★ Öne çıkan':'☆ Öne çıkar')+'</button>')
+    +'<button class="btn btn-ghost btn-sm" onclick="editBlog(\''+p.id+'\')" title="Düzenle">✏️</button><button class="btn btn-red btn-sm" onclick="deleteBlogItem(\''+p.id+'\')" title="Sil">🗑</button></div></div>';};
+  el.innerHTML='<div class="abl-grid">'
+    +'<div class="card" style="padding:0;overflow:hidden"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 14px;border-bottom:1px solid var(--border);flex-wrap:wrap"><h3 style="font-size:15px;margin:0">📚 Tüm yazılar <span style="font-weight:400;color:var(--muted);font-size:12px">('+posts.length+')</span></h3><input id="abl-search" placeholder="🔍 Yazı ara…" value="'+esc(window._ablQ||'')+'" oninput="window._ablQ=this.value;renderAdminBlogLists();var e=document.getElementById(\'abl-search\');e.focus();e.setSelectionRange(e.value.length,e.value.length)" style="padding:7px 10px;border:1px solid var(--border);border-radius:8px;font-size:12px;min-width:180px;background:var(--card);color:var(--text)"></div>'
+      +(list.length?list.map(function(p){return row(p,false);}).join(''):'<p style="padding:20px;color:var(--muted);font-size:13px">Yazı bulunamadı.</p>')+'</div>'
+    +'<div class="card abl-feat" style="padding:0;overflow:hidden;border:2px solid #f59e0b"><div style="padding:12px 14px;border-bottom:1px solid var(--border);background:#fff8ec"><h3 style="font-size:15px;margin:0">⭐ Öne çıkanlar <span style="font-weight:400;color:var(--muted);font-size:12px">('+feat.length+')</span></h3><p style="font-size:11px;color:var(--muted);margin:3px 0 0">Blog sayfasının en üstündeki "Öne Çıkanlar" bölümünde görünür.'+(feat.length>4?' <b style="color:#b45309">En fazla 2–4 yazı önerilir.</b>':'')+'</p></div>'
+      +(feat.length?feat.map(function(p){return row(p,true);}).join(''):'<p style="padding:18px 14px;color:var(--muted);font-size:13px">Henüz öne çıkan yazı yok. Soldaki listeden <b>☆ Öne çıkar</b> ile ekle.</p>')+'</div>'
+    +'</div>';
+};
+window.toggleBlogFeatured=async function(id,val){
+  var fb=window._fb;var p=(window.BLOG_POSTS||[]).find(function(x){return x.id===id;});if(!fb||!p)return;
+  try{
+    await fb.updateDoc(fb.doc(fb.db,'blog',id),{featured:!!val});
+    p.featured=!!val;
+    toast(val?'⭐ Öne çıkanlara eklendi':'Öne çıkanlardan kaldırıldı','ok');
+    window.renderAdminBlogLists();
+    if(window.renderBlogList)try{renderBlogList();}catch(e){}
+  }catch(e){toast('Hata: '+(e.code||e.message),'err');}
+};
+
 // ═══ YARIŞ TARTIŞMA MERKEZİ v2 ═══
 (function(){
   var MON=['OCA','ŞUB','MAR','NİS','MAY','HAZ','TEM','AĞU','EYL','EKİ','KAS','ARA'];

@@ -15854,6 +15854,31 @@ footer.f26{background:#0E0C0B;color:rgba(255,255,255,.62);padding:64px 0 28px;ma
   .page-banner{border-radius:0 0 24px 24px}
 }
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+/* düzeltmeler v2 */
+.sec-head h2{padding-left:0!important}
+.sec-head h2::before{display:none!important}
+.sp-card::before,.sp-card::after{display:none!important}
+#topnav .logo svg{width:168px}
+.h26 h1{font-size:clamp(42px,6vw,80px)}
+.h26-l,.h26-r{min-width:0}
+[style*="linear-gradient(135deg,#E8622A 0%,#B5471D 100%)"]{background:radial-gradient(circle at 80% 0%,rgba(232,98,42,.55),transparent 60%),linear-gradient(135deg,#1F1A17,#0E0C0B)!important}
+.fr26-cta{display:flex;flex-direction:column;justify-content:center;gap:10px;border:1.5px dashed var(--border2)!important;background:transparent!important;box-shadow:none!important;padding:26px;border-radius:var(--r);min-height:260px}
+.fr26-cta b{font-family:var(--font-head);font-size:22px;letter-spacing:-.03em;line-height:1.15}
+.fr26-cta p{margin:0;color:var(--muted);font-size:14.5px}
+.fr26-cta .btn{align-self:flex-start;margin-top:6px}
+@media(max-width:1100px){.h26-in{grid-template-columns:minmax(0,1fr)}}
+@media(max-width:768px){
+  .ig26-box,.nl26-in{grid-template-columns:minmax(0,1fr)}
+  .sec-head{flex-direction:row!important;align-items:flex-end!important;flex-wrap:nowrap!important}
+  .sec-head h2{flex:1;min-width:0;font-size:28px}
+  .sec-head .sec-sub{font-size:14px}
+  .sec-head>button{flex-shrink:0;font-size:13px!important}
+  .h26-chips{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin-right:-18px;padding-right:18px}
+  .h26-chips::-webkit-scrollbar{display:none}
+  .h26-chips button,.h26-chips span{flex-shrink:0}
+  #topnav .logo svg{width:136px}
+}
 </style>
 <script id="design-2026-js">
 // ═══ TASARIM 2026: hero, arama, menü, alt menü, SSS ═══
@@ -15971,6 +15996,11 @@ footer.f26{background:#0E0C0B;color:rgba(255,255,255,.62);padding:64px 0 28px;ma
     if(!qs.length)return;
     var s=document.createElement('script');s.type='application/ld+json';s.id='faq-ld';s.textContent=JSON.stringify({'@context':'https://schema.org','@type':'FAQPage',mainEntity:qs});document.head.appendChild(s);
   })();
+
+  // Fırsatlar azsa "markalar için" kartı ekle
+  (function(){var el=document.getElementById('home-firsatlar');if(!el||!window.MutationObserver)return;
+    var fix=function(){if(el.querySelector('.fr26-cta'))return;var n=el.children.length;if(n>0&&n<3){var d=document.createElement('div');d.className='card fr26-cta';d.innerHTML='<span class="spx-eye" style="align-self:flex-start">Markalar için</span><b>Markanızın fırsatı burada olabilir.</b><p>Binlerce aktif koşucuya üyelere özel indirimle ulaşın.</p><button class="btn btn-or" onclick="window.goSponsorForm?goSponsorForm():nav(\'firsatlar\')">İş birliği yap →</button>';el.appendChild(d);}};
+    new MutationObserver(function(){setTimeout(fix,0);}).observe(el,{childList:true});fix();})();
 })();
 </script>
 </body>

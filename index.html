@@ -9696,6 +9696,7 @@ function renderAdminSection(sec){
   if(sec==='sponsors')setTimeout(()=>window.renderAdminSponsorsV2&&window.renderAdminSponsorsV2(),60);
   if(sec==='instagram')setTimeout(()=>window.renderAdminIg&&window.renderAdminIg(),60);
   if(sec==='reviews')setTimeout(()=>window.renderAdminReviews&&window.renderAdminReviews(),60);
+  if(sec==='popup')setTimeout(()=>window.renderAdminPopupV2&&window.renderAdminPopupV2(),60);
   if(sec==='blog'){setTimeout(initQuillEditor,200);setTimeout(()=>window.renderAdminBlogLists&&window.renderAdminBlogLists(),30);}
   if(sec==='races')setTimeout(initQuillRaceEditor,200);
   if(sec==='races')setTimeout(()=>window.renderAdminRacesV2&&window.renderAdminRacesV2(),60);
@@ -15860,6 +15861,58 @@ footer.f26{background:#0E0C0B;color:rgba(255,255,255,.62);padding:64px 0 28px;ma
 .ig26-t em.rl svg{width:13px;height:13px}
 @media(hover:none){.ig26-p span{display:none}}
 .cc-svg{width:100%;height:100%;display:block}
+.rcp{position:fixed;z-index:950;pointer-events:none}
+.rcp .rcp-card{pointer-events:auto;background:#fff;color:var(--text);box-shadow:0 30px 80px -24px rgba(18,16,16,.45);position:relative;transition:transform .35s cubic-bezier(.2,.8,.2,1),opacity .3s}
+.rcp-x{position:absolute;top:10px;right:10px;width:32px;height:32px;border-radius:50%;border:0;background:rgba(18,16,16,.06);color:var(--text);font-size:20px;line-height:1;cursor:pointer;z-index:2}
+.rcp-x:hover{background:rgba(18,16,16,.12)}
+.rcp-badge{display:inline-block;background:var(--or-soft);color:var(--or2);font-size:11.5px;font-weight:800;letter-spacing:.04em;padding:4px 10px;border-radius:999px;margin-bottom:8px}
+.rcp h3{font-family:var(--font-head);font-size:22px;line-height:1.15;letter-spacing:-.02em;margin:0 0 6px;padding-right:28px}
+.rcp p{margin:0 0 14px;color:var(--muted);font-size:14.5px;line-height:1.55}
+.rcp-act{display:flex;gap:8px;flex-wrap:wrap}
+.rcp-act .btn{flex:1;justify-content:center}
+/* orta pencere */
+.rcp-modal{inset:0;display:flex;align-items:center;justify-content:center;padding:20px}
+.rcp-bd{position:absolute;inset:0;background:rgba(18,16,16,.45);backdrop-filter:blur(3px);-webkit-backdrop-filter:blur(3px);opacity:0;transition:opacity .3s;pointer-events:auto}
+.rcp-modal .rcp-card{width:100%;max-width:440px;border-radius:24px;overflow:hidden;transform:translateY(20px) scale(.97);opacity:0}
+.rcp-modal.on .rcp-card,.rcp-sheet.on .rcp-card{transform:none;opacity:1}
+.rcp-modal.on .rcp-bd,.rcp-sheet.on .rcp-bd{opacity:1}
+.rcp-img{aspect-ratio:16/9;background:var(--bg3)}
+.rcp-img img{width:100%;height:100%;object-fit:cover;display:block}
+.rcp-img+.rcp-in .rcp-x{display:none}
+.rcp-modal .rcp-img~.rcp-x,.rcp-modal .rcp-x{background:rgba(255,255,255,.9)}
+.rcp-in{padding:20px 22px 22px}
+/* mobil alt kart */
+.rcp-sheet{inset:0;display:flex;align-items:flex-end}
+.rcp-sheet .rcp-card{width:100%;border-radius:24px 24px 0 0;overflow:hidden;transform:translateY(100%);padding-bottom:env(safe-area-inset-bottom)}
+.rcp-sheet .rcp-img{aspect-ratio:21/9}
+/* köşe kartı */
+.rcp-slide{left:20px;bottom:20px;width:360px;max-width:calc(100vw - 24px)}
+.rcp-slide .rcp-card{display:flex;gap:12px;border-radius:20px;padding:14px;border:1px solid var(--border);transform:translateY(30px);opacity:0}
+.rcp-slide.on .rcp-card{transform:none;opacity:1}
+.rcp-slide .rcp-thumb{width:84px;height:84px;border-radius:14px;overflow:hidden;flex-shrink:0;background:var(--bg3)}
+.rcp-slide .rcp-thumb img{width:100%;height:100%;object-fit:cover}
+.rcp-slide .rcp-in{padding:0;min-width:0;flex:1}
+.rcp-slide h3{font-size:16.5px}
+.rcp-slide p{font-size:13px;margin-bottom:10px}
+.rcp-slide .rcp-act .btn{flex:0 0 auto;padding:8px 14px;font-size:13px}
+.rcp-slide .rcp-x{top:6px;right:6px;width:28px;height:28px;font-size:17px}
+/* şerit */
+.rcp-bar{left:0;right:0;top:72px}
+.rcp-bar .rcp-card{background:var(--ink);color:#fff;transform:translateY(-110%);opacity:0;box-shadow:none}
+.rcp-bar.on .rcp-card{transform:none;opacity:1}
+.rcp-bar-in{max-width:1200px;margin:0 auto;padding:10px 56px 10px 24px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px}
+.rcp-bar .rcp-badge{margin:0;background:var(--or);color:#fff}
+.rcp-bar b{font-family:var(--font-head)}
+.rcp-bar-t{color:rgba(255,255,255,.7)}
+.rcp-bar-cta{background:#fff;color:var(--ink);border:0;border-radius:999px;padding:6px 14px;font-weight:700;font-size:13px;cursor:pointer;margin-left:auto}
+.rcp-bar .rcp-x{background:rgba(255,255,255,.12);color:#fff;top:50%;transform:translateY(-50%)}
+@media(max-width:768px){
+  .rcp-bar{top:62px}
+  .rcp-bar-in{padding:9px 48px 9px 14px;font-size:13px;gap:6px 10px}
+  .rcp-bar-t{display:none}
+  .rcp-slide{left:12px;right:12px;width:auto;bottom:calc(84px + env(safe-area-inset-bottom))}
+  .rcp-sheet .rcp-card{padding-bottom:calc(76px + env(safe-area-inset-bottom))}
+}
 .demo-badge{position:absolute;top:10px;left:10px;z-index:6;background:rgba(18,16,16,.78);color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;padding:4px 9px;border-radius:999px;pointer-events:auto;backdrop-filter:blur(6px)}
 [data-demo]{position:relative}
 .ev-card .demo-badge{left:auto;right:10px}
@@ -16270,6 +16323,183 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       det.insertBefore(b,det.firstChild);
     }).observe(det,{childList:true,subtree:true});
   }
+})();
+
+// ═══ KAMPANYA POPUP SİSTEMİ v2 ═══
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var LS={get:function(k){try{return JSON.parse(localStorage.getItem(k)||'null');}catch(e){return null;}},set:function(k,v){try{localStorage.setItem(k,JSON.stringify(v));}catch(e){}}};
+  var SS={get:function(k){try{return sessionStorage.getItem(k);}catch(e){return null;}},set:function(k,v){try{sessionStorage.setItem(k,v);}catch(e){}}};
+  var PAGES={home:'Ana sayfa',races:'Yarış takvimi','race-detail':'Yarış detay',clubs:'Kulüpler','club-detail':'Kulüp detay',events:'Etkinlikler','event-detail':'Etkinlik detay',firsatlar:'Fırsatlar','firsat-detail':'Fırsat detay',blog:'Rehber / blog','blog-detail':'Blog yazısı',discussions:'Tartışmalar',community:'Topluluk',city:'Şehir sayfaları'};
+  var BLOCK=['admin','panel','dashboard','profile','contact','kvkk','gizlilik','kosullar','riza','cerez'];
+  window.RC_POPUPS=[];
+  function curPage(){var p=document.querySelector('.pg.on');return p?p.id.replace('pg-',''):'home';}
+  function isMobile(){return window.matchMedia('(max-width:640px)').matches;}
+  function anyModalOpen(){return !!document.querySelector('.overlay.on, #master-drawer[style*="translateX(0"], .fd-lb');}
+  function today(){return new Date().toISOString().slice(0,10);}
+  function eligible(p,page){
+    if(!p||p.active===false)return false;
+    var t=today();if(p.start&&t<p.start)return false;if(p.end&&t>p.end)return false;
+    var g=!window.CU;if(p.audience==='guests'&&!g)return false;if(p.audience==='members'&&g)return false;
+    if(p.pages&&p.pages.length&&p.pages.indexOf(page)<0)return false;
+    if(BLOCK.indexOf(page)>=0)return false;
+    var st=LS.get('rcpp_'+p.id)||{};
+    if(st.conv)return false;
+    var days=p.freqDays==null?7:+p.freqDays;
+    if(st.closed&&days>=0&&(Date.now()-st.closed)<days*864e5)return false;
+    if(days<0&&st.closed)return false;
+    if(p.maxViews&&(st.views||0)>=+p.maxViews)return false;
+    return true;
+  }
+  function bump(id,field){var fb=window._fb;if(!fb||id==='__preview')return;try{var u={};u[field]=fb.increment(1);fb.updateDoc(fb.doc(fb.db,'popup',id),u).catch(function(){});}catch(e){}}
+  function go(link){
+    if(!link)return;
+    if(/^https?:\/\//i.test(link)&&link.indexOf(location.host)<0){window.open(link,'_blank','noopener');return;}
+    var path=link.replace(/^https?:\/\/[^/]+/i,'');
+    if(path.charAt(0)!=='/')path='/'+path;
+    history.pushState({},'',path);window.dispatchEvent(new PopStateEvent('popstate',{state:null}));window.scrollTo({top:0});
+  }
+  function html(p,kind){
+    var img=p.imgUrl?'<div class="rcp-img"><img src="'+esc(p.imgUrl)+'" alt=""></div>':'';
+    var badge=p.badge?'<span class="rcp-badge">'+esc(p.badge)+'</span>':'';
+    var cta=p.ctaText?'<button class="btn btn-or rcp-cta" data-act="cta">'+esc(p.ctaText)+'</button>':'';
+    var x='<button class="rcp-x" data-act="close" aria-label="Kapat">×</button>';
+    if(kind==='bar')return x+'<div class="rcp-bar-in">'+badge+'<b>'+esc(p.title)+'</b><span class="rcp-bar-t">'+esc(p.body||'')+'</span>'+(p.ctaText?'<button class="rcp-bar-cta" data-act="cta">'+esc(p.ctaText)+' →</button>':'')+'</div>';
+    if(kind==='slide')return x+(p.imgUrl?'<div class="rcp-thumb"><img src="'+esc(p.imgUrl)+'" alt=""></div>':'')+'<div class="rcp-in">'+badge+'<h3>'+esc(p.title)+'</h3>'+(p.body?'<p>'+esc(p.body)+'</p>':'')+'<div class="rcp-act">'+cta+'</div></div>';
+    return x+img+'<div class="rcp-in">'+badge+'<h3>'+esc(p.title)+'</h3>'+(p.body?'<p>'+esc(p.body)+'</p>':'')+'<div class="rcp-act">'+cta+'<button class="btn btn-ghost" data-act="close">'+esc(p.dismissText||'Şimdi değil')+'</button></div></div>';
+  }
+  var shown=null;
+  window.rcShowPopup=function(p,preview){
+    if(shown)rcClose(false);
+    var kind=p.type||'modal';if(kind==='modal'&&isMobile()&&!preview)kind='sheet';
+    var wrap=document.createElement('div');wrap.className='rcp rcp-'+kind;wrap.setAttribute('role',kind==='bar'?'region':'dialog');wrap.setAttribute('aria-label',p.title||'Kampanya');
+    var inner=document.createElement('div');inner.className='rcp-card';inner.innerHTML=html(p,kind==='sheet'?'modal':kind);
+    if(kind==='modal'||kind==='sheet'){var bd=document.createElement('div');bd.className='rcp-bd';bd.setAttribute('data-act','close');wrap.appendChild(bd);}
+    wrap.appendChild(inner);document.body.appendChild(wrap);
+    requestAnimationFrame(function(){wrap.classList.add('on');});
+    shown={p:p,el:wrap,preview:!!preview};
+    wrap.addEventListener('click',function(e){var a=e.target.closest('[data-act]');if(!a)return;if(a.dataset.act==='cta'){if(!preview){bump(p.id,'clicks');var st=LS.get('rcpp_'+p.id)||{};st.conv=Date.now();LS.set('rcpp_'+p.id,st);window.rcTrack&&rcTrack('popup_click',{popup_id:p.id,popup_name:p.name||p.title});}rcClose(false);go(p.ctaLink);}else rcClose(true);});
+    if(!preview){var st=LS.get('rcpp_'+p.id)||{};st.views=(st.views||0)+1;st.last=Date.now();LS.set('rcpp_'+p.id,st);SS.set('rcpp_shown','1');bump(p.id,'views');window.rcTrack&&rcTrack('popup_view',{popup_id:p.id,popup_name:p.name||p.title});}
+    var f=inner.querySelector('.rcp-cta')||inner.querySelector('[data-act=close]');if(f&&kind!=='bar')setTimeout(function(){try{f.focus({preventScroll:true});}catch(e){}},300);
+  };
+  window.rcClose=function(user){
+    if(!shown)return;var s=shown;shown=null;
+    if(user&&!s.preview){var st=LS.get('rcpp_'+s.p.id)||{};st.closed=Date.now();LS.set('rcpp_'+s.p.id,st);bump(s.p.id,'closes');window.rcTrack&&rcTrack('popup_close',{popup_id:s.p.id});}
+    s.el.classList.remove('on');setTimeout(function(){s.el.remove();},300);
+  };
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&shown)rcClose(true);});
+
+  // ── tetikleyiciler ──
+  var armed=null,timer=null,scrollFn=null,exitFn=null,startedAt=Date.now();
+  function disarm(){clearTimeout(timer);if(scrollFn)window.removeEventListener('scroll',scrollFn);if(exitFn)document.removeEventListener('mouseout',exitFn);armed=timer=scrollFn=exitFn=null;}
+  function fire(p){
+    if(shown||SS.get('rcpp_shown'))return disarm();
+    if(anyModalOpen()||document.hidden){timer=setTimeout(function(){fire(p);},4000);return;}
+    var a=document.activeElement;if(a&&/INPUT|TEXTAREA|SELECT/.test(a.tagName)){timer=setTimeout(function(){fire(p);},4000);return;}
+    if(!eligible(p,curPage()))return disarm();
+    disarm();rcShowPopup(p);
+  }
+  function arm(){
+    disarm();if(shown||SS.get('rcpp_shown'))return;
+    var page=curPage();
+    var list=(window.RC_POPUPS||[]).filter(function(p){return eligible(p,page);}).sort(function(a,b){return (b.priority||0)-(a.priority||0);});
+    var p=list[0];if(!p)return;armed=p;
+    var trig=p.trigger||'delay';
+    var minWait=Math.max(0,6000-(Date.now()-startedAt));
+    if(trig==='scroll'){
+      var pct=+p.scrollPct||40;
+      scrollFn=function(){var h=document.documentElement;var sp=(h.scrollTop)/(Math.max(1,h.scrollHeight-h.clientHeight))*100;if(sp>=pct){window.removeEventListener('scroll',scrollFn);timer=setTimeout(function(){fire(p);},minWait);}};
+      window.addEventListener('scroll',scrollFn,{passive:true});
+    }else if(trig==='exit'&&!isMobile()){
+      exitFn=function(e){if(!e.relatedTarget&&e.clientY<=8){fire(p);}};
+      timer=setTimeout(function(){document.addEventListener('mouseout',exitFn);},minWait);
+    }else{
+      timer=setTimeout(function(){fire(p);},Math.max(minWait,(+p.delay||8)*1000));
+    }
+  }
+  window.rcArmPopup=arm;
+  async function load(n){
+    var fb=window._fb;if(!fb||!fb.getDocs){if((n||0)<40)setTimeout(function(){load((n||0)+1);},300);return;}
+    try{var sn=await fb.getDocs(fb.collection(fb.db,'popup'));var a=[];sn.forEach(function(d){if(d.id==='active')return;var x=d.data();delete x.id;a.push(Object.assign({id:d.id},x));});window.RC_POPUPS=a;}catch(e){}
+    arm();
+  }
+  // eski sistemi kapat
+  try{window.loadPopup=function(){};}catch(e){}
+  var _nav=window.nav;
+  if(_nav&&!_nav._pp){window.nav=function(){var r=_nav.apply(this,arguments);if(shown&&shown.p&&shown.p.type!=='bar'&&!shown.preview)rcClose(false);setTimeout(arm,400);return r;};for(var k in _nav)window.nav[k]=_nav[k];window.nav._pp=1;}
+  window.addEventListener('popstate',function(){setTimeout(arm,500);});
+  setTimeout(function(){load(0);},2500);
+
+  // ── ADMIN ──
+  var PRESETS={
+    firsat:{name:'Fırsat duyurusu',type:'slide',badge:'Üyelere özel',title:'Koşu ekipmanında %20 indirim',body:'RunClubTürkiye üyelerine özel indirim kodu Fırsatlar sayfasında.',ctaText:'Fırsatı gör',ctaLink:'/firsatlar',trigger:'scroll',scrollPct:40,pages:['home','blog','blog-detail','races'],audience:'all',freqDays:7},
+    kampanya:{name:'Kampanya',type:'modal',badge:'Sınırlı süre',title:'Kampanya başlığı',body:'Kısa ve net bir cümleyle kampanyayı anlat.',ctaText:'Hemen incele',ctaLink:'/firsatlar',trigger:'delay',delay:10,pages:['home'],audience:'all',freqDays:3},
+    duyuru:{name:'Özel haber',type:'bar',badge:'Yeni',title:'360° Yarış Değerlendirmesi yayında',body:'Latmos Ultra’yı organizasyon, parkur ve atmosfer açısından puanladık.',ctaText:'Raporu oku',ctaLink:'/haberler',trigger:'delay',delay:3,pages:[],audience:'all',freqDays:2},
+    uyelik:{name:'Üyelik daveti',type:'slide',badge:'Ücretsiz',title:'Kulübünü bul, yarışları kaçırma',body:'Ücretsiz üye ol: yarış hatırlatmaları, kulüp etkinlikleri ve üyelere özel fırsatlar.',ctaText:'Ücretsiz üye ol',ctaLink:'#register',trigger:'scroll',scrollPct:50,pages:['home','races','blog-detail'],audience:'guests',freqDays:14},
+    yonlendir:{name:'Sayfa içi yönlendirme',type:'slide',badge:'',title:'Bu hafta sonu hangi yarış var?',body:'Şehrine göre filtrele, kayıt tarihlerini kaçırma.',ctaText:'Yarış takvimine git',ctaLink:'/yaris-takvimi',trigger:'scroll',scrollPct:60,pages:['blog-detail'],audience:'all',freqDays:7}
+  };
+  var _go=go;go=function(l){if(l==='#register'){window.openAuth&&openAuth('register');return;}_go(l);};
+  window._ppEdit=null;
+  function status(p){var t=today();if(p.active===false)return['Pasif','#9ca3af'];if(p.start&&t<p.start)return['Planlı','#3b82f6'];if(p.end&&t>p.end)return['Bitti','#6b7280'];return['Yayında','#16a34a'];}
+  window.renderAdminPopupV2=async function(){
+    var main=document.getElementById('admin-main');if(!main)return;var fb=window._fb;
+    var L=[];try{var sn=await fb.getDocs(fb.collection(fb.db,'popup'));sn.forEach(function(d){if(d.id==='active')return;var x=d.data();delete x.id;L.push(Object.assign({id:d.id},x));});}catch(e){}
+    L.sort(function(a,b){return ((b.updatedAt&&b.updatedAt.seconds)||0)-((a.updatedAt&&a.updatedAt.seconds)||0);});window._ppList=L;
+    main.innerHTML='<h2 style="margin-bottom:6px">💬 Popup ve kampanyalar</h2><p style="color:var(--muted);font-size:13px;margin:0 0 16px">Ziyaretçiyi rahatsız etmeyen kurallar: oturum başına en fazla 1 popup, sayfaya girer girmez değil (en az 6 sn sonra), yazı yazarken veya başka pencere açıkken çıkmaz, kapatılınca belirlediğin gün kadar tekrar gösterilmez, butona tıklayan bir daha görmez. Mobilde ortadaki pencere alttan açılan küçük karta dönüşür. Admin, profil ve yasal sayfalarda gösterilmez.</p>'
+      +'<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px"><div style="padding:12px 14px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap"><h3 style="margin:0;font-size:15px">Kampanyalar ('+L.length+')</h3><button class="btn btn-or btn-sm" onclick="ppNew()">＋ Yeni kampanya</button></div>'
+      +(L.length?L.map(function(p){var s=status(p),v=p.views||0,c=p.clicks||0;return '<div class="abl-row"><div class="ph" style="display:flex;align-items:center;justify-content:center;font-size:20px;background:var(--bg3)">'+({modal:'🪟',slide:'💬',bar:'📢'}[p.type||'modal'])+'</div><div class="ti"><b>'+esc(p.name||p.title)+' <span style="font-size:11px;font-weight:700;color:#fff;background:'+s[1]+';padding:2px 8px;border-radius:999px;margin-left:4px">'+s[0]+'</span></b><span>'+esc(p.title)+' · '+({modal:'Orta pencere',slide:'Köşe kartı',bar:'Şerit'}[p.type||'modal'])+' · 👁 '+v+' · 🖱 '+c+(v?' · %'+(c/v*100).toFixed(1)+' tıklama':'')+(p.start||p.end?' · 📅 '+esc(p.start||'…')+' → '+esc(p.end||'…'):'')+'</span></div><div class="abl-act"><button class="btn btn-ghost btn-sm" onclick="ppPreview(\''+p.id+'\')">👁</button><button class="btn btn-ghost btn-sm" onclick="ppEdit(\''+p.id+'\')">✏️</button><button class="btn btn-sm '+(p.active===false?'btn-ghost':'btn-or')+'" onclick="ppToggle(\''+p.id+'\','+(p.active===false)+')">'+(p.active===false?'⏸':'✅')+'</button><button class="btn btn-red btn-sm" onclick="ppDel(\''+p.id+'\')">🗑</button></div></div>';}).join(''):'<p style="padding:16px;color:var(--muted);font-size:13px">Henüz kampanya yok. Hazır şablonlardan biriyle başla.</p>')+'</div>'
+      +'<div class="card" id="pp-form" style="padding:20px;display:none"></div>';
+  };
+  function field(id,label,val,ph,extra){return '<div><label>'+label+'</label><input type="text" id="'+id+'" value="'+esc(val||'')+'" placeholder="'+esc(ph||'')+'" '+(extra||'')+'></div>';}
+  window.ppNew=function(preset){window._ppEdit=null;openForm(Object.assign({active:true,priority:0},PRESETS[preset||'firsat']));};
+  window.ppEdit=function(id){var p=(window._ppList||[]).find(function(x){return x.id===id;});if(!p)return;window._ppEdit=id;openForm(p);};
+  function openForm(p){
+    var f=document.getElementById('pp-form');if(!f)return;f.style.display='block';
+    var pg=p.pages||[];
+    f.innerHTML='<h3 style="margin:0 0 6px;font-size:15px">'+(window._ppEdit?'Kampanyayı düzenle':'Yeni kampanya')+'</h3>'
+      +(window._ppEdit?'':'<div style="display:flex;gap:6px;flex-wrap:wrap;margin:6px 0 14px"><span style="font-size:12px;color:var(--muted);align-self:center">Hazır şablon:</span>'+Object.keys(PRESETS).map(function(k){return '<button class="btn btn-ghost btn-sm" onclick="ppNew(\''+k+'\')">'+PRESETS[k].name+'</button>';}).join('')+'</div>')
+      +'<div class="spa-form">'
+      +field('pp-name','İç ad (sadece admin görür)',p.name,'Kasım fırsatı')
+      +'<div><label>Görünüm</label><select id="pp-type"><option value="slide">💬 Köşe kartı (en az rahatsız eden)</option><option value="bar">📢 Üst şerit (duyuru)</option><option value="modal">🪟 Orta pencere (önemli kampanya)</option></select></div>'
+      +field('pp-badge','Etiket',p.badge,'Üyelere özel / Yeni / %20')
+      +field('pp-title','Başlık *',p.title,'',' maxlength="70"')
+      +'<div class="full"><label>Metin</label><textarea id="pp-body" rows="2" maxlength="180" placeholder="En fazla 1-2 kısa cümle">'+esc(p.body||'')+'</textarea></div>'
+      +field('pp-cta','Buton yazısı',p.ctaText,'Fırsatı gör')
+      +'<div><label>Buton linki</label><input type="text" id="pp-link" value="'+esc(p.ctaLink||'')+'" placeholder="/firsatlar · /yaris-takvimi · https://…" list="pp-links"><datalist id="pp-links"><option value="/firsatlar"><option value="/yaris-takvimi"><option value="/kulupler"><option value="/etkinlikler"><option value="/haberler"><option value="/tartismalar"><option value="#register"></datalist><small class="h" style="font-size:11px;color:var(--muted)">Site içi linkler aynı sekmede açılır. #register = üye ol penceresi.</small></div>'
+      +'<div><label>Görsel (orta pencere/köşe kartı)</label><input type="file" id="pp-file" accept="image/jpeg,image/png,image/webp,image/gif"><input type="text" id="pp-img" value="'+esc(p.imgUrl||'')+'" placeholder="veya görsel URL" style="margin-top:6px"></div>'
+      +'<div><label>Ne zaman gösterilsin?</label><select id="pp-trig"><option value="scroll">Sayfanın bir kısmı okununca (önerilen)</option><option value="delay">Belirli süre sonra</option><option value="exit">Sayfadan çıkmak üzereyken (masaüstü)</option></select><div style="display:flex;gap:8px;margin-top:6px"><input type="text" id="pp-scroll" value="'+esc(p.scrollPct||40)+'" style="width:90px" title="Kaydırma yüzdesi"><span style="font-size:12px;color:var(--muted);align-self:center">% kaydırma ·</span><input type="text" id="pp-delay" value="'+esc(p.delay||8)+'" style="width:70px" title="Saniye"><span style="font-size:12px;color:var(--muted);align-self:center">sn</span></div></div>'
+      +'<div><label>Kime?</label><select id="pp-aud"><option value="all">Herkese</option><option value="guests">Sadece üye olmayanlara</option><option value="members">Sadece üyelere</option></select></div>'
+      +'<div><label>Kapatınca tekrar gösterme süresi</label><select id="pp-freq"><option value="1">1 gün</option><option value="3">3 gün</option><option value="7">7 gün</option><option value="14">14 gün</option><option value="30">30 gün</option><option value="-1">Bir daha gösterme</option></select></div>'
+      +'<div><label>Başlangıç / bitiş</label><div style="display:flex;gap:6px"><input type="date" id="pp-start" value="'+esc(p.start||'')+'"><input type="date" id="pp-end" value="'+esc(p.end||'')+'"></div></div>'
+      +'<div><label>Öncelik (aynı anda birden fazla uygunsa)</label><input type="text" id="pp-pri" value="'+esc(p.priority||0)+'" inputmode="numeric"></div>'
+      +'<div class="full"><label>Hangi sayfalarda? (hiçbiri seçilmezse tüm sayfalarda)</label><div style="display:flex;flex-wrap:wrap;gap:8px 14px;font-size:13px">'+Object.keys(PAGES).map(function(k){return '<label style="display:flex;gap:6px;align-items:center;font-weight:500;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" class="pp-pg" value="'+k+'"'+(pg.indexOf(k)>=0?' checked':'')+' style="width:15px;height:15px">'+PAGES[k]+'</label>';}).join('')+'</div></div>'
+      +'<label class="full" style="display:flex;gap:8px;align-items:center;font-weight:500;cursor:pointer;text-transform:none;letter-spacing:0"><input type="checkbox" id="pp-active" '+(p.active===false?'':'checked')+' style="width:16px;height:16px"> Yayında</label>'
+      +'</div><div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap"><button class="btn btn-or" id="pp-save" onclick="ppSave()">💾 Kaydet</button><button class="btn btn-ghost" onclick="ppPreviewForm()">👁 Önizle</button><button class="btn btn-ghost" onclick="document.getElementById(\'pp-form\').style.display=\'none\'">Vazgeç</button></div>';
+    var sv=function(id,v){var e=document.getElementById(id);if(e&&v!=null)e.value=v;};
+    sv('pp-type',p.type||'slide');sv('pp-trig',p.trigger||'scroll');sv('pp-aud',p.audience||'all');sv('pp-freq',String(p.freqDays==null?7:p.freqDays));
+    f.scrollIntoView({behavior:'smooth',block:'start'});
+  }
+  function readForm(){
+    var g=function(i){return ((document.getElementById(i)||{}).value||'').trim();};
+    return {name:g('pp-name'),type:g('pp-type'),badge:g('pp-badge'),title:g('pp-title'),body:g('pp-body'),ctaText:g('pp-cta'),ctaLink:g('pp-link'),imgUrl:g('pp-img'),trigger:g('pp-trig'),scrollPct:parseInt(g('pp-scroll'),10)||40,delay:parseInt(g('pp-delay'),10)||8,audience:g('pp-aud'),freqDays:parseInt(g('pp-freq'),10),start:g('pp-start'),end:g('pp-end'),priority:parseInt(g('pp-pri'),10)||0,pages:[].slice.call(document.querySelectorAll('.pp-pg:checked')).map(function(c){return c.value;}),active:!!(document.getElementById('pp-active')||{}).checked};
+  }
+  window.ppPreviewForm=function(){var d=readForm();var fi=document.getElementById('pp-file');if(fi&&fi.files&&fi.files[0])d.imgUrl=URL.createObjectURL(fi.files[0]);d.id='__preview';rcShowPopup(d,true);};
+  window.ppPreview=function(id){var p=(window._ppList||[]).find(function(x){return x.id===id;});if(p)rcShowPopup(Object.assign({},p,{id:'__preview'}),true);};
+  window.ppSave=async function(){
+    var d=readForm();if(!d.title){toast('Başlık gerekli','err');return;}
+    var fb=window._fb;var b=document.getElementById('pp-save');b.disabled=true;
+    try{
+      var fi=document.getElementById('pp-file');var file=fi&&fi.files&&fi.files[0];
+      if(file){var ref=fb.ref(fb.storage,'popup/'+Date.now()+'_'+file.name.replace(/[^\w.-]/g,'_'));await fb.uploadBytes(ref,file,{contentType:file.type});d.imgUrl=await fb.getDownloadURL(ref);}
+      d.updatedAt=fb.serverTimestamp();
+      if(window._ppEdit){await fb.updateDoc(fb.doc(fb.db,'popup',window._ppEdit),d);}
+      else{d.views=0;d.clicks=0;d.closes=0;d.createdAt=fb.serverTimestamp();await fb.addDoc(fb.collection(fb.db,'popup'),d);}
+      toast('Kampanya kaydedildi ✓','ok');window._ppEdit=null;window.renderAdminPopupV2();load(0);
+    }catch(e){toast('Hata: '+(e.code||e.message),'err');}
+    b.disabled=false;
+  };
+  window.ppToggle=async function(id,on){var fb=window._fb;try{await fb.updateDoc(fb.doc(fb.db,'popup',id),{active:!!on,updatedAt:fb.serverTimestamp()});window.renderAdminPopupV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}};
+  window.ppDel=async function(id){if(!confirm('Kampanya silinsin mi?'))return;var fb=window._fb;try{await fb.deleteDoc(fb.doc(fb.db,'popup',id));window.renderAdminPopupV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}};
 })();
 </script>
 </body>

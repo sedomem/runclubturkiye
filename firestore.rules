@@ -93,7 +93,14 @@ service cloud.firestore {
       allow delete: if isSuperAdmin() || (isAuth() && (uid() == resource.data.authorUid || uid() == resource.data.userUid));
     }
 
-    match /popup/{id}    { allow read: if true; allow write: if isSuperAdmin(); }
+    match /popup/{id} {
+      allow read: if true;
+      allow write: if isSuperAdmin();
+      // Ziyaretçi sayaçları: yalnızca views / clicks / closes +1
+      allow update: if (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['views']) && request.resource.data.views == resource.data.get('views', 0) + 1)
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clicks']) && request.resource.data.clicks == resource.data.get('clicks', 0) + 1)
+        || (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['closes']) && request.resource.data.closes == resource.data.get('closes', 0) + 1);
+    }
     match /banners/{id}  { allow read: if true; allow write: if isSuperAdmin(); }
     match /sponsors/{id} {
       allow read: if true;

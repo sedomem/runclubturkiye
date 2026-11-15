@@ -47,6 +47,10 @@ service cloud.firestore {
       match /private/{docId} {
         allow read, write: if (isAuth() && uid() == userId) || isSuperAdmin();
       }
+      // Strava'dan çekilen koşular — yalnızca kişinin kendisi
+      match /runs/{runId} {
+        allow read, write: if (isAuth() && uid() == userId) || isSuperAdmin();
+      }
     }
 
     match /clubs/{id} {

@@ -1,6 +1,6 @@
 // Yeni kullanıcı kaydı → hoş geldin duyurusu + (varsa) push + e-posta
 // Tek başına dağıtılan 1. nesil Auth tetikleyicisi (onUserCreated, us-central1).
-// Dağıtım: gcloud functions deploy onUserCreated --no-gen2 --region=us-central1 --runtime=nodejs20 \
+// Dağıtım: gcloud functions deploy onUserCreated --no-gen2 --region=us-central1 --runtime=nodejs22 \
 //   --trigger-event=providers/firebase.auth/eventTypes/user.create --trigger-resource=runclubturkiye \
 //   --entry-point=onUserCreated --source=. --project=runclubturkiye
 const functions = require('firebase-functions');

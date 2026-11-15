@@ -9212,7 +9212,7 @@ function buildDashboard(){
       <div style="margin-bottom:14px">
         <button class="btn btn-ghost btn-sm" style="gap:8px" onclick="window.inviteFriend&&inviteFriend()">👫 Arkadaşını Davet Et</button>
       </div>
-      <div id="dash-strava-week"></div>
+      <div id="dash-runs-week"></div><div id="dash-strava-week"></div>
       <div id="dash-last-race" style="margin-bottom:14px"></div>
       <div id="dash-club-rank" style="margin-bottom:14px"></div>
       <div id="overview-recent-events"></div>
@@ -9263,6 +9263,7 @@ function buildDashboard(){
             <button class="btn btn-or" onclick="addKm(document.getElementById('km-input').value)">Manuel Ekle</button>
           </div>
         </div>
+        <div id="runs-box"></div>
         <div id="strava-box" style="margin-bottom:14px"></div>
         <div id="km-events-list"></div>
       </div>
@@ -16860,7 +16861,7 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
     else if(th==='orange'){var g2=ctx.createLinearGradient(0,0,W,H);g2.addColorStop(0,'#F0743A');g2.addColorStop(1,'#B9441A');ctx.fillStyle=g2;ctx.fillRect(0,0,W,H);}
     else{var g3=ctx.createLinearGradient(0,0,0,H);g3.addColorStop(0,'#17181D');g3.addColorStop(1,'#0B0B0E');ctx.fillStyle=g3;ctx.fillRect(0,0,W,H);}
     // pist şeritleri (logo ile uyumlu)
-    if(!photo){ctx.save();var cx=W*0.98,cy=story?H*0.24:H*0.2;
+    if(!photo&&!r.route){ctx.save();var cx=W*0.98,cy=story?H*0.24:H*0.2;
       for(var i=0;i<6;i++){var rad=330+i*62;ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.lineWidth=40;ctx.strokeStyle=th==='orange'?'rgba(255,255,255,'+(0.10-i*0.012)+')':'rgba(232,98,42,'+(0.22-i*0.03)+')';ctx.stroke();
         ctx.beginPath();ctx.arc(cx,cy,rad+31,0,Math.PI*2);ctx.lineWidth=3;ctx.setLineDash([22,18]);ctx.strokeStyle=th==='orange'?'rgba(255,255,255,.18)':'rgba(255,255,255,.08)';ctx.stroke();ctx.setLineDash([]);}
       ctx.restore();}
@@ -16868,11 +16869,14 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
     var muted=th==='orange'?'rgba(255,255,255,.82)':'rgba(255,255,255,.66)';
     // logo
     var ly=story?150:70;if(lg){var lw=400,lh=lw*lg.height/lg.width;ctx.drawImage(lg,X,ly,lw,lh);}
+    // rota (dosya/Strava'dan gelen yarışlarda)
+    if(r.route&&window.rcDrawRoute){var bs=story?300:240,bx=W-X-bs,by=story?110:50;
+      rcDrawRoute(ctx,r.route,bx,by,bs,bs,{width:story?9:8,color:th==='orange'?'#fff':OR,under:th==='orange'?'rgba(0,0,0,.22)':'rgba(255,255,255,.10)'});}
     // rozetler
     y=story?340:210;var px=X;
     px+=pill(ctx,px,y,'FINISHER',th==='orange'?'#121010':OR,'#fff')+16;
     if(r._pr)px+=pill(ctx,px,y,'KİŞİSEL REKOR','#F5B400','#121010')+16;
-    var pl=String(r.place||'').trim().replace(/\.$/,'');if(pl&&px<W-260)pill(ctx,px,y,(pl==='1'||pl==='2'||pl==='3'?pl+'. DERECE':pl+'. SIRA'),'rgba(255,255,255,.16)','#fff');
+    var pl=String(r.place||'').trim().replace(/\.$/,'');if(pl&&px<(r.route?W-560:W-260))pill(ctx,px,y,(pl==='1'||pl==='2'||pl==='3'?pl+'. DERECE':pl+'. SIRA'),'rgba(255,255,255,.16)','#fff');
     // yarış adı
     y+=story?130:112;ctx.fillStyle='#fff';
     var name=String(r.raceName||'Yarış').toLocaleUpperCase('tr-TR');var fs=story?112:96,lines;
@@ -17099,7 +17103,7 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   async function loadRuns(force){
     if(S.runs&&!force)return S.runs;
     var snap=await fb().getDocs(fb().collection(fb().db,'users',CU.uid,'runs'));
-    var a=[];snap.forEach(function(d){var x=d.data();x.id=d.id;a.push(x);});
+    var a=[];snap.forEach(function(d){var x=d.data();x.id=d.id;if(x.source==='strava')a.push(x);});
     a.sort(function(p,q){return String(q.start||'').localeCompare(String(p.start||''));});
     S.runs=a;return a;
   }
@@ -17125,9 +17129,9 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       var ex=await fb().getDocs(fb().query(fb().collection(fb().db,'raceResults'),fb().where('userId','==',CU.uid)));
       var dup=ex.docs.find(function(d){return d.data().stravaId===id;});
       if(dup){window.shareRaceResult&&shareRaceResult(dup.id);return;}
-      var km=Math.round(r.distance/100)/10,sec=r.workout_type===1?(r.elapsed_time||r.moving_time):r.moving_time;
+      var km=Math.round(r.distance/10)/100,sec=r.workout_type===1?(r.elapsed_time||r.moving_time):r.moving_time;
       var clubId=CU.clubId||'',clubName=CU.clubName||'';
-      await fb().addDoc(fb().collection(fb().db,'raceResults'),{userId:CU.uid,userName:CU.name||'',raceName:r.name||'Yarış',distance:km+'km',distanceNum:km,time:fmtT(sec),pace:pace(sec,r.distance)+' dk/km',place:'',date:r.date||'',resultUrl:'',certUrl:'',clubId:clubId,clubName:clubName,source:'strava',stravaId:id,createdAt:fb().serverTimestamp()});
+      await fb().addDoc(fb().collection(fb().db,'raceResults'),{userId:CU.uid,userName:CU.name||'',raceName:r.name||'Yarış',distance:km+'km',distanceNum:km,time:fmtT(sec),pace:pace(sec,r.distance)+' dk/km',place:'',date:r.date||'',resultUrl:'',certUrl:'',clubId:clubId,clubName:clubName,source:'strava',stravaId:id,route:String(r.polyline||'').slice(0,6000),createdAt:fb().serverTimestamp()});
       T('Yarış sonuçlarına eklendi 🏅');
       window._rrJustSaved=true;window._RR=null;
       if(window.openMyRaceResults)openMyRaceResults();else window.loadRaceResults&&loadRaceResults();
@@ -17186,6 +17190,228 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   if(_bd&&!_bd._sv){var g=function(){var r=_bd.apply(this,arguments);S.runs=null;setTimeout(onDash,120);return r;};g._sv=true;window.buildDashboard=g;}
   window.syncStravaData=function(){S.conn?stravaSync():stravaConnect();};
   if(/[?&]strava=cb/.test(location.search))handleCallback();
+})();
+</script>
+<style id="runs-css">
+.rf-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:14px}
+.rf-hd{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.rf-ico{width:40px;height:40px;border-radius:10px;background:var(--or-soft,rgba(232,98,42,.12));display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.rf-hd h4{margin:0;font-size:15px;font-weight:800}
+.rf-hd p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.rf-up{background:var(--or);color:#fff;border:none;border-radius:10px;padding:11px 16px;font-weight:800;font-size:13.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.rf-up:disabled{opacity:.6;cursor:default}
+.rf-drop{border:2px dashed var(--border);border-radius:14px;padding:14px;text-align:center;font-size:12.5px;color:var(--muted);margin-top:12px;transition:.15s}
+.rf-drop.on{border-color:var(--or);background:var(--or-soft,rgba(232,98,42,.08));color:var(--text)}
+.rf-help{margin-top:10px;font-size:12px;color:var(--muted)}
+.rf-help summary{cursor:pointer;font-weight:700;color:var(--text)}
+.rf-help ul{margin:8px 0 0;padding-left:18px;line-height:1.65}
+.rf-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.rf-stats>div{background:var(--bg2);border-radius:12px;padding:10px 12px}
+.rf-stats b{display:block;font-family:Archivo,var(--font-head),sans-serif;font-size:20px;font-weight:900;line-height:1.15}
+.rf-stats span{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.rf-run{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--border)}
+.rf-map{width:54px;height:54px;border-radius:10px;background:var(--bg2);flex-shrink:0;display:block}
+.rf-run .t{flex:1;min-width:0}
+.rf-run .t h5{margin:0 0 2px;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rf-run .t div{font-size:12px;color:var(--muted)}
+.rf-run .a{display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0}
+.rf-run .a button{font-size:11.5px;font-weight:700;color:var(--or);background:none;border:none;cursor:pointer;padding:0}
+.rf-run .a button.x{color:var(--muted);font-weight:600}
+.rf-week{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:14px;cursor:pointer}
+.rf-week b{font-family:Archivo,var(--font-head),sans-serif;font-size:18px}
+@media(max-width:560px){.rf-stats{grid-template-columns:repeat(2,minmax(0,1fr))}.rf-map{width:46px;height:46px}}
+</style>
+<script id="runs-js">
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var T=function(m,t){try{toast(m,t||'ok');}catch(_){}};
+  var AYL=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  var fmtT=function(s){s=Math.round(s||0);var h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};
+  var pace=function(sec,m){if(!sec||!m)return '';var p=sec/(m/1000);var mm=Math.floor(p/60),ss=Math.round(p%60);if(ss===60){mm++;ss=0;}return mm+':'+String(ss).padStart(2,'0');};
+  var km1=function(m){return (Math.round((m||0)/100)/10).toString().replace('.',',');};
+  var fb=function(){return window._fb;};
+
+  // ── Polyline (Google) kodlama / çözme
+  function encPoly(pts){var out='',pl=0,pn=0;function e(v){v=v<0?~(v<<1):(v<<1);var s='';while(v>=0x20){s+=String.fromCharCode((0x20|(v&0x1f))+63);v>>=5;}return s+String.fromCharCode(v+63);}
+    pts.forEach(function(p){var la=Math.round(p[0]*1e5),lo=Math.round(p[1]*1e5);out+=e(la-pl)+e(lo-pn);pl=la;pn=lo;});return out;}
+  function decPoly(s){var i=0,la=0,lo=0,o=[];s=String(s||'');while(i<s.length){var b,sh=0,r=0;do{b=s.charCodeAt(i++)-63;r|=(b&0x1f)<<sh;sh+=5;}while(b>=0x20&&i<s.length);la+=(r&1)?~(r>>1):(r>>1);sh=0;r=0;do{b=s.charCodeAt(i++)-63;r|=(b&0x1f)<<sh;sh+=5;}while(b>=0x20&&i<s.length);lo+=(r&1)?~(r>>1):(r>>1);o.push([la/1e5,lo/1e5]);}return o;}
+  window.rcDecPoly=decPoly;
+  // Rotayı bir kutuya çiz (kart + liste küçük haritası)
+  window.rcDrawRoute=function(ctx,poly,x,y,w,h,opt){
+    var p=Array.isArray(poly)?poly:decPoly(poly);if(p.length<2)return false;opt=opt||{};
+    var la0=1e9,la1=-1e9,lo0=1e9,lo1=-1e9;p.forEach(function(q){la0=Math.min(la0,q[0]);la1=Math.max(la1,q[0]);lo0=Math.min(lo0,q[1]);lo1=Math.max(lo1,q[1]);});
+    var k=Math.cos((la0+la1)/2*Math.PI/180),gw=(lo1-lo0)*k||1e-6,gh=(la1-la0)||1e-6,sc=Math.min(w/gw,h/gh),ox=x+(w-gw*sc)/2,oy=y+(h-gh*sc)/2;
+    var X=function(q){return ox+(q[1]-lo0)*k*sc;},Y=function(q){return oy+(la1-q[0])*sc;};
+    ctx.save();ctx.lineJoin='round';ctx.lineCap='round';
+    [[opt.under||'rgba(0,0,0,.25)',(opt.width||8)+(opt.width||8)*0.9],[opt.color||'#E8622A',opt.width||8]].forEach(function(s){ctx.beginPath();p.forEach(function(q,i){i?ctx.lineTo(X(q),Y(q)):ctx.moveTo(X(q),Y(q));});ctx.strokeStyle=s[0];ctx.lineWidth=s[1];ctx.stroke();});
+    var a=p[0],b=p[p.length-1],dr=(opt.width||8)*0.9;
+    ctx.beginPath();ctx.arc(X(a),Y(a),dr,0,7);ctx.fillStyle='#22c55e';ctx.fill();ctx.lineWidth=dr*0.5;ctx.strokeStyle='#fff';ctx.stroke();
+    ctx.beginPath();ctx.arc(X(b),Y(b),dr,0,7);ctx.fillStyle='#ef4444';ctx.fill();ctx.stroke();
+    ctx.restore();return true;
+  };
+
+  // ── Ayrıştırıcılar
+  var hav=function(a,b){var R=6371000,r=Math.PI/180,dl=(b.lat-a.lat)*r,dn=(b.lon-a.lon)*r,s=Math.sin(dl/2)*Math.sin(dl/2)+Math.cos(a.lat*r)*Math.cos(b.lat*r)*Math.sin(dn/2)*Math.sin(dn/2);return 2*R*Math.atan2(Math.sqrt(s),Math.sqrt(1-s));};
+  function summarize(pts,meta){
+    pts=pts.filter(function(q){return q.t&&!isNaN(q.t);}).sort(function(a,b){return a.t-b.t;});
+    var geo=pts.filter(function(q){return q.lat!=null&&q.lon!=null&&Math.abs(q.lat)<=90&&!(q.lat===0&&q.lon===0);});
+    var dist=0,mov=0,asc=0,base=null;
+    for(var i=1;i<pts.length;i++){var a=pts[i-1],b=pts[i],dt=(b.t-a.t)/1000,dd;
+      if(a.d!=null&&b.d!=null)dd=Math.max(0,b.d-a.d);else if(a.lat!=null&&b.lat!=null)dd=hav(a,b);else dd=0;
+      dist+=dd;if(dt>0&&dt<=60&&dd/dt>0.6)mov+=dt;}
+    pts.forEach(function(q){if(q.ele==null)return;if(base==null){base=q.ele;return;}if(q.ele-base>3){asc+=q.ele-base;base=q.ele;}else if(base-q.ele>3)base=q.ele;});
+    meta=meta||{};
+    var total=meta.distance||(pts.length&&pts[pts.length-1].d!=null&&pts[0].d!=null?pts[pts.length-1].d-pts[0].d:dist);
+    var start=meta.start||(pts[0]&&pts[0].t),elapsed=meta.elapsed||(pts.length?(pts[pts.length-1].t-pts[0].t)/1000:0);
+    var step=Math.max(1,Math.ceil(geo.length/350)),sim=geo.filter(function(q,i){return i%step===0||i===geo.length-1;}).map(function(q){return [q.lat,q.lon];});
+    return {start:start,distance:Math.round(total),moving_time:Math.round(meta.moving||mov||elapsed),elapsed_time:Math.round(elapsed),elev:Math.round(meta.ascent!=null?meta.ascent:asc),polyline:sim.length>1?encPoly(sim):'',name:meta.name||'',sport:meta.sport};
+  }
+  function xmlPts(doc,tag){
+    var nodes=doc.getElementsByTagNameNS('*',tag),out=[];
+    var txt=function(n,t){var e=n.getElementsByTagNameNS('*',t)[0];return e?e.textContent:null;};
+    for(var i=0;i<nodes.length;i++){var n=nodes[i],q={};
+      if(tag==='trkpt'){q.lat=parseFloat(n.getAttribute('lat'));q.lon=parseFloat(n.getAttribute('lon'));}
+      else{var la=txt(n,'LatitudeDegrees'),lo=txt(n,'LongitudeDegrees');if(la!=null){q.lat=parseFloat(la);q.lon=parseFloat(lo);}var dm=txt(n,'DistanceMeters');if(dm!=null)q.d=parseFloat(dm);}
+      var el=txt(n,tag==='trkpt'?'ele':'AltitudeMeters');if(el!=null)q.ele=parseFloat(el);
+      var tm=txt(n,tag==='trkpt'?'time':'Time');if(tm)q.t=Date.parse(tm);out.push(q);}
+    return out;
+  }
+  function parseGPX(text){var d=new DOMParser().parseFromString(text,'application/xml');if(d.getElementsByTagName('parsererror').length)throw new Error('GPX okunamadı');
+    var nm=d.getElementsByTagNameNS('*','trk')[0],name=nm&&nm.getElementsByTagNameNS('*','name')[0];var ty=nm&&nm.getElementsByTagNameNS('*','type')[0];
+    return summarize(xmlPts(d,'trkpt'),{name:name?name.textContent.trim():'',sport:ty?ty.textContent.trim():''});}
+  function parseTCX(text){var d=new DOMParser().parseFromString(text,'application/xml');if(d.getElementsByTagName('parsererror').length)throw new Error('TCX okunamadı');
+    var act=d.getElementsByTagNameNS('*','Activity')[0],laps=d.getElementsByTagNameNS('*','Lap'),dist=0,tt=0;
+    for(var i=0;i<laps.length;i++){var L=laps[i],a=L.getElementsByTagNameNS('*','TotalTimeSeconds')[0],b=null;for(var c=L.firstElementChild;c;c=c.nextElementSibling)if(c.localName==='DistanceMeters')b=c;if(a)tt+=parseFloat(a.textContent)||0;if(b)dist+=parseFloat(b.textContent)||0;}
+    return summarize(xmlPts(d,'Trackpoint'),{distance:dist||null,moving:tt||null,sport:act?act.getAttribute('Sport'):''});}
+  function parseFIT(buf){
+    var dv=new DataView(buf);if(buf.byteLength<14)throw new Error('FIT dosyası boş');
+    var hs=dv.getUint8(0),ds=dv.getUint32(4,true);if(String.fromCharCode(dv.getUint8(8),dv.getUint8(9),dv.getUint8(10),dv.getUint8(11))!=='.FIT')throw new Error('Geçerli bir FIT dosyası değil');
+    var p=hs,end=Math.min(hs+ds,buf.byteLength),defs={},lastTs=0,recs=[],ses=null,OFF=631065600;
+    function rd(d,off){var m={},o=off;d.f.forEach(function(f){var bt=f.bt&0x1f,v=null,le=d.le;
+      try{if(f.s===1&&(bt===0||bt===2||bt===10||bt===13)){v=dv.getUint8(o);if(v===0xFF)v=null;}
+      else if(f.s===1&&bt===1){v=dv.getInt8(o);if(v===0x7F)v=null;}
+      else if(f.s===2&&bt===3){v=dv.getInt16(o,le);if(v===0x7FFF)v=null;}
+      else if(f.s===2&&(bt===4||bt===11)){v=dv.getUint16(o,le);if(v===0xFFFF)v=null;}
+      else if(f.s===4&&bt===5){v=dv.getInt32(o,le);if(v===0x7FFFFFFF)v=null;}
+      else if(f.s===4&&(bt===6||bt===12)){v=dv.getUint32(o,le);if(v===0xFFFFFFFF)v=null;}}catch(_){}
+      if(v!=null)m[f.n]=v;o+=f.s;});return m;}
+    function hd(g,m,ts){if(m[253]!=null){lastTs=m[253];ts=m[253];}
+      if(g===20){var q={t:ts!=null?(ts+OFF)*1000:null};if(m[0]!=null&&m[1]!=null){q.lat=m[0]*180/2147483648;q.lon=m[1]*180/2147483648;}
+        if(m[5]!=null)q.d=m[5]/100;var al=m[78]!=null?m[78]:m[2];if(al!=null)q.ele=al/5-500;recs.push(q);}
+      else if(g===18&&!ses){ses={start:m[2]!=null?(m[2]+OFF)*1000:null,moving:m[7]!=null?m[7]/1000:null,elapsed:m[8]!=null?m[8]/1000:null,distance:m[9]!=null?m[9]/100:null,ascent:m[22]!=null?m[22]:null,sport:m[5]};}}
+    while(p<end-1){var h=dv.getUint8(p++);
+      if(h&0x80){var d=defs[(h>>5)&3];if(!d)break;var off=h&0x1f,ts=(lastTs&~0x1f)+off;if(off<(lastTs&0x1f))ts+=0x20;lastTs=ts;hd(d.g,rd(d,p),ts);p+=d.size;continue;}
+      var lt=h&0x0f;
+      if(h&0x40){p++;var le=dv.getUint8(p++)===0,g=dv.getUint16(p,le);p+=2;var n=dv.getUint8(p++),f=[],size=0;
+        for(var i=0;i<n;i++){f.push({n:dv.getUint8(p),s:dv.getUint8(p+1),bt:dv.getUint8(p+2)});size+=dv.getUint8(p+1);p+=3;}
+        if(h&0x20){var nd=dv.getUint8(p++);for(var j=0;j<nd;j++){size+=dv.getUint8(p+1);p+=3;}}
+        defs[lt]={g:g,le:le,f:f,size:size};}
+      else{var d2=defs[lt];if(!d2)break;hd(d2.g,rd(d2,p),null);p+=d2.size;}}
+    if(!recs.length&&!ses)throw new Error('FIT dosyasında koşu verisi bulunamadı');
+    var s=summarize(recs,ses||{});if(ses&&ses.sport!=null)s.sport=ses.sport;return s;
+  }
+  function isRun(s){var sp=s.sport;if(sp==null||sp==='')return true;if(typeof sp==='number')return sp===1||sp===0;return /run|koş|kos|trail|jog/i.test(sp)||/^\d+$/.test(sp)&&(+sp===9||+sp===1);}
+  async function parseFile(file){
+    var nm=file.name.toLowerCase();
+    if(/\.fit$/.test(nm))return parseFIT(await file.arrayBuffer());
+    var tx=await file.text();
+    if(/\.tcx$/.test(nm)||/<TrainingCenterDatabase/i.test(tx.slice(0,800)))return parseTCX(tx);
+    if(/\.gpx$/.test(nm)||/<gpx/i.test(tx.slice(0,800)))return parseGPX(tx);
+    throw new Error('Desteklenen biçimler: GPX, TCX, FIT');
+  }
+
+  // ── Veri
+  var R={runs:null,busy:false};
+  async function loadRuns(force){if(R.runs&&!force)return R.runs;
+    var snap=await fb().getDocs(fb().collection(fb().db,'users',CU.uid,'runs'));var a=[];snap.forEach(function(d){var x=d.data();x.id=d.id;a.push(x);});
+    a.sort(function(p,q){return String(q.start||'').localeCompare(String(p.start||''));});R.runs=a;return a;}
+  async function syncKm(){
+    var tot=Math.round((R.runs||[]).filter(function(r){return r.source==='file';}).reduce(function(s,r){return s+(r.distance||0);},0)/100)/10;
+    var u=await fb().getDoc(fb().doc(fb().db,'users',CU.uid));var d=u.exists()?u.data():{};var prev=+d.fileKm||0,delta=Math.round((tot-prev)*10)/10;if(!delta)return;
+    var nt=Math.max(0,Math.round(((+d.totalKm||0)+delta)*10)/10);
+    await fb().setDoc(fb().doc(fb().db,'users',CU.uid),{fileKm:tot,totalKm:nt},{merge:true});CU.totalKm=nt;
+    var k=document.getElementById('km-total');if(k)k.textContent=nt+' km';
+    document.querySelectorAll('#dp-overview .s-card').forEach(function(c){var l=c.querySelector('.l');if(l&&/Toplam/i.test(l.textContent)){var v=c.querySelector('.n');if(v)v.textContent=nt+' km';}});
+  }
+  function stats(runs){var now=new Date(),dow=(now.getDay()+6)%7,wk=new Date(now.getFullYear(),now.getMonth(),now.getDate()-dow).getTime(),mo=new Date(now.getFullYear(),now.getMonth(),1).getTime(),yr=new Date(now.getFullYear(),0,1).getTime();
+    var o={w:0,wn:0,m:0,y:0,yn:0};runs.forEach(function(r){var t=new Date(r.start).getTime();if(t>=wk){o.w+=r.distance||0;o.wn++;}if(t>=mo)o.m+=r.distance||0;if(t>=yr){o.y+=r.distance||0;o.yn++;}});return o;}
+
+  window.rfUpload=async function(files){
+    if(!window.CU){window.openAuth&&openAuth('login');return;}
+    files=[].slice.call(files||[]);if(!files.length)return;R.busy=true;render();
+    var ok=0,skip=0,errs=[];
+    for(var i=0;i<files.length;i++){var f=files[i];
+      try{if(f.size>40*1024*1024)throw new Error('dosya çok büyük');
+        var s=await parseFile(f);
+        if(!isRun(s)){skip++;continue;}
+        if(!s.start||!s.distance)throw new Error('zaman/mesafe bilgisi yok');
+        var dt=new Date(s.start),id='f_'+Math.floor(s.start/1000);
+        var name=s.name&&!/^(Running|Run|Koşu|Morning Run|Afternoon Run|Evening Run)$/i.test(s.name)?s.name:'Koşu · '+dt.getDate()+' '+AYL[dt.getMonth()];
+        var dloc=new Date(s.start-dt.getTimezoneOffset()*60000).toISOString();
+        await fb().setDoc(fb().doc(fb().db,'users',CU.uid,'runs',id),{name:name,type:'Run',start:dloc.slice(0,19),date:dloc.slice(0,10),distance:s.distance,moving_time:s.moving_time,elapsed_time:s.elapsed_time,elev:s.elev,workout_type:null,polyline:String(s.polyline||'').slice(0,6000),source:'file',fileName:f.name.slice(0,120),addedAt:Date.now()},{merge:true});
+        ok++;
+      }catch(e){errs.push(f.name+': '+e.message);}}
+    R.busy=false;
+    try{await loadRuns(true);await syncKm();}catch(e){}
+    render();renderWeek();
+    if(ok)T(ok+' koşu eklendi ✓'+(skip?' ('+skip+' koşu olmayan aktivite atlandı)':''));
+    else if(skip)T('Bu dosyada koşu bulunamadı (bisiklet/yürüyüş atlandı)','err');
+    if(errs.length)T('Okunamadı: '+errs[0],'err');
+  };
+  window.rfDelete=async function(id){if(!confirm('Bu koşuyu silmek istiyor musun?'))return;
+    try{await fb().deleteDoc(fb().doc(fb().db,'users',CU.uid,'runs',id));await loadRuns(true);await syncKm();render();renderWeek();T('Koşu silindi');}catch(e){T('Hata: '+e.message,'err');}};
+  window.rfToRace=async function(id){
+    var r=(R.runs||[]).find(function(x){return x.id===id;});if(!r)return;
+    try{
+      var ex=await fb().getDocs(fb().query(fb().collection(fb().db,'raceResults'),fb().where('userId','==',CU.uid)));
+      var dup=ex.docs.find(function(d){return d.data().runId===id;});if(dup){window.shareRaceResult&&shareRaceResult(dup.id);return;}
+      var nm=prompt('Yarışın adı:',/^Koşu · /.test(r.name)?'':r.name);if(nm===null)return;nm=nm.trim()||r.name;
+      var km=Math.round(r.distance/10)/100,sec=r.elapsed_time&&r.elapsed_time<r.moving_time*1.15?r.elapsed_time:r.moving_time;
+      await fb().addDoc(fb().collection(fb().db,'raceResults'),{userId:CU.uid,userName:CU.name||'',raceName:nm,distance:km+'km',distanceNum:km,time:fmtT(sec),pace:pace(sec,r.distance)+' dk/km',place:'',date:r.date||'',resultUrl:'',certUrl:'',clubId:CU.clubId||'',clubName:CU.clubName||'',source:r.source||'file',runId:id,route:String(r.polyline||'').slice(0,6000),createdAt:fb().serverTimestamp()});
+      T('Yarış sonuçlarına eklendi 🏅');window._rrJustSaved=true;window._RR=null;
+      if(window.openMyRaceResults)openMyRaceResults();else window.loadRaceResults&&loadRaceResults();
+    }catch(e){T('Eklenemedi: '+e.message,'err');}
+  };
+
+  function mini(id,poly){setTimeout(function(){var c=document.getElementById('rfm-'+id);if(!c||!poly)return;var x=c.getContext('2d');c.width=108;c.height=108;rcDrawRoute(x,poly,10,10,88,88,{width:4,under:'rgba(232,98,42,.18)'});},0);}
+  async function render(){
+    var el=document.getElementById('runs-box');if(!el||!window.CU)return;
+    var runs=R.runs;if(!runs){el.innerHTML='<div class="rf-card"><div class="spinner" style="margin:10px auto"></div></div>';try{runs=await loadRuns();}catch(e){runs=[];}}
+    var st=stats(runs),y=new Date().getFullYear();
+    el.innerHTML='<div class="rf-card" id="rf-drop-zone"><div class="rf-hd"><div class="rf-ico">⌚</div><div style="flex:1;min-width:180px"><h4>Koşularım</h4><p>Saatinden ya da Strava\'dan koşu dosyanı yükle; mesafe, pace ve rota otomatik çıksın.</p></div>'
+      +'<label class="rf-up"'+(R.busy?' style="opacity:.6;pointer-events:none"':'')+'>'+(R.busy?'Yükleniyor…':'+ Koşu yükle')+'<input type="file" accept=".gpx,.tcx,.fit,application/gpx+xml,application/vnd.garmin.tcx+xml,application/octet-stream" multiple style="display:none" onchange="rfUpload(this.files);this.value=\'\'"></label></div>'
+      +(runs.length?'<div class="rf-stats"><div><b>'+km1(st.w)+'</b><span>Bu hafta km</span></div><div><b>'+km1(st.m)+'</b><span>Bu ay km</span></div><div><b>'+km1(st.y)+'</b><span>'+y+' km</span></div><div><b>'+st.yn+'</b><span>Koşu ('+y+')</span></div></div>'
+        +runs.slice(0,R.all?200:8).map(function(r){var d=new Date(r.start);return '<div class="rf-run">'+(r.polyline?'<canvas class="rf-map" id="rfm-'+esc(r.id)+'"></canvas>':'<div class="rf-map" style="display:flex;align-items:center;justify-content:center;font-size:20px">🏃</div>')
+          +'<div class="t"><h5>'+esc(r.name)+'</h5><div>'+(isNaN(d)?'':d.getDate()+' '+AYL[d.getMonth()]+' · ')+km1(r.distance)+' km · '+fmtT(r.moving_time)+' · '+pace(r.moving_time,r.distance)+' /km'+(r.elev?' · ↑'+r.elev+' m':'')+'</div></div>'
+          +'<div class="a"><button onclick="rfToRace(\''+esc(r.id)+'\')">🏅 Yarış olarak ekle</button>'+(r.source==='file'?'<button class="x" onclick="rfDelete(\''+esc(r.id)+'\')">Sil</button>':'<span style="font-size:10.5px;color:var(--muted)">Strava</span>')+'</div></div>';}).join('')
+        +(runs.length>8&&!R.all?'<button class="sv-ghost" style="margin-top:8px;width:100%;background:none;border:1.5px solid var(--border);border-radius:10px;padding:9px;font-weight:700;cursor:pointer;color:var(--text)" onclick="rfAll()">Tüm koşular ('+runs.length+')</button>':'')
+      :'<div class="rf-drop" id="rf-drop">Dosyayı buraya sürükle ya da <b>+ Koşu yükle</b>\'ye dokun · GPX, TCX, FIT</div>')
+      +'<details class="rf-help"><summary>Koşu dosyamı nereden alırım?</summary><ul>'
+      +'<li><b>Strava</b> (bilgisayardan strava.com): Aktiviteyi aç → <b>⋯</b> menüsü → <b>GPX olarak dışa aktar</b></li>'
+      +'<li><b>Garmin Connect</b> (connect.garmin.com): Aktivite → <b>⚙</b> → <b>Orijinali Dışa Aktar</b> (.fit, zip içinden çıkar)</li>'
+      +'<li><b>Coros, Suunto, Polar, Huawei</b> uygulamaları: Aktivite → Paylaş / Dışa aktar → <b>GPX</b> veya <b>FIT</b></li>'
+      +'<li><b>Apple Watch</b>: "HealthFit" ya da "RunGap" gibi bir uygulamayla antrenmanı FIT/GPX olarak dışa aktar</li>'
+      +'<li>Telefonda: indirdiğin dosyayı <b>+ Koşu yükle</b> ile Dosyalar\'dan seç. Birden fazla dosyayı aynı anda seçebilirsin.</li></ul></details></div>';
+    runs.slice(0,R.all?200:8).forEach(function(r){if(r.polyline)mini(r.id,r.polyline);});
+    var z=document.getElementById('rf-drop-zone');
+    if(z&&!z._dd){z._dd=1;['dragenter','dragover'].forEach(function(ev){z.addEventListener(ev,function(e){e.preventDefault();var d=document.getElementById('rf-drop');if(d)d.classList.add('on');});});
+      z.addEventListener('dragleave',function(){var d=document.getElementById('rf-drop');if(d)d.classList.remove('on');});
+      z.addEventListener('drop',function(e){e.preventDefault();rfUpload(e.dataTransfer.files);});}
+  }
+  window.rfAll=function(){R.all=true;render();};
+  async function renderWeek(){
+    var el=document.getElementById('dash-runs-week');if(!el||!window.CU)return;
+    var runs=R.runs;if(!runs){try{runs=await loadRuns();}catch(e){runs=[];}}
+    if(!runs.length){el.innerHTML='';return;}
+    var sv=document.getElementById('dash-strava-week');if(sv)sv.innerHTML='';
+    var st=stats(runs);
+    el.innerHTML='<div class="rf-week" onclick="showDash(\'my-km\',null)"><div class="rf-ico" style="width:34px;height:34px;font-size:17px">⌚</div><div style="flex:1"><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Bu hafta</div><b>'+km1(st.w)+' km</b> <span style="font-size:12.5px;color:var(--muted)">· '+st.wn+' koşu · bu ay '+km1(st.m)+' km</span></div><span style="color:var(--muted)">›</span></div>';
+  }
+  function onDash(){if(!window.CU)return;R.runs=null;render();renderWeek();}
+  var _sd=window.showDash;
+  if(_sd&&!_sd._rf){var f=function(id){var r=_sd.apply(this,arguments);if(id==='my-km'||id==='overview')setTimeout(function(){render();renderWeek();},80);return r;};f._rf=true;for(var k in _sd)f[k]=_sd[k];window.showDash=f;}
+  var _bd=window.buildDashboard;
+  if(_bd&&!_bd._rf){var g=function(){var r=_bd.apply(this,arguments);setTimeout(onDash,150);return r;};g._rf=true;window.buildDashboard=g;}
 })();
 </script>
 </body>

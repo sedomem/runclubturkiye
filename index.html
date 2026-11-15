@@ -14190,6 +14190,7 @@ body.is-guest div.guest-only{display:flex!important}
 .abl-act{display:flex;gap:4px;flex-shrink:0}
 .abl-act .btn{font-size:11px;padding:5px 8px}
 .abl-star{border:1.5px solid var(--border);background:var(--card);border-radius:8px;padding:5px 8px;font-size:11px;font-weight:700;cursor:pointer;white-space:nowrap;color:var(--muted)}
+[data-fst]{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--text2);margin-top:4px}[data-fst] small{color:var(--muted)}
 .abl-star.on{background:#fff4e5;border-color:#f59e0b;color:#b45309}
 @media(max-width:900px){.abl-grid{grid-template-columns:1fr}.abl-feat{position:static;order:-1}}
 </style>
@@ -14478,7 +14479,7 @@ window.renderFirsatAdminV2=async function(){
   var reqs=[];try{var fb=window._fb;var sn=await fb.getDocs(fb.collection(fb.db,'partnerRequests'));sn.forEach(function(d){reqs.push(Object.assign({id:d.id},d.data()));});reqs.sort(function(a,b){return ((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0);});}catch(e){}
   var stLbl={new:'🆕 Yeni',contacted:'📞 Görüşüldü',won:'✅ Anlaşıldı',lost:'✖ Olmadı'};
   box.innerHTML='<div class="card" style="padding:0;overflow:hidden;margin-bottom:18px"><div style="padding:12px 14px;border-bottom:1px solid var(--border)"><h3 style="font-size:15px;margin:0">🎁 Fırsatlar <span style="font-weight:400;color:var(--muted);font-size:12px">('+list.length+')</span></h3></div>'
-    +(list.length?list.map(function(f){return '<div class="abl-row"'+(f.featured?' style="background:#fffaf0"':'')+'>'+(f.imgUrl?'<img src="'+esc(f.imgUrl)+'" alt="">':'<div class="ph"></div>')+'<div class="ti"><b>'+esc(f.baslik)+'</b><span>'+esc(f.marka||'—')+' · '+esc(f.kategori||'')+(f.kod?' · <code>'+esc(f.kod)+'</code>':'')+(f.bitis?' · bitiş '+esc(f.bitis):'')+' · 👁 '+(f.views||0)+'</span></div><div class="abl-act">'
+    +(list.length?list.map(function(f){return '<div class="abl-row"'+(f.featured?' style="background:#fffaf0"':'')+'>'+(f.imgUrl?'<img src="'+esc(f.imgUrl)+'" alt="">':'<div class="ph"></div>')+'<div class="ti"><b>'+esc(f.baslik)+'</b><span>'+esc(f.marka||'—')+' · '+esc(f.kategori||'')+(f.kod?' · <code>'+esc(f.kod)+'</code>':'')+(f.bitis?' · bitiş '+esc(f.bitis):'')+'</span><span class="fst" data-fst="'+f.id+'">'+(window.fdStatHtml?window.fdStatHtml(f):'')+'</span></div><div class="abl-act">'
       +'<label class="abl-star'+(f.featured?' on':'')+'" style="display:inline-flex;align-items:center;gap:5px"><input type="checkbox" '+(f.featured?'checked ':'')+'onchange="setFirsatField(\''+f.id+'\',\'featured\',this.checked)" style="margin:0;accent-color:#f59e0b">⭐</label>'
       +'<button class="btn btn-sm '+(f.aktif?'btn-or':'btn-ghost')+'" onclick="setFirsatField(\''+f.id+'\',\'aktif\','+(!f.aktif)+')">'+(f.aktif?'✅ Aktif':'⏸ Pasif')+'</button>'
       +'<button class="btn btn-ghost btn-sm" onclick="editFirsatV2(\''+f.id+'\')">✏️</button><button class="btn btn-red btn-sm" onclick="deleteFirsat(\''+f.id+'\')">🗑</button></div></div>';}).join(''):'<p style="padding:16px;color:var(--muted);font-size:13px">Henüz fırsat yok.</p>')+'</div>'
@@ -15088,7 +15089,7 @@ window.fMask=function(t,f){t=String(t||'');if(f&&f.kod){t=t.split(f.kod).join('�
       toast('Kod kopyalandı: '+f.kod+' 📋','ok');
       setTimeout(function(){document.querySelectorAll('.fd-code').forEach(function(el){el.classList.remove('copied');var b=el.querySelector('button');if(b)b.textContent='Kopyala';});},2500);
       if(!window._fdCopied){window._fdCopied={};}
-      if(!window._fdCopied[id]){window._fdCopied[id]=1;window.trackFirsatClick&&window.trackFirsatClick(id);}
+      if(!window._fdCopied[id]){window._fdCopied[id]=1;window.fdStat&&window.fdStat(id,'copy');}
       window.rcTrack&&window.rcTrack('firsat_code_copy',{firsat_id:id,brand:f.marka||''});
     };
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(f.kod).then(done).catch(function(){toast('Kod: '+f.kod,'ok');});}
@@ -15106,7 +15107,7 @@ window.fMask=function(t,f){t=String(t||'');if(f&&f.kod){t=t.split(f.kod).join('�
     if(how==='wa'){window.open('https://wa.me/?text='+encodeURIComponent(txt+' '+url),'_blank','noopener');}
     else if(how==='native'&&navigator.share){navigator.share({title:f.baslik,text:txt,url:url}).catch(function(){});}
     else{(navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){toast('Bağlantı kopyalandı 🔗','ok');}).catch(function(){prompt('Bağlantı:',url);});}
-    window.rcTrack&&window.rcTrack('share',{method:how,content_type:'firsat',item_id:id});
+    window.fdStat&&window.fdStat(id,'share');window.rcTrack&&window.rcTrack('share',{method:how,content_type:'firsat',item_id:id});
   };
   window.fdZoom=function(u){
     var d=document.createElement('div');d.className='fd-lb';d.innerHTML='<img src="'+esc(u)+'" alt="">';d.onclick=function(){d.remove();};
@@ -16537,6 +16538,36 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   // admin düzenle: gizli alanları forma getir
   var oe=window.editFirsatV2;
   if(typeof oe==='function'){window.editFirsatV2=function(id){var a=arguments,t=this;var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(f&&f.hasSecret&&!f._sec){window.loadFirsatSecret(f).then(function(){oe.apply(t,a);});return;}return oe.apply(t,a);};}
+})();
+
+// ═══ FIRSAT İSTATİSTİKLERİ: görüntülenme, kod kopyalayan üye, site tıklaması, paylaşım ═══
+(function(){
+  var once=function(k){try{if(localStorage.getItem(k))return false;localStorage.setItem(k,'1');return true;}catch(e){return true;}};
+  window.fdStat=function(id,kind){
+    var fb=window._fb;if(!fb)return;
+    try{
+      if(kind==='copy'){
+        if(window.CU&&window.CU.uid){fb.setDoc(fb.doc(fb.db,'firsatlar',id,'copies',window.CU.uid),{uid:window.CU.uid,name:window.CU.name||window.CU.displayName||'',at:fb.serverTimestamp()}).catch(function(){});}
+        if(once('fcp_'+id))fb.updateDoc(fb.doc(fb.db,'firsatlar',id),{copies:fb.increment(1)}).catch(function(){});
+      }else if(kind==='share'){fb.updateDoc(fb.doc(fb.db,'firsatlar',id),{shares:fb.increment(1)}).catch(function(){});}
+    }catch(e){}
+  };
+  window.fdStatHtml=function(f,uniq){
+    var v=f.views||0,c=f.copies||0,k=f.clicks||0,sh=f.shares||0,u=uniq==null?'…':uniq;
+    var pct=function(a){return v?' <small>(%'+(a/v*100).toFixed(1)+')</small>':'';};
+    return '<span title="Görüntülenme">👁 '+v+'</span><span title="Kodu kopyalayan üye (tekil)">📋 '+u+' üye</span><span title="Toplam kod kopyalama (tarayıcı başına 1)">⧉ '+c+pct(c)+'</span><span title="Marka/kayıt sitesine tıklama">🔗 '+k+pct(k)+'</span><span title="Paylaşım (WhatsApp/link)">📤 '+sh+'</span>';
+  };
+  var o=window.renderFirsatAdminV2;
+  if(typeof o==='function'&&!o._st){
+    var w=async function(){var r=await o.apply(this,arguments);var fb=window._fb;
+      if(!document.getElementById('fst-legend')){var box=document.getElementById('fr-admin-v2');var h=box&&box.querySelector('h3');if(h){var l=document.createElement('div');l.id='fst-legend';l.style.cssText='font-size:11.5px;color:var(--muted);margin-top:4px;font-weight:400';l.textContent='👁 görüntülenme · 📋 kodu kopyalayan tekil üye · ⧉ kopyalama · 🔗 kayıt/marka sitesine tıklama · 📤 paylaşım · (%) görüntülenmeye oran';h.parentNode.appendChild(l);}}
+      [].forEach.call(document.querySelectorAll('[data-fst]'),async function(el){var id=el.dataset.fst;var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(!f)return;
+        try{var fr=await fb.getDoc(fb.doc(fb.db,'firsatlar',id));if(fr.exists())Object.assign(f,{views:fr.data().views,copies:fr.data().copies,clicks:fr.data().clicks,shares:fr.data().shares});}catch(e){}
+        var u='?';try{var c=await fb.getCountFromServer(fb.collection(fb.db,'firsatlar',id,'copies'));u=c.data().count;}catch(e){}
+        el.innerHTML=window.fdStatHtml(f,u);});
+      return r;};
+    w._st=1;window.renderFirsatAdminV2=w;
+  }
 })();
 </script>
 </body>

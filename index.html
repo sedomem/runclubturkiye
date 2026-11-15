@@ -2671,6 +2671,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button onclick="aNav('popup',this)">💬 Popup</button>
     <button onclick="aNav('sponsors',this)">💼 Sponsorlar</button>
     <button onclick="aNav('instagram',this)">📸 Instagram</button>
+    <button onclick="aNav('reviews',this)">🏁 Değerlendirmeler</button>
     <button onclick="aNav('ticker',this)">📢 Kayan Yazı</button>
     <button onclick="aNav('users',this)">👥 Kullanıcılar</button>
     <button onclick="aNav('newsletter',this)">📬 Haberdar Ol</button>
@@ -9694,6 +9695,7 @@ function renderAdminSection(sec){
   if(sec==='firsatlar')setTimeout(()=>window.renderFirsatAdminV2&&window.renderFirsatAdminV2(),60);
   if(sec==='sponsors')setTimeout(()=>window.renderAdminSponsorsV2&&window.renderAdminSponsorsV2(),60);
   if(sec==='instagram')setTimeout(()=>window.renderAdminIg&&window.renderAdminIg(),60);
+  if(sec==='reviews')setTimeout(()=>window.renderAdminReviews&&window.renderAdminReviews(),60);
   if(sec==='blog'){setTimeout(initQuillEditor,200);setTimeout(()=>window.renderAdminBlogLists&&window.renderAdminBlogLists(),30);}
   if(sec==='races')setTimeout(initQuillRaceEditor,200);
   if(sec==='banners')setTimeout(()=>{
@@ -15857,6 +15859,13 @@ footer.f26{background:#0E0C0B;color:rgba(255,255,255,.62);padding:64px 0 28px;ma
 .ig26-t em.rl svg{width:13px;height:13px}
 @media(hover:none){.ig26-p span{display:none}}
 .cc-svg{width:100%;height:100%;display:block}
+.rv-card{display:flex;gap:16px;align-items:center;background:#0E0C0B;color:#fff;border-radius:20px;padding:18px 20px;margin:0 0 20px;text-decoration:none;cursor:pointer;transition:transform .2s}
+.rv-card:hover{transform:translateY(-2px)}
+.rv-card b{display:block;font-family:var(--font-head);font-size:17px;line-height:1.25;margin:2px 0 4px;color:#fff}
+.rv-card small{display:block;color:rgba(255,255,255,.65);font-size:13px}
+.rv-card .rv-eye{color:#FF9A6B;font-size:11px;font-weight:700;letter-spacing:.12em}
+.rv-sc{flex-shrink:0;width:74px;height:74px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-family:var(--font-head);font-weight:900;font-size:24px;letter-spacing:-.03em}
+.rv-sc small{display:inline!important;font-size:12px!important;color:#fff!important;opacity:.8;margin-left:1px}
 html,body{overflow-x:clip!important;overflow-y:visible!important}
 #topnav{position:sticky!important;top:0!important;z-index:300!important}
 .card-img[style*="height"]{aspect-ratio:auto!important;width:100%!important}
@@ -16113,6 +16122,67 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       if(!hero.querySelector('img')){var d=document.createElement('div');d.className='cc-hero';d.innerHTML=window.clubCover(c,true);hero.insertBefore(d,hero.firstChild);}
       var lw=hero.querySelector('.club-logo-wrap');if(lw&&!lw.querySelector('img'))lw.innerHTML=window.clubLogoBox(c);
     }).observe(det,{childList:true,subtree:true});
+  }
+})();
+
+// ═══ 360° YARIŞ DEĞERLENDİRMESİ: taslak onayı + yarış sayfası kartı ═══
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var KAT='Yarış Değerlendirmesi';
+  function slugify(t){return String(t||'').toLocaleLowerCase('tr-TR').replace(/[ğüşıöç]/g,function(c){return{ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'}[c];}).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'').slice(0,90);}
+  window._rvDrafts=[];
+  window.renderAdminReviews=async function(){
+    var main=document.getElementById('admin-main');if(!main)return;var fb=window._fb;
+    main.innerHTML='<h2 style="margin-bottom:6px">🏁 360° Yarış Değerlendirmeleri</h2><p style="color:var(--muted);font-size:13px;margin:0 0 16px">Öne çıkan yarışlar bittikten 1 hafta sonra rapor taslağı buraya düşer. Taslaklar sitede görünmez; “Yayınla + bildirim” ile blogda yayınlanır ve tüm kullanıcılara push gider.</p><div id="rv-list"><div class="spinner" style="margin:20px auto"></div></div>';
+    var L=[];try{var sn=await fb.getDocs(fb.collection(fb.db,'reviewDrafts'));sn.forEach(function(d){var x=d.data();delete x.id;L.push(Object.assign({id:d.id},x));});}catch(e){document.getElementById('rv-list').innerHTML='<p style="color:var(--muted)">Yüklenemedi: '+esc(e.code||e.message)+'</p>';return;}
+    L.sort(function(a,b){return ((b.createdAt&&b.createdAt.seconds)||0)-((a.createdAt&&a.createdAt.seconds)||0);});window._rvDrafts=L;
+    var el=document.getElementById('rv-list');
+    el.innerHTML=L.length?L.map(function(d){
+      var pub=d.status==='published';
+      return '<div class="card" style="padding:16px 18px;margin-bottom:12px"><div style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;align-items:flex-start">'
+        +'<div style="min-width:0;flex:1"><div style="font-size:12px;color:var(--muted);margin-bottom:4px">'+esc(d.raceName||'')+' · '+esc(d.raceDate||'')+(d.score?' · <b style="color:var(--or)">'+esc(d.score)+'/10</b>':'')+'</div><b style="font-size:16px;display:block">'+esc(d.title)+'</b>'
+        +'<div style="font-size:13px;color:var(--muted);margin-top:4px">'+esc(d.verdict||d.metaDesc||'')+'</div>'
+        +(d.gaps?'<div style="font-size:12px;margin-top:8px;background:#FFF7E6;border:1px solid #F5D9A6;border-radius:10px;padding:8px 10px">⚠️ Doğrulanamayan başlıklar: '+esc(d.gaps)+'</div>':'')
+        +'<div style="font-size:12px;color:var(--muted);margin-top:8px">🔔 Bildirim: <b>'+esc(d.pushTitle||'')+'</b> — '+esc(d.pushBody||'')+'</div></div>'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap">'+(pub?'<span class="pill pill-gr">✅ Yayında</span>'+(d.slug?'<a class="btn btn-ghost btn-sm" href="/haber/'+esc(d.slug)+'" target="_blank">Gör</a>':''):'<button class="btn btn-ghost btn-sm" onclick="rvPreview(\''+d.id+'\')">👁 Önizle</button><button class="btn btn-or btn-sm" onclick="rvPublish(\''+d.id+'\',true)">✅ Yayınla + bildirim</button><button class="btn btn-ghost btn-sm" onclick="rvPublish(\''+d.id+'\',false)">Sadece yayınla</button>')+'<button class="btn btn-red btn-sm" onclick="rvDelete(\''+d.id+'\')">🗑</button></div>'
+        +'</div><div id="rv-pv-'+d.id+'" style="display:none;margin-top:14px;border-top:1px solid var(--border);padding-top:14px;max-height:520px;overflow:auto" class="blog-body-content"></div></div>';
+    }).join(''):'<div class="card" style="padding:22px;text-align:center;color:var(--muted)">Bekleyen rapor taslağı yok. Öne çıkan (⭐) bir yarış bittikten 1 hafta sonra taslak burada görünür.</div>';
+  };
+  window.rvPreview=function(id){var d=window._rvDrafts.find(function(x){return x.id===id;});var b=document.getElementById('rv-pv-'+id);if(!d||!b)return;if(b.style.display==='none'){b.innerHTML=d.body||'';b.style.display='block';}else b.style.display='none';};
+  window.rvDelete=async function(id){if(!confirm('Taslak silinsin mi?'))return;var fb=window._fb;try{await fb.deleteDoc(fb.doc(fb.db,'reviewDrafts',id));toast('Silindi','ok');window.renderAdminReviews();}catch(e){toast('Hata: '+(e.code||e.message),'err');}};
+  window.rvPublish=async function(id,withPush){
+    var d=window._rvDrafts.find(function(x){return x.id===id;});if(!d)return;
+    if(!confirm(withPush?'Rapor yayınlansın ve TÜM kullanıcılara bildirim gitsin mi?':'Rapor bildirim olmadan yayınlansın mı?'))return;
+    var fb=window._fb;
+    try{
+      var slug=d.slug||slugify(d.title);
+      if((window.BLOG_POSTS||[]).some(function(p){return p.slug===slug;}))slug=slug+'-'+Date.now().toString(36).slice(-4);
+      var post={title:d.title,kategori:KAT,featured:false,body:d.body||'',coverUrl:d.coverUrl||'',tags:d.tags||['yarış değerlendirmesi','360 derece'],metaTitle:d.metaTitle||d.title,metaDesc:d.metaDesc||'',authorName:'RunClub Editör',status:'published',publishedAt:new Date().toISOString().split('T')[0],slug:slug,raceId:d.raceId||'',score:d.score||'',likes:0,createdAt:fb.serverTimestamp()};
+      var r=await fb.addDoc(fb.collection(fb.db,'blog'),post);
+      var url='https://www.runclubturkiye.com/haber/'+slug;
+      if(withPush){
+        await fb.addDoc(fb.collection(fb.db,'pushNotifications'),{title:(d.pushTitle||('🏁 360° Değerlendirme: '+(d.raceName||''))).slice(0,120),body:(d.pushBody||d.verdict||'Yarış değerlendirme raporu yayında.').slice(0,240),url:url,image:'',target:'all',targetRole:'',targetClubId:'',status:'pending',processed:false,sentBy:(window.CU&&window.CU.email)||'admin',createdAt:fb.serverTimestamp(),platform:'web'});
+      }
+      await fb.updateDoc(fb.doc(fb.db,'reviewDrafts',id),{status:'published',blogId:r.id,slug:slug,publishedAt:fb.serverTimestamp(),pushed:!!withPush});
+      if(window.loadBlogFromDB)await window.loadBlogFromDB();
+      toast(withPush?'Yayında ✓ Bildirim kuyruğa alındı':'Yayında ✓','ok');window.renderAdminReviews();
+    }catch(e){toast('Hata: '+(e.code||e.message),'err');}
+  };
+  // Blog kategori seçeneği
+  document.addEventListener('click',function(){var s=document.getElementById('ab-kategori');if(s&&![].some.call(s.options,function(o){return o.value===KAT;})){var o=document.createElement('option');o.value=KAT;o.textContent='🏁 '+KAT;s.appendChild(o);}},true);
+  // Yarış sayfasında rapor kartı
+  var rd=document.getElementById('race-detail-content');
+  if(rd&&window.MutationObserver){
+    new MutationObserver(function(){
+      if(rd.querySelector('.rv-card'))return;
+      var h=rd.querySelector('h2,h1');if(!h)return;var name=h.textContent.trim();
+      var race=(window.RACES||[]).find(function(x){return x.name===name;});if(!race)return;
+      var p=(window.BLOG_POSTS||[]).find(function(b){return b.raceId===race.id&&b.status!=='draft';});if(!p)return;
+      var c=document.createElement('a');c.className='rv-card';c.href='/haber/'+(p.slug||p.id);
+      c.onclick=function(e){e.preventDefault();window.openBlog&&openBlog(p.id);};
+      c.innerHTML='<span class="rv-sc">'+esc(p.score||'360°')+'<small>'+(p.score?'/10':'')+'</small></span><span style="min-width:0"><small class="rv-eye">360° YARIŞ DEĞERLENDİRMESİ</small><b>'+esc(p.title)+'</b><small>Organizasyon, parkur, atmosfer ve SWOT analizi · Raporu oku →</small></span>';
+      var card=rd.querySelector('.card');if(card)card.parentNode.insertBefore(c,card.nextSibling);else rd.prepend(c);
+    }).observe(rd,{childList:true});
   }
 })();
 </script>

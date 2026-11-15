@@ -16211,7 +16211,7 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   window.rvDelete=async function(id){if(!confirm('Taslak silinsin mi?'))return;var fb=window._fb;try{await fb.deleteDoc(fb.doc(fb.db,'reviewDrafts',id));toast('Silindi','ok');window.renderAdminReviews();}catch(e){toast('Hata: '+(e.code||e.message),'err');}};
   window.rvPublish=async function(id,withPush){
     var d=window._rvDrafts.find(function(x){return x.id===id;});if(!d)return;
-    if(!confirm(withPush?'Rapor yayınlansın ve TÜM kullanıcılara bildirim gitsin mi?':'Rapor bildirim olmadan yayınlansın mı?'))return;
+    if(!confirm((withPush?'Rapor yayınlansın ve TÜM kullanıcılara bildirim gitsin mi?':'Rapor bildirim olmadan yayınlansın mı?')+'\n\nSitede 3 gün boyunca üst şerit duyurusu da açılacak (Admin › Popup’tan kapatabilirsin).'))return;
     var fb=window._fb;
     try{
       var slug=d.slug||slugify(d.title);
@@ -16222,6 +16222,8 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       if(withPush){
         await fb.addDoc(fb.collection(fb.db,'pushNotifications'),{title:(d.pushTitle||('🏁 360° Değerlendirme: '+(d.raceName||''))).slice(0,120),body:(d.pushBody||d.verdict||'Yarış değerlendirme raporu yayında.').slice(0,240),url:url,image:'',target:'all',targetRole:'',targetClubId:'',status:'pending',processed:false,sentBy:(window.CU&&window.CU.email)||'admin',createdAt:fb.serverTimestamp(),platform:'web'});
       }
+      try{var t0=new Date(),t3=new Date(Date.now()+3*864e5),fmt=function(d){return d.toISOString().slice(0,10);};
+        await fb.addDoc(fb.collection(fb.db,'popup'),{name:'360° rapor: '+(d.raceName||''),type:'bar',badge:'Yeni',title:('360° Değerlendirme: '+(d.raceName||'')).slice(0,70),body:(d.score?d.score+'/10 · ':'')+(d.verdict||'').slice(0,150),ctaText:'Raporu oku',ctaLink:'/haber/'+slug,imgUrl:'',trigger:'delay',delay:3,scrollPct:40,audience:'all',freqDays:2,start:fmt(t0),end:fmt(t3),priority:5,pages:[],active:true,views:0,clicks:0,closes:0,createdAt:fb.serverTimestamp(),updatedAt:fb.serverTimestamp(),auto:'review'});}catch(pe){}
       await fb.updateDoc(fb.doc(fb.db,'reviewDrafts',id),{status:'published',blogId:r.id,slug:slug,publishedAt:fb.serverTimestamp(),pushed:!!withPush});
       if(window.loadBlogFromDB)await window.loadBlogFromDB();
       toast(withPush?'Yayında ✓ Bildirim kuyruğa alındı':'Yayında ✓','ok');window.renderAdminReviews();

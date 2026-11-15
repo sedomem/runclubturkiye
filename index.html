@@ -15860,6 +15860,10 @@ footer.f26{background:#0E0C0B;color:rgba(255,255,255,.62);padding:64px 0 28px;ma
 .ig26-t em.rl svg{width:13px;height:13px}
 @media(hover:none){.ig26-p span{display:none}}
 .cc-svg{width:100%;height:100%;display:block}
+.demo-badge{position:absolute;top:10px;left:10px;z-index:6;background:rgba(18,16,16,.78);color:#fff;font-size:11px;font-weight:700;letter-spacing:.04em;padding:4px 9px;border-radius:999px;pointer-events:auto;backdrop-filter:blur(6px)}
+[data-demo]{position:relative}
+.demo-band{background:#FFF4E8;border:1px solid #F6D3B5;color:#5A3A22;border-radius:16px;padding:14px 16px;margin:0 0 16px;font-size:14px;line-height:1.55}
+.demo-band a{color:var(--or);font-weight:700;cursor:pointer;white-space:nowrap}
 .rv-card{display:flex;gap:16px;align-items:center;background:#0E0C0B;color:#fff;border-radius:20px;padding:18px 20px;margin:0 0 20px;text-decoration:none;cursor:pointer;transition:transform .2s}
 .rv-card:hover{transform:translateY(-2px)}
 .rv-card b{display:block;font-family:var(--font-head);font-size:17px;line-height:1.25;margin:2px 0 4px;color:#fff}
@@ -16227,6 +16231,35 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   window.arV2Feat=async function(id,on){
     var fb=window._fb;try{await fb.updateDoc(fb.doc(fb.db,'races',id),{featured:!!on});var r=(window.RACES||[]).find(function(x){return x.id===id;});if(r)r.featured=!!on;toast(on?'⭐ Öne çıkarıldı · rapor planlandı':'Öne çıkan kaldırıldı','ok');window.renderAdminRacesV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}
   };
+})();
+
+// ═══ ÖRNEK (DEMO) İÇERİK ETİKETLERİ ═══
+(function(){
+  var B='<span class="demo-badge" title="Bu içerik, sitenin nasıl çalıştığını göstermek için hazırlanmış örnektir">Örnek</span>';
+  // Etkinlik kartları
+  var oe=window.evtCard;
+  if(typeof oe==='function'){
+    var ne=function(e){var h=oe.apply(this,arguments);if(e&&e.demo){h=h.replace(/^(\s*<[a-z]+)([^>]*)>/i,function(m,a,b){return a+b+' data-demo="1">'+B;});}return h;};
+    window.evtCard=ne;try{evtCard=ne;}catch(x){}
+  }
+  // Kulüp kartı
+  var oc=window.clubCard;
+  if(typeof oc==='function'){
+    var nc=function(c){var h=oc.apply(this,arguments);if(c&&c.demo)h=h.replace('<div class="card-img"','<div class="card-img" data-demo="1"').replace(/(<div class="card-img"[^>]*>)/,'$1'+B);return h;};
+    window.clubCard=nc;try{clubCard=nc;}catch(x){}
+  }
+  // Kulüp sayfası bandı
+  var det=document.getElementById('club-detail-content');
+  if(det&&window.MutationObserver){
+    new MutationObserver(function(){
+      if(det.querySelector('.demo-band'))return;
+      var h=det.querySelector('.club-hero-text h2');if(!h)return;
+      var c=(window.CLUBS||[]).find(function(x){return x.name===h.textContent.trim();});if(!c||!c.demo)return;
+      var b=document.createElement('div');b.className='demo-band';
+      b.innerHTML='<b>👋 Bu bir örnek kulüp sayfasıdır.</b> RunClubTürkiye’de bir kulübün nasıl göründüğünü göstermek için hazırladık: grup koşuları, kulüp yarış takvimi ve duyurular. <a onclick="openAuth(\'groupadmin\')">Kendi kulübünü ücretsiz ekle →</a>';
+      det.insertBefore(b,det.firstChild);
+    }).observe(det,{childList:true,subtree:true});
+  }
 })();
 </script>
 </body>

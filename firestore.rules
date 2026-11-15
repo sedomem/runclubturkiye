@@ -110,7 +110,15 @@ service cloud.firestore {
         && request.resource.data.clicks == resource.data.get('clicks', 0) + 1;
     }
     match /firsatlar/{id}{ allow read: if true; allow write: if isSuperAdmin();
+      // Ziyaretçi sayaçları: views / clicks / copies / shares yalnızca +1
+      allow update: if request.resource.data.diff(resource.data).affectedKeys().size() == 1
+        && request.resource.data.diff(resource.data).affectedKeys().hasAny(['views','clicks','copies','shares'])
+        && (('views' in request.resource.data.diff(resource.data).affectedKeys() && request.resource.data.views == resource.data.get('views', 0) + 1)
+          || ('clicks' in request.resource.data.diff(resource.data).affectedKeys() && request.resource.data.clicks == resource.data.get('clicks', 0) + 1)
+          || ('copies' in request.resource.data.diff(resource.data).affectedKeys() && request.resource.data.copies == resource.data.get('copies', 0) + 1)
+          || ('shares' in request.resource.data.diff(resource.data).affectedKeys() && request.resource.data.shares == resource.data.get('shares', 0) + 1));
       match /private/{doc} { allow read: if isAuth(); allow write: if isSuperAdmin(); }
+      match /copies/{uid} { allow read: if isSuperAdmin(); allow create, update: if isAuth() && uid == request.auth.uid; }
     }
     match /ticker/{id}   { allow read: if true; allow write: if isSuperAdmin(); }
     match /igPosts/{id}  { allow read: if true; allow write: if isSuperAdmin(); }

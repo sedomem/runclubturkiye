@@ -9212,6 +9212,7 @@ function buildDashboard(){
       <div style="margin-bottom:14px">
         <button class="btn btn-ghost btn-sm" style="gap:8px" onclick="window.inviteFriend&&inviteFriend()">👫 Arkadaşını Davet Et</button>
       </div>
+      <div id="dash-strava-week"></div>
       <div id="dash-last-race" style="margin-bottom:14px"></div>
       <div id="dash-club-rank" style="margin-bottom:14px"></div>
       <div id="overview-recent-events"></div>
@@ -9255,15 +9256,14 @@ function buildDashboard(){
       </div>
       <div id="km-tab-content">
         <div class="card" style="padding:24px;margin-bottom:14px">
-          <div style="font-size:36px;font-weight:700;color:var(--or);margin-bottom:4px">${CU.totalKm||0} km</div>
+          <div id="km-total" style="font-size:36px;font-weight:700;color:var(--or);margin-bottom:4px">${CU.totalKm||0} km</div>
           <div style="font-size:13px;color:var(--muted);margin-bottom:14px">Toplam koşulan mesafe</div>
-          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px">
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:4px">
             <input type="number" id="km-input" placeholder="km girin..." style="max-width:130px"/>
             <button class="btn btn-or" onclick="addKm(document.getElementById('km-input').value)">Manuel Ekle</button>
-            ${CU.stravaLink?'<button class="btn btn-sm" style="background:#fc4c02;color:#fff;border:none;cursor:pointer" onclick="syncStravaData()">🟠 Strava Sync</button>':''}
           </div>
-          ${!CU.stravaLink?'<p style="font-size:11px;color:var(--muted)">Strava senkronizasyonu için <a onclick="nav(\'profile\')" style="cursor:pointer;color:var(--or)">profiline</a> Strava linki ekle.</p>':''}
         </div>
+        <div id="strava-box" style="margin-bottom:14px"></div>
         <div id="km-events-list"></div>
       </div>
       <div id="pr-tab-content" style="display:none">
@@ -16980,6 +16980,212 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
     }catch(e){b.disabled=false;b.textContent='💬 Toplulukta paylaş';T('Hata: '+e.message,'err');}
   };
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('rrs'))rrsClose();});
+})();
+</script>
+<style id="strava-css">
+.sv-card{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px}
+.sv-hd{display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.sv-logo{width:40px;height:40px;border-radius:10px;background:#FC4C02;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.sv-hd h4{margin:0;font-size:15px;font-weight:800}
+.sv-hd p{margin:2px 0 0;font-size:12px;color:var(--muted)}
+.sv-btn{background:#FC4C02;color:#fff;border:none;border-radius:10px;padding:11px 16px;font-weight:800;font-size:13.5px;cursor:pointer;display:inline-flex;align-items:center;gap:8px}
+.sv-btn:disabled{opacity:.6;cursor:default}
+.sv-ghost{background:none;border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:8px 12px;font-weight:700;font-size:12.5px;cursor:pointer}
+.sv-stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:8px;margin:14px 0}
+.sv-stats>div{background:var(--bg2);border-radius:12px;padding:10px 12px}
+.sv-stats b{display:block;font-family:Archivo,var(--font-head),sans-serif;font-size:20px;font-weight:900;line-height:1.15}
+.sv-stats span{font-size:10.5px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.sv-run{display:flex;gap:12px;align-items:center;padding:11px 0;border-top:1px solid var(--border)}
+.sv-run .d{min-width:44px;text-align:center;background:rgba(252,76,2,.1);border-radius:9px;padding:5px 2px}
+.sv-run .d b{display:block;font-size:15px;color:#FC4C02;line-height:1}.sv-run .d span{font-size:9px;color:var(--muted);font-weight:700}
+.sv-run .t{flex:1;min-width:0}
+.sv-run .t h5{margin:0 0 2px;font-size:13.5px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sv-run .t div{font-size:12px;color:var(--muted)}
+.sv-run .a{display:flex;flex-direction:column;align-items:flex-end;gap:4px;flex-shrink:0}
+.sv-run .a a,.sv-run .a button{font-size:11.5px;font-weight:700;color:#FC4C02;background:none;border:none;cursor:pointer;padding:0;text-decoration:none}
+.sv-race{font-size:10px;font-weight:800;background:#FC4C02;color:#fff;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+.sv-pw{font-size:10.5px;color:var(--muted);text-align:right;margin-top:10px;font-weight:700;letter-spacing:.04em}
+.sv-week{display:flex;align-items:center;gap:12px;background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px;margin-bottom:14px;cursor:pointer}
+.sv-week b{font-family:Archivo,var(--font-head),sans-serif;font-size:18px}
+@media(max-width:560px){.sv-stats{grid-template-columns:repeat(2,minmax(0,1fr))}}
+</style>
+<script id="strava-js">
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var T=function(m,t){try{toast(m,t||'ok');}catch(_){}};
+  var SITE='https://www.runclubturkiye.com';
+  var LOGO='<svg width="20" height="20" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M15.39 17.94l-2.08-4.1h-3.05L15.39 24l5.12-10.16h-3.05zM10.17 0L3.27 13.84h4.06l2.84-5.5 2.83 5.5h4.03z"/></svg>';
+  var M=['OCA','ŞUB','MAR','NİS','MAY','HAZ','TEM','AĞU','EYL','EKİ','KAS','ARA'];
+  var fmtT=function(s){s=Math.round(s||0);var h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};
+  var pace=function(sec,m){if(!sec||!m)return '';var p=sec/(m/1000);return Math.floor(p/60)+':'+String(Math.round(p%60)).padStart(2,'0');};
+  var km1=function(m){return (Math.round((m||0)/100)/10).toString().replace('.',',');};
+  var fb=function(){return window._fb;};
+  var CFG=null;
+  function cfg(){if(CFG)return CFG;CFG=fetch('/api/strava').then(function(r){return r.json();}).catch(function(){return {configured:false};});return CFG;}
+  async function api(body){var r=await fetch('/api/strava',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(body)});var j=await r.json().catch(function(){return {};});if(!r.ok)throw new Error(j.error||('HTTP '+r.status));return j;}
+  var pRef=function(){return fb().doc(fb().db,'users',CU.uid,'private','strava');};
+  var S={conn:null,runs:null,busy:false};
+
+  async function getConn(){if(!window.CU)return null;try{var d=await fb().getDoc(pRef());S.conn=d.exists()?d.data():null;}catch(e){S.conn=null;}return S.conn;}
+  async function accessToken(){
+    var c=S.conn||await getConn();if(!c||!c.refresh_token)throw new Error('Strava bağlı değil');
+    if(!c.access_token||(c.expires_at||0)<Date.now()/1000+120){
+      var t=await api({action:'refresh',refresh_token:c.refresh_token});
+      c=Object.assign({},c,{access_token:t.access_token,refresh_token:t.refresh_token||c.refresh_token,expires_at:t.expires_at});
+      await fb().setDoc(pRef(),c,{merge:true});S.conn=c;
+    }
+    return c.access_token;
+  }
+
+  // ── Bağlan
+  window.stravaConnect=async function(){
+    if(!window.CU){window.openAuth&&openAuth('login');return;}
+    var c=await cfg();if(!c.configured){T('Strava bağlantısı çok yakında aktif olacak','info');return;}
+    var st=Math.random().toString(36).slice(2)+Date.now().toString(36);
+    try{sessionStorage.setItem('sv_state',st);localStorage.setItem('sv_state',st);}catch(_){}
+    var mob=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+    var q=new URLSearchParams({client_id:c.client_id,response_type:'code',redirect_uri:SITE+'/?strava=cb',approval_prompt:'auto',scope:'read,activity:read_all',state:st});
+    location.href='https://www.strava.com/oauth/'+(mob?'mobile/':'')+'authorize?'+q.toString();
+  };
+
+  // ── Geri dönüş (/?strava=cb&code=…)
+  async function handleCallback(){
+    var u=new URL(location.href);if(u.searchParams.get('strava')!=='cb')return;
+    var code=u.searchParams.get('code'),err=u.searchParams.get('error'),st=u.searchParams.get('state'),scope=u.searchParams.get('scope')||'';
+    history.replaceState(null,'','/');
+    if(err){T('Strava bağlantısı iptal edildi','err');return;}
+    var saved='';try{saved=sessionStorage.getItem('sv_state')||localStorage.getItem('sv_state')||'';}catch(_){}
+    if(!code||!st||st!==saved){T('Strava bağlantısı doğrulanamadı, tekrar dene','err');return;}
+    try{sessionStorage.removeItem('sv_state');localStorage.removeItem('sv_state');}catch(_){}
+    for(var i=0;i<40&&!(window.CU&&window._fb);i++)await new Promise(function(r){setTimeout(r,300);});
+    if(!window.CU){T('Strava bağlantısı için önce giriş yap','err');return;}
+    if(!/activity:read/.test(scope)){T('Koşularını çekebilmemiz için "aktiviteleri görüntüle" iznini açık bırakmalısın','err');}
+    try{
+      T('Strava bağlanıyor…','info');
+      var t=await api({action:'exchange',code:code,scope:scope});
+      var a=t.athlete||{};
+      var data={access_token:t.access_token,refresh_token:t.refresh_token,expires_at:t.expires_at,scope:t.scope||scope,athleteId:a.id||null,athleteName:((a.firstname||'')+' '+(a.lastname||'')).trim(),athletePhoto:a.profile||'',connectedAt:Date.now(),lastSyncAt:0};
+      await fb().setDoc(pRef(),data);S.conn=data;
+      await fb().setDoc(fb().doc(fb().db,'users',CU.uid),{stravaConnected:true,stravaAthleteId:a.id||null},{merge:true});
+      CU.stravaConnected=true;
+      T('Strava bağlandı ✓ Koşuların çekiliyor…');
+      if(window.nav)nav('dashboard');
+      setTimeout(function(){window.showDash&&showDash('my-km',null);window.switchKmTab&&switchKmTab('km');stravaSync(true);},700);
+    }catch(e){T('Strava bağlanamadı: '+e.message,'err');}
+  }
+
+  // ── Eşitle
+  window.stravaSync=async function(full){
+    if(S.busy||!window.CU)return;S.busy=true;renderBox();
+    var added=0;
+    try{
+      var c=S.conn||await getConn();if(!c)throw new Error('Strava bağlı değil');
+      var tok=await accessToken();
+      var after=full||!c.lastSyncAt?Math.floor(Date.now()/1000-365*86400):Math.floor(c.lastSyncAt/1000-3*86400);
+      for(var page=1;page<=6;page++){
+        var r=await api({action:'activities',access_token:tok,after:after,page:page,per_page:100});
+        for(var i=0;i<r.runs.length;i++){var x=r.runs[i];
+          await fb().setDoc(fb().doc(fb().db,'users',CU.uid,'runs',x.id),{name:x.name,type:x.type,start:x.start,date:String(x.start||'').slice(0,10),distance:x.distance,moving_time:x.moving_time,elapsed_time:x.elapsed_time,elev:x.elev,workout_type:x.workout_type,hr:x.hr,polyline:String(x.polyline||'').slice(0,4000),source:'strava'},{merge:true});added++;}
+        if(r.count<100)break;
+      }
+      var now=Date.now();await fb().setDoc(pRef(),{lastSyncAt:now},{merge:true});S.conn.lastSyncAt=now;
+      await loadRuns(true);
+      await updateKm();
+      if(full!=='quiet')T(added?'Strava eşitlendi ✓ '+added+' koşu güncellendi':'Strava güncel ✓');
+    }catch(e){if(full!=='quiet')T('Strava eşitlenemedi: '+e.message,'err');console.warn('[strava]',e);}
+    S.busy=false;renderBox();renderWeek();
+  };
+
+  async function loadRuns(force){
+    if(S.runs&&!force)return S.runs;
+    var snap=await fb().getDocs(fb().collection(fb().db,'users',CU.uid,'runs'));
+    var a=[];snap.forEach(function(d){var x=d.data();x.id=d.id;a.push(x);});
+    a.sort(function(p,q){return String(q.start||'').localeCompare(String(p.start||''));});
+    S.runs=a;return a;
+  }
+  // Strava km'si toplam km'ye fark olarak eklenir (manuel girişler korunur)
+  async function updateKm(){
+    var tot=Math.round((S.runs||[]).reduce(function(s,r){return s+(r.distance||0);},0)/100)/10;
+    var u=await fb().getDoc(fb().doc(fb().db,'users',CU.uid));var d=u.exists()?u.data():{};
+    var prev=+d.stravaKm||0,delta=Math.round((tot-prev)*10)/10;
+    if(delta){var nt=Math.max(0,Math.round(((+d.totalKm||0)+delta)*10)/10);
+      await fb().setDoc(fb().doc(fb().db,'users',CU.uid),{stravaKm:tot,totalKm:nt},{merge:true});CU.totalKm=nt;CU.stravaKm=tot;
+      var k=document.getElementById('km-total');if(k)k.textContent=nt+' km';
+      document.querySelectorAll('#dp-overview .s-card').forEach(function(c){var l=c.querySelector('.l');if(l&&/Toplam/i.test(l.textContent)){var v=c.querySelector('.n');if(v)v.textContent=nt+' km';}});}
+  }
+  function stats(runs){
+    var now=new Date(),dow=(now.getDay()+6)%7,wk=new Date(now.getFullYear(),now.getMonth(),now.getDate()-dow).getTime(),mo=new Date(now.getFullYear(),now.getMonth(),1).getTime(),yr=new Date(now.getFullYear(),0,1).getTime();
+    var o={w:0,wn:0,m:0,y:0,yn:0};runs.forEach(function(r){var t=new Date(r.start).getTime();if(t>=wk){o.w+=r.distance;o.wn++;}if(t>=mo)o.m+=r.distance;if(t>=yr){o.y+=r.distance;o.yn++;}});return o;
+  }
+
+  // ── Koşuyu yarış sonucu olarak ekle → story kartı
+  window.stravaToRace=async function(id){
+    var r=(S.runs||[]).find(function(x){return x.id===id;});if(!r)return;
+    try{
+      var ex=await fb().getDocs(fb().query(fb().collection(fb().db,'raceResults'),fb().where('userId','==',CU.uid)));
+      var dup=ex.docs.find(function(d){return d.data().stravaId===id;});
+      if(dup){window.shareRaceResult&&shareRaceResult(dup.id);return;}
+      var km=Math.round(r.distance/100)/10,sec=r.workout_type===1?(r.elapsed_time||r.moving_time):r.moving_time;
+      var clubId=CU.clubId||'',clubName=CU.clubName||'';
+      await fb().addDoc(fb().collection(fb().db,'raceResults'),{userId:CU.uid,userName:CU.name||'',raceName:r.name||'Yarış',distance:km+'km',distanceNum:km,time:fmtT(sec),pace:pace(sec,r.distance)+' dk/km',place:'',date:r.date||'',resultUrl:'',certUrl:'',clubId:clubId,clubName:clubName,source:'strava',stravaId:id,createdAt:fb().serverTimestamp()});
+      T('Yarış sonuçlarına eklendi 🏅');
+      window._rrJustSaved=true;window._RR=null;
+      if(window.openMyRaceResults)openMyRaceResults();else window.loadRaceResults&&loadRaceResults();
+    }catch(e){T('Eklenemedi: '+e.message,'err');}
+  };
+
+  window.stravaDisconnect=async function(){
+    if(!confirm('Strava bağlantısını kesmek istiyor musun? Strava\'dan çekilen koşular buradan silinir, toplam km\'nden düşülür. Yarış sonuçların kalır.'))return;
+    try{
+      try{var tok=await accessToken();await api({action:'deauthorize',access_token:tok});}catch(_){}
+      var runs=await loadRuns(true);for(var i=0;i<runs.length;i++)await fb().deleteDoc(fb().doc(fb().db,'users',CU.uid,'runs',runs[i].id));
+      S.runs=[];await updateKm();
+      await fb().deleteDoc(pRef());S.conn=null;
+      await fb().setDoc(fb().doc(fb().db,'users',CU.uid),{stravaConnected:false,stravaKm:0},{merge:true});CU.stravaConnected=false;
+      T('Strava bağlantısı kesildi');
+    }catch(e){T('Hata: '+e.message,'err');}
+    renderBox();renderWeek();
+  };
+
+  // ── Arayüz
+  async function renderBox(){
+    var el=document.getElementById('strava-box');if(!el||!window.CU)return;
+    var c=await cfg();
+    if(!S.conn&&S.conn!==false){await getConn();if(!S.conn)S.conn=null;}
+    if(!S.conn){
+      if(!c.configured){el.innerHTML=CU.role==='superadmin'?'<div class="sv-card" style="font-size:12.5px;color:var(--muted)"><b style="color:var(--text)">Strava (yalnızca sen görüyorsun):</b> Bağlantı hazır, Vercel\'e STRAVA_CLIENT_ID ve STRAVA_CLIENT_SECRET eklenince üyelere açılır.</div>':'';return;}
+      el.innerHTML='<div class="sv-card"><div class="sv-hd"><div class="sv-logo">'+LOGO+'</div><div style="flex:1;min-width:180px"><h4>Strava\'yı bağla</h4><p>Koşuların otomatik gelsin; haftalık km, aylık toplam ve yarışların tek yerde.</p></div><button class="sv-btn" onclick="stravaConnect()">'+LOGO+' Strava ile bağlan</button></div></div>';
+      return;
+    }
+    var runs=S.runs||[];
+    if(!S.runs){el.innerHTML='<div class="sv-card"><div class="spinner" style="margin:10px auto"></div></div>';try{runs=await loadRuns();}catch(e){runs=[];}}
+    var st=stats(runs),last=S.conn.lastSyncAt?new Date(S.conn.lastSyncAt):null;
+    el.innerHTML='<div class="sv-card"><div class="sv-hd"><div class="sv-logo">'+LOGO+'</div><div style="flex:1;min-width:160px"><h4>Strava bağlı'+(S.conn.athleteName?' · '+esc(S.conn.athleteName):'')+'</h4><p>'+(S.busy?'Eşitleniyor…':last?'Son eşitleme: '+last.toLocaleString('tr-TR',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'}):'Henüz eşitlenmedi')+'</p></div>'
+      +'<button class="sv-ghost" onclick="stravaSync()" '+(S.busy?'disabled':'')+'>↻ Şimdi eşitle</button></div>'
+      +'<div class="sv-stats"><div><b>'+km1(st.w)+'</b><span>Bu hafta km</span></div><div><b>'+km1(st.m)+'</b><span>Bu ay km</span></div><div><b>'+km1(st.y)+'</b><span>'+new Date().getFullYear()+' km</span></div><div><b>'+st.yn+'</b><span>Koşu ('+new Date().getFullYear()+')</span></div></div>'
+      +(runs.length?runs.slice(0,8).map(function(r){var d=new Date(r.start);return '<div class="sv-run"><div class="d"><b>'+(isNaN(d)?'':d.getDate())+'</b><span>'+(isNaN(d)?'':M[d.getMonth()])+'</span></div><div class="t"><h5>'+esc(r.name)+(r.workout_type===1?'<span class="sv-race">YARIŞ</span>':'')+'</h5><div>'+km1(r.distance)+' km · '+fmtT(r.moving_time)+' · '+pace(r.moving_time,r.distance)+' /km'+(r.elev?' · ↑'+Math.round(r.elev)+' m':'')+'</div></div><div class="a"><button onclick="stravaToRace(\''+r.id+'\')">🏅 '+(r.workout_type===1?'Sonucu paylaş':'Yarış olarak ekle')+'</button><a href="https://www.strava.com/activities/'+encodeURIComponent(r.id)+'" target="_blank" rel="noopener">Strava\'da gör ↗</a></div></div>';}).join('')
+        :'<p style="font-size:13px;color:var(--muted);margin:6px 0 0">'+(S.busy?'Koşuların getiriliyor…':'Son bir yılda Strava\'da koşu bulunamadı.')+'</p>')
+      +'<div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px"><button class="sv-ghost" style="border:none;padding:4px 0;color:var(--muted);font-weight:600" onclick="stravaDisconnect()">Bağlantıyı kes</button><div class="sv-pw">POWERED BY STRAVA</div></div></div>';
+  }
+  async function renderWeek(){
+    var el=document.getElementById('dash-strava-week');if(!el||!window.CU)return;
+    if(!S.conn){el.innerHTML='';return;}
+    var runs=S.runs||await loadRuns().catch(function(){return [];}),st=stats(runs);
+    el.innerHTML='<div class="sv-week" onclick="showDash(\'my-km\',null)"><div class="sv-logo" style="width:34px;height:34px">'+LOGO+'</div><div style="flex:1"><div style="font-size:11px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.06em">Bu hafta</div><b>'+km1(st.w)+' km</b> <span style="font-size:12.5px;color:var(--muted)">· '+st.wn+' koşu · bu ay '+km1(st.m)+' km</span></div><span style="color:var(--muted)">›</span></div>';
+  }
+  async function onDash(){
+    if(!window.CU)return;
+    await getConn();renderBox();renderWeek();
+    if(S.conn&&!S.busy&&(Date.now()-(S.conn.lastSyncAt||0))>3*3600e3)stravaSync('quiet');
+  }
+  window.stravaRender=onDash;
+  // Panel açılınca
+  var _sd=window.showDash;
+  if(_sd&&!_sd._sv){var f=function(id){var r=_sd.apply(this,arguments);if(id==='my-km'||id==='overview')setTimeout(onDash,60);return r;};f._sv=true;for(var k in _sd)f[k]=_sd[k];window.showDash=f;}
+  var _bd=window.buildDashboard;
+  if(_bd&&!_bd._sv){var g=function(){var r=_bd.apply(this,arguments);S.runs=null;setTimeout(onDash,120);return r;};g._sv=true;window.buildDashboard=g;}
+  window.syncStravaData=function(){S.conn?stravaSync():stravaConnect();};
+  if(/[?&]strava=cb/.test(location.search))handleCallback();
 })();
 </script>
 </body>

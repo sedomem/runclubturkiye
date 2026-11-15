@@ -109,7 +109,9 @@ service cloud.firestore {
       allow update: if request.resource.data.diff(resource.data).affectedKeys().hasOnly(['clicks'])
         && request.resource.data.clicks == resource.data.get('clicks', 0) + 1;
     }
-    match /firsatlar/{id}{ allow read: if true; allow write: if isSuperAdmin(); }
+    match /firsatlar/{id}{ allow read: if true; allow write: if isSuperAdmin();
+      match /private/{doc} { allow read: if isAuth(); allow write: if isSuperAdmin(); }
+    }
     match /ticker/{id}   { allow read: if true; allow write: if isSuperAdmin(); }
     match /igPosts/{id}  { allow read: if true; allow write: if isSuperAdmin(); }
     match /reviewDrafts/{id} { allow read, write: if isSuperAdmin(); }

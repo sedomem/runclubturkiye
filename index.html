@@ -5057,12 +5057,12 @@ function renderHomeFirsatlar(){
   const items=(window.FIRSATLAR||[]).filter(f=>f.aktif).slice(0,3);
   el.innerHTML=items.map(f=>`
     <div class="firsat-card" onclick="openFirsatDetail('${f.id}')">
-      ${f.indirim?`<div class="firsat-badge">${f.indirim}</div>`:''}
+      ${f.indirim?`<div class="firsat-badge">ÖZEL İNDİRİM</div>`:''}
       <div class="firsat-img">${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik||'Fırsat'}" loading="lazy" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover"/>`:'<span style="font-size:48px">🎁</span>'}</div>
       <div class="firsat-body">
         <span class="tag tag-pu">${f.kategori||'Genel'}</span>
         <h3>${f.baslik}</h3>
-        <p>${(f.aciklama||'').substring(0,70)}...</p>
+        <p>${(window.fMask?window.fMask(f.aciklama,f):(f.aciklama||'')).substring(0,70)}...</p>
         <div class="firsat-meta"><span>🏷️ ${f.marka||''}</span>${f.bitis?`<span>⏰ ${f.bitis}'e kadar</span>`:''}</div>
         <button class="btn btn-or btn-full" onclick="event.stopPropagation();openFirsatDetail('${f.id}')">Detayı Gör →</button>
       </div>
@@ -7412,10 +7412,10 @@ function renderFirsatlar(list){
                :'<span style="font-size:48px">🎁</span>')
       +'</div>'
       +'<div class="firsat-body">'
-      +(f.indirim?'<div class="firsat-badge">'+f.indirim+' İNDİRİM</div>':'')
+      +(f.indirim?'<div class="firsat-badge">ÖZEL İNDİRİM</div>':'')
       +'<span class="tag tag-pu">'+f.kategori+'</span>'
       +'<h3>'+f.baslik+'</h3>'
-      +'<p style="font-size:13px;color:var(--muted);line-height:1.5">'+( f.aciklama||'').slice(0,80)+(f.aciklama&&f.aciklama.length>80?'...':'')+'</p>'
+      +'<p style="font-size:13px;color:var(--muted);line-height:1.5">'+(window.fMask?window.fMask(f.aciklama,f):(f.aciklama||'')).slice(0,80)+(f.aciklama&&f.aciklama.length>80?'...':'')+'</p>'
       +cdHtml
       +'<div class="firsat-views">👁 '+(f.views||0)+' kez görüntülendi</div>'
       +'<button class="btn btn-or btn-full" style="margin-top:8px">Detayları Gör →</button>'
@@ -8849,7 +8849,7 @@ window.openFirsatDetail=id=>{
     <div class="firsat-detail-hero" style="${f.imgUrl?'':'background:linear-gradient(135deg,#1a0500,#2a0800)'}">
       ${f.imgUrl?`<img src="${f.imgUrl}" alt="${f.baslik||'Fırsat'}" loading="lazy" alt="${f.baslik}" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/><div class="hero-overlay"></div>`:''}
       <div class="hero-inner" style="position:relative;z-index:1;text-align:center">
-        ${f.indirim?`<div style="background:var(--or);color:#fff;padding:6px 16px;border-radius:20px;font-size:15px;font-weight:700;display:inline-block;margin-bottom:12px">${f.indirim} İNDİRİM</div>`:'<div style="font-size:60px;margin-bottom:12px">🎁</div>'}
+        ${f.indirim?`<div style="background:var(--or);color:#fff;padding:6px 16px;border-radius:20px;font-size:15px;font-weight:700;display:inline-block;margin-bottom:12px">ÖZEL İNDİRİM</div>`:'<div style="font-size:60px;margin-bottom:12px">🎁</div>'}
         <h2 style="font-size:clamp(20px,3vw,32px);font-weight:700;color:#fff;margin-bottom:8px">${f.baslik}</h1>
         <p style="color:rgba(255,255,255,.8);font-size:15px">${f.marka||''}</p>
       </div>
@@ -15060,6 +15060,11 @@ window.syncClubCount=function(n){
   }catch(_){}
 };
 
+
+// Üye olmayanlardan indirim oranı ve kodu gizle
+window.fMask=function(t,f){t=String(t||'');if(f&&f.kod){t=t.split(f.kod).join('••••••');}
+  t=t.replace(/%\s?\d+([.,]\d+)?(\s?(indirim|oranında|lik|luk|lük))?/gi,'özel indirim').replace(/\d+([.,]\d+)?\s?(TL|₺)\s?(indirim)/gi,'özel indirim').replace(/özel indirim\s+indirim/gi,'özel indirim');
+  return t;};
 // ═══ FIRSAT DETAY v2 (marka vitrini) ═══
 (function(){
   var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
@@ -15097,7 +15102,7 @@ window.syncClubCount=function(n){
   window.fdShare=function(id,how){
     var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(!f)return;
     var url=location.origin+'/firsat/'+encodeURIComponent(f.slug||f.id);
-    var txt=(f.marka?f.marka+': ':'')+(f.baslik||'')+(f.indirim?' ('+f.indirim+' indirim)':'')+' — RunClubTürkiye üyelerine özel';
+    var txt=(f.marka?f.marka+': ':'')+(f.baslik||'')+' — RunClubTürkiye üyelerine özel indirim';
     if(how==='wa'){window.open('https://wa.me/?text='+encodeURIComponent(txt+' '+url),'_blank','noopener');}
     else if(how==='native'&&navigator.share){navigator.share({title:f.baslik,text:txt,url:url}).catch(function(){});}
     else{(navigator.clipboard?navigator.clipboard.writeText(url):Promise.reject()).then(function(){toast('Bağlantı kopyalandı 🔗','ok');}).catch(function(){prompt('Bağlantı:',url);});}
@@ -15129,6 +15134,7 @@ window.syncClubCount=function(n){
     id=f.id;
     var cont=document.getElementById('firsat-detail-content');if(!cont)return;
     var isIn=!!window.CU;
+    if(!isIn&&window.fMask){f=Object.assign({},f,{aciklama:fMask(f.aciklama,f),markaHakkinda:fMask(f.markaHakkinda,f),kosullar:fMask(f.kosullar,f),nasilKullanilir:fMask(f.nasilKullanilir,f),baslik:fMask(f.baslik,f)});}
     window.trackFirsatView&&window.trackFirsatView(id);
     var end=endOf(f.bitis),now=Date.now();
     var expired=!!(end&&end.getTime()<now);
@@ -15160,9 +15166,9 @@ window.syncClubCount=function(n){
 
     var bannerHtml='<div class="fd-banner'+(f.bannerFit==='cover'?' cover':'')+'">'
       +(banner?'<img class="bg" src="'+esc(banner)+'" alt="" aria-hidden="true"><img class="fg" src="'+esc(banner)+'" alt="'+esc(f.baslik||'Fırsat')+'" fetchpriority="high">'
-        :'<div class="ph"><b>'+esc(f.indirim||'🎁')+'</b><span>'+esc(brand)+'</span></div>')
+        :'<div class="ph"><b>'+(f.indirim?'Özel indirim':'🎁')+'</b><span>'+esc(brand)+'</span></div>')
       +'<div class="fd-chips">'+chips+'</div>'
-      +(f.indirim&&banner?'<div class="fd-disc"><b>'+esc(f.indirim)+'</b><small>İNDİRİM</small></div>':'')
+      +(f.indirim&&banner?'<div class="fd-disc"><b>Özel</b><small>İNDİRİM</small></div>':'')
       +'</div>';
 
     var meta='';
@@ -15183,7 +15189,7 @@ window.syncClubCount=function(n){
         +'<button class="btn btn-or fd-cta" onclick="openAuth(\'register\')">✨ Ücretsiz üye ol, kodu al</button>'
         +'<button class="btn btn-ghost btn-full" onclick="openAuth(\'login\')">Zaten üyeyim — giriş yap</button>';
     }
-    var offer='<div class="fd-offer"><div class="fd-offer-top"><small>RunClub üyelerine özel</small><b>'+esc(f.indirim||'Özel fırsat')+'</b><p>'+esc(f.baslik||'')+'</p></div><div class="fd-offer-body">'
+    var offer='<div class="fd-offer"><div class="fd-offer-top"><small>RunClub üyelerine özel</small><b>'+esc(isIn?(f.indirim||'Özel fırsat'):(f.indirim?'Özel indirim':'Özel fırsat'))+'</b><p>'+esc(f.baslik||'')+'</p></div><div class="fd-offer-body">'
       +(end&&!expired?'<div class="fd-cd-lbl">Kampanyanın bitmesine</div><div class="fd-cd" id="fd-cd"></div>':'')
       +codeHtml
       +'<div class="fd-share"><button type="button" onclick="fdShare(\''+id+'\',\'wa\')">💬 WhatsApp</button><button type="button" onclick="fdShare(\''+id+'\',\''+(navigator.share?'native':'copy')+'\')">🔗 Paylaş</button></div>'
@@ -15191,7 +15197,7 @@ window.syncClubCount=function(n){
       +'</div></div>';
 
     var hl='<div class="fd-hl">'
-      +(f.indirim?'<div><small>İndirim</small><b style="color:var(--or)">'+esc(f.indirim)+'</b></div>':'')
+      +(f.indirim&&isIn?'<div><small>İndirim</small><b style="color:var(--or)">'+esc(f.indirim)+'</b></div>':'')
       +'<div><small>Marka</small><b>'+esc(brand)+'</b></div>'
       +(f.kategori?'<div><small>Kategori</small><b>'+esc(f.kategori)+'</b></div>':'')
       +'<div><small>Geçerlilik</small><b>'+(end?trDate(end):'Süresiz')+'</b></div></div>';
@@ -15207,11 +15213,11 @@ window.syncClubCount=function(n){
 
     var others=all.filter(function(x){if(x.id===id||x.aktif===false)return false;var e=endOf(x.bitis);return !(e&&e.getTime()<now);})
       .sort(function(a,b){return (b.featured?1:0)-(a.featured?1:0)||((a.kategori===f.kategori)?-1:0)-((b.kategori===f.kategori)?-1:0);}).slice(0,3);
-    var more=others.length?'<section style="margin-top:10px"><h2 style="font-size:18px;margin:0 0 12px">🎁 Diğer fırsatlar</h2><div class="fd-more">'+others.map(function(o){var im=o.imgUrl||o.bannerUrl;return '<a onclick="openFirsatDetail(\''+o.id+'\');window.scrollTo({top:0,behavior:\'smooth\'})"><div class="im">'+(im?'<img src="'+esc(im)+'" alt="" loading="lazy">':'')+(o.indirim?'<em>'+esc(o.indirim)+'</em>':'')+'</div><div class="t">'+esc(o.baslik)+'<small>'+esc(o.marka||'')+'</small></div></a>';}).join('')+'</div></section>':'';
+    var more=others.length?'<section style="margin-top:10px"><h2 style="font-size:18px;margin:0 0 12px">🎁 Diğer fırsatlar</h2><div class="fd-more">'+others.map(function(o){var im=o.imgUrl||o.bannerUrl;return '<a onclick="openFirsatDetail(\''+o.id+'\');window.scrollTo({top:0,behavior:\'smooth\'})"><div class="im">'+(im?'<img src="'+esc(im)+'" alt="" loading="lazy">':'')+(o.indirim?'<em>Özel indirim</em>':'')+'</div><div class="t">'+esc(o.baslik)+'<small>'+esc(o.marka||'')+'</small></div></a>';}).join('')+'</div></section>':'';
 
     var bar;
     if(expired)bar='<div class="fd-bar"><div class="d"><b>—</b><small>Süresi doldu</small></div><button class="btn btn-ghost" onclick="nav(\'firsatlar\')">Diğer fırsatlar</button></div>';
-    else if(!isIn)bar='<div class="fd-bar"><div class="d"><b>'+esc(f.indirim||'🎁')+'</b><small>üyelere özel</small></div><button class="btn btn-or" onclick="openAuth(\'register\')">Üye ol, kodu al</button></div>';
+    else if(!isIn)bar='<div class="fd-bar"><div class="d"><b>🎁</b><small>üyelere özel</small></div><button class="btn btn-or" onclick="openAuth(\'register\')">Üye ol, kodu al</button></div>';
     else if(f.kod)bar='<div class="fd-bar"><div class="d"><b>'+esc(f.indirim||'🎁')+'</b><small>'+esc(f.kod)+'</small></div><button class="btn btn-or" onclick="fdCopy(\''+id+'\')">📋 Kodu kopyala</button>'+(link?'<a class="btn btn-ghost" style="flex:0 0 auto" href="'+esc(link)+'" target="_blank" rel="noopener sponsored" onclick="fdGo(\''+id+'\')">Git →</a>':'')+'</div>';
     else if(link)bar='<div class="fd-bar"><div class="d"><b>'+esc(f.indirim||'🎁')+'</b><small>'+esc(brand)+'</small></div><a class="btn btn-or" href="'+esc(link)+'" target="_blank" rel="noopener sponsored" onclick="fdGo(\''+id+'\')">'+esc(cta)+' →</a></div>';
     else bar='';
@@ -15225,7 +15231,7 @@ window.syncClubCount=function(n){
     try{var bn=document.getElementById('bottom-nav'),fbar=cont.querySelector('.fd-bar');if(bn&&fbar&&getComputedStyle(fbar).display!=='none'){var bh=getComputedStyle(bn).display!=='none'?bn.offsetHeight:0;fbar.style.bottom=bh+'px';if(bh)fbar.style.paddingBottom='10px';cont.querySelector('.fd').style.paddingBottom=(84+bh)+'px';}}catch(e){}
     nav('firsat-detail');
     document.title=(f.baslik||'Fırsat')+(f.marka?' – '+f.marka:'')+' | RunClubTürkiye Fırsatlar';
-    try{var md=document.querySelector('meta[name="description"]');if(md)md.setAttribute('content',((f.marka?f.marka+': ':'')+(f.baslik||'')+(f.indirim?' — '+f.indirim+' indirim':'')+'. RunClubTürkiye üyelerine özel fırsat.').slice(0,160));}catch(e){}
+    try{var md=document.querySelector('meta[name="description"]');if(md)md.setAttribute('content',((f.marka?f.marka+': ':'')+(f.baslik||'')+(f.indirim?' — üyelere özel indirim':'')+'. RunClubTürkiye üyelerine özel fırsat.').slice(0,160));}catch(e){}
     window.rcTrack&&window.rcTrack('view_promotion',{promotion_id:id,promotion_name:f.baslik||'',creative_name:f.marka||''});
   };
 
@@ -15345,10 +15351,12 @@ window.syncClubCount=function(n){
       if(window._frEditId){
         var cur=(window.FIRSATLAR||[]).find(function(x){return x.id===window._frEditId;});
         if(!data.imgUrl&&cur&&!cur.imgUrl&&data.bannerUrl)data.imgUrl=data.bannerUrl;
-        await fb.updateDoc(fb.doc(fb.db,'firsatlar',window._frEditId),data);toast('Fırsat güncellendi ✓','ok');
+        var sec={kod:data.kod||'',indirim:data.indirim||''};data.hasSecret=true;data.kod='';data.indirim=sec.indirim?'Özel indirim':'';
+        await fb.updateDoc(fb.doc(fb.db,'firsatlar',window._frEditId),data);await fb.setDoc(fb.doc(fb.db,'firsatlar',window._frEditId,'private','secret'),sec);toast('Fırsat güncellendi ✓','ok');
       }else{
         if(window.makeSlug)data.slug=window.makeSlug(baslik);data.imgUrl=data.imgUrl||'';data.aktif=true;data.views=0;data.clicks=0;data.createdAt=fb.serverTimestamp();
-        await fb.addDoc(fb.collection(fb.db,'firsatlar'),data);toast('Fırsat eklendi ✓','ok');
+        var sec2={kod:data.kod||'',indirim:data.indirim||''};data.hasSecret=true;data.kod='';data.indirim=sec2.indirim?'Özel indirim':'';
+        var nr=await fb.addDoc(fb.collection(fb.db,'firsatlar'),data);await fb.setDoc(fb.doc(fb.db,'firsatlar',nr.id,'private','secret'),sec2);toast('Fırsat eklendi ✓','ok');
       }
       window.resetFirsatForm();
       if(window.loadFirsatlarFromDB)await window.loadFirsatlarFromDB();
@@ -16509,6 +16517,26 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   var o=window.openFirsatDetail;if(typeof o!=='function'||o._re)return;
   var w=function(id){window._fdCur=id;return o.apply(this,arguments);};w._re=1;window.openFirsatDetail=w;
   var last=null;setInterval(function(){var u=window.CU&&window.CU.uid||'';if(last===null){last=u;return;}if(u!==last){last=u;var pg=document.getElementById('pg-firsat-detail');if(u&&pg&&pg.classList.contains('on')&&window._fdCur){window.openFirsatDetail(window._fdCur);window.rcTrack&&rcTrack('sign_up_from_deal',{firsat_id:window._fdCur});setTimeout(function(){var c=document.querySelector('.fd-code');if(c){c.scrollIntoView({behavior:'smooth',block:'center'});c.animate([{boxShadow:'0 0 0 0 rgba(232,98,42,.6)'},{boxShadow:'0 0 0 14px rgba(232,98,42,0)'}],{duration:1200,iterations:2});}},400);}}},1000);
+})();
+
+// Fırsat kodu/oranı: yalnızca giriş yapmış üyeler okuyabilir (firsatlar/{id}/private/secret)
+(function(){
+  window.loadFirsatSecret=async function(f){
+    if(!f||!f.hasSecret||f._sec||!window.CU)return f;var fb=window._fb;
+    try{var d=await fb.getDoc(fb.doc(fb.db,'firsatlar',f.id,'private','secret'));if(d.exists()){var x=d.data();f.kod=x.kod||'';f.indirim=x.indirim||f.indirim;f._sec=1;}}catch(e){}
+    return f;
+  };
+  var o=window.openFirsatDetail;
+  if(typeof o==='function'&&!o._sec){
+    var w=function(id){var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id||x.slug===id;});
+      if(f&&window.CU&&f.hasSecret&&!f._sec){window.loadFirsatSecret(f).then(function(){o(id);});return;}
+      if(f&&!window.CU&&f._sec){f.kod='';f.indirim='Özel indirim';f._sec=0;}
+      return o.apply(this,arguments);};
+    for(var k in o)w[k]=o[k];w._sec=1;window.openFirsatDetail=w;
+  }
+  // admin düzenle: gizli alanları forma getir
+  var oe=window.editFirsatV2;
+  if(typeof oe==='function'){window.editFirsatV2=function(id){var a=arguments,t=this;var f=(window.FIRSATLAR||[]).find(function(x){return x.id===id;});if(f&&f.hasSecret&&!f._sec){window.loadFirsatSecret(f).then(function(){oe.apply(t,a);});return;}return oe.apply(t,a);};}
 })();
 </script>
 </body>

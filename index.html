@@ -2489,7 +2489,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 <!-- PROFILE -->
 <div class="pg" id="pg-profile"><div class="container sec" style="max-width:820px">
-  <h2 style="margin-bottom:18px">Profilim</h2>
+  <div style="display:flex;align-items:center;gap:12px;margin-bottom:18px"><button type="button" class="pf-back" onclick="pfBack()" aria-label="Geri">← Geri</button><h2 style="margin:0">Profilim</h2></div>
   <div style="background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:28px;display:flex;gap:20px;align-items:center;margin-bottom:20px;flex-wrap:wrap">
     <div style="width:80px;height:80px;border-radius:50%;background:var(--or);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:700;flex-shrink:0;overflow:hidden;cursor:pointer;position:relative" id="profile-avatar-el" onclick="document.getElementById('photo-input').click()">
       <span id="profile-initials">U</span>
@@ -4423,107 +4423,16 @@ window.approveApplication=async(appId,uid)=>{
 
     // 6. Onay e-postası gönder (Firebase Email Extension)
     if(email){
-      const WELCOME_HTML=`<!DOCTYPE html>
-<html lang="tr">
-<head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/></head>
-<body style="margin:0;padding:0;background:#f4f4f4;font-family:Arial,sans-serif;">
-<table width="100%" cellpadding="0" cellspacing="0" style="background:#f4f4f4;padding:30px 0;">
-<tr><td align="center">
-<table width="600" cellpadding="0" cellspacing="0" style="background:#fff;border-radius:12px;overflow:hidden;max-width:600px;width:100%;">
-  <!-- HEADER -->
-  <tr><td style="background:#E8622A;padding:28px 36px;text-align:center;">
-    <h2 style="margin:0;color:#fff;font-size:24px;font-weight:800;">🏃 RunClub Türkiye</h2>
-    <p style="margin:8px 0 0;color:rgba(255,255,255,.85);font-size:13px;">Grup Admin Paneli — Hoş Geldin!</p>
-  </td></tr>
-  <!-- BODY -->
-  <tr><td style="padding:32px 36px;">
-    <h2 style="margin:0 0 12px;font-size:20px;color:#1a1a1a;">Tebrikler, {{NAME}}! 🎉</h2>
-    <p style="margin:0 0 16px;color:#444;font-size:14px;line-height:1.7;">
-      <strong>{{CLUB_NAME}}</strong> kulübünün Grup Admin başvurusu onaylandı!
-      Artık kulübünü RunClub Türkiye üzerinden yönetebilir, etkinlik ve antrenman takvimi oluşturabilirsin.
-    </p>
-
-    <!-- GİRİŞ BİLGİLERİ -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#fdf6f2;border-radius:10px;margin-bottom:20px;">
-    <tr><td style="padding:20px 24px;">
-      <h3 style="margin:0 0 12px;color:#E8622A;font-size:14px;">🔐 Nasıl Giriş Yaparsın?</h3>
-      <p style="margin:0 0 8px;color:#333;font-size:13px;line-height:1.7;">
-        <strong>1.</strong> <a href="https://www.runclubturkiye.com" style="color:#E8622A;">runclubturkiye.com</a> adresine git<br/>
-        <strong>2.</strong> Sağ üstteki <strong>"Giriş Yap"</strong> butonuna tıkla<br/>
-        <strong>3.</strong> <strong>Grup Admin</strong> sekmesini seç<br/>
-        <strong>4.</strong> Kayıt olurken kullandığın e-posta ve şifreni gir<br/>
-        <strong>5.</strong> Giriş yaptıktan sonra sol menüdeki <strong>"Grup Paneli"</strong> butonuna tıkla
-      </p>
-    </td></tr>
-    </table>
-
-    <!-- DASHBOARD ÖZELLİKLERİ -->
-    <table width="100%" cellpadding="0" cellspacing="0" style="background:#1a1a1a;border-radius:10px;margin-bottom:20px;">
-    <tr><td style="padding:20px 24px;">
-      <h3 style="margin:0 0 14px;color:#E8622A;font-size:14px;">⚡ Grup Panelinde Neler Yapabilirsin?</h3>
-      <table cellpadding="0" cellspacing="0" width="100%">
-        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
-          <span style="color:#E8622A;font-weight:700">📅 Etkinlik Yönetimi</span><br/>
-          <span style="color:#aaa;font-size:12px;">Kulübünüze özel etkinlikler oluştur, düzenle ve yönet. Etkinlikler süper admin onayıyla sitede yayınlanır.</span>
-        </td></tr>
-        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
-          <span style="color:#E8622A;font-weight:700">🏃 Koşu / Antrenman Takvimi</span><br/>
-          <span style="color:#aaa;font-size:12px;">Haftalık antrenman programları oluştur. Tarih, saat, konum ve tempo bilgilerini ekle.</span>
-        </td></tr>
-        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
-          <span style="color:#E8622A;font-weight:700">👥 Üye Yönetimi</span><br/>
-          <span style="color:#aaa;font-size:12px;">Kulüp üyelerini görüntüle, başvuruları onayla veya reddet.</span>
-        </td></tr>
-        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
-          <span style="color:#E8622A;font-weight:700">📢 Duyuru Gönder</span><br/>
-          <span style="color:#aaa;font-size:12px;">Kulüp üyelerine anlık duyurular yayınla. Push bildirimleri ile üyelerine ulaş.</span>
-        </td></tr>
-        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
-          <span style="color:#E8622A;font-weight:700">🏆 Yarış Takvimi</span><br/>
-          <span style="color:#aaa;font-size:12px;">Kulübünüze özel yarış takvimi oluştur ve üyelerini haberdar et.</span>
-        </td></tr>
-        <tr><td style="padding:6px 0;color:#ddd;font-size:13px;line-height:1.6;vertical-align:top;">
-          <span style="color:#E8622A;font-weight:700">✏️ Kulüp Profilini Düzenle</span><br/>
-          <span style="color:#aaa;font-size:12px;">Kulübünün banner, logo, açıklama ve sosyal medya linklerini güncelle.</span>
-        </td></tr>
-      </table>
-    </td></tr>
-    </table>
-
-    <!-- CTA -->
-    <div style="text-align:center;margin-bottom:24px;">
-      <a href="https://www.runclubturkiye.com" style="display:inline-block;background:#E8622A;color:#fff;font-size:14px;font-weight:700;padding:13px 32px;border-radius:8px;text-decoration:none;">
-        🚀 Grup Paneline Git
-      </a>
-    </div>
-
-    <p style="margin:0;color:#888;font-size:13px;line-height:1.6;">
-      Herhangi bir sorun yaşarsan bize ulaşabilirsin: <a href="mailto:runclubturkiye@gmail.com" style="color:#E8622A;">runclubturkiye@gmail.com</a><br/>
-      <strong style="color:#E8622A;">RunClub Türkiye Ekibi</strong> 🧡
-    </p>
-  </td></tr>
-  <!-- FOOTER -->
-  <tr><td style="background:#f9f9f9;padding:16px 36px;border-top:1px solid #eee;text-align:center;">
-    <p style="margin:0;color:#aaa;font-size:11px;">
-      © 2025 RunClub Türkiye &nbsp;·&nbsp;\n      <a href="https://www.runclubturkiye.com/privacy-policy.html" style="color:#aaa;">Gizlilik</a> &nbsp;·&nbsp; <a href="mailto:runclubturkiye@gmail.com" style="color:#aaa;">runclubturkiye@gmail.com</a>\n    </p>
-  </td></tr>
-</table>
-</td></tr>
-</table>
-
-<!-- PWA -->
-<div id="pwa-install-bar"><span class="pwa-icon">📱</span><div class="pwa-text"><strong>Uygulamayı Yükle</strong><span>Ana ekrana ekle, daha hızlı aç</span></div><button class="btn btn-or btn-sm" onclick="pwaInstall()">Yükle</button><button class="btn btn-ghost btn-sm" onclick="pwaDismiss()">X</button></div>
-</body>
-</html>`;
+      const WELCOME_HTML=`<!DOCTYPE html><html lang="tr"><head><meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/><meta name="x-apple-disable-message-reformatting"/><title>RunClubTürkiye</title><style>@media(max-width:620px){.pad{padding:26px 20px!important}.hero{font-size:24px!important}}</style></head><body style="margin:0;padding:0;background:#F2EFEA"><div style="display:none;max-height:0;overflow:hidden;opacity:0">{{CLUB_NAME}} artık RunClubTürkiye'de! Grup Admin panelin açıldı.</div><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#F2EFEA"><tr><td align="center" style="padding:26px 12px 40px"><table role="presentation" width="600" cellpadding="0" cellspacing="0" style="width:100%;max-width:600px"><tr><td align="center" style="padding:4px 0 18px"><a href="https://www.runclubturkiye.com"><img src="https://www.runclubturkiye.com/logo.png" width="200" height="41" alt="RunClubTürkiye" style="display:block;border:0;width:200px;height:auto"/></a></td></tr><tr><td style="background:#ffffff;border-radius:18px;overflow:hidden"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td style="height:6px;background:#E8622A;font-size:0;line-height:0">&nbsp;</td></tr><tr><td class="pad" style="padding:34px 40px 36px"><div style="font-family:Arial,Helvetica,sans-serif;font-size:11px;font-weight:700;letter-spacing:2.5px;color:#E8622A;text-transform:uppercase;margin-bottom:8px">Başvurun onaylandı</div><h1 class="hero" style="margin:0 0 16px;font-family:Arial,Helvetica,sans-serif;font-size:28px;line-height:1.2;color:#121010;font-weight:900">Tebrikler {{NAME}}, kulübün yayında! 🎉</h1><p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:14.5px;line-height:1.65;color:#3b3b3b;">Tebrikler! <b>{{CLUB_NAME}}</b> için grup yöneticisi başvurun <b>onaylandı</b>. Kulübün artık RunClubTürkiye'de; giriş yaptığında menüde <b>Grup Admin Paneli</b> seni bekliyor.</p><h2 style="margin:30px 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:1.3;color:#121010">İlk 15 dakikada kulübünü hazırla</h2><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#FFF7F2;border:1px solid #F6D9C9;border-radius:14px"><tr><td style="padding:18px 20px 6px"><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="top" style="width:34px;padding:0 0 12px"><div style="width:26px;height:26px;border-radius:50%;background:#E8622A;color:#fff;text-align:center;line-height:26px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700">1</div></td><td valign="top" style="padding:3px 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#3b3b3b"><b style="color:#121010">Kulüp Ayarları:</b> logo, kapak görseli, kısa açıklama, şehir ve Instagram hesabını ekle.</td></tr></table><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="top" style="width:34px;padding:0 0 12px"><div style="width:26px;height:26px;border-radius:50%;background:#E8622A;color:#fff;text-align:center;line-height:26px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700">2</div></td><td valign="top" style="padding:3px 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#3b3b3b"><b style="color:#121010">İlk etkinliğini oluştur:</b> haftalık grup koşunu ya da antrenmanını yayınla; üyeler sitede kaydolsun.</td></tr></table><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="top" style="width:34px;padding:0 0 12px"><div style="width:26px;height:26px;border-radius:50%;background:#E8622A;color:#fff;text-align:center;line-height:26px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700">3</div></td><td valign="top" style="padding:3px 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#3b3b3b"><b style="color:#121010">Takvimi doldur:</b> antrenman programını ve kulüpçe katılacağınız yarışları ekle.</td></tr></table><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="top" style="width:34px;padding:0 0 12px"><div style="width:26px;height:26px;border-radius:50%;background:#E8622A;color:#fff;text-align:center;line-height:26px;font-family:Arial,Helvetica,sans-serif;font-size:13px;font-weight:700">4</div></td><td valign="top" style="padding:3px 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:14px;line-height:1.55;color:#3b3b3b"><b style="color:#121010">Üyelerini davet et:</b> kulüp sayfanın linkini WhatsApp grubunda ve Instagram'da paylaş; başvuruları panelden onayla.</td></tr></table></td></tr></table><div style="padding:18px 0 4px"><table role="presentation" cellpadding="0" cellspacing="0" style="display:inline-table;margin:4px 6px 4px 0"><tr><td style="background:#E8622A;border-radius:10px"><a href="https://www.runclubturkiye.com/?go=panel" style="display:inline-block;padding:13px 22px;font-family:Arial,Helvetica,sans-serif;font-size:14px;font-weight:700;color:#ffffff;text-decoration:none">Grup Admin Paneline git →</a></td></tr></table></div><h2 style="margin:30px 0 12px;font-family:Arial,Helvetica,sans-serif;font-size:18px;line-height:1.3;color:#121010">Panelinde neler yapabilirsin?</h2><table role="presentation" width="100%" cellpadding="0" cellspacing="0"><tr><td valign="top" style="width:44px;padding:0 0 14px"><div style="width:36px;height:36px;border-radius:10px;background:#FDF0EA;text-align:center;line-height:36px;font-size:18px">📅</div></td><td valign="top" style="padding:0 0 14px 6px;font-family:Arial,Helvetica,sans-serif"><div style="font-size:14.5px;font-weight:700;color:#121010;margin:1px 0 3px">Etkinlikler</div><div style="font-size:13.5px;line-height:1.55;color:#5b5b5b">Grup koşusu ve antrenman oluştur (tarih, mesafe, kontenjan, ücret, pace grupları). Onaydan sonra sitede ve kulüp sayfanda yayınlanır.</div></td></tr><tr><td valign="top" style="width:44px;padding:0 0 14px"><div style="width:36px;height:36px;border-radius:10px;background:#FDF0EA;text-align:center;line-height:36px;font-size:18px">🗓</div></td><td valign="top" style="padding:0 0 14px 6px;font-family:Arial,Helvetica,sans-serif"><div style="font-size:14.5px;font-weight:700;color:#121010;margin:1px 0 3px">Etkinlik Takvimi ve Kulüp Yarışları</div><div style="font-size:13.5px;line-height:1.55;color:#5b5b5b">Haftalık antrenman programını ve kulüpçe katılacağınız yarışları ekle; üyelerinin panelinde otomatik görünür.</div></td></tr><tr><td valign="top" style="width:44px;padding:0 0 14px"><div style="width:36px;height:36px;border-radius:10px;background:#FDF0EA;text-align:center;line-height:36px;font-size:18px">👥</div></td><td valign="top" style="padding:0 0 14px 6px;font-family:Arial,Helvetica,sans-serif"><div style="font-size:14.5px;font-weight:700;color:#121010;margin:1px 0 3px">Üyeler ve Başvurular</div><div style="font-size:13.5px;line-height:1.55;color:#5b5b5b">Kulübüne katılmak isteyenleri onayla, üye listeni yönet, etkinlik katılımcılarını gör.</div></td></tr><tr><td valign="top" style="width:44px;padding:0 0 14px"><div style="width:36px;height:36px;border-radius:10px;background:#FDF0EA;text-align:center;line-height:36px;font-size:18px">📢</div></td><td valign="top" style="padding:0 0 14px 6px;font-family:Arial,Helvetica,sans-serif"><div style="font-size:14.5px;font-weight:700;color:#121010;margin:1px 0 3px">Duyurular ve Mesajlaşma</div><div style="font-size:13.5px;line-height:1.55;color:#5b5b5b">Üyelerine duyuru gönder; bildirim olarak paneline düşsün. Üyelerinle mesajlaş.</div></td></tr><tr><td valign="top" style="width:44px;padding:0 0 14px"><div style="width:36px;height:36px;border-radius:10px;background:#FDF0EA;text-align:center;line-height:36px;font-size:18px">🏅</div></td><td valign="top" style="padding:0 0 14px 6px;font-family:Arial,Helvetica,sans-serif"><div style="font-size:14.5px;font-weight:700;color:#121010;margin:1px 0 3px">Performanslar ve İstatistikler</div><div style="font-size:13.5px;line-height:1.55;color:#5b5b5b">Üyelerinin yarış sonuçları, en aktif üyeler ve katılım istatistikleri.</div></td></tr><tr><td valign="top" style="width:44px;padding:0 0 14px"><div style="width:36px;height:36px;border-radius:10px;background:#FDF0EA;text-align:center;line-height:36px;font-size:18px">⚙</div></td><td valign="top" style="padding:0 0 14px 6px;font-family:Arial,Helvetica,sans-serif"><div style="font-size:14.5px;font-weight:700;color:#121010;margin:1px 0 3px">Kulüp Ayarları</div><div style="font-size:13.5px;line-height:1.55;color:#5b5b5b">Logo, kapak görseli, açıklama, şehir ve sosyal medya hesapların. İyi görsel ve açıklama, kulüp sayfanı aramalarda öne çıkarır.</div></td></tr></table><table role="presentation" width="100%" cellpadding="0" cellspacing="0" style="background:#16171B;border-radius:14px;margin-top:8px"><tr><td style="padding:20px 22px;font-family:Arial,Helvetica,sans-serif"><div style="font-size:11px;font-weight:700;letter-spacing:2px;color:#F0A070;text-transform:uppercase;margin-bottom:10px">Üyelerine sunduklarımız</div><div style="font-size:13.5px;line-height:1.7;color:#E9E9EC">Kulübüne katılan her koşucu kendi panelinde kulüp takvimini görür, etkinliklere kaydolur, koşu dosyalarını yükleyip haftalık km'sini takip eder ve yarış sonuçlarını <b style="color:#fff">story kartı</b> olarak paylaşır. Paylaşılan her kartta kulübünün adı yer alır.</div></td></tr></table><p style="margin:0 0 14px;font-family:Arial,Helvetica,sans-serif;font-size:14.5px;line-height:1.65;color:#3b3b3b;margin-top:8px"><br/>Herhangi bir konuda yardıma ihtiyacın olursa bu e-postayı yanıtlaman yeterli.<br/>İyi koşular! 🧡<br/><b style="color:#E8622A">RunClubTürkiye Ekibi</b></p></td></tr></table></td></tr><tr><td align="center" style="padding:22px 10px 0;font-family:Arial,Helvetica,sans-serif;font-size:12px;line-height:1.7;color:#8a8580"><a href="https://www.instagram.com/runclubturkiye/" style="color:#E8622A;font-weight:700;text-decoration:none">Instagram @runclubturkiye</a> &nbsp;·&nbsp; <a href="https://www.runclubturkiye.com" style="color:#E8622A;font-weight:700;text-decoration:none">runclubturkiye.com</a><br/>Sorun mu var? Bu e-postayı yanıtla ya da <a href="mailto:runclubturkiye@gmail.com" style="color:#8a8580">runclubturkiye@gmail.com</a> adresine yaz.<br/>© 2026 RunClubTürkiye &nbsp;·&nbsp; <a href="https://www.runclubturkiye.com/gizlilik" style="color:#8a8580">Gizlilik</a> &nbsp;·&nbsp; <a href="https://www.runclubturkiye.com/kullanim-kosullari" style="color:#8a8580">Kullanım Koşulları</a></td></tr></table></td></tr></table></body></html>`;
       const emailHtml=WELCOME_HTML
         .replace(/\{\{NAME\}\}/g, name)
         .replace(/\{\{CLUB_NAME\}\}/g, clubName);
       await addDoc(collection(db,'mail'),{
         to: email,
         message:{
-          subject: `✅ Tebrikler ${name}! Grup Admin Başvurunuz Onaylandı — RunClub Türkiye`,
+          subject: `🎉 Tebrikler ${name}! ${clubName} artık RunClubTürkiye'de — Grup Admin panelin açıldı`,
           html:    emailHtml,
-          text:    `Merhaba ${name}, ${clubName} kulübünün Grup Admin başvurusu onaylandı! Giriş yapmak için: https://www.runclubturkiye.com`,
+          text:    `Merhaba ${name}, ${clubName} için Grup Admin başvurun onaylandı! Panelin: https://www.runclubturkiye.com/?go=panel`,
         },
       });
     }
@@ -17412,6 +17321,70 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   if(_sd&&!_sd._rf){var f=function(id){var r=_sd.apply(this,arguments);if(id==='my-km'||id==='overview')setTimeout(function(){render();renderWeek();},80);return r;};f._rf=true;for(var k in _sd)f[k]=_sd[k];window.showDash=f;}
   var _bd=window.buildDashboard;
   if(_bd&&!_bd._rf){var g=function(){var r=_bd.apply(this,arguments);setTimeout(onDash,150);return r;};g._rf=true;window.buildDashboard=g;}
+})();
+</script>
+<style id="profile-fix-css">
+.pf-back{display:inline-flex;align-items:center;gap:6px;background:var(--card);border:1.5px solid var(--border);color:var(--text);border-radius:10px;padding:8px 14px;font-weight:700;font-size:13.5px;cursor:pointer}
+.pf-back:hover{border-color:var(--or);color:var(--or)}
+</style>
+<script id="profile-fix-js">
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  // ── Sayfa geçmişi (geri düğmesi için)
+  var prevPg='';
+  function wrapNav(){var o=window.nav;if(!o||o._pb)return;
+    var f=function(pg){var cur=(document.querySelector('.pg.on')||{}).id||'';if(pg==='profile'&&cur&&cur!=='pg-profile')prevPg=cur.replace(/^pg-/,'');var r=o.apply(this,arguments);if(pg==='profile')setTimeout(loadProfileExtras,400);return r;};
+    for(var k in o)f[k]=o[k];f._pb=true;window.nav=f;}
+  wrapNav();window.addEventListener('load',function(){setTimeout(wrapNav,80);});
+  window.pfBack=function(){
+    var prev=prevPg;prevPg='';
+    if(prev&&document.getElementById('pg-'+prev)&&!/detail$/.test(prev)){nav(prev);return;}
+    if(history.length>1){history.back();setTimeout(function(){var on=document.querySelector('.pg.on');if(on&&on.id==='pg-profile')nav('dashboard');},350);return;}
+    nav(window.CU?'dashboard':'home');
+  };
+
+  // ── Kulüp üyeliklerim (userId ve uid alanlarının ikisi de) + rozetler — "Yükleniyor" takılması düzeltildi
+  window.loadProfileClubs=async function(){
+    var el=document.getElementById('profile-clubs-container');if(!el)return;
+    if(!window.CU||!window._fb){el.innerHTML='<p style="font-size:13px;color:var(--muted)">Giriş yapınca kulüplerin görünür.</p>';return;}
+    var fb=window._fb;
+    try{
+      var qs=await Promise.all([fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('userId','==',CU.uid))),fb.getDocs(fb.query(fb.collection(fb.db,'memberships'),fb.where('uid','==',CU.uid)))]);
+      var seen={},list=[];qs.forEach(function(sn){sn.forEach(function(d){var x=d.data();if(!x.clubId||seen[x.clubId])return;seen[x.clubId]=1;list.push(x);});});
+      if(!list.length){el.innerHTML='<p style="font-size:13px;color:var(--muted);margin:0">Henüz bir kulübe üye değilsin. <a onclick="nav(\'clubs\')" style="color:var(--or);font-weight:700;cursor:pointer">Kulüp bul →</a></p>';return;}
+      el.innerHTML='<div class="profile-clubs-list">'+list.map(function(m){var c=(window.CLUBS||[]).find(function(x){return x.id===m.clubId;})||{};var nm=c.name||m.clubName||'Kulüp';
+        var lg=c.logoUrl||c.logo||'';var st=m.status&&m.status!=='active'&&m.status!=='approved'?'<span style="font-size:11px;font-weight:700;color:#b45309;background:#fef3c7;border-radius:8px;padding:2px 8px;margin-left:6px">Onay bekliyor</span>':'';
+        return '<div class="profile-club-row" style="cursor:pointer" onclick="openClub(\''+esc(m.clubId)+'\')">'
+          +(lg?'<img src="'+esc(lg)+'" alt="" style="width:40px;height:40px;border-radius:10px;object-fit:cover;flex-shrink:0">':'<div style="width:40px;height:40px;border-radius:10px;background:var(--or);display:flex;align-items:center;justify-content:center;color:#fff;font-size:14px;font-weight:800;flex-shrink:0">'+esc(nm.slice(0,2).toLocaleUpperCase('tr-TR'))+'</div>')
+          +'<div style="flex:1;min-width:0"><div style="font-size:14px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">'+esc(nm)+st+'</div>'+(c.city?'<div style="font-size:12px;color:var(--muted)">📍 '+esc(c.city)+'</div>':'')+'</div><span style="font-size:12px;color:var(--or)">→</span></div>';}).join('')+'</div>';
+    }catch(e){el.innerHTML='<p style="font-size:13px;color:var(--muted);margin:0">Kulüplerin yüklenemedi. <a onclick="loadProfileClubs()" style="color:var(--or);cursor:pointer;font-weight:700">Tekrar dene</a></p>';}
+  };
+  window.loadProfileBadges=function(){
+    var el=document.getElementById('profile-badges-container');if(!el)return;
+    if(!window.CU){el.innerHTML='';return;}
+    var rules=window.BADGE_RULES||[];var mine=CU.badges||[];
+    var earned=rules.filter(function(b){return mine.indexOf(b.id)>-1;});
+    var next=rules.filter(function(b){return mine.indexOf(b.id)<0;}).slice(0,3);
+    el.innerHTML=(earned.length?'<div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px">'+earned.map(function(b){return '<div title="'+esc(b.desc)+'" style="display:flex;align-items:center;gap:6px;padding:6px 12px;background:rgba(232,98,42,.1);border-radius:20px;font-size:12.5px;font-weight:700"><span style="font-size:16px">'+b.ico+'</span>'+esc(b.name)+'</div>';}).join('')+'</div>'
+        :'<p style="font-size:13px;color:var(--muted);margin:0 0 10px">Henüz rozet kazanmadın. Etkinliğe katılıp kulübe üye oldukça rozetler açılır.</p>')
+      +(next.length?'<div style="font-size:12px;color:var(--muted)">Sıradaki: '+next.map(function(b){return '🔒 '+esc(b.name)+' <span style="opacity:.8">('+esc(b.desc)+')</span>';}).join(' · ')+'</div>':'')
+      +'<a onclick="nav(\'dashboard\');setTimeout(function(){showDash(\'badges\',null)},600)" style="display:inline-block;margin-top:8px;font-size:12.5px;color:var(--or);font-weight:700;cursor:pointer">Tüm rozetler →</a>';
+  };
+  function loadProfileExtras(){var pg=document.getElementById('pg-profile');if(!pg||!pg.classList.contains('on'))return;loadProfileClubs();loadProfileBadges();}
+  window.loadProfileExtras=loadProfileExtras;
+  // profil sayfası her açıldığında (doğrudan /profil linki, yenileme vb.)
+  var pgp=document.getElementById('pg-profile');
+  if(pgp&&window.MutationObserver)new MutationObserver(function(){if(pgp.classList.contains('on'))setTimeout(loadProfileExtras,200);}).observe(pgp,{attributes:true,attributeFilter:['class']});
+  // giriş tamamlanınca profil açıksa yükle
+  var tries=0,iv=setInterval(function(){tries++;if(window.CU&&window._fb){clearInterval(iv);loadProfileExtras();}if(tries>60)clearInterval(iv);},500);
+
+  // ── E-posta bağlantıları: ?go=dashboard | ?go=panel
+  (function(){var m=location.search.match(/[?&]go=(dashboard|panel)\b/);if(!m)return;var dest=m[1];
+    try{history.replaceState(null,'',location.pathname);}catch(_){}
+    var n=0,t=setInterval(function(){n++;
+      if(window.CU&&window.nav){clearInterval(t);if(dest==='panel'&&window.goPanel&&['superadmin','groupadmin','subadmin'].indexOf(CU.role)>-1)goPanel();else nav('dashboard');}
+      else if(n===16&&!window.CU&&window.openAuth){openAuth('login');}
+      if(n>120)clearInterval(t);},500);})();
 })();
 </script>
 </body>

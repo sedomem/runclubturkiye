@@ -16245,16 +16245,25 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   // Kulüp kartı
   var oc=window.clubCard;
   if(typeof oc==='function'){
-    var nc=function(c){var h=oc.apply(this,arguments);if(c&&c.demo)h=h.replace('<div class="card-img"','<div class="card-img" data-demo="1"').replace(/(<div class="card-img"[^>]*>)/,'$1'+B);return h;};
+    var nc=function(c){var h=oc.apply(this,arguments);if(c&&(c.demo||(window.DEMO_CLUBS||{})[c.id]))h=h.replace('<div class="card-img"','<div class="card-img" data-demo="1"').replace(/(<div class="card-img"[^>]*>)/,'$1'+B);return h;};
     window.clubCard=nc;try{clubCard=nc;}catch(x){}
   }
+  // demo kulüp listesi
+  window.DEMO_CLUBS={};
+  (function load(n){var fb=window._fb;if(!fb||!fb.getDocs||!fb.where){if(n<40)setTimeout(function(){load(n+1);},300);return;}
+    fb.getDocs(fb.query(fb.collection(fb.db,'clubs'),fb.where('demo','==',true))).then(function(sn){sn.forEach(function(d){window.DEMO_CLUBS[d.id]=1;});
+      var C=window.CLUBS||[];C.forEach(function(x){if(window.DEMO_CLUBS[x.id])x.demo=true;});
+      var cl=document.getElementById('clubs-list');if(cl&&C.length&&cl.querySelector('.card')){var cta=cl.querySelector('.club-card');cl.innerHTML=C.map(window.clubCard).join('');if(cta)cl.appendChild(cta);}
+      var hc=document.getElementById('home-clubs');if(hc&&hc.children.length)hc.innerHTML=C.slice(0,4).map(window.clubCard).join('');
+      var det=document.getElementById('club-detail-content');if(det&&det.innerHTML){var t=document.createElement('i');det.appendChild(t);t.remove();}
+    }).catch(function(){});})(0);
   // Kulüp sayfası bandı
   var det=document.getElementById('club-detail-content');
   if(det&&window.MutationObserver){
     new MutationObserver(function(){
       if(det.querySelector('.demo-band'))return;
       var h=det.querySelector('.club-hero-text h2');if(!h)return;
-      var c=(window.CLUBS||[]).find(function(x){return x.name===h.textContent.trim();});if(!c||!c.demo)return;
+      var c=(window.CLUBS||[]).find(function(x){return x.name===h.textContent.trim();});if(!c||!(c.demo||(window.DEMO_CLUBS||{})[c.id]))return;
       var b=document.createElement('div');b.className='demo-band';
       b.innerHTML='<b>👋 Bu bir örnek kulüp sayfasıdır.</b> RunClubTürkiye’de bir kulübün nasıl göründüğünü göstermek için hazırladık: grup koşuları, kulüp yarış takvimi ve duyurular. <a onclick="openAuth(\'groupadmin\')">Kendi kulübünü ücretsiz ekle →</a>';
       det.insertBefore(b,det.firstChild);

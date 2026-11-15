@@ -9698,6 +9698,7 @@ function renderAdminSection(sec){
   if(sec==='reviews')setTimeout(()=>window.renderAdminReviews&&window.renderAdminReviews(),60);
   if(sec==='blog'){setTimeout(initQuillEditor,200);setTimeout(()=>window.renderAdminBlogLists&&window.renderAdminBlogLists(),30);}
   if(sec==='races')setTimeout(initQuillRaceEditor,200);
+  if(sec==='races')setTimeout(()=>window.renderAdminRacesV2&&window.renderAdminRacesV2(),60);
   if(sec==='banners')setTimeout(()=>{
     renderBannerSlots();
     ['events','clubs','races','blog','community'].forEach(t=>{const el=document.getElementById('banner-tab-'+t);if(el)el.style.display='none';});
@@ -16184,6 +16185,48 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       var card=rd.querySelector('.card');if(card)card.parentNode.insertBefore(c,card.nextSibling);else rd.prepend(c);
     }).observe(rd,{childList:true});
   }
+})();
+
+// ═══ ADMIN YARIŞ LİSTESİ v2: arama, filtre, tarih sırası, ⭐ öne çıkar (rapor) ═══
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var st={q:'',f:'all'};
+  var norm=function(s){return String(s||'').toLocaleLowerCase('tr-TR');};
+  window.renderAdminRacesV2=function(){
+    var main=document.getElementById('admin-main');if(!main)return;
+    var tbl=main.querySelector('table');if(tbl)tbl.style.display='none';
+    var box=document.getElementById('ar-v2');
+    if(!box){box=document.createElement('div');box.id='ar-v2';box.className='card';box.style.cssText='padding:0;overflow:hidden;margin-top:18px';main.appendChild(box);
+      box.innerHTML='<div style="padding:14px;border-bottom:1px solid var(--border);display:flex;gap:10px;flex-wrap:wrap;align-items:center"><h3 style="margin:0;font-size:15px;flex:1;min-width:160px">🏆 Yarışlar <span id="ar-v2-n" style="font-weight:400;color:var(--muted);font-size:12px"></span></h3>'
+        +'<input id="ar-v2-q" type="search" placeholder="Yarış veya şehir ara…" style="max-width:240px;padding:8px 12px" oninput="arV2Set(\'q\',this.value)">'
+        +'<div style="display:flex;gap:6px;flex-wrap:wrap" id="ar-v2-f">'+[['all','Tümü'],['up','Yaklaşan'],['past','Geçmiş'],['feat','⭐ Rapor yazılacak']].map(function(x){return '<button class="btn btn-sm '+(x[0]==='all'?'btn-or':'btn-ghost')+'" data-f="'+x[0]+'" onclick="arV2Set(\'f\',\''+x[0]+'\')">'+x[1]+'</button>';}).join('')+'</div></div>'
+        +'<div style="padding:10px 14px;background:#FFF8EC;font-size:12.5px;color:var(--text2);border-bottom:1px solid var(--border)">⭐ işaretlediğin yarışlar sitede öne çıkanlarda gösterilir ve yarıştan <b>1 hafta sonra 360° değerlendirme raporu</b> hazırlanıp Admin › 🏁 Değerlendirmeler’e onayına gelir.</div>'
+        +'<div id="ar-v2-list"></div>';}
+    var today=new Date();today.setHours(0,0,0,0);
+    var L=(window.RACES||[]).slice().filter(function(r){
+      var d=r.date?new Date(r.date):null,past=d&&d<today;
+      if(st.f==='up'&&past)return false;if(st.f==='past'&&!past)return false;if(st.f==='feat'&&!r.featured)return false;
+      return !st.q||norm(r.name+' '+(r.location||'')).indexOf(norm(st.q))>=0;
+    });
+    L.sort(function(a,b){var da=a.date||'9999',db=b.date||'9999';return st.f==='past'?(db<da?-1:db>da?1:0):(da<db?-1:da>db?1:0);});
+    var nf=(window.RACES||[]).filter(function(r){return r.featured;}).length;
+    document.getElementById('ar-v2-n').textContent='('+L.length+' gösteriliyor · ⭐ '+nf+')';
+    [].forEach.call(document.querySelectorAll('#ar-v2-f button'),function(b){b.className='btn btn-sm '+(b.dataset.f===st.f?'btn-or':'btn-ghost');});
+    var el=document.getElementById('ar-v2-list');
+    el.innerHTML=L.length?L.map(function(r){
+      var d=r.date?new Date(r.date):null,past=d&&d<today;
+      var due=r.date?new Date(new Date(r.date).getTime()+7*864e5).toLocaleDateString('tr-TR',{day:'numeric',month:'short'}):'';
+      return '<div class="abl-row"'+(r.featured?' style="background:#fffaf0"':'')+'>'
+        +(r.imgUrl?'<img src="'+esc(r.imgUrl)+'" alt="" loading="lazy">':'<div class="ph"></div>')
+        +'<div class="ti"><b>'+esc(r.name)+(past?' <span style="color:#e55;font-size:11px;font-weight:600">[Geçti]</span>':'')+'</b><span>📅 '+esc(window.fmtTRDate?fmtTRDate(r.date):r.date||'—')+' · 📍 '+esc(r.location||'—')+(r.featured?' · <b style="color:#b45309">Rapor: '+esc(due)+'</b>':'')+'</span></div>'
+        +'<div class="abl-act"><label class="abl-star'+(r.featured?' on':'')+'" title="Öne çıkar + 360° rapor" style="display:inline-flex;align-items:center;gap:5px;cursor:pointer"><input type="checkbox" '+(r.featured?'checked ':'')+'onchange="arV2Feat(\''+r.id+'\',this.checked)" style="margin:0;width:17px;height:17px;accent-color:#f59e0b">⭐</label>'
+        +'<button class="btn btn-ghost btn-sm" data-rid="'+r.id+'" onclick="editRace(this.dataset.rid);window.scrollTo({top:0,behavior:\'smooth\'})">✏️</button><button class="btn btn-red btn-sm" data-rid="'+r.id+'" onclick="deleteRace(this.dataset.rid)">🗑</button></div></div>';
+    }).join(''):'<p style="padding:16px;color:var(--muted);font-size:13px">Sonuç yok.</p>';
+  };
+  window.arV2Set=function(k,v){st[k]=v;window.renderAdminRacesV2();};
+  window.arV2Feat=async function(id,on){
+    var fb=window._fb;try{await fb.updateDoc(fb.doc(fb.db,'races',id),{featured:!!on});var r=(window.RACES||[]).find(function(x){return x.id===id;});if(r)r.featured=!!on;toast(on?'⭐ Öne çıkarıldı · rapor planlandı':'Öne çıkan kaldırıldı','ok');window.renderAdminRacesV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}
+  };
 })();
 </script>
 </body>

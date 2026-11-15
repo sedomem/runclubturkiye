@@ -16503,6 +16503,13 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
   window.ppToggle=async function(id,on){var fb=window._fb;try{await fb.updateDoc(fb.doc(fb.db,'popup',id),{active:!!on,updatedAt:fb.serverTimestamp()});window.renderAdminPopupV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}};
   window.ppDel=async function(id){if(!confirm('Kampanya silinsin mi?'))return;var fb=window._fb;try{await fb.deleteDoc(fb.doc(fb.db,'popup',id));window.renderAdminPopupV2();}catch(e){toast('Hata: '+(e.code||e.message),'err');}};
 })();
+
+// Fırsat detayında giriş/kayıt sonrası kodu otomatik göster
+(function(){
+  var o=window.openFirsatDetail;if(typeof o!=='function'||o._re)return;
+  var w=function(id){window._fdCur=id;return o.apply(this,arguments);};w._re=1;window.openFirsatDetail=w;
+  var last=null;setInterval(function(){var u=window.CU&&window.CU.uid||'';if(last===null){last=u;return;}if(u!==last){last=u;var pg=document.getElementById('pg-firsat-detail');if(u&&pg&&pg.classList.contains('on')&&window._fdCur){window.openFirsatDetail(window._fdCur);window.rcTrack&&rcTrack('sign_up_from_deal',{firsat_id:window._fdCur});setTimeout(function(){var c=document.querySelector('.fd-code');if(c){c.scrollIntoView({behavior:'smooth',block:'center'});c.animate([{boxShadow:'0 0 0 0 rgba(232,98,42,.6)'},{boxShadow:'0 0 0 14px rgba(232,98,42,0)'}],{duration:1200,iterations:2});}},400);}}},1000);
+})();
 </script>
 </body>
 </html>

@@ -5105,7 +5105,7 @@ function evtCard(e){
     <div class="ev-info">
       <span class="tag tag-or">${e.cat}</span>
       <h3>${e.emoji||'🏃'} ${e.title}</h3>
-      <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span><span class="meta">💳 ${e.fee}</span></div>
+      <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${window.kmU?kmU(e.dist):e.dist}</span><span class="meta">💳 ${e.fee}</span></div>
       ${e.pace?.length?`<div class="pace-chips">${e.pace.map(p=>`<span class="pace-chip">${p}</span>`).join('')}</div>`:''}
       ${avatarHtml}
       <div class="fomo-bar" style="margin-top:6px"><div class="fomo-bar-fill ${barColor}" style="width:${Math.min(pct,100)}%"></div></div>
@@ -5135,7 +5135,7 @@ window.openEvent=id=>{
       <span class="tag tag-or">${e.cat}</span>
       <h2 style="font-size:clamp(18px,4vw,26px);margin:8px 0;color:#fff;line-height:1.2">${e.emoji||'🏃'} ${e.title}</h1>
       ${club?`<div style="color:rgba(255,255,255,0.9);font-size:14px;font-weight:600;margin-bottom:8px">🤝 ${club.name}</div>`:''}
-      <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
+      <div class="ev-meta" style="margin-bottom:14px"><span class="meta">📅 ${e.date}</span><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${window.kmU?kmU(e.dist):e.dist}</span></div>
       ${e.desc?`<p style="color:rgba(255,255,255,0.8);font-size:13px;line-height:1.6;margin-top:12px">${e.desc}</p>`:''}
       <div class="fomo-countdown-wrap" id="ev-cd"></div>
     </div>
@@ -6318,7 +6318,7 @@ window.renderClubPublicEvents = async function(clubId) {
           <div class="ev-info">
             <span class="tag tag-or">${e.cat||''}</span>
             <h3 style="font-size:14px">${e.title}</h3>
-            <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${e.dist}</span></div>
+            <div class="ev-meta"><span class="meta">📍 ${e.city}</span><span class="meta">📏 ${window.kmU?kmU(e.dist):e.dist}</span></div>
           </div>
         </div>`;
     }).join('');
@@ -9193,7 +9193,7 @@ function buildDashboard(){
     {id:'club-events',ico:'🏟️',l:'Kulüp Etkinlikleri'},
     {id:'my-events',ico:'📅',l:'Etkinliklerim'},
     {id:'my-clubs',ico:'🤝',l:'Kulüplerim'},
-    {id:'my-km',ico:'🏃',l:'KM Takibi'},
+    {id:'my-km',ico:'🏃',l:'Koşu & Yarış'},
     {id:'my-discussions',ico:'💬',l:'Yorumlarım'},
     {id:'badges',ico:'🏅',l:'Rozetler'},
     {id:'profile-tab',ico:'⚙',l:'Profil'},
@@ -9212,6 +9212,7 @@ function buildDashboard(){
       <div style="margin-bottom:14px">
         <button class="btn btn-ghost btn-sm" style="gap:8px" onclick="window.inviteFriend&&inviteFriend()">👫 Arkadaşını Davet Et</button>
       </div>
+      <div id="dash-last-race" style="margin-bottom:14px"></div>
       <div id="dash-club-rank" style="margin-bottom:14px"></div>
       <div id="overview-recent-events"></div>
       <div style="margin-top:18px;padding-top:16px;border-top:1px solid var(--border)">
@@ -9261,27 +9262,27 @@ function buildDashboard(){
             <button class="btn btn-or" onclick="addKm(document.getElementById('km-input').value)">Manuel Ekle</button>
             ${CU.stravaLink?'<button class="btn btn-sm" style="background:#fc4c02;color:#fff;border:none;cursor:pointer" onclick="syncStravaData()">🟠 Strava Sync</button>':''}
           </div>
-          ${!CU.stravaLink?'<p style="font-size:11px;color:var(--muted)">Strava senkronizasyonu için <a onclick="nav(\'profile\'" style="cursor:pointer;color:var(--or)">profiline</a> Strava linki ekle.</p>':''}
+          ${!CU.stravaLink?'<p style="font-size:11px;color:var(--muted)">Strava senkronizasyonu için <a onclick="nav(\'profile\')" style="cursor:pointer;color:var(--or)">profiline</a> Strava linki ekle.</p>':''}
         </div>
         <div id="km-events-list"></div>
       </div>
       <div id="pr-tab-content" style="display:none">
-        <h3 style="margin:0 0 12px;font-size:15px">Kisisel Rekorlarim</h3>
+        <h3 style="margin:0 0 12px;font-size:15px">Kişisel Rekorlarım</h3>
         <div class="pr-grid" id="pr-grid-display"></div>
         <div class="card" style="padding:16px">
-          <h4 style="margin:0 0 10px;font-size:13px;color:var(--muted)">PR Guncelle</h4>
+          <h4 style="margin:0 0 10px;font-size:13px;color:var(--muted)">PR Güncelle</h4>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
             <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Mesafe</label>
             <select id="pr-dist-select" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px">
               <option value="5K">5K</option><option value="10K">10K</option>
-              <option value="HM">Yari Maraton</option><option value="M">Maraton</option><option value="Ultra">Ultra</option>
+              <option value="HM">Yarı Maraton</option><option value="M">Maraton</option><option value="Ultra">Ultra</option>
             </select></div>
-            <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Sure</label>
+            <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Süre</label>
             <input id="pr-time-input" placeholder="ss:dd:ss" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
           </div>
           <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-            <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Yaris</label>
-            <input id="pr-race-input" placeholder="Istanbul Maratonu" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
+            <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Yarış</label>
+            <input id="pr-race-input" placeholder="İstanbul Maratonu" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
             <div><label style="font-size:11px;font-weight:600;color:var(--muted);display:block;margin-bottom:4px">Tarih</label>
             <input id="pr-date-input" type="date" style="width:100%;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/></div>
           </div>
@@ -9290,15 +9291,15 @@ function buildDashboard(){
       </div>
       <div id="pace-tab-content" style="display:none">
         <div class="pace-calc-wrap">
-          <h3>Pace Hesaplayici</h3>
+          <h3>Pace Hesaplayıcı</h3>
           <div class="pace-inputs">
             <div><label>Mesafe</label>
             <select id="pace-dist" onchange="document.getElementById('pace-custom-km').style.display=this.value==='custom'?'block':'none'">
               <option value="5">5K</option><option value="10">10K</option>
-              <option value="21.0975">Yari Maraton</option><option value="42.195">Maraton</option><option value="custom">Ozel km</option>
+              <option value="21.0975">Yarı Maraton</option><option value="42.195">Maraton</option><option value="custom">Özel km</option>
             </select></div>
-            <div><label>Km (ozel)</label><input id="pace-custom-km" type="number" placeholder="km" step="0.1" style="display:none"/></div>
-            <div><label>Hedef Sure</label><input id="pace-target-time" placeholder="3:30:00"/></div>
+            <div><label>Km (özel)</label><input id="pace-custom-km" type="number" placeholder="km" step="0.1" style="display:none"/></div>
+            <div><label>Hedef Süre</label><input id="pace-target-time" placeholder="3:30:00"/></div>
           </div>
           <button class="btn btn-or" onclick="calcPace()" style="width:100%;margin-bottom:12px">Hesapla</button>
           <div id="pace-result" class="pace-res" style="display:none">
@@ -9309,7 +9310,7 @@ function buildDashboard(){
           </div>
         </div>
         <div class="card" style="padding:16px">
-          <h4 style="margin:0 0 10px;font-size:14px">Pace Zonlari</h4>
+          <h4 style="margin:0 0 10px;font-size:14px">Pace Zonları</h4>
           <div style="display:flex;gap:8px;margin-bottom:10px">
             <input id="zone-marathon" placeholder="Hedef maraton (3:30:00)" style="flex:1;padding:8px;border:1.5px solid var(--border);border-radius:8px;background:var(--bg2);color:var(--text);font-size:13px"/>
             <button class="btn btn-or" onclick="calcZones()">Hesapla</button>
@@ -9430,7 +9431,7 @@ async function loadMyEvents(){
         <div class="ev-info">
           <span class="tag ${past?'tag-gr':'tag-or'}">${past?'Geçmiş':(e.cat||'Yaklaşan')}</span>
           <h3>${e.emoji||'🏃'} ${e.title||'Etkinlik'}</h3>
-          <div class="ev-meta">${e.city?`<span class="meta">📍 ${e.city}</span>`:''}${e.dist?`<span class="meta">📏 ${e.dist}</span>`:''}${e.fee?`<span class="meta">💳 ${e.fee}</span>`:''}</div>
+          <div class="ev-meta">${e.city?`<span class="meta">📍 ${e.city}</span>`:''}${e.dist?`<span class="meta">📏 ${window.kmU?kmU(e.dist):e.dist}</span>`:''}${e.fee?`<span class="meta">💳 ${e.fee}</span>`:''}</div>
         </div>
         ${past?'':`<button class="btn btn-red btn-sm" style="flex-shrink:0;align-self:center" onclick="event.stopPropagation();leaveEvent('${e.id}')">İptal</button>`}
       </div>`;
@@ -11227,7 +11228,7 @@ async function loadKmEvents(){
           </div>
           <div style="flex:1">
             <div style="font-size:13px;font-weight:600">${e.title}</div>
-            <div style="font-size:11px;color:var(--muted)">📏 ${e.dist||'—'} · 📍 ${e.city}</div>
+            <div style="font-size:11px;color:var(--muted)">📏 ${window.kmU?kmU(e.dist):(e.dist||'—')} · 📍 ${e.city}</div>
           </div>
           ${isPast?`<div style="text-align:right">
             <div style="font-size:10px;color:var(--muted);margin-bottom:4px">KM:</div>
@@ -12715,14 +12716,18 @@ window.loadClubEvents = async function() {
 
     // Bu kulüplerin etkinliklerini ve koşu takvimlerini çek
     const ids = Array.from(clubIds);
-    const [evtSnap, trSnap] = await Promise.all([
-      fb.getDocs(fb.query(fb.collection(fb.db,'events'), fb.where('clubId', 'in', ids.slice(0, 10)), fb.where('status', '==', 'approved'))),
-      fb.getDocs(fb.query(fb.collection(fb.db,'club_trainings'), fb.where('clubId', 'in', ids.slice(0, 10))))
+    const [evtSnap, trSnap, ceSnap] = await Promise.all([
+      fb.getDocs(fb.query(fb.collection(fb.db,'events'), fb.where('clubId', 'in', ids.slice(0, 10)), fb.where('status', '==', 'approved'))).catch(()=>({forEach(){}})),
+      fb.getDocs(fb.query(fb.collection(fb.db,'club_trainings'), fb.where('clubId', 'in', ids.slice(0, 10)))).catch(()=>({forEach(){}})),
+      fb.getDocs(fb.query(fb.collection(fb.db,'club_events'), fb.where('clubId', 'in', ids.slice(0, 10)))).catch(()=>({forEach(){}}))
     ]);
 
     let allItems = [];
     evtSnap.forEach(d => allItems.push({type:'event', id:d.id, ...d.data()}));
     trSnap.forEach(d => allItems.push({type:'training', id:d.id, ...d.data()}));
+    ceSnap.forEach(d => { const x=d.data(); allItems.push({type:'training', _ce:true, id:d.id, ...x, location:x.location||x.meetPoint||''}); });
+    const _cn={}; (window.CLUBS||[]).forEach(c=>{_cn[c.id]=c.name;});
+    allItems.forEach(i=>{ if(!i.clubName&&_cn[i.clubId]) i.clubName=_cn[i.clubId]; });
 
     // Tarihe göre sırala
     const today = new Date().toISOString().split('T')[0];
@@ -12739,12 +12744,12 @@ window.loadClubEvents = async function() {
       <div class="ev-card" style="margin-bottom:12px; border-left: 4px solid ${i.type==='event'?'#E8622A':'#2c3e50'}">
         <div class="ev-date-box" style="background:${i.type==='event'?'var(--or)':'#2c3e50'}"><div class="day">${d.getDate()}</div><div class="mon">${MONTHS[d.getMonth()]||''}</div></div>
         <div class="ev-info">
-          <span class="tag ${i.type==='event'?'tag-or':'tag-bl'}">${i.type==='event'?'Etkinlik':'Koşu Takvimi'}</span>
+          <span class="tag ${i.type==='event'?'tag-or':'tag-bl'}">${i.type==='event'?'Etkinlik':(i._ce?'Kulüp Etkinliği':'Koşu Takvimi')}</span>
           <h3 style="margin:4px 0">${i.title}</h3>
           <div class="ev-meta">
              <span class="meta">🏙 ${i.clubName||'Kulüp'}</span>
              <span class="meta">📍 ${i.location||i.city||'—'}</span>
-             <span class="meta">⏰ ${i.time||'—'}</span>
+             ${i.time?`<span class="meta">⏰ ${i.time}</span>`:''}
           </div>
         </div>
         ${i.type==='event'?`<button class="btn btn-or btn-sm" onclick="openEvent('${i.id}')">Detay</button>`:''}
@@ -12990,9 +12995,9 @@ window.loadClubRacesForUser = async function() {
     let races = [];
     snap.forEach(d => {
       const data = d.data();
-      if(data.date && new Date(data.date).getFullYear() === currentYear) races.push({id:d.id, ...data});
+      if(data.date && (data.date >= today || new Date(data.date).getFullYear() === currentYear)) races.push({id:d.id, ...data});
     });
-    races.sort((a,b) => a.date.localeCompare(b.date));
+    races.sort((a,b) => { const pa=a.date<today, pb=b.date<today; if(pa!==pb) return pa?1:-1; return pa? b.date.localeCompare(a.date) : a.date.localeCompare(b.date); });
 
     if(!races.length) {
       el.innerHTML = '<p style="color:var(--muted);text-align:center;padding:20px">Yakın zamanda planlanmış kulüp yarışı bulunmuyor.</p>';
@@ -13004,14 +13009,17 @@ window.loadClubRacesForUser = async function() {
     const myJoinedIds = new Set();
     myRsvpsSnap.forEach(d => myJoinedIds.add(d.data().raceId));
 
-    el.innerHTML = races.map(r => {
+    const _pastN = races.filter(r=>r.date<today).length, _upN = races.length-_pastN;
+    let _seenPast=false;
+    el.innerHTML = (_upN?'':'<p style="color:var(--muted);text-align:center;padding:14px">Yaklaşan kulüp yarışı yok.</p>') + races.map(r => {
       const isPast = r.date < today;
       const isJoined = myJoinedIds.has(r.id);
+      const _hdr = (isPast && !_seenPast) ? (_seenPast=true, `<details class="cr-past"><summary style="cursor:pointer;font-size:13px;font-weight:700;color:var(--muted);padding:10px 2px">Geçmiş yarışlar (${_pastN})</summary>`) : '';
       return `
-      <div class="card" style="padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;${isPast?'opacity:0.5;filter:grayscale(1);background:#f9fafb':''}">
-        <div style="flex:1">
+      ${_hdr}<div class="card" style="padding:16px;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap;${isPast?'opacity:0.6':''}">
+        <div style="flex:1;min-width:180px">
           <h4 style="margin:0 0 4px 0;font-size:15px">${r.name}</h4>
-          <div style="font-size:12px;color:var(--muted)">📅 ${r.date} · 📍 ${r.location}</div>
+          <div style="font-size:12px;color:var(--muted)">📅 ${window.fmtTRDate?fmtTRDate(r.date):r.date}${r.location&&!/^https?:/.test(r.location)?' · 📍 '+r.location:''}</div>
         </div>
         <div style="display:flex;gap:8px">
           ${!isPast ? `
@@ -13021,7 +13029,7 @@ window.loadClubRacesForUser = async function() {
           ${r.url ? `<button class="btn btn-ghost btn-sm" onclick="window.open('${r.url}','_blank')">Detaylar</button>` : ''}
         </div>
       </div>`;
-    }).join('');
+    }).join('') + (_seenPast?'</details>':'');
   } catch(e) { el.innerHTML = '<p style="color:var(--muted)">Yüklenemedi.</p>'; }
 };
 
@@ -13196,7 +13204,7 @@ window.loadPRs=async function(){
 window.renderPRGrid=function(prs){
   var el=document.getElementById("pr-grid-display");if(!el)return;
   var dists=["5K","10K","HM","M","Ultra"];
-  function dl(d){return d==="HM"?"Yari M":d==="M"?"Maraton":d;}
+  function dl(d){return d==="HM"?"Yarı Maraton":d==="M"?"Maraton":d;}
   el.innerHTML=dists.map(function(d){
     var pr=prs[d];
     return "<div class='pr-card'><div class='prd'>"+dl(d)+"</div>"
@@ -13210,7 +13218,7 @@ window.savePR=async function(){
   var time=document.getElementById("pr-time-input")?.value.trim();
   var race=document.getElementById("pr-race-input")?.value.trim();
   var date=document.getElementById("pr-date-input")?.value;
-  if(!dist||!time){toast("Mesafe ve sure gerekli","err");return;}
+  if(!dist||!time){toast("Mesafe ve süre gerekli","err");return;}
   var uid=window.CU&&window.CU.uid;if(!uid)return;
   var fb=window._fb;
   var prs=window._userPRs||{};
@@ -13235,7 +13243,7 @@ window.calcPace=function(){
   var customKm=parseFloat(document.getElementById("pace-custom-km")?.value||"0");
   var km=distSel==="custom"?customKm:parseFloat(distSel||"0");
   var timeStr=document.getElementById("pace-target-time")?.value.trim();
-  if(!km||!timeStr){toast("Mesafe ve sure girin","err");return;}
+  if(!km||!timeStr){toast("Mesafe ve süre girin","err");return;}
   var parts=timeStr.split(":").map(Number);
   var total=parts.length===3?parts[0]*3600+parts[1]*60+parts[2]:parts.length===2?parts[0]*60+parts[1]:0;
   if(!total){toast("Format: ss:dd:ss","err");return;}
@@ -13255,10 +13263,10 @@ window.calcZones=function(){
   if(!total)return;
   var pace=total/42.195;
   var zones=[
-    ["Z1 Kolay",1.35,"#22c55e","Uzun yavas kosu"],
-    ["Z2 Aerobik",1.20,"#84cc16","Temel dayaniklilik"],
-    ["Z3 Tempo",1.08,"#eab308","Konusma siniri"],
-    ["Z4 Esik",1.00,"#f97316","Maraton pace"],
+    ["Z1 Kolay",1.35,"#22c55e","Uzun yavaş koşu"],
+    ["Z2 Aerobik",1.20,"#84cc16","Temel dayanıklılık"],
+    ["Z3 Tempo",1.08,"#eab308","Konuşma sınırı"],
+    ["Z4 Eşik",1.00,"#f97316","Maraton pace"],
     ["Z5 Interval",0.90,"#ef4444","5K pace civari"],
   ];
   var el=document.getElementById("pace-zones-result");if(!el)return;
@@ -13274,12 +13282,12 @@ window.toggleRaceReminder=function(raceId,btn){
   if(localStorage.getItem(key)){
     localStorage.removeItem(key);
     if(btn)btn.textContent="🔕";
-    toast("Hatirlayici kaldirildi","ok");
+    toast("Hatırlatıcı kaldırıldı","ok");
   }else{
     var race=(window.RACES||[]).find(function(r){return r.id===raceId;});
     localStorage.setItem(key,JSON.stringify({raceId:raceId,name:(race&&race.name)||"",deadline:(race&&race.regDeadline)||""}));
     if(btn)btn.textContent="🔔";
-    toast("Hatirlayici kuruldu"+(race&&race.regDeadline?" - Son: "+race.regDeadline:""),"ok");
+    toast("Hatırlatıcı kuruldu"+(race&&race.regDeadline?" - Son: "+race.regDeadline:""),"ok");
   }
 };
 window.showCalendarOptions=function(e){
@@ -16568,6 +16576,410 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       return r;};
     w._st=1;window.renderFirsatAdminV2=w;
   }
+})();
+</script>
+<style id="member-v2-css">
+/* ── Üye paneli v2: yarış kartları + paylaşım ── */
+#dp-my-km>div:first-of-type{overflow-x:auto;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+#dp-my-km>div:first-of-type::-webkit-scrollbar{display:none}
+#dp-my-km>div:first-of-type>button{flex-shrink:0;white-space:nowrap}
+.rr2-sum{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-bottom:14px}
+.rr2-sum>div{background:var(--card);border:1.5px solid var(--border);border-radius:14px;padding:12px 14px}
+.rr2-sum b{display:block;font-family:Archivo,var(--font-head),sans-serif;font-size:22px;font-weight:900;line-height:1.1}
+.rr2-sum span{font-size:11px;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em}
+.rr2{background:var(--card);border:1.5px solid var(--border);border-radius:16px;padding:16px;margin-bottom:12px}
+.rr2-top{display:flex;gap:12px;align-items:flex-start}
+.rr2-ico{width:44px;height:44px;border-radius:12px;background:var(--or-soft,rgba(232,98,42,.12));display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
+.rr2-tt{flex:1;min-width:0}
+.rr2-tt h4{margin:0 0 3px;font-size:16px;font-weight:800;line-height:1.25;overflow-wrap:anywhere}
+.rr2-sub{font-size:12px;color:var(--muted)}
+.rr2-bd{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.rr2-pill{font-size:11px;font-weight:800;padding:3px 9px;border-radius:20px;background:var(--bg2);color:var(--text)}
+.rr2-pill.pr{background:linear-gradient(135deg,#f59e0b,#d97706);color:#fff}
+.rr2-pill.g1{background:#f59e0b;color:#fff}.rr2-pill.g2{background:#94a3b8;color:#fff}.rr2-pill.g3{background:#b8743a;color:#fff}
+.rr2-stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:14px 0 12px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.rr2-stats>div{padding:10px 4px;text-align:left}
+.rr2-stats>div+div{border-left:1px solid var(--border);padding-left:12px}
+.rr2-stats span{display:block;font-size:10px;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:.07em;margin-bottom:2px}
+.rr2-stats b{font-family:Archivo,var(--font-head),sans-serif;font-size:19px;font-weight:800;white-space:nowrap}
+.rr2-act{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.rr2-share{flex:1;min-width:190px;background:var(--or);color:#fff;border:none;border-radius:11px;padding:11px 14px;font-weight:800;font-size:13.5px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:8px}
+.rr2-share:hover{filter:brightness(1.06)}
+.rr2-lnk{font-size:12px;font-weight:700;color:var(--or);text-decoration:none;padding:8px 6px}
+.rr2-del{background:none;border:none;color:var(--muted);font-size:12px;cursor:pointer;padding:8px 6px}
+.rr2-del:hover{color:#e55}
+.rr2-empty{text-align:center;padding:30px 18px;border:1.5px dashed var(--border);border-radius:16px}
+.rr2-empty .e{font-size:40px;margin-bottom:6px}
+.rr2-empty p{color:var(--muted);font-size:13px;margin:6px auto 14px;max-width:360px}
+/* overview son yarış */
+.ov-race{display:flex;gap:14px;align-items:center;background:linear-gradient(135deg,#16171b,#24252b);color:#fff;border-radius:16px;padding:16px 18px;position:relative;overflow:hidden}
+.ov-race:after{content:"";position:absolute;right:-60px;bottom:-60px;width:200px;height:200px;border-radius:50%;border:14px solid rgba(232,98,42,.18);box-shadow:0 0 0 22px rgba(232,98,42,.08)}
+.ov-race .k{font-size:10.5px;font-weight:800;letter-spacing:.12em;color:#F0A070;text-transform:uppercase}
+.ov-race h4{margin:3px 0 4px;font-size:16px;font-weight:800;color:#fff}
+.ov-race .m{font-size:12.5px;color:rgba(255,255,255,.75)}
+.ov-race button{position:relative;z-index:1;flex-shrink:0;background:#E8622A;color:#fff;border:none;border-radius:11px;padding:10px 14px;font-weight:800;font-size:13px;cursor:pointer}
+.ov-race.empty{background:var(--card);color:var(--text);border:1.5px dashed var(--border)}
+.ov-race.empty h4{color:var(--text)}.ov-race.empty .m{color:var(--muted)}.ov-race.empty .k{color:var(--or)}
+@media(max-width:560px){.ov-race{flex-wrap:wrap}.ov-race button{width:100%}}
+/* paylaşım sayfası */
+.rrs-ov{position:fixed;inset:0;background:rgba(10,10,12,.72);z-index:9000;display:flex;align-items:center;justify-content:center;padding:16px;backdrop-filter:blur(4px)}
+.rrs-box{background:var(--card,#fff);color:var(--text);border-radius:20px;width:100%;max-width:820px;max-height:calc(100vh - 32px);overflow:auto;box-shadow:0 30px 80px rgba(0,0,0,.4)}
+.rrs-hd{display:flex;align-items:center;justify-content:space-between;padding:14px 18px;border-bottom:1px solid var(--border)}
+.rrs-hd b{font-size:16px}
+.rrs-x{background:none;border:none;font-size:26px;line-height:1;cursor:pointer;color:var(--muted)}
+.rrs-body{display:grid;grid-template-columns:minmax(0,300px) minmax(0,1fr);gap:20px;padding:18px}
+.rrs-prev{display:flex;justify-content:center;align-items:flex-start}
+.rrs-prev canvas{width:100%;max-width:300px;height:auto;border-radius:14px;box-shadow:0 10px 30px rgba(0,0,0,.25);background:#111}
+.rrs-lbl{font-size:11px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.08em;margin:0 0 6px}
+.rrs-seg{display:flex;background:var(--bg2);border-radius:11px;padding:3px;margin-bottom:14px}
+.rrs-seg button{flex:1;border:none;background:none;padding:8px 6px;border-radius:9px;font-weight:700;font-size:12.5px;cursor:pointer;color:var(--muted)}
+.rrs-seg button.on{background:var(--card,#fff);color:var(--text);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.rrs-chk{display:flex!important;align-items:center;gap:8px;font-size:13px!important;font-weight:600!important;text-transform:none!important;letter-spacing:0!important;color:var(--text)!important;margin:0 0 14px!important;cursor:pointer}
+.rrs-chk input{width:18px!important;height:18px;margin:0;flex:0 0 auto;accent-color:#E8622A}
+.rrs-main{width:100%;background:linear-gradient(135deg,#E8622A,#c94e1c);color:#fff;border:none;border-radius:13px;padding:14px;font-weight:900;font-size:15px;cursor:pointer;margin-bottom:8px}
+.rrs-row{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin-bottom:8px}
+.rrs-btn{border:1.5px solid var(--border);background:var(--card,#fff);color:var(--text);border-radius:11px;padding:10px 8px;font-weight:700;font-size:13px;cursor:pointer;display:flex;align-items:center;justify-content:center;gap:6px;text-decoration:none}
+.rrs-btn:hover{border-color:var(--or)}
+.rrs-btn.wa{background:#25D366;border-color:#25D366;color:#fff}
+.rrs-btn.fb{background:#1877F2;border-color:#1877F2;color:#fff}
+.rrs-btn:disabled{opacity:.55;cursor:default}
+.rrs-hint{font-size:11.5px;color:var(--muted);line-height:1.5;margin-top:8px}
+@media(max-width:640px){
+  .rrs-ov{padding:0;align-items:flex-end}
+  .rrs-box{border-radius:20px 20px 0 0;max-height:94vh}
+  .rrs-body{grid-template-columns:1fr;gap:14px;padding:14px}
+  .rrs-prev canvas{max-width:200px}
+}
+</style>
+<script id="member-v2-js">
+(function(){
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"']/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];});};
+  var AYL=['Ocak','Şubat','Mart','Nisan','Mayıs','Haziran','Temmuz','Ağustos','Eylül','Ekim','Kasım','Aralık'];
+  var trDate=function(d){d=String(d||'');var m=d.match(/^(\d{4})-(\d{2})-(\d{2})/);return m?(+m[3])+' '+AYL[+m[2]-1]+' '+m[1]:d;};
+  var T=function(m,t){try{(window.toast||function(){})(m,t||'ok');}catch(_){}};
+
+  // ── Birim: "10" → "10 km"
+  window.kmU=function(d){d=String(d==null?'':d).trim();if(!d)return '—';return /^\d+([.,]\d+)?$/.test(d)?d.replace('.',',')+' km':d;};
+
+  // ── Süre / pace yardımcıları
+  var sec=function(t){t=String(t||'').trim().replace(/\./g,':');if(!t)return 0;var p=t.split(':').map(Number);if(p.some(isNaN))return 0;
+    if(p.length===3)return p[0]*3600+p[1]*60+p[2];if(p.length===2)return p[0]*60+p[1];return 0;};
+  var fmtT=function(s){s=Math.round(s);var h=Math.floor(s/3600),m=Math.floor(s%3600/60),x=s%60;return (h?h+':'+String(m).padStart(2,'0'):m)+':'+String(x).padStart(2,'0');};
+  var kmOf=function(r){var n=parseFloat(r.distanceNum)||parseFloat(String(r.distance||'').replace(',','.'))||0;return n;};
+  var distKey=function(k){if(k>=4.9&&k<=5.1)return '5K';if(k>=9.8&&k<=10.2)return '10K';if(k>=20.9&&k<=21.3)return 'HM';if(k>=41.9&&k<=42.5)return 'M';return '';};
+  var paceOf=function(r){var s=sec(r.time),k=kmOf(r);if(!s||!k)return '';var p=s/k;return Math.floor(p/60)+':'+String(Math.round(p%60)).padStart(2,'0');};
+  var kmTxt=function(k){return k?(Math.round(k*10)/10).toString().replace('.',','):'';};
+  window.rrHelpers={sec:sec,fmtT:fmtT,kmOf:kmOf,paceOf:paceOf,distKey:distKey,trDate:trDate};
+
+  // ── calcPace çakışması: yarış formu calcPace(dist,time) çağırıyor; hesaplayıcı argümansız
+  function installPace(){
+    var cur=window.calcPace;if(!cur||cur._dual)return;
+    var f=function(d,t){
+      if(arguments.length>=2&&typeof d!=='object'){var s=sec(t),k=parseFloat(String(d).replace(',','.'));if(!s||!k)return '';var p=s/k;var mm=Math.floor(p/60),ss=Math.round(p%60);if(ss===60){mm++;ss=0;}return mm+':'+String(ss).padStart(2,'0')+' dk/km';}
+      return cur.apply(this,arguments);
+    };f._dual=true;window.calcPace=f;
+  }
+  installPace();window.addEventListener('load',function(){setTimeout(installPace,50);});
+
+  // ── KM sekmeleri (PR sekmesinde yarış listesinin de görünmesi hatası giderildi)
+  window.switchKmTab=function(tab){
+    ['km','rr','pr','pace'].forEach(function(t){
+      var c=document.getElementById(t+'-tab-content'),b=document.getElementById(t+'-tab-btn'),on=t===tab;
+      if(c)c.style.display=on?'block':'none';
+      if(b){b.style.color=on?'var(--or)':'var(--muted)';b.style.borderBottomColor=on?'var(--or)':'transparent';b.style.fontWeight=on?'700':'500';}
+    });
+    if(tab==='rr'&&window.loadRaceResults)window.loadRaceResults();
+    if(tab==='pr'&&window.loadPRs)window.loadPRs();
+  };
+  window.openMyRaceResults=function(add){
+    var go=function(){if(window.showDash)showDash('my-km',null);setTimeout(function(){switchKmTab('rr');if(add){buildRaceResultModal();openModal('race-result-modal');}},80);};
+    var pg=document.getElementById('pg-dashboard');
+    if(pg&&pg.classList.contains('on')&&document.getElementById('dp-my-km'))go();
+    else{if(window.nav)nav('dashboard');setTimeout(go,600);}
+  };
+
+  // ── Sonuçları çek (önbellekli)
+  async function fetchMine(){
+    var cu=window.CU;if(!cu)return [];
+    var fb=window._fb;var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'raceResults'),fb.where('userId','==',cu.uid)));
+    var list=[];snap.forEach(function(d){var x=d.data();delete x.id;x.id=d.id;list.push(x);});
+    var best={};
+    list.forEach(function(r){r._sec=sec(r.time);r._km=kmOf(r);r._key=distKey(r._km);r._pace=paceOf(r);
+      if(r._key&&r._sec&&(!best[r._key]||r._sec<best[r._key]._sec))best[r._key]=r;});
+    Object.keys(best).forEach(function(k){best[k]._pr=true;});
+    list.sort(function(a,b){return String(b.date||'').localeCompare(String(a.date||''))||((b.createdAt&&b.createdAt.seconds)||9e9)-((a.createdAt&&a.createdAt.seconds)||9e9);});
+    window._RR=list;window._RRbest=best;
+    syncPRs(best);
+    return list;
+  }
+  window.rrFetchMine=fetchMine;
+
+  // Yarış sonuçlarından kişisel rekorları otomatik güncelle (sadece daha hızlıysa)
+  async function syncPRs(best){
+    try{
+      var cu=window.CU,fb=window._fb;if(!cu||!Object.keys(best).length)return;
+      var prs=window._userPRs;
+      if(!prs){var s=await fb.getDoc(fb.doc(fb.db,'users',cu.uid));prs=s.exists()?(s.data().personalRecords||{}):{};}
+      prs=Object.assign({},prs);var ch=false;
+      Object.keys(best).forEach(function(k){var r=best[k],cur=prs[k];
+        if(!cur||!sec(cur.time)||r._sec<sec(cur.time)){prs[k]={time:fmtT(r._sec),race:r.raceName||'',date:r.date||'',auto:true};ch=true;}});
+      window._userPRs=prs;
+      if(ch){await fb.updateDoc(fb.doc(fb.db,'users',cu.uid),{personalRecords:prs});window.renderPRGrid&&renderPRGrid(prs);}
+    }catch(e){console.warn('[PR sync]',e.message);}
+  }
+
+  // ── Kart
+  function placeBadge(p){p=String(p||'').trim().replace(/\.$/,'');if(!p)return '';
+    if(p==='1')return '<span class="rr2-pill g1">🥇 1. Derece</span>';if(p==='2')return '<span class="rr2-pill g2">🥈 2. Derece</span>';if(p==='3')return '<span class="rr2-pill g3">🥉 3. Derece</span>';
+    return '<span class="rr2-pill">'+esc(p)+'. sıra</span>';}
+  window.raceResultCard=function(r,showDelete){
+    var mine=window.CU&&r.userId===window.CU.uid;
+    var s=r._sec!=null?r._sec:sec(r.time),k=r._km!=null?r._km:kmOf(r),pc=r._pace!=null?r._pace:paceOf(r);
+    var sub=[r.date?trDate(r.date):'',r.clubName||''].filter(Boolean).map(esc).join(' · ');
+    var nm=!mine&&r.userName?'<div class="rr2-sub" style="font-weight:700;color:var(--text)">'+esc(r.userName)+'</div>':'';
+    return '<article class="rr2">'
+      +'<div class="rr2-top"><div class="rr2-ico">🏅</div><div class="rr2-tt">'+nm+'<h4>'+esc(r.raceName||'Yarış')+'</h4><div class="rr2-sub">'+sub+'</div>'
+      +((r._pr||placeBadge(r.place))?'<div class="rr2-bd">'+(r._pr?'<span class="rr2-pill pr">🏆 Kişisel rekor</span>':'')+placeBadge(r.place)+'</div>':'')
+      +'</div></div>'
+      +'<div class="rr2-stats"><div><span>Mesafe</span><b>'+(k?kmTxt(k)+' km':esc(r.distance||'—'))+'</b></div><div><span>Süre</span><b>'+(s?fmtT(s):esc(r.time||'—'))+'</b></div><div><span>Pace</span><b>'+(pc?pc+' /km':'—')+'</b></div></div>'
+      +'<div class="rr2-act">'
+      +(mine?'<button class="rr2-share" onclick="shareRaceResult(\''+r.id+'\')">📲 Story kartı oluştur &amp; paylaş</button>':'')
+      +(r.resultUrl&&/^https?:\/\//.test(r.resultUrl)?'<a class="rr2-lnk" href="'+esc(r.resultUrl)+'" target="_blank" rel="noopener noreferrer">Resmi sonuç ↗</a>':'')
+      +(r.certUrl?'<a class="rr2-lnk" href="'+esc(r.certUrl)+'" target="_blank" rel="noopener">Sertifika</a>':'')
+      +(showDelete&&mine?'<button class="rr2-del" onclick="deleteRaceResult(\''+r.id+'\')">Sil</button>':'')
+      +'</div></article>';
+  };
+
+  var emptyHtml='<div class="rr2-empty"><div class="e">🏅</div><b>İlk yarış sonucunu ekle</b><p>Süreni gir, pace\'in ve kişisel rekorların otomatik hesaplansın. Instagram, WhatsApp ve Facebook için hazır story kartın tek tıkla oluşsun.</p><button class="btn btn-or btn-sm" onclick="buildRaceResultModal();openModal(\'race-result-modal\')">+ Yarış sonucu ekle</button></div>';
+
+  window.loadRaceResults=async function(){
+    var el=document.getElementById('race-results-list');if(!el||!window.CU)return;
+    el.innerHTML='<div class="spinner" style="margin:20px auto"></div>';
+    try{
+      var list=await fetchMine();
+      renderLastRace();
+      if(!list.length){el.innerHTML=emptyHtml;return;}
+      var tk=list.reduce(function(a,r){return a+(r._km||0);},0),prn=Object.keys(window._RRbest||{}).length;
+      el.innerHTML='<div class="rr2-sum"><div><b>'+list.length+'</b><span>Yarış</span></div><div><b>'+kmTxt(tk)+'</b><span>Yarış km</span></div><div><b>'+prn+'</b><span>Kişisel rekor</span></div></div>'
+        +list.map(function(r){return window.raceResultCard(r,true);}).join('');
+      if(window._rrJustSaved){window._rrJustSaved=false;
+        var nw=list.slice().sort(function(a,b){return ((b.createdAt&&b.createdAt.seconds)||9e9)-((a.createdAt&&a.createdAt.seconds)||9e9);})[0];
+        if(nw)setTimeout(function(){window.shareRaceResult(nw.id,true);},350);}
+    }catch(e){el.innerHTML='<p style="color:var(--muted)">Yüklenemedi: '+esc(e.message)+'</p>';}
+  };
+
+  // Kaydet → otomatik story kartı aç
+  function wrapSave(){
+    var o=window.saveRaceResult;if(!o||o._w)return;
+    var f=async function(){window._rrJustSaved=true;await o.apply(this,arguments);
+      var er=document.getElementById('rr-error');if(er&&er.style.display==='block')window._rrJustSaved=false;};
+    f._w=true;window.saveRaceResult=f;
+  }
+  wrapSave();window.addEventListener('load',function(){setTimeout(wrapSave,60);});
+
+  // Form: yarış takviminden otomatik tamamla
+  function wrapModal(){
+    var o=window.buildRaceResultModal;if(!o||o._w)return;
+    var f=function(){var had=!!document.getElementById('race-result-modal');var r=o.apply(this,arguments);
+      if(!had){try{
+        var inp=document.getElementById('rr-name');if(!inp)return r;
+        var today=new Date().toISOString().slice(0,10),lim=new Date(Date.now()-400*864e5).toISOString().slice(0,10);
+        var rs=(window.RACES||[]).filter(function(x){return x.date&&x.date<=today&&x.date>=lim&&x.name;}).sort(function(a,b){return b.date.localeCompare(a.date);});
+        var dl=document.createElement('datalist');dl.id='rr-races';dl.innerHTML=rs.map(function(x){return '<option value="'+esc(x.name)+'">'+esc(trDate(x.date))+'</option>';}).join('');
+        inp.setAttribute('list','rr-races');inp.setAttribute('autocomplete','off');inp.placeholder='Yarış adını yaz veya takvimden seç';inp.parentNode.appendChild(dl);
+        inp.addEventListener('change',function(){var m=rs.find(function(x){return x.name===inp.value;});if(!m)return;
+          var dt=document.getElementById('rr-date');if(dt&&!dt.value)dt.value=m.date;
+          var ds=document.getElementById('rr-dist');if(ds&&!ds.value){var n=String(m.distance||m.dist||'').match(/\d+([.,]\d+)?/);if(n&&String(m.distance||m.dist).split(/[,/|]/).length===1)ds.value=n[0].replace(',','.');}
+        });
+        var tm=document.getElementById('rr-time');if(tm){tm.placeholder='01:52:30';tm.setAttribute('inputmode','numeric');}
+        var mb=document.querySelector('#race-result-modal .modal');if(mb)mb.style.maxWidth='520px';
+      }catch(e){}}
+      return r;};
+    f._w=true;window.buildRaceResultModal=f;
+  }
+  wrapModal();window.addEventListener('load',function(){setTimeout(wrapModal,60);});
+
+  // ── Genel sekme: son yarış kartı + tutarlı sayılar
+  async function renderLastRace(){
+    var el=document.getElementById('dash-last-race');if(!el)return;
+    var list=window._RR;
+    if(!list){try{list=await fetchMine();}catch(e){list=[];}}
+    if(!list.length){el.innerHTML='<div class="ov-race empty"><div style="flex:1;position:relative;z-index:1"><div class="k">Yarış sonuçların</div><h4>Bitirdiğin yarışı ekle, story kartını paylaş</h4><div class="m">Süre, pace ve kişisel rekor otomatik hesaplanır.</div></div><button onclick="openMyRaceResults(true)">+ Sonuç ekle</button></div>';return;}
+    var r=list[0];
+    el.innerHTML='<div class="ov-race"><div style="flex:1;min-width:0;position:relative;z-index:1"><div class="k">Son yarışın'+(r._pr?' · 🏆 Kişisel rekor':'')+'</div><h4>'+esc(r.raceName||'Yarış')+'</h4><div class="m">'+[r._km?kmTxt(r._km)+' km':'',r._sec?fmtT(r._sec):'',r._pace?r._pace+' /km':'',r.date?trDate(r.date):''].filter(Boolean).join(' · ')+'</div><div class="m" style="margin-top:6px"><a onclick="openMyRaceResults()" style="color:#F0A070;cursor:pointer;font-weight:700">Tüm sonuçlarım ('+list.length+') →</a></div></div><button onclick="shareRaceResult(\''+r.id+'\')">📲 Paylaş</button></div>';
+  }
+  window.renderLastRace=renderLastRace;
+
+  window.loadOverviewRecent=async function(){
+    var el=document.getElementById('overview-recent-events');if(!el||!window.CU)return;
+    renderLastRace();
+    try{
+      var fb=window._fb,cu=window.CU;
+      var snap=await fb.getDocs(fb.query(fb.collection(fb.db,'rsvps'),fb.where('userId','==',cu.uid)));
+      var ids=[];snap.forEach(function(d){var x=d.data();if(x.type==='club_race')return;if(x.eventId&&ids.indexOf(x.eventId)<0)ids.push(x.eventId);});
+      var evs=(window.EVENTS||[]).filter(function(e){return ids.indexOf(e.id)>=0;});
+      for(var i=0;i<ids.length;i++){if(!evs.some(function(e){return e.id===ids[i];})){try{var ds=await fb.getDoc(fb.doc(fb.db,'events',ids[i]));if(ds.exists()){var x=ds.data();x.id=ds.id;evs.push(x);}}catch(_){}}}
+      document.querySelectorAll('#dp-overview .s-card').forEach(function(c){var l=c.querySelector('.l');if(l&&l.textContent.trim()==='Etkinlik'){var v=c.querySelector('.n');if(v)v.textContent=evs.length;}});
+      if(cu.eventCount!==evs.length){cu.eventCount=evs.length;try{fb.setDoc(fb.doc(fb.db,'users',cu.uid),{eventCount:evs.length},{merge:true});}catch(_){}}
+      if(!evs.length){el.innerHTML='<p style="font-size:13px;color:var(--muted);margin-top:14px">Henüz bir etkinliğe kaydolmadın. <a onclick="nav(\'events\')" style="cursor:pointer;color:var(--or);font-weight:700">Etkinlikleri keşfet →</a></p>';return;}
+      var today=new Date().toISOString().slice(0,10);
+      var up=evs.filter(function(e){return String(e.date||'')>=today;}).sort(function(a,b){return String(a.date).localeCompare(String(b.date));});
+      var past=evs.filter(function(e){return String(e.date||'')<today;}).sort(function(a,b){return String(b.date).localeCompare(String(a.date));});
+      var show=up.concat(past).slice(0,4);
+      var M=window.MONTHS||['OCA','ŞUB','MAR','NİS','MAY','HAZ','TEM','AĞU','EYL','EKİ','KAS','ARA'];
+      el.innerHTML='<div style="margin-top:16px"><h3 style="font-size:14px;margin-bottom:10px;color:var(--muted2)">'+(up.length?'Yaklaşan etkinliklerin':'Katıldığın etkinlikler')+'</h3>'
+        +show.map(function(e){var d=new Date(e.date),isP=String(e.date||'')<today;
+          return '<div onclick="openEvent&&openEvent(\''+e.id+'\')" style="cursor:pointer;display:flex;gap:10px;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)">'
+          +'<div style="min-width:42px;text-align:center;background:rgba(232,98,42,.1);border-radius:8px;padding:5px"><div style="font-size:15px;font-weight:800;color:var(--or);line-height:1">'+(isNaN(d)?'':d.getDate())+'</div><div style="font-size:9px;color:var(--muted)">'+(isNaN(d)?'':M[d.getMonth()])+'</div></div>'
+          +'<div style="flex:1;min-width:0"><div style="font-size:13px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">'+esc(e.title||'Etkinlik')+'</div><div style="font-size:11px;color:var(--muted)">'+[e.city?'📍 '+esc(e.city):'',e.dist?esc(kmU(e.dist)):''].filter(Boolean).join(' · ')+'</div></div>'
+          +'<span class="pill '+(isP?'pill-gr':'pill-or')+'">'+(isP?'Tamamlandı':'Yaklaşan')+'</span></div>';}).join('')
+        +(evs.length>4?'<a onclick="showDash(\'my-events\',null)" style="display:inline-block;margin-top:8px;font-size:12px;color:var(--or);cursor:pointer;font-weight:700">Tümünü gör ('+evs.length+') →</a>':'')+'</div>';
+    }catch(e){el.innerHTML='';}
+  };
+
+  // ══ STORY KARTI ══
+  var LOGO=null;function logo(){if(LOGO)return LOGO;LOGO=new Promise(function(res){var i=new Image();i.onload=function(){res(i);};i.onerror=function(){res(null);};i.src='/logo-light.svg';});return LOGO;}
+  var FONTS=null;function fonts(){if(FONTS)return FONTS;FONTS=Promise.all(['900 100px Archivo','800 60px Archivo','800 40px Inter','600 40px Inter'].map(function(f){return document.fonts?document.fonts.load(f).catch(function(){}):null;}));return FONTS;}
+
+  function fitFont(ctx,txt,weight,family,max,min,w){var s=max;while(s>min){ctx.font=weight+' '+s+'px '+family;if(ctx.measureText(txt).width<=w)break;s-=4;}return s;}
+  function wrap(ctx,txt,w,maxLines){var words=String(txt).split(/\s+/),lines=[],cur='';
+    words.forEach(function(wd){var t=cur?cur+' '+wd:wd;if(ctx.measureText(t).width>w&&cur){lines.push(cur);cur=wd;}else cur=t;});if(cur)lines.push(cur);
+    if(lines.length>maxLines){lines=lines.slice(0,maxLines);var l=lines[maxLines-1];while(ctx.measureText(l+'…').width>w&&l.length>1)l=l.slice(0,-1);lines[maxLines-1]=l+'…';}return lines;}
+  function rrect(ctx,x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+  function sp(ctx,v){try{ctx.letterSpacing=v;}catch(_){}}
+  function pill(ctx,x,y,txt,bg,fg){ctx.font='800 30px Inter, sans-serif';sp(ctx,'3px');var w=ctx.measureText(txt).width+56;rrect(ctx,x,y,w,62,31);ctx.fillStyle=bg;ctx.fill();ctx.fillStyle=fg;ctx.textBaseline='middle';ctx.fillText(txt,x+28,y+32);ctx.textBaseline='alphabetic';sp(ctx,'0px');return w;}
+
+  async function drawCard(cv,r,o){
+    await fonts();var lg=await logo();
+    var W=1080,H=o.fmt==='post'?1350:1920,story=H===1920;cv.width=W;cv.height=H;
+    var ctx=cv.getContext('2d');try{ctx.fontStretch='expanded';}catch(_){}
+    var OR='#E8622A',th=o.theme,photo=th==='photo'&&o.img;
+    // arka plan
+    if(photo){var im=o.img,sc=Math.max(W/im.width,H/im.height),iw=im.width*sc,ih=im.height*sc;ctx.drawImage(im,(W-iw)/2,(H-ih)/2,iw,ih);
+      var g=ctx.createLinearGradient(0,0,0,H);g.addColorStop(0,'rgba(0,0,0,.55)');g.addColorStop(.3,'rgba(0,0,0,.12)');g.addColorStop(.52,'rgba(0,0,0,.35)');g.addColorStop(1,'rgba(0,0,0,.9)');ctx.fillStyle=g;ctx.fillRect(0,0,W,H);}
+    else if(th==='orange'){var g2=ctx.createLinearGradient(0,0,W,H);g2.addColorStop(0,'#F0743A');g2.addColorStop(1,'#B9441A');ctx.fillStyle=g2;ctx.fillRect(0,0,W,H);}
+    else{var g3=ctx.createLinearGradient(0,0,0,H);g3.addColorStop(0,'#17181D');g3.addColorStop(1,'#0B0B0E');ctx.fillStyle=g3;ctx.fillRect(0,0,W,H);}
+    // pist şeritleri (logo ile uyumlu)
+    if(!photo){ctx.save();var cx=W*0.98,cy=story?H*0.24:H*0.2;
+      for(var i=0;i<6;i++){var rad=330+i*62;ctx.beginPath();ctx.arc(cx,cy,rad,0,Math.PI*2);ctx.lineWidth=40;ctx.strokeStyle=th==='orange'?'rgba(255,255,255,'+(0.10-i*0.012)+')':'rgba(232,98,42,'+(0.22-i*0.03)+')';ctx.stroke();
+        ctx.beginPath();ctx.arc(cx,cy,rad+31,0,Math.PI*2);ctx.lineWidth=3;ctx.setLineDash([22,18]);ctx.strokeStyle=th==='orange'?'rgba(255,255,255,.18)':'rgba(255,255,255,.08)';ctx.stroke();ctx.setLineDash([]);}
+      ctx.restore();}
+    var X=84,CW=W-2*X,y;
+    var muted=th==='orange'?'rgba(255,255,255,.82)':'rgba(255,255,255,.66)';
+    // logo
+    var ly=story?150:70;if(lg){var lw=400,lh=lw*lg.height/lg.width;ctx.drawImage(lg,X,ly,lw,lh);}
+    // rozetler
+    y=story?340:210;var px=X;
+    px+=pill(ctx,px,y,'FINISHER',th==='orange'?'#121010':OR,'#fff')+16;
+    if(r._pr)px+=pill(ctx,px,y,'KİŞİSEL REKOR','#F5B400','#121010')+16;
+    var pl=String(r.place||'').trim().replace(/\.$/,'');if(pl&&px<W-260)pill(ctx,px,y,(pl==='1'||pl==='2'||pl==='3'?pl+'. DERECE':pl+'. SIRA'),'rgba(255,255,255,.16)','#fff');
+    // yarış adı
+    y+=story?130:112;ctx.fillStyle='#fff';
+    var name=String(r.raceName||'Yarış').toLocaleUpperCase('tr-TR');var fs=story?112:96,lines;
+    while(true){ctx.font='900 '+fs+'px Archivo, sans-serif';lines=wrap(ctx,name,CW,story?3:2);if((lines.length<=2||fs<=78)&&lines.every(function(l){return ctx.measureText(l).width<=CW;}))break;fs-=6;if(fs<60)break;}
+    lines.forEach(function(l){y+=fs*0.98;ctx.fillText(l,X,y);});
+    // tarih / yer
+    var meta=[r.date?trDate(r.date):'',r.city||r.location||''].filter(function(v){return v&&!/^https?:/.test(v);}).join(' · ');
+    if(meta){y+=story?66:58;ctx.font='600 40px Inter, sans-serif';ctx.fillStyle=muted;ctx.fillText(meta,X,y);}
+    // süre
+    var tS=r._sec?fmtT(r._sec):String(r.time||'');
+    var tf=fitFont(ctx,tS,'900','Archivo, sans-serif',story?250:200,120,CW);
+    var labY=Math.max(y+(story?120:84),story?800:0),ty=labY+22+tf*0.74;
+    ctx.font='800 32px Inter, sans-serif';sp(ctx,'6px');ctx.fillStyle=th==='orange'?'#121010':OR;ctx.fillText('BİTİRİŞ SÜRESİ',X,labY);sp(ctx,'0px');
+    ctx.font='900 '+tf+'px Archivo, sans-serif';ctx.fillStyle='#fff';ctx.fillText(tS,X-6,ty);
+    // istatistikler
+    var stats=[['MESAFE',r._km?kmTxt(r._km)+' km':String(r.distance||'—')],['PACE',r._pace?r._pace+' /km':'—']];
+    if(pl)stats.push(['DERECE',pl+'.']);else if(r.clubName)stats.push(['KULÜP',r.clubName]);
+    var sy=ty+(story?110:80),colW=CW/stats.length;
+    ctx.fillStyle=th==='orange'?'rgba(255,255,255,.35)':'rgba(255,255,255,.16)';ctx.fillRect(X,sy-10,CW,3);
+    stats.forEach(function(s,i){var sx=X+i*colW+(i?28:0);
+      if(i){ctx.fillStyle=th==='orange'?'rgba(255,255,255,.35)':'rgba(255,255,255,.16)';ctx.fillRect(X+i*colW,sy+24,3,120);}
+      ctx.font='800 28px Inter, sans-serif';sp(ctx,'5px');ctx.fillStyle=muted;ctx.fillText(s[0],sx,sy+62);sp(ctx,'0px');
+      var vf=fitFont(ctx,s[1],'800','Archivo, sans-serif',66,34,colW-(i?40:20));ctx.font='800 '+vf+'px Archivo, sans-serif';ctx.fillStyle='#fff';ctx.fillText(s[1],sx,sy+138);});
+    // koşucu
+    if(o.showName&&window.CU){var ry=story?1540:H-112,nm=String(window.CU.name||'Koşucu');
+      ctx.beginPath();ctx.arc(X+46,ry,46,0,Math.PI*2);ctx.fillStyle=th==='orange'?'#121010':OR;ctx.fill();
+      ctx.font='900 44px Archivo, sans-serif';ctx.fillStyle='#fff';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(nm.trim().charAt(0).toLocaleUpperCase('tr-TR'),X+46,ry+2);ctx.textAlign='left';ctx.textBaseline='alphabetic';
+      var nf=fitFont(ctx,nm,'800','Inter, sans-serif',46,30,story?CW-130:CW-560);ctx.font='800 '+nf+'px Inter, sans-serif';ctx.fillStyle='#fff';ctx.fillText(nm,X+116,ry-4);
+      ctx.font='600 30px Inter, sans-serif';ctx.fillStyle=muted;ctx.fillText(story?(r.clubName?r.clubName+' · RunClubTürkiye':'RunClubTürkiye koşucusu'):(r.clubName||'RunClubTürkiye'),X+116,ry+38);}
+    // alt bilgi
+    if(story){var fy=1735;
+      ctx.fillStyle=th==='orange'?'rgba(255,255,255,.35)':'rgba(255,255,255,.16)';ctx.fillRect(X,fy-62,CW,3);
+      ctx.font='900 40px Archivo, sans-serif';ctx.fillStyle=th==='orange'?'#fff':OR;ctx.fillText('runclubturkiye.com',X,fy);
+      ctx.font='700 30px Inter, sans-serif';ctx.fillStyle=muted;ctx.textAlign='right';ctx.fillText('#RunClubTürkiye',W-X,fy-2);ctx.textAlign='left';}
+    else{ctx.font='900 34px Archivo, sans-serif';ctx.fillStyle=th==='orange'?'#fff':OR;ctx.textAlign='right';ctx.fillText('runclubturkiye.com',W-X,o.showName?H-100:H-70);ctx.textAlign='left';}
+  }
+  window.rrDrawCard=drawCard;
+
+  var ST={};
+  function shareText(r){return '🏅 '+(r.raceName||'Yarış')+' tamamlandı!\n'+[r._km?kmTxt(r._km)+' km':'',r._sec?'⏱ '+fmtT(r._sec):'',r._pace?'🚀 '+r._pace+' /km':''].filter(Boolean).join(' · ')+(r._pr?'\n🏆 Yeni kişisel rekor!':'')+'\n\nYarış sonuçlarını sen de ekle 👉 https://www.runclubturkiye.com';}
+  var siteUrl='https://www.runclubturkiye.com/?utm_source=share&utm_medium=race_card';
+
+  function blob(){return new Promise(function(res){document.getElementById('rrs-cv').toBlob(function(b){res(b);},'image/png');});}
+  function fname(){return 'runclubturkiye-'+String(ST.r.raceName||'yaris').toLocaleLowerCase('tr-TR').replace(/[çğıöşü]/g,function(c){return{'ç':'c','ğ':'g','ı':'i','ö':'o','ş':'s','ü':'u'}[c];}).replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,'')+'-'+ST.fmt+'.png';}
+  async function redraw(){var cv=document.getElementById('rrs-cv');if(!cv)return;await drawCard(cv,ST.r,ST);}
+  function track(k){try{window.rcTrack&&rcTrack('race_card_'+k,{raceName:ST.r.raceName||''});}catch(_){}}
+
+  window.shareRaceResult=async function(id,fresh){
+    if(!window.CU){window.openAuth&&openAuth('login');return;}
+    var r=(window._RR||[]).find(function(x){return x.id===id;});
+    if(!r){try{await fetchMine();r=(window._RR||[]).find(function(x){return x.id===id;});}catch(e){}}
+    if(!r){T('Sonuç bulunamadı','err');return;}
+    ST={r:r,fmt:'story',theme:'night',img:null,showName:true};
+    var old=document.getElementById('rrs');if(old)old.remove();
+    var canFiles=false;try{canFiles=!!(navigator.canShare&&navigator.canShare({files:[new File([new Blob(['x'],{type:'image/png'})],'t.png',{type:'image/png'})]}));}catch(_){}
+    var ov=document.createElement('div');ov.id='rrs';ov.className='rrs-ov';
+    ov.innerHTML='<div class="rrs-box" role="dialog" aria-label="Yarış kartını paylaş"><div class="rrs-hd"><b>'+(fresh?'🎉 Tebrikler! Kartın hazır':'📲 Yarış kartını paylaş')+'</b><button class="rrs-x" aria-label="Kapat" onclick="rrsClose()">×</button></div>'
+      +'<div class="rrs-body"><div class="rrs-prev"><canvas id="rrs-cv" width="1080" height="1920"></canvas></div><div>'
+      +'<p class="rrs-lbl">Format</p><div class="rrs-seg" data-k="fmt"><button class="on" data-v="story">Story 9:16</button><button data-v="post">Gönderi 4:5</button></div>'
+      +'<p class="rrs-lbl">Tema</p><div class="rrs-seg" data-k="theme"><button class="on" data-v="night">Gece</button><button data-v="orange">Turuncu</button><button data-v="photo">📷 Fotoğrafım</button></div>'
+      +'<input type="file" id="rrs-file" accept="image/*" style="display:none">'
+      +'<label class="rrs-chk"><input type="checkbox" id="rrs-nm" checked> Adımı kartta göster</label>'
+      +(canFiles?'<button class="rrs-main" onclick="rrsShare()">📲 Paylaş — Instagram, WhatsApp, Facebook…</button>':'<button class="rrs-main" onclick="rrsDownload()">⬇ Kartı indir (PNG)</button>')
+      +'<div class="rrs-row">'+(canFiles?'<button class="rrs-btn" onclick="rrsDownload()">⬇ İndir</button>':'<button class="rrs-btn" onclick="rrsCopy()">🔗 Metni kopyala</button>')
+      +'<button class="rrs-btn" id="rrs-feed" onclick="rrsFeed()">💬 Toplulukta paylaş</button></div>'
+      +'<div class="rrs-row"><a class="rrs-btn wa" target="_blank" rel="noopener" id="rrs-wa">WhatsApp</a><a class="rrs-btn fb" target="_blank" rel="noopener" id="rrs-fb">Facebook</a></div>'
+      +'<div class="rrs-hint">'+(canFiles?'<b>Instagram Story:</b> Paylaş’a dokun → Instagram → Hikâye. Görsel kartın story boyutunda hazır.':'<b>Instagram:</b> Kartı indir, telefonundan Hikâye olarak yükle. Telefondan açarsan tek dokunuşla paylaşabilirsin.')+'</div>'
+      +'</div></div></div>';
+    document.body.appendChild(ov);document.body.style.overflow='hidden';
+    ov.addEventListener('click',function(e){if(e.target===ov)rrsClose();});
+    var tx=shareText(r);
+    document.getElementById('rrs-wa').href='https://wa.me/?text='+encodeURIComponent(tx);
+    document.getElementById('rrs-fb').href='https://www.facebook.com/sharer/sharer.php?u='+encodeURIComponent(siteUrl)+'&quote='+encodeURIComponent(tx);
+    document.getElementById('rrs-wa').addEventListener('click',function(){track('whatsapp');});
+    document.getElementById('rrs-fb').addEventListener('click',function(){track('facebook');});
+    ov.querySelectorAll('.rrs-seg').forEach(function(sg){sg.addEventListener('click',function(e){var b=e.target.closest('button');if(!b)return;var k=sg.dataset.k,v=b.dataset.v;
+      if(k==='theme'&&v==='photo'&&!ST.img){document.getElementById('rrs-file').click();return;}
+      sg.querySelectorAll('button').forEach(function(x){x.classList.toggle('on',x===b);});ST[k]=v;redraw();});});
+    document.getElementById('rrs-file').addEventListener('change',function(e){var f=e.target.files&&e.target.files[0];if(!f)return;var u=URL.createObjectURL(f),im=new Image();
+      im.onload=function(){ST.img=im;ST.theme='photo';ov.querySelectorAll('.rrs-seg[data-k="theme"] button').forEach(function(x){x.classList.toggle('on',x.dataset.v==='photo');});redraw();};im.src=u;});
+    document.getElementById('rrs-nm').addEventListener('change',function(e){ST.showName=e.target.checked;redraw();});
+    checkFeed();
+    await redraw();
+  };
+  window.rrsClose=function(){var o=document.getElementById('rrs');if(o)o.remove();document.body.style.overflow='';};
+  window.rrsShare=async function(){
+    try{var b=await blob();var f=new File([b],fname(),{type:'image/png'});
+      await navigator.share({files:[f]});track('native');
+    }catch(e){if(e&&e.name==='AbortError')return;window.rrsDownload();}
+  };
+  window.rrsDownload=async function(){var b=await blob();var u=URL.createObjectURL(b);var a=document.createElement('a');a.href=u;a.download=fname();document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u);},4000);T('Kart indirildi ✓');track('download');};
+  window.rrsCopy=async function(){try{await navigator.clipboard.writeText(shareText(ST.r));T('Paylaşım metni kopyalandı ✓');}catch(e){T('Kopyalanamadı','err');}};
+  async function checkFeed(){
+    var b=document.getElementById('rrs-feed');if(!b)return;
+    try{var fb=window._fb;var s=await fb.getDocs(fb.query(fb.collection(fb.db,'posts'),fb.where('raceResultId','==',ST.r.id)));
+      var mine=s.docs.some(function(d){return d.data().userUid===window.CU.uid;});
+      if(mine){b.disabled=true;b.textContent='✓ Toplulukta paylaşıldı';}}catch(e){}
+  }
+  window.rrsFeed=async function(){
+    var b=document.getElementById('rrs-feed');if(!b||b.disabled)return;b.disabled=true;b.textContent='Paylaşılıyor…';
+    try{var fb=window._fb,cu=window.CU,r=ST.r;
+      await fb.addDoc(fb.collection(fb.db,'posts'),{type:'run',text:shareText(r).split('\n\n')[0],userName:cu.name||'Koşucu',userPhoto:cu.photoURL||null,userUid:cu.uid,likes:[],commentCount:0,
+        createdAt:fb.serverTimestamp(),createdAtMs:Date.now(),runData:{dist:r._km?kmTxt(r._km)+' km':(r.distance||''),time:r._sec?fmtT(r._sec):(r.time||''),pace:r._pace?r._pace+' /km':'',raceName:r.raceName||''},source:'raceResult',raceResultId:r.id});
+      b.textContent='✓ Toplulukta paylaşıldı';T('Topluluk akışında paylaşıldı 🎉');track('feed');
+    }catch(e){b.disabled=false;b.textContent='💬 Toplulukta paylaş';T('Hata: '+e.message,'err');}
+  };
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('rrs'))rrsClose();});
 })();
 </script>
 </body>

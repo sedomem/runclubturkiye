@@ -17129,7 +17129,7 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       var ex=await fb().getDocs(fb().query(fb().collection(fb().db,'raceResults'),fb().where('userId','==',CU.uid)));
       var dup=ex.docs.find(function(d){return d.data().stravaId===id;});
       if(dup){window.shareRaceResult&&shareRaceResult(dup.id);return;}
-      var km=Math.round(r.distance/100)/10,sec=r.workout_type===1?(r.elapsed_time||r.moving_time):r.moving_time;
+      var km=Math.round(r.distance/10)/100,sec=r.workout_type===1?(r.elapsed_time||r.moving_time):r.moving_time;
       var clubId=CU.clubId||'',clubName=CU.clubName||'';
       await fb().addDoc(fb().collection(fb().db,'raceResults'),{userId:CU.uid,userName:CU.name||'',raceName:r.name||'Yarış',distance:km+'km',distanceNum:km,time:fmtT(sec),pace:pace(sec,r.distance)+' dk/km',place:'',date:r.date||'',resultUrl:'',certUrl:'',clubId:clubId,clubName:clubName,source:'strava',stravaId:id,route:String(r.polyline||'').slice(0,6000),createdAt:fb().serverTimestamp()});
       T('Yarış sonuçlarına eklendi 🏅');
@@ -17366,7 +17366,7 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       var ex=await fb().getDocs(fb().query(fb().collection(fb().db,'raceResults'),fb().where('userId','==',CU.uid)));
       var dup=ex.docs.find(function(d){return d.data().runId===id;});if(dup){window.shareRaceResult&&shareRaceResult(dup.id);return;}
       var nm=prompt('Yarışın adı:',/^Koşu · /.test(r.name)?'':r.name);if(nm===null)return;nm=nm.trim()||r.name;
-      var km=Math.round(r.distance/100)/10,sec=r.elapsed_time&&r.elapsed_time<r.moving_time*1.15?r.elapsed_time:r.moving_time;
+      var km=Math.round(r.distance/10)/100,sec=r.elapsed_time&&r.elapsed_time<r.moving_time*1.15?r.elapsed_time:r.moving_time;
       await fb().addDoc(fb().collection(fb().db,'raceResults'),{userId:CU.uid,userName:CU.name||'',raceName:nm,distance:km+'km',distanceNum:km,time:fmtT(sec),pace:pace(sec,r.distance)+' dk/km',place:'',date:r.date||'',resultUrl:'',certUrl:'',clubId:CU.clubId||'',clubName:CU.clubName||'',source:r.source||'file',runId:id,route:String(r.polyline||'').slice(0,6000),createdAt:fb().serverTimestamp()});
       T('Yarış sonuçlarına eklendi 🏅');window._rrJustSaved=true;window._RR=null;
       if(window.openMyRaceResults)openMyRaceResults();else window.loadRaceResults&&loadRaceResults();

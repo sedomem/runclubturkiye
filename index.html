@@ -678,6 +678,32 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .blog-body-content hr{border:none;border-top:1.5px solid var(--border);margin:24px 0}
 .blog-body-content code{background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}
 .blog-body-content pre{background:var(--bg3);padding:14px;border-radius:8px;overflow-x:auto;margin:14px 0}
+/* ━━ BLOG DETAIL LAYOUT + SIDEBAR ━━ */
+.blog-detail-wrap{display:grid;grid-template-columns:1fr 320px;gap:36px;align-items:start}
+.blog-cover{width:100%;padding-top:33.33%;min-height:300px;border-radius:var(--r2);overflow:hidden;margin-bottom:28px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);position:relative;box-shadow:var(--shadow-md)}
+.blog-ad-card{border:2px dashed var(--border2,var(--border));background:var(--bg2);text-align:center;padding:22px 16px}
+.blog-ad-card img{width:100%;border-radius:10px;margin-bottom:10px}
+.blog-ad-card a{color:var(--or);font-weight:700;font-size:12.5px;text-decoration:none}
+.blog-cover img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.blog-cover .ph{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);font-size:70px}
+.blog-sidebar{display:flex;flex-direction:column;gap:18px;position:sticky;top:84px}
+.blog-sb-card{background:var(--card);border:1.5px solid var(--border);border-radius:var(--r2);padding:18px;box-shadow:var(--shadow-sm)}
+.blog-sb-card h4{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:12px;font-family:var(--font-head)}
+.blog-toc a{display:block;font-size:12.5px;color:var(--text2);padding:6px 0;border-bottom:1px solid var(--border);text-decoration:none;transition:color .15s}
+.blog-toc a:last-child{border-bottom:none}
+.blog-toc a:hover{color:var(--or)}
+.blog-sb-author{display:flex;gap:12px;align-items:center}
+.blog-sb-author .av{width:46px;height:46px;border-radius:50%;background:var(--or);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:16px;flex-shrink:0;font-family:var(--font-head)}
+.blog-related-item{display:flex;gap:10px;align-items:center;cursor:pointer;padding:8px 0;border-bottom:1px solid var(--border);transition:opacity .15s}
+.blog-related-item:last-child{border-bottom:none}
+.blog-related-item:hover{opacity:.75}
+.blog-related-item .th{width:50px;height:50px;border-radius:8px;object-fit:cover;flex-shrink:0;background:linear-gradient(135deg,var(--cream2),var(--cream3));display:flex;align-items:center;justify-content:center;font-size:17px}
+.blog-related-item .t{font-size:12.5px;font-weight:600;line-height:1.35;color:var(--dark2)}
+@media(max-width:768px){
+  .blog-detail-wrap{grid-template-columns:1fr;gap:28px}
+  .blog-sidebar{position:static;top:auto}
+  .blog-cover{padding-top:50%;min-height:180px}
+}
 /* ━━ BLOG COMMENTS ━━ */
 .comment-item{padding:14px 0;border-bottom:1px solid var(--border)}
 .comment-item:last-child{border-bottom:none}
@@ -2219,7 +2245,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   </div>
 </div>
 
-<div class="pg" id="pg-blog-detail"><div class="container sec" style="max-width:820px"><button class="btn btn-ghost btn-sm" onclick="nav('blog')" style="margin-bottom:18px">← Geri</button><div id="blog-detail-content"></div></div></div>
+<div class="pg" id="pg-blog-detail"><div class="container sec" style="max-width:1180px"><button class="btn btn-ghost btn-sm" onclick="nav('blog')" style="margin-bottom:18px">← Geri</button><div id="blog-detail-cover"></div><div class="blog-detail-wrap"><div id="blog-detail-content"></div><aside class="blog-sidebar" id="blog-detail-sidebar"></aside></div></div></div>
 
 <!-- SSS -->
 <div class="pg" id="pg-community">
@@ -4612,7 +4638,7 @@ window.reloadSiteData=loadAllFromDB;
 window.loadAllFromDB=loadAllFromDB;
 
 window.loadBannersFromDB=loadBannersFromDB;
-loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();
+loadBannersFromDB();loadSponsorsFromDB();loadFirsatlarFromDB();loadBlogAdConfig();
 loadAllFromDB();
 </script>
 
@@ -4688,6 +4714,26 @@ window.EVENTS=[];
 window.CLUBS=[];
 window.RACES=[];
 window.BLOG_POSTS=[];
+window.BLOG_AD={imgUrl:'',title:'Markanız Burada Görünsün',link:''};
+window.loadBlogAdConfig=async function(){
+  try{var fb=window._fb;var snap=await fb.getDoc(fb.doc(fb.db,'config','blogAd'));if(snap.exists())Object.assign(window.BLOG_AD,snap.data());}catch(e){}
+};
+window.saveBlogAdConfig=async function(){
+  try{
+    var fb=window._fb;
+    var data={imgUrl:document.getElementById('ba-img').value.trim(),title:document.getElementById('ba-title').value.trim()||'Markanız Burada Görünsün',link:document.getElementById('ba-link').value.trim()};
+    await fb.setDoc(fb.doc(fb.db,'config','blogAd'),data);
+    Object.assign(window.BLOG_AD,data);
+    toast('Reklam alanı güncellendi ✓','ok');
+  }catch(e){toast('Hata: '+(e.code||e.message),'err');}
+};
+window.renderBlogAdCard=function(){
+  var a=window.BLOG_AD||{};
+  return '<div class="blog-sb-card blog-ad-card">'+(a.imgUrl?'<img src="'+a.imgUrl+'" alt="reklam" loading="lazy"/>':'<div style="font-size:11px;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Reklam Alanı · 300×250</div>')+
+    '<div style="font-weight:700;font-size:13px;color:var(--dark2);margin-bottom:6px">'+(a.title||'Markanız Burada Görünsün')+'</div>'+
+    (a.link?'<a href="'+a.link+'" target="_blank" rel="noopener">İletişime Geçin →</a>':'<span style="font-size:11.5px;color:var(--muted)">Reklam vermek için iletişime geçin</span>')+
+  '</div>';
+};
 window.FIRSATLAR=[];
 window.loadFirsatlarFromDB=async function(){
   try{
@@ -7087,12 +7133,22 @@ window.openBlog=id=>{
   const p=BLOG_POSTS.find(x=>x.id===id);if(!p){console.warn('[openBlog] post bulunamadı:',id);return;}
   const _cu=window.CU;
   const liked=_cu&&localStorage.getItem(`blog_like_${p.id}_${_cu.uid}`);
+  const toc=[];
+  const bodyHtml=(p.body||'').replace(/<h([23])([^>]*)>(.*?)<\/h\1>/gi,(m,lvl,attrs,txt)=>{
+    const plain=txt.replace(/<[^>]+>/g,'').trim();if(!plain)return m;
+    const hid='toc-'+toc.length+'-'+plain.toLowerCase().replace(/[ğüşıöç]/g,c=>({ğ:'g',ü:'u',ş:'s',ı:'i',ö:'o',ç:'c'})[c]||c).replace(/[^a-z0-9]+/g,'-').slice(0,40);
+    toc.push({id:hid,txt:plain,lvl});
+    return `<h${lvl}${attrs} id="${hid}">${txt}</h${lvl}>`;
+  });
+  const words=(p.body||'').replace(/<[^>]+>/g,' ').split(/\s+/).filter(Boolean).length;
+  const readMin=Math.max(1,Math.round(words/200));
+  const coverEl=document.getElementById('blog-detail-cover');
+  if(coverEl)coverEl.innerHTML=`<div class="blog-cover">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="1200" height="400" loading="lazy"/>`:`<span class="ph">${p.emoji||'📰'}</span>`}</div>`;
   document.getElementById('blog-detail-content').innerHTML=`
-    <div style="width:100%;padding-top:52.5%;border-radius:var(--r);overflow:hidden;margin-bottom:24px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);display:flex;align-items:center;justify-content:center;position:relative">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="820" height="430" loading="lazy" style="width:100%;height:100%;object-fit:cover;position:absolute;inset:0"/>`:`<span style="font-size:70px;position:absolute;top:50%;left:50%;transform:translate(-50%,-50%)">${p.emoji||'\ud83d\udcf0'}</span>`}</div>
     <div style="display:flex;gap:6px;margin-bottom:10px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>
     <h2 style="font-size:26px;margin-bottom:10px;line-height:1.2">${p.title}</h2>
-    <div style="font-size:12px;color:var(--muted);margin-bottom:20px">✍️ ${p.authorName||'Editör'} · ${p.publishedAt||''}</div>
-    <div class="blog-body-content" style="font-size:15px;line-height:1.85;color:var(--text);margin-bottom:24px">${p.body||''}</div>
+    <div style="font-size:12px;color:var(--muted);margin-bottom:20px">✍️ ${p.authorName||'Editör'} · ${p.publishedAt||''} · ⏱️ ${readMin} dk okuma</div>
+    <div class="blog-body-content" style="font-size:15px;line-height:1.85;color:var(--text);margin-bottom:24px">${bodyHtml}</div>
     <div class="blog-social">
       <button class="social-btn ${liked?'liked':''}" id="like-btn-${p.id}" onclick="likeBlogPost('${p.id}',this)">
         ${liked?'❤️':'🤍'} ${liked?'Beğenildi':'Beğen'} (<span id="like-count-${p.id}">${p.likes||0}</span>)
@@ -7114,6 +7170,14 @@ window.openBlog=id=>{
         </div>` : `<div style="text-align:center;padding:16px;background:var(--bg2);border-radius:10px;font-size:13px;color:var(--muted)"><a onclick="openAuth('login')" style="color:var(--or);cursor:pointer;font-weight:600">Giriş yapın</a> veya <a onclick="openAuth('register')" style="color:var(--or);cursor:pointer;font-weight:600">üye olun</a> yorum yapmak için.</div>`}
       </div>
     </div>`;
+  const related=BLOG_POSTS.filter(x=>x.id!==p.id&&((x.kategori&&x.kategori===p.kategori)||(x.tags||[]).some(t=>(p.tags||[]).includes(t)))).slice(0,3);
+  const sbEl=document.getElementById('blog-detail-sidebar');
+  if(sbEl)sbEl.innerHTML=`
+    ${toc.length?`<div class="blog-sb-card"><h4>📑 Bu Yazıda</h4><div class="blog-toc">${toc.map(h=>`<a href="#${h.id}" style="${h.lvl==='3'?'padding-left:12px;font-size:11.5px':''}">${h.txt}</a>`).join('')}</div></div>`:''}
+    <div class="blog-sb-card"><h4>✍️ Yazar</h4><div class="blog-sb-author"><div class="av">${(p.authorName||'R').charAt(0).toUpperCase()}</div><div><div style="font-weight:700;font-size:13px;color:var(--dark2)">${p.authorName||'RunClub Editör'}</div><div style="font-size:11px;color:var(--muted)">${p.publishedAt||''}${p.kategori?' · '+p.kategori:''}</div></div></div></div>
+    ${(p.tags||[]).length?`<div class="blog-sb-card"><h4>🏷️ Etiketler</h4><div style="display:flex;gap:6px;flex-wrap:wrap">${p.tags.map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div></div>`:''}
+    ${related.length?`<div class="blog-sb-card"><h4>📰 İlgili Yazılar</h4>${related.map(r=>`<div class="blog-related-item" onclick="openBlog('${r.id}')">${r.coverUrl?`<img class="th" src="${r.coverUrl}" alt="${r.title}" loading="lazy"/>`:`<div class="th">${r.emoji||'📰'}</div>`}<div class="t">${r.title}</div></div>`).join('')}</div>`:''}
+    ${renderBlogAdCard()}`;
   nav('blog-detail');
   if(typeof routerPush==='function')routerPush('blog-detail', p.slug||p.id, p.title+' — RunClubTürkiye', (p.body||'').substring(0,150), p.coverUrl||'');
   window.injectBlogSchema&&window.injectBlogSchema(p);
@@ -9460,7 +9524,7 @@ function renderAdminSection(sec){
         </div>
         <div class="form-grp"><label>Başlık</label><input id="ab-title" oninput="updateSeoScore()"/></div>
         <div class="form-grp"><label>Yazar İsmi</label><input id="ab-author" placeholder="Run Club Editör" style="width:100%;padding:10px 12px;border:1.5px solid var(--border);border-radius:8px;background:var(--card);color:var(--text);font-size:14px"/></div>
-        ${imgUploadHtml('ab-img-input','Kapak Görseli','1200×630px')}
+        ${imgUploadHtml('ab-img-input','Kapak Görseli','1200×400px')}
         <div class="form-grp">
           <label>İçerik</label>
           <div id="ab-body-editor" style="height:320px;background:var(--bg);border-radius:8px;font-size:14px"></div>
@@ -9493,7 +9557,14 @@ function renderAdminSection(sec){
         <button class="btn btn-or" id="ab-save-btn" onclick="saveBlogFromAdmin()">Yayınla</button>
       <input type="hidden" id="ab-edit-id"/><input type="hidden" id="ab-form-title-val"/>
       </div>
-      <div id="admin-blog-lists"></div>`,
+      <div id="admin-blog-lists"></div>
+      <div class="card" style="padding:20px;margin-top:18px">
+        <h3 style="margin-bottom:14px;font-size:14px">📢 Blog Detay — Sidebar Reklam Alanı</h3>
+        <div class="form-grp"><label>Görsel URL (boş bırakılırsa yer tutucu görünür)</label><input id="ba-img" value="${(window.BLOG_AD&&window.BLOG_AD.imgUrl)||''}"/></div>
+        <div class="form-grp"><label>Başlık</label><input id="ba-title" value="${(window.BLOG_AD&&window.BLOG_AD.title)||'Markanız Burada Görünsün'}"/></div>
+        <div class="form-grp"><label>Link (opsiyonel)</label><input id="ba-link" value="${(window.BLOG_AD&&window.BLOG_AD.link)||''}"/></div>
+        <button class="btn btn-or" onclick="saveBlogAdConfig()">Kaydet</button>
+      </div>`,
     firsatlar:`<h2 style="margin-bottom:18px">🎁 Fırsatlar</h2>
       <div class="card" style="padding:20px;margin-bottom:18px">
         <h3 style="margin-bottom:14px;font-size:14px">Yeni Fırsat Ekle</h3>

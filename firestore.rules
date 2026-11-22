@@ -204,7 +204,7 @@ service cloud.firestore {
     match /adminNotifications/{id} {
       allow read, update, delete: if isSuperAdmin();
       allow create: if request.resource.data.keys().hasOnly(['type','title','body','section','read','createdAt','actorUid','actorName'])
-        && request.resource.data.type in ['new_user','ga_application','club_join','contact','ga_event','ga_calendar','ga_announcement','chat','partner']
+        && request.resource.data.type in ['new_user','ga_application','club_join','contact','ga_event','ga_calendar','ga_announcement','chat','partner','help']
         && request.resource.data.title is string && request.resource.data.title.size() <= 120
         && request.resource.data.body is string && request.resource.data.body.size() <= 300
         && request.resource.data.read == false;
@@ -221,6 +221,20 @@ service cloud.firestore {
     match /pageStatsDaily/{day} {
       allow read, delete: if isSuperAdmin();
       allow create, update: if request.resource.data.keys().hasOnly(['date','c']) && request.resource.data.date == day;
+    }
+
+    // Yardım asistanı: ziyaretçi/üye sorularının eskale edildiği talepler
+    match /helpMessages/{id} {
+      allow get: if true; // sahibi kendi talebini (kaydettiği id ile) takip edebilsin
+      allow list, delete: if isSuperAdmin();
+      allow create: if request.resource.data.keys().hasOnly(['question','name','email','uid','status','answer','createdAt'])
+        && request.resource.data.question is string && request.resource.data.question.size() > 0 && request.resource.data.question.size() <= 500
+        && request.resource.data.name is string && request.resource.data.name.size() <= 80
+        && request.resource.data.email is string && request.resource.data.email.size() <= 120
+        && request.resource.data.status == 'open' && request.resource.data.answer == '';
+      allow update: if isSuperAdmin()
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['answer','status','answeredAt'])
+        && request.resource.data.status == 'answered';
     }
 
     // Markalardan gelen iş birliği talepleri

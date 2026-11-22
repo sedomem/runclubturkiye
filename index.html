@@ -706,6 +706,29 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
   .blog-sidebar{position:static;top:auto}
   .blog-cover{padding-top:50%;min-height:180px}
 }
+/* ━━ YARDIM ASİSTANI ━━ */
+#help-fab{position:fixed;bottom:140px;right:20px;width:54px;height:54px;border-radius:50%;background:var(--or);color:#fff;border:none;cursor:pointer;z-index:380;box-shadow:0 6px 20px rgba(232,98,42,.4);font-size:24px;display:flex;align-items:center;justify-content:center;transition:transform .15s}
+#help-fab:hover{transform:scale(1.07)}
+#help-panel{position:fixed;bottom:206px;right:20px;width:340px;max-width:calc(100vw - 32px);max-height:min(520px,70vh);background:var(--card);border:1.5px solid var(--border);border-radius:18px;box-shadow:0 16px 48px rgba(0,0,0,.22);z-index:381;display:none;flex-direction:column;overflow:hidden}
+#help-panel.on{display:flex}
+.help-head{background:var(--dark2);color:#fff;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
+.help-head b{font-size:14px}
+.help-head span{font-size:11px;opacity:.7;display:block;margin-top:2px}
+.help-close{background:none;border:none;color:#fff;font-size:18px;cursor:pointer;opacity:.8;padding:4px}
+.help-body{flex:1;overflow-y:auto;padding:14px 14px 8px;display:flex;flex-direction:column;gap:10px;background:var(--bg2)}
+.help-msg{max-width:88%;padding:9px 12px;border-radius:14px;font-size:13px;line-height:1.5}
+.help-msg.bot{background:var(--card);border:1px solid var(--border);align-self:flex-start;border-bottom-left-radius:4px}
+.help-msg.user{background:var(--or);color:#fff;align-self:flex-end;border-bottom-right-radius:4px}
+.help-msg a{color:var(--or)}
+.help-msg.bot a{text-decoration:underline}
+.help-esc-btn{align-self:flex-start;margin-top:2px;background:none;border:1.5px solid var(--or);color:var(--or);border-radius:999px;padding:5px 12px;font-size:11.5px;font-weight:700;cursor:pointer}
+.help-foot{padding:10px;border-top:1px solid var(--border);display:flex;gap:8px;flex-shrink:0;background:var(--card)}
+.help-foot input{flex:1;border:1.5px solid var(--border);border-radius:999px;padding:9px 14px;font-size:13px;background:var(--bg2);color:var(--text)}
+.help-foot button{background:var(--or);color:#fff;border:none;border-radius:50%;width:36px;height:36px;cursor:pointer;flex-shrink:0;font-size:15px}
+@media(max-width:768px){
+  #help-fab{bottom:96px;right:16px;width:48px;height:48px;font-size:21px}
+  #help-panel{bottom:154px;right:12px;left:12px;width:auto}
+}
 /* ━━ BLOG COMMENTS ━━ */
 .comment-item{padding:14px 0;border-bottom:1px solid var(--border)}
 .comment-item:last-child{border-bottom:none}
@@ -2712,6 +2735,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button onclick="aNav('users',this)">👥 Kullanıcılar</button>
     <button onclick="aNav('newsletter',this)">📬 Haberdar Ol</button>
     <button id="sb-messages-btn" onclick="aNav('messages',this)">✉️ Mesajlar</button>
+    <button id="sb-help-btn" onclick="aNav('help',this)">🆘 Yardım Mesajları</button>
     <button id="sb-applications-btn" onclick="aNav('applications',this)">📋 Başvurular</button>
     <button onclick="aNav('chat',this)">💬 Mesajlaşma</button>
     <button onclick="aNav('community',this)">🏃 Topluluk</button>
@@ -3023,6 +3047,20 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 </div>
 <div id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
 <div id="toast"></div>
+
+<!-- YARDIM ASİSTANI -->
+<button id="help-fab" onclick="toggleHelpPanel()" aria-label="Yardım">💬</button>
+<div id="help-panel">
+  <div class="help-head">
+    <div><b>Yardım Asistanı</b><span>Genellikle anında cevap verir</span></div>
+    <button class="help-close" onclick="toggleHelpPanel(false)">✕</button>
+  </div>
+  <div class="help-body" id="help-body"></div>
+  <div class="help-foot">
+    <input id="help-input" placeholder="Bir soru yaz…" onkeydown="if(event.key==='Enter')sendHelpMsg()"/>
+    <button onclick="sendHelpMsg()">➤</button>
+  </div>
+</div>
 
 <!-- Leaflet CSS: harita sayfasına kadar kritik değil → non-blocking -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css" media="print" onload="this.media='all'"/>
@@ -9690,6 +9728,7 @@ function renderAdminSection(sec){
     messages:`<h2 style="margin-bottom:18px">✉️ Mesajlar</h2><div id="admin-messages-list"><div class="spinner" style="margin:20px auto"></div></div>`,
     chat:`<h2 style="margin-bottom:18px">💬 Mesajlaşma</h2><div style="display:flex;flex-direction:column;height:400px"><div style="flex:1;overflow-y:auto;padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--bg3);border-radius:8px;margin-bottom:10px" id="chat-messages-admin"></div><div style="display:flex;gap:8px"><input type="text" id="chat-input-admin" placeholder="Mesaj yaz..." onkeypress="if(event.key==='Enter')sendChatMessage('admin')"/><button class="btn btn-or btn-sm" onclick="sendChatMessage('admin')">Gönder</button></div></div>`,
     applications:`<h2 style="margin-bottom:18px">📋 Başvurular</h2><div id="admin-applications-list"><div class="spinner" style="margin:20px auto"></div></div>`,
+    help:`<h2 style="margin-bottom:18px">🆘 Yardım Mesajları</h2><p style="font-size:12px;color:var(--muted);margin-bottom:14px">Yardım asistanının cevap veremediği sorular burada listelenir.</p><div id="admin-help-list"><div class="spinner" style="margin:20px auto"></div></div>`,
   };
   main.innerHTML=sections[sec]||sections['dashboard'];
   if(sec==='users')setTimeout(()=>loadAdminUsers&&loadAdminUsers(),100);
@@ -9700,6 +9739,7 @@ function renderAdminSection(sec){
     setTimeout(()=>window.renderUserDemographics&&window.renderUserDemographics(),300);
   }
   if(sec==='messages')setTimeout(()=>loadAdminMessages&&loadAdminMessages(),100);
+  if(sec==='help')setTimeout(()=>window.loadAdminHelp&&window.loadAdminHelp(),100);
   if(sec==='applications')setTimeout(()=>loadApplications&&loadApplications(),100);
   if(sec==='approvals')setTimeout(()=>loadPendingEvents&&loadPendingEvents(),100);
   if(sec==='chat')setTimeout(()=>loadChatMessages&&loadChatMessages('admin'),100);
@@ -17518,6 +17558,134 @@ html,body{overflow-x:clip!important;overflow-y:visible!important}
       else if(n===16&&!window.CU&&window.openAuth){openAuth('login');}
       if(n>120)clearInterval(t);},500);})();
 })();
+</script>
+
+<script id="help-assistant">
+// ═══ YARDIM ASİSTANI — SSS tabanlı oto-cevap + admin'e eskale ═══
+window.HELP_FAQ=[
+  {q:"RunClubTürkiye nedir",a:"RunClubTürkiye, Türkiye'deki koşucuları, koşu kulüplerini ve yarışları tek platformda buluşturan ücretsiz bir koşu topluluğudur."},
+  {q:"üyelik ücretli mi para ödeme",a:"Hayır, üyelik ve platformdaki tüm temel özellikler tamamen ücretsizdir. Ücretli bir etkinliğe katılırsan ödemeyi doğrudan organizatöre yaparsın."},
+  {q:"nasıl üye olurum kayıt ol",a:"Sağ üstteki <b>Üye Ol</b> butonuna tıkla; e-posta/şifre ya da Google hesabınla birkaç saniyede kayıt olabilirsin."},
+  {q:"hangi şehirlerde aktifsiniz il var mı",a:"Platform 81 ilin tamamına açıktır, her il için kulüpleri ve yaklaşan yarışları gösteren şehir sayfaları vardır."},
+  {q:"mobil uygulama var mı telefon",a:"Ayrı bir uygulama yok ama telefonunda tarayıcı menüsünden 'Ana ekrana ekle' seçersen site bir uygulama gibi çalışır ve bildirim alabilirsin."},
+  {q:"yarış takviminde hangi yarışlar var",a:"Türkiye genelindeki yol koşuları, trail ve ultra yarışlar tarih sırasıyla listelenir; her yarışın tarih, konum, mesafe ve kayıt bilgisi vardır."},
+  {q:"yarışı nasıl takip ederim beğen paylaş",a:"Yarış kartındaki Beğen ile ilgilendiğin yarışları işaretleyebilir, Paylaş ile arkadaşlarına gönderebilirsin. Kayıt organizatörün kendi sitesinden yapılır."},
+  {q:"organizatörüm yarışımı nasıl ekletirim",a:"Yarışının adı, tarihi, konumu ve kayıt bağlantısını İletişim formundan ya da runclubturkiye@gmail.com adresinden gönder, kontrol edip ekleyelim."},
+  {q:"koşu kulübüne nasıl katılırım üye",a:"Kulüpler sayfasından ya da şehir sayfandan kulübü seç ve Katıl'a tıkla. Birden fazla kulübe üye olabilirsin."},
+  {q:"kendi kulübümü grubumu nasıl eklerim kulüp açmak",a:"Menüdeki 'Kulüp yöneticisi girişi'nden başvuru formunu doldur. Onaylanınca kulübün yayınlanır ve yönetim panelin açılır. Ücretsizdir."},
+  {q:"kulüp yönetim panelinde neler yapabilirim",a:"Etkinlik/antrenman ekleme, duyuru gönderme, kulüp içi sohbet, üye listesi, katılım istatistikleri ve kulüp profilini (logo, açıklama, sosyal medya) yönetebilirsin."},
+  {q:"etkinliğe nasıl kaydolurum katılırım",a:"Etkinlik sayfasındaki 'Etkinliğe Kaydol' butonuna tıklaman yeterli, etkinlik profilindeki listende görünür."},
+  {q:"qr check-in nedir",a:"Etkinlik günü katılımını doğrulamak için kullanılır; etkinlik sayfasındaki QR Check-in ile kişisel kodunu oluşturup görevliye gösterirsin."},
+  {q:"etkinlik ücretini platform mu alıyor ödeme",a:"Hayır, RunClubTürkiye bir keşif/kayıt platformudur. Ücretli etkinliklerde ödeme organizatöre yapılır."},
+  {q:"fırsatlar indirim kodu nasıl çalışır",a:"Fırsatlar sayfasında markaların üyelere özel indirimleri yer alır. Kodlar sadece giriş yapmış üyelere görünür, tek tıkla kopyalanır."},
+  {q:"indirim kodu çalışmıyor",a:"Önce kampanya koşullarını ve bitiş tarihini kontrol et. Sorun devam ederse bize yaz, markayla iletişime geçip çözelim."},
+  {q:"şifremi unuttum giriş yapamıyorum",a:"Giriş ekranındaki 'Şifremi unuttum' bağlantısına tıkla ve e-postanı yaz; sıfırlama bağlantısı gelir (spam klasörünü de kontrol et)."},
+  {q:"rozetler istatistikler nasıl oluşuyor",a:"Etkinliklere katıldıkça, kulüplere üye oldukça ve toplulukta aktif oldukça profilindeki istatistiklerin güncellenir ve rozet kazanırsın."},
+  {q:"verilerim güvende mi gizlilik kvkk",a:"Evet, veriler Google Firebase altyapısında KVKK'ya uygun şekilde saklanır. Sağlık bilgisi gibi hassas alanlar isteğe bağlıdır ve yalnızca sen görebilirsin."},
+  {q:"hesabımı nasıl silerim",a:"Profil sayfandaki hesap ayarlarındaki 'Hesabımı Sil' butonuyla hesabını kalıcı olarak silebilirsin."},
+  {q:"bildirimleri nasıl yönetirim kapatırım",a:"Tarayıcın bildirim izni istediğinde onay verirsen duyurular telefonuna/bilgisayarına gelir; istediğin zaman tarayıcı ayarlarından kapatabilirsin."},
+  {q:"markam için nasıl yer alırım sponsorluk iş birliği",a:"Üyelere özel fırsat sayfaları, sponsorluk ve içerik iş birlikleri sunuyoruz. İş birliği formunu doldur, 2 iş günü içinde dönüş yapalım."}
+];
+window._helpEscQ='';
+function helpNorm(s){return (s||'').toLocaleLowerCase('tr').replace(/[^a-zçğıöşü0-9\s]/g,' ').split(/\s+/).filter(function(w){return w.length>=3;});}
+window.helpFindAnswer=function(question){
+  var qw=helpNorm(question);if(!qw.length)return null;
+  var best=null,bestScore=0;
+  window.HELP_FAQ.forEach(function(f){
+    var fw=helpNorm(f.q+' '+f.a);var score=0;
+    qw.forEach(function(w){if(fw.indexOf(w)>-1)score++;else if(fw.some(function(x){return x.indexOf(w)>-1||w.indexOf(x)>-1;}))score+=0.5;});
+    if(score>bestScore){bestScore=score;best=f;}
+  });
+  return bestScore>=1?best:null;
+};
+function helpAddMsg(role,html){
+  var b=document.getElementById('help-body');if(!b)return;
+  var d=document.createElement('div');d.className='help-msg '+role;d.innerHTML=html;b.appendChild(d);
+  b.scrollTop=b.scrollHeight;
+}
+window.toggleHelpPanel=function(force){
+  var p=document.getElementById('help-panel');if(!p)return;
+  var show=force===undefined?!p.classList.contains('on'):force;
+  p.classList.toggle('on',show);
+  if(show&&!p.dataset.inited){
+    p.dataset.inited='1';
+    helpAddMsg('bot','Merhaba 👋 RunClubTürkiye hakkında merak ettiğin bir şeyi yazabilirsin. Cevabını bulamazsam seni direkt ekibimize yönlendiririm.');
+  }
+};
+window.sendHelpMsg=function(){
+  var inp=document.getElementById('help-input');var q=(inp.value||'').trim();if(!q)return;
+  inp.value='';helpAddMsg('user',q.replace(/</g,'&lt;'));
+  var hit=window.helpFindAnswer(q);
+  if(hit){
+    helpAddMsg('bot',hit.a+'<br><button class="help-esc-btn" onclick="helpEscalate(\''+q.replace(/'/g,"\\'").replace(/</g,'&lt;')+'\')">Bu cevap yardımcı olmadı, bir yöneticiye ilet</button>');
+  }else{
+    window._helpEscQ=q;
+    helpAddMsg('bot','Bunun için hazır bir cevabım yok. İstersen sorunu ekibimize iletebilirim, ilk fırsatta sana dönüş yaparız.<br><button class="help-esc-btn" onclick="helpEscalate(\''+q.replace(/'/g,"\\'").replace(/</g,'&lt;')+'\')">Yöneticiye ilet</button>');
+  }
+};
+window.helpEscalate=async function(question){
+  try{
+    var fb=window._fb;if(!fb){helpAddMsg('bot','Şu an bağlantı kurulamadı, lütfen birazdan tekrar dene.');return;}
+    var name=(window.CU&&window.CU.name)||'Ziyaretçi';
+    var email=(window.CU&&window.CU.email)||'';
+    var ref=await fb.addDoc(fb.collection(fb.db,'helpMessages'),{question:String(question).slice(0,500),name:name,email:email,uid:(window.CU&&window.CU.uid)||'',status:'open',answer:'',createdAt:fb.serverTimestamp()});
+    try{
+      var mine=JSON.parse(localStorage.getItem('rc_help_mine')||'[]');
+      mine.push(ref.id);localStorage.setItem('rc_help_mine',JSON.stringify(mine.slice(-20)));
+    }catch(e){}
+    window.notifyAdmin&&window.notifyAdmin('help','Yeni yardım talebi',question,'help');
+    helpAddMsg('bot','Talebin iletildi ✓ Ekibimiz en kısa sürede buradan cevap yazacak.');
+    helpWatchMine();
+  }catch(e){helpAddMsg('bot','Gönderilemedi: '+(e.code||e.message));}
+};
+var _helpWatched={};
+window.helpWatchMine=function(){
+  var fb=window._fb;if(!fb)return;
+  var mine=[];try{mine=JSON.parse(localStorage.getItem('rc_help_mine')||'[]');}catch(e){}
+  mine.forEach(function(id){
+    if(_helpWatched[id])return;_helpWatched[id]=1;
+    fb.onSnapshot(fb.doc(fb.db,'helpMessages',id),function(snap){
+      if(!snap.exists())return;var d=snap.data();
+      if(d.status==='answered'&&d.answer&&!d._shown){
+        helpAddMsg('bot','<b>Yönetici yanıtı:</b><br>'+String(d.answer).replace(/</g,'&lt;'));
+        d._shown=true;
+        if(!document.getElementById('help-panel').classList.contains('on')){var fab=document.getElementById('help-fab');if(fab)fab.style.boxShadow='0 0 0 4px rgba(232,98,42,.4),0 6px 20px rgba(232,98,42,.4)';}
+      }
+    });
+  });
+};
+helpWatchMine();
+
+// ── SÜPER ADMIN: Yardım Mesajları paneli ──
+var _helpAdminUnsub=null;
+window.loadAdminHelp=function(){
+  var el=document.getElementById('admin-help-list');if(!el)return;
+  var fb=window._fb;if(!fb){el.innerHTML='<p style="color:var(--muted)">Bağlantı yok.</p>';return;}
+  if(_helpAdminUnsub)_helpAdminUnsub();
+  var esc=function(v){return String(v==null?'':v).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c];});};
+  _helpAdminUnsub=fb.onSnapshot(fb.query(fb.collection(fb.db,'helpMessages'),fb.orderBy('createdAt','desc')),function(snap){
+    var rows=[];snap.forEach(function(d){rows.push(Object.assign({id:d.id},d.data()));});
+    if(!rows.length){el.innerHTML='<p style="color:var(--muted);font-size:13px">Henüz yardım talebi yok.</p>';return;}
+    el.innerHTML=rows.map(function(r){
+      var open=r.status!=='answered';
+      var when=r.createdAt&&r.createdAt.toDate?r.createdAt.toDate().toLocaleString('tr-TR'):'';
+      return '<div class="card" style="padding:16px;margin-bottom:12px;border-left:3px solid '+(open?'#e8622a':'#2e7d32')+'">'
+        +'<div style="display:flex;justify-content:space-between;gap:8px;margin-bottom:6px"><b style="font-size:13px">'+esc(r.name||'Ziyaretçi')+(r.email?' · '+esc(r.email):'')+'</b><span style="font-size:11px;color:var(--muted)">'+when+'</span></div>'
+        +'<p style="font-size:13.5px;margin-bottom:10px">'+esc(r.question||'')+'</p>'
+        +(r.status==='answered'?'<div style="background:var(--bg2);border-radius:8px;padding:10px;font-size:12.5px;margin-bottom:8px"><b>Yanıtınız:</b> '+esc(r.answer||'')+'</div>':'')
+        +'<div style="display:flex;gap:8px"><input id="help-reply-'+r.id+'" placeholder="Yanıt yaz..." value="'+esc(r.answer||'')+'" style="flex:1;padding:8px 10px;border:1px solid var(--border);border-radius:7px;background:var(--bg2);color:var(--text);font-size:12.5px"/><button class="btn btn-or btn-sm" onclick="helpReply(\''+r.id+'\')">Yanıtla</button></div>'
+        +'</div>';
+    }).join('');
+  },function(e){el.innerHTML='<p style="color:var(--muted)">Yüklenemedi: '+e.message+'</p>';});
+};
+window.helpReply=async function(id){
+  var inp=document.getElementById('help-reply-'+id);var answer=(inp&&inp.value||'').trim();if(!answer)return;
+  try{
+    var fb=window._fb;
+    await fb.updateDoc(fb.doc(fb.db,'helpMessages',id),{answer:answer,status:'answered',answeredAt:fb.serverTimestamp()});
+    toast('Yanıt gönderildi ✓','ok');
+  }catch(e){toast('Hata: '+(e.code||e.message),'err');}
+};
 </script>
 </body>
 </html>

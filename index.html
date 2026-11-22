@@ -2324,6 +2324,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
         </div>
       </div>
 
+      <!-- En Çok Okunan Bloglar -->
+      <div class="comm-sidebar-card">
+        <h3>📰 En Çok Okunan</h3>
+        <div id="comm-top-blog" style="display:flex;flex-direction:column;gap:2px">
+          <div class="spinner" style="margin:10px auto"></div>
+        </div>
+      </div>
+
       <!-- Aktif Kulüpler -->
       <div class="comm-sidebar-card">
         <h3>👑 En Aktif Kulüpler</h3>
@@ -11675,7 +11683,37 @@ window.loadCommunityPage = async function() {
     loadActiveUsers(),
     loadLeaderboard(),
     loadTopClubs(),
+    loadTopBlogPosts(),
   ]);
+};
+
+// ── EN ÇOK OKUNAN BLOG YAZILARI ──────────────────────────
+window.loadTopBlogPosts = async function(){
+  const el=document.getElementById('comm-top-blog');
+  if(!el)return;
+  try{
+    const fb=window._fb;
+    const snap=await fb.getDocs(fb.query(fb.collection(fb.db,'pageStats'),fb.where('type','==','blog')));
+    const rows=[];snap.forEach(d=>rows.push(d.data()));
+    rows.sort((a,b)=>(b.views||0)-(a.views||0));
+    const top=rows.slice(0,5);
+    if(!top.length){el.innerHTML='<p style="font-size:12px;color:var(--muted)">Henüz veri yok.</p>';return;}
+    el.innerHTML=top.map((r,i)=>{
+      const slug=(r.path||'').replace(/^\/haber\//,'');
+      return `<div class="blog-related-item" onclick="openBlogBySlug('${slug}')">
+        <div class="th" style="font-weight:800;color:var(--or);font-size:15px">${i+1}</div>
+        <div class="t">${r.title||slug}<div style="font-size:10.5px;color:var(--muted);font-weight:500;margin-top:2px">👁 ${r.views||0} okunma</div></div>
+      </div>`;
+    }).join('');
+  }catch(e){console.warn('[TopBlog]',e.message);el.innerHTML='<p style="font-size:12px;color:var(--muted)">Yüklenemedi.</p>';}
+};
+window.openBlogBySlug=function(slug){
+  const p=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);
+  if(p){window.openBlog(p.id);return;}
+  if(window.loadBlogFromDB)window.loadBlogFromDB().then(()=>{
+    const p2=window.BLOG_POSTS&&window.BLOG_POSTS.find(x=>x.slug===slug||x.id===slug);
+    if(p2)window.openBlog(p2.id);
+  });
 };
 
 // ── FEED ──────────────────────────────────────────────────

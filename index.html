@@ -3244,6 +3244,24 @@ onAuthStateChanged(auth,async user=>{
     setupRoleBtn();buildDashboard();syncProfileUI();
     if(typeof window.syncMobileMenu==='function')window.syncMobileMenu();
     if(role==='superadmin'){loadAdminBadges();setTimeout(()=>window.startAdminAlerts&&window.startAdminAlerts(),1500);setTimeout(()=>window.migrateHealthData&&window.migrateHealthData(),4000);}
+    // Sayfa yenilemede panel/admin/dashboard'dan ana sayfaya atmasın — kaldığı yere dön
+    try{
+      if(!window._rcRestored&&location.pathname==='/'){
+        window._rcRestored=true;
+        const lp=sessionStorage.getItem('rc_lastPage');
+        if(lp==='panel'&&(role==='groupadmin'||role==='subadmin')){
+          nav('panel');
+          const lps=sessionStorage.getItem('rc_lastPanelSec');
+          if(lps)setTimeout(()=>{const b=document.querySelector('#pg-panel .admin-sb button[onclick*="gNav(\''+lps+'\'"]');gNav(lps,b);},400);
+        }else if(lp==='admin'&&role==='superadmin'){
+          nav('admin');
+          const las=sessionStorage.getItem('rc_lastAdminSec');
+          if(las)setTimeout(()=>{const b=document.querySelector('#pg-admin .admin-sb button[onclick*="aNav(\''+las+'\'"]');aNav(las,b);},400);
+        }else if(lp==='dashboard'){
+          nav('dashboard');
+        }
+      }
+    }catch(e){}
     // Push bildirim izni banner'ı göster
     setTimeout(()=>{if(typeof window.checkAndRequestPush==='function')window.checkAndRequestPush();},2000);
   }else{
@@ -4850,6 +4868,7 @@ window.nav=id=>{
   if(hb)hb.classList.remove('open');
   // URL güncelle
   if(typeof routerPush==='function')routerPush(id);
+  try{sessionStorage.setItem('rc_lastPage',id);}catch(e){}
   const gf=document.getElementById('global-footer');
   if(gf)gf.style.display=['admin','panel','dashboard','profile'].includes(id)?'none':'block';
   if((id==='dashboard'||id==='admin'||id==='panel')&&!window.CU){openAuth('login');return;}
@@ -8340,6 +8359,7 @@ window.renderRaceListPaged=function(){
 };
 
 window.gNav=function(sec,btn){
+  try{sessionStorage.setItem('rc_lastPanelSec',sec);}catch(e){}
   document.querySelectorAll('#pg-panel .admin-sb button').forEach(function(b){
     b.classList.remove('on');
   });
@@ -9810,7 +9830,7 @@ function renderAdminSection(sec){
     return;
   }
 }
-window.aNav=(sec,btn)=>{document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);if(sec==='firsatlar')setTimeout(()=>loadFirsatlarFromDB&&loadFirsatlarFromDB(),200);};
+window.aNav=(sec,btn)=>{try{sessionStorage.setItem('rc_lastAdminSec',sec);}catch(e){}document.querySelectorAll('.admin-sb button').forEach(b=>b.classList.remove('on'));if(btn)btn.classList.add('on');renderAdminSection(sec);if(sec==='firsatlar')setTimeout(()=>loadFirsatlarFromDB&&loadFirsatlarFromDB(),200);};
 
 // ── ETKİNLİK İSTATİSTİKLERİ ──
 window.showEventStats=async(eventId)=>{

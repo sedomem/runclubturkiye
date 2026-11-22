@@ -14481,7 +14481,7 @@ window.renderFirsatStats=function(){
   var el=document.getElementById('fp-stats');if(!el)return;
   var t=new Date().toISOString().slice(0,10);
   var up=(window.RACES||[]).filter(function(r){return r.date>=t;}).length;
-  el.innerHTML='<div><b>'+((window.CLUBS||[]).length||'—')+'</b><span>koşu kulübü</span></div><div><b>'+(up||'—')+'</b><span>yaklaşan yarış</span></div><div><b>'+((window.BLOG_POSTS||[]).length||'—')+'</b><span>Haber&amp;Blog</span></div><div><b>81</b><span>ilde koşucu</span></div>';
+  el.innerHTML='<div><b>'+((window.CLUBS||[]).length||'—')+'</b><span>koşu kulübü</span></div><div><b>'+(up||'—')+'</b><span>yaklaşan yarış</span></div><div><b>'+((window.BLOG_POSTS||[]).length||'—')+'</b><span>rehber &amp; haber</span></div><div><b>81</b><span>ilde koşucu</span></div>';
 };
 (function(){
   var _r=window.renderFirsatlar;

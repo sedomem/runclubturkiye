@@ -6386,7 +6386,15 @@ function renderRaceList(){
   const fw=document.getElementById('featured-races-wrap');
   const fl=document.getElementById('featured-races-list');
   if(fw&&fl){
-    if(featured.length){fl.innerHTML=featured.map(raceCard).join('');fw.style.display='block';}
+    if(featured.length){
+      featured.sort((x,y)=>String(x.date||'9999').localeCompare(String(y.date||'9999')));
+      const LIM=6,showAll=!!window._featShowAll,list=showAll?featured:featured.slice(0,LIM);
+      fl.innerHTML=list.map(raceCard).join('');
+      let more=document.getElementById('featured-races-more');
+      if(!more){more=document.createElement('div');more.id='featured-races-more';more.style.cssText='text-align:center;margin-top:14px';fl.parentNode.insertBefore(more,fl.nextSibling);}
+      more.innerHTML=featured.length>LIM?'<button type="button" class="btn btn-ghost btn-sm" onclick="window._featShowAll='+(!showAll)+';renderRaceList()">'+(showAll?'Daha az göster':'Tüm öne çıkanları göster ('+featured.length+')')+'</button>':'';
+      fw.style.display='block';
+    }
     else fw.style.display='none';
   }
   // Şehir dropdown doldur

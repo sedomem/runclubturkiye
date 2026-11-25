@@ -6376,6 +6376,15 @@ function raceCard(r){
   </div>`;
 }
 window.raceCard=raceCard;
+window.renderUpcomingRacesRow=function(excludeId){
+  const el=document.getElementById('related-upcoming-'+excludeId);
+  if(!el)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const all=(window.RACES||[]).filter(x=>x.id!==excludeId);
+  const upcoming=all.filter(x=>x.date&&new Date(x.date)>=today).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const picks=(upcoming.length?upcoming:all).slice(0,4);
+  el.innerHTML=picks.length?picks.map(raceCard).join(''):'<p style="color:var(--muted)">Yaklaşan başka yarış bulunamadı.</p>';
+};
 function renderRaceList(){
   const rl=document.getElementById('races-list');
   if(!rl)return;
@@ -6555,11 +6564,17 @@ window.openRace=id=>{
         </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
         <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
       </div>
+    </div>
+    <!-- ── YAKLAŞAN YARIŞLAR ── -->
+    <div class="sec" style="margin-top:28px">
+      <div class="sec-head" style="margin-bottom:14px"><h2 style="font-size:18px;margin:0">🔥 Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
+      <div class="grid g4 scroll-row" id="related-upcoming-${r.id}"></div>
     </div>`;
   nav('race-detail');
   if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'', r.imgUrl||'');
   updateSEOMeta(r.name || '', (r.name||'')+' — '+(r.location||r.city||'')+(r.date?', '+((window.fmtTRDate&&window.fmtTRDate(r.date))||r.date):'')+'. Mesafeler, kayıt bilgileri ve yarış detayları RunClub Türkiye yarış takviminde.', 'https://www.runclubturkiye.com/yaris/' + (r.slug||r.id||''));
   setTimeout(()=>loadDiscussions&&loadDiscussions(r.id),100);
+  renderUpcomingRacesRow(r.id);
 };
 
 // ── BLOG ──
@@ -7220,7 +7235,8 @@ window.openBlog=id=>{
   const readMin=Math.max(1,Math.round(words/200));
   const coverEl=document.getElementById('blog-detail-cover');
   if(coverEl)coverEl.innerHTML=`<div class="blog-cover">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="1200" height="400" loading="lazy"/>`:`<span class="ph">${p.emoji||'📰'}</span>`}</div>`;
-  document.getElementById('blog-detail-content').innerHTML=`
+  const contentEl=document.getElementById('blog-detail-content');
+  if(contentEl)contentEl.innerHTML=`
     <div style="display:flex;gap:6px;margin-bottom:10px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>
     <h2 style="font-size:26px;margin-bottom:10px;line-height:1.2">${p.title}</h2>
     <div style="font-size:12px;color:var(--muted);margin-bottom:20px">✍️ ${p.authorName||'Editör'} · ${p.publishedAt||''} · ⏱️ ${readMin} dk okuma</div>
@@ -13664,7 +13680,8 @@ window.injectEventSchema = function(e) {
 
   function shouldIgnore(msg) {
     if (!msg) return true;
-    return _ignorePatterns.some(function(p) { return msg.indexOf(p) > -1; });
+    var m = String(msg).toLowerCase();
+    return _ignorePatterns.some(function(p) { return m.indexOf(String(p).toLowerCase()) > -1; });
   }
 
   function showErrorBoundary(msg, retry) {
@@ -13684,6 +13701,17 @@ window.injectEventSchema = function(e) {
 
     el.querySelector('p').textContent = friendly;
     el.classList.add('show');
+
+    try {
+      if (window._fb && window._fb.db) {
+        window._fb.addDoc(window._fb.collection(window._fb.db, 'client_errors'), {
+          msg: String(msg || '').slice(0, 500),
+          ua: navigator.userAgent,
+          path: location.pathname,
+          ts: window._fb.serverTimestamp()
+        });
+      }
+    } catch (_) {}
 
     var retryBtn = el.querySelector('.err-retry');
     if (retryBtn) {

@@ -332,5 +332,11 @@ service cloud.firestore {
       allow read, update, delete: if false;
     }
 
+    // İstemci hata logları (global error boundary tarafından yazılır)
+    match /client_errors/{id} {
+      allow create: if true;
+      allow read, update, delete: if isSuperAdmin();
+    }
+
   }
 }

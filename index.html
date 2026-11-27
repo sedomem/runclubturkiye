@@ -6383,6 +6383,15 @@ function raceCard(r){
   </div>`;
 }
 window.raceCard=raceCard;
+window.renderUpcomingRacesRow=function(excludeId){
+  const el=document.getElementById('related-upcoming-'+excludeId);
+  if(!el)return;
+  const today=new Date();today.setHours(0,0,0,0);
+  const all=(window.RACES||[]).filter(x=>x.id!==excludeId);
+  const upcoming=all.filter(x=>x.date&&new Date(x.date)>=today).sort((a,b)=>new Date(a.date)-new Date(b.date));
+  const picks=(upcoming.length?upcoming:all).slice(0,4);
+  el.innerHTML=picks.length?picks.map(raceCard).join(''):'<p style="color:var(--muted)">Yaklaşan başka yarış bulunamadı.</p>';
+};
 function renderRaceList(){
   const rl=document.getElementById('races-list');
   if(!rl)return;
@@ -6393,7 +6402,15 @@ function renderRaceList(){
   const fw=document.getElementById('featured-races-wrap');
   const fl=document.getElementById('featured-races-list');
   if(fw&&fl){
-    if(featured.length){fl.innerHTML=featured.map(raceCard).join('');fw.style.display='block';}
+    if(featured.length){
+      featured.sort((x,y)=>String(x.date||'9999').localeCompare(String(y.date||'9999')));
+      const LIM=6,showAll=!!window._featShowAll,list=showAll?featured:featured.slice(0,LIM);
+      fl.innerHTML=list.map(raceCard).join('');
+      let more=document.getElementById('featured-races-more');
+      if(!more){more=document.createElement('div');more.id='featured-races-more';more.style.cssText='text-align:center;margin-top:14px';fl.parentNode.insertBefore(more,fl.nextSibling);}
+      more.innerHTML=featured.length>LIM?'<button type="button" class="btn btn-ghost btn-sm" onclick="window._featShowAll='+(!showAll)+';renderRaceList()">'+(showAll?'Daha az göster':'Tüm öne çıkanları göster ('+featured.length+')')+'</button>':'';
+      fw.style.display='block';
+    }
     else fw.style.display='none';
   }
   // Şehir dropdown doldur
@@ -6554,11 +6571,17 @@ window.openRace=id=>{
         </div>`:`<div style="background:var(--bg2);border-radius:10px;padding:14px;margin-bottom:16px;text-align:center"><p style="font-size:13px;color:var(--muted);margin-bottom:8px">Yorum yapmak için giriş yap.</p><button class="btn btn-or btn-sm" onclick="openAuth('login')">Giriş Yap</button></div>`}
         <div id="discussions-list-${r.id}" data-active-tag=""><div class="spinner" style="margin:20px auto"></div></div>
       </div>
+    </div>
+    <!-- ── YAKLAŞAN YARIŞLAR ── -->
+    <div class="sec" style="margin-top:28px">
+      <div class="sec-head" style="margin-bottom:14px"><h2 style="font-size:18px;margin:0">🔥 Yaklaşan Yarışlar</h2><button class="btn btn-ghost btn-sm" onclick="nav('races')">Tümünü Gör →</button></div>
+      <div class="grid g4 scroll-row" id="related-upcoming-${r.id}"></div>
     </div>`;
   nav('race-detail');
   if(typeof routerPush==='function')routerPush('race-detail', r.slug||r.id, r.name+' — RunClubTürkiye', r.location||'', r.imgUrl||'');
   updateSEOMeta(r.name || '', (r.name||'')+' — '+(r.location||r.city||'')+(r.date?', '+((window.fmtTRDate&&window.fmtTRDate(r.date))||r.date):'')+'. Mesafeler, kayıt bilgileri ve yarış detayları RunClub Türkiye yarış takviminde.', 'https://www.runclubturkiye.com/yaris/' + (r.slug||r.id||''));
   setTimeout(()=>loadDiscussions&&loadDiscussions(r.id),100);
+  renderUpcomingRacesRow(r.id);
 };
 
 // ── BLOG ──
@@ -7223,7 +7246,8 @@ window.openBlog=id=>{
   const readMin=Math.max(1,Math.round(words/200));
   const coverEl=document.getElementById('blog-detail-cover');
   if(coverEl)coverEl.innerHTML=`<div class="blog-cover">${p.coverUrl?`<img src="${p.coverUrl}" alt="${p.title}" width="1200" height="400" loading="lazy"/>`:`<span class="ph">${p.emoji||'📰'}</span>`}</div>`;
-  document.getElementById('blog-detail-content').innerHTML=`
+  const contentEl=document.getElementById('blog-detail-content');
+  if(contentEl)contentEl.innerHTML=`
     <div style="display:flex;gap:6px;margin-bottom:10px">${(p.tags||[]).map(t=>`<span class="tag tag-gy">${t}</span>`).join('')}</div>
     <h2 style="font-size:26px;margin-bottom:10px;line-height:1.2">${p.title}</h2>
     <div style="font-size:12px;color:var(--muted);margin-bottom:20px">✍️ ${p.authorName||'Editör'} · ${p.publishedAt||''} · ⏱️ ${readMin} dk okuma</div>
@@ -13711,7 +13735,8 @@ window.injectEventSchema = function(e) {
 
   function shouldIgnore(msg) {
     if (!msg) return true;
-    return _ignorePatterns.some(function(p) { return msg.indexOf(p) > -1; });
+    var m = String(msg).toLowerCase();
+    return _ignorePatterns.some(function(p) { return m.indexOf(String(p).toLowerCase()) > -1; });
   }
 
   function showErrorBoundary(msg, retry) {
@@ -13731,6 +13756,17 @@ window.injectEventSchema = function(e) {
 
     el.querySelector('p').textContent = friendly;
     el.classList.add('show');
+
+    try {
+      if (window._fb && window._fb.db) {
+        window._fb.addDoc(window._fb.collection(window._fb.db, 'client_errors'), {
+          msg: String(msg || '').slice(0, 500),
+          ua: navigator.userAgent,
+          path: location.pathname,
+          ts: window._fb.serverTimestamp()
+        });
+      }
+    } catch (_) {}
 
     var retryBtn = el.querySelector('.err-retry');
     if (retryBtn) {
@@ -17741,6 +17777,42 @@ window.helpReply=async function(id){
     toast('Yanıt gönderildi ✓','ok');
   }catch(e){toast('Hata: '+(e.code||e.message),'err');}
 };
+
+/* crawl-links: kart başlıklarına gerçek <a href> ekler (arama motorları sayfaları bağlantıdan keşfeder) */
+(function(){
+  var SKIP='#pg-dashboard,#pg-admin,#pg-panel,#pg-profile,#pg-discussions,#pg-community';
+  function find(arr,id){arr=arr||[];for(var i=0;i<arr.length;i++){if(arr[i].id===id)return arr[i];}return null;}
+  function hrefFor(fn,id){
+    var x;
+    if(fn==='openRace'){x=find(window.RACES,id);return x?'/yaris/'+(x.slug||x.id):null;}
+    if(fn==='openClub'){x=find(window.CLUBS,id);return x?'/kulup/'+x.id:null;}
+    if(fn==='openEvent'){x=find(window.EVENTS,id);return (x&&x.status==='approved')?'/etkinlik/'+(x.slug||x.id):null;}
+    if(fn==='openBlog'){x=find(window.BLOG_POSTS,id);return x?'/haber/'+(x.slug||x.id):null;}
+    return null;
+  }
+  function enhance(){
+    try{
+      var cards=document.querySelectorAll('[onclick^="openRace("],[onclick^="openClub("],[onclick^="openEvent("],[onclick^="openBlog("]');
+      for(var i=0;i<cards.length;i++){
+        var card=cards[i]; if(card.getAttribute('data-cl'))continue;
+        var h=card.querySelector('h3,h4'); if(!h)continue;
+        if(card.closest&&card.closest(SKIP)){card.setAttribute('data-cl','x');continue;}
+        var m=/^(open\w+)\('([^']+)'\)/.exec(card.getAttribute('onclick')||''); if(!m)continue;
+        var href=hrefFor(m[1],m[2]); if(!href)continue;
+        card.setAttribute('data-cl','1');
+        if(h.querySelector('a'))continue;
+        var a=document.createElement('a'); a.href=href; a.style.cssText='color:inherit;text-decoration:none';
+        a.addEventListener('click',function(ev){if(!(ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.button))ev.preventDefault();});
+        while(h.firstChild)a.appendChild(h.firstChild);
+        h.appendChild(a);
+      }
+    }catch(e){}
+  }
+  var t=null;
+  function sched(){if(t)return;t=setTimeout(function(){t=null;enhance();},400);}
+  try{new MutationObserver(sched).observe(document.body,{childList:true,subtree:true});}catch(e){}
+  window.addEventListener('load',sched); sched();
+})();
 </script>
 </body>
 </html>

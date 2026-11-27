@@ -85,6 +85,13 @@ const safeBody = h => String(h || '').replace(/<script[\s\S]*?<\/script>/gi, '')
 const MONTHS = ['Ocak', 'Şubat', 'Mart', 'Nisan', 'Mayıs', 'Haziran', 'Temmuz', 'Ağustos', 'Eylül', 'Ekim', 'Kasım', 'Aralık'];
 function trDate(d) { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(d || ''); return m ? `${+m[3]} ${MONTHS[+m[2] - 1]} ${m[1]}` : (d || ''); }
 
+// ── İç bağlantı listeleri (arama motorlarının sayfaları keşfetmesi için) ──
+async function racesLite() { return listAll('races', ['name', 'slug', 'date', 'location', 'distance']); }
+async function blogLite() { const b = await listAll('blog', ['title', 'slug', 'status', 'publishedAt', 'createdAt']); return b.filter(p => p.title && (!p.status || p.status === 'published')); }
+async function eventsLite() { const e = await listAll('events', ['title', 'slug', 'status', 'date', 'city']); return e.filter(x => x.title && x.status === 'approved'); }
+const liLink = (href, txt, sub) => `<li><a href="${href}">${esc(txt)}</a>${sub ? ' — ' + esc(sub) : ''}</li>`;
+const raceLi = r => liLink('/yaris/' + esc(r.slug || r.id), r.name, [r.date ? trDate(r.date) : '', r.location || '', r.distance || ''].filter(Boolean).join(' · '));
+
 const PAGES = {
   'yaris-takvimi': ['Koşu Yarışları Takvimi 2026–2027 — Maraton, Yarı Maraton, Trail ve Ultra', 'Türkiye\'deki tüm koşu yarışları tek takvimde: maraton, yarı maraton, 10K, trail ve ultra yarışların tarihleri, şehirleri ve kayıt bilgileri.'],
   'kulupler': ['Koşu Kulüpleri ve Koşu Grupları — Türkiye', 'Şehrindeki koşu kulüplerini ve grup koşularını keşfet, ücretsiz üye ol ve birlikte koş.'],
@@ -137,7 +144,25 @@ async function meta(t, s) {
     }
     if (s === 'kulupler') {
       const d = await cityData();
-      m.content = `<h1>Koşu Kulüpleri ve Koşu Grupları</h1><p>${esc(p[1])}</p><h2>Şehrine göre koşu kulüpleri</h2>${cityLinks(d.list)}`;
+      const allClubs = (await listAll('clubs', ['name', 'city'])).filter(c => c.name);
+      m.content = `<h1>Koşu Kulüpleri ve Koşu Grupları</h1><p>${esc(p[1])}</p><h2>Şehrine göre koşu kulüpleri</h2>${cityLinks(d.list)}` +
+        (allClubs.length ? `<h2>Tüm koşu kulüpleri</h2><ul>${allClubs.map(c => liLink('/kulup/' + c.id, c.name, c.city)).join('')}</ul>` : '');
+    }
+    if (s === 'yaris-takvimi') {
+      const rs = await racesLite(); const today = new Date().toISOString().slice(0, 10);
+      const up = rs.filter(r => r.date && r.date >= today).sort((a, b) => a.date < b.date ? -1 : 1);
+      const past = rs.filter(r => r.date && r.date < today).sort((a, b) => a.date < b.date ? 1 : -1);
+      m.content = `<h1>${esc(p[0])}</h1><p>${esc(p[1])}</p>` +
+        (up.length ? `<h2>Yaklaşan koşu yarışları (${up.length})</h2><ul>${up.map(raceLi).join('')}</ul>` : '') +
+        (past.length ? `<h2>Geçmiş koşu yarışları</h2><ul>${past.map(raceLi).join('')}</ul>` : '');
+    }
+    if (s === 'haberler') {
+      const bs = (await blogLite()).sort((a, b) => String(b.publishedAt || b.createdAt || '') < String(a.publishedAt || a.createdAt || '') ? -1 : 1);
+      m.content = `<h1>${esc(p[0])}</h1><p>${esc(p[1])}</p>` + (bs.length ? `<ul>${bs.map(b => liLink('/haber/' + esc(b.slug || b.id), b.title)).join('')}</ul>` : '');
+    }
+    if (s === 'etkinlikler') {
+      const es = (await eventsLite()).sort((a, b) => String(a.date || '') < String(b.date || '') ? -1 : 1);
+      m.content = `<h1>${esc(p[0])}</h1><p>${esc(p[1])}</p>` + (es.length ? `<ul>${es.map(e => liLink('/etkinlik/' + esc(e.slug || e.id), e.title, [e.date ? trDate(e.date) : '', e.city || ''].filter(Boolean).join(' · '))).join('')}</ul>` : '');
     }
     return m;
   }
@@ -167,10 +192,15 @@ async function meta(t, s) {
     const url = `${SITE}/haber/${b.slug || b.id}`;
     const title = b.metaTitle || b.title;
     const desc = short(b.metaDesc || b.body, 158);
+    let more = '';
+    try {
+      const others = (await blogLite()).filter(x => x.id !== b.id).sort((a, c) => String(c.publishedAt || c.createdAt || '') < String(a.publishedAt || a.createdAt || '') ? -1 : 1).slice(0, 6);
+      more = others.length ? `<h2>Diğer koşu rehberleri</h2><ul>${others.map(x => liLink('/haber/' + esc(x.slug || x.id), x.title)).join('')}</ul><p><a href="/yaris-takvimi">Koşu yarışları takvimi</a></p>` : '';
+    } catch (e) { /* sessizce geç */ }
     return {
       title: `${title} | ${BRAND}`, desc, url, image: b.coverUrl, ogType: 'article',
       jsonld: { '@context': 'https://schema.org', '@type': 'BlogPosting', headline: b.title, description: desc, image: b.coverUrl || DEFAULT_IMG, datePublished: b.publishedAt || b.createdAt, dateModified: b.updatedAt || b.publishedAt || b.createdAt, author: { '@type': 'Organization', name: b.authorName || BRAND }, publisher: { '@type': 'Organization', name: BRAND, logo: { '@type': 'ImageObject', url: SITE + '/icon-192.png' } }, mainEntityOfPage: url, inLanguage: 'tr-TR', keywords: (b.tags || []).join(', ') },
-      content: `<nav style="font-size:13px"><a href="/">Ana Sayfa</a> › <a href="/haberler">Koşu Rehberleri</a></nav><article><h1>${esc(b.title)}</h1>${b.kategori ? `<p style="color:#888">${esc(b.kategori)}</p>` : ''}${safeBody(b.body)}</article>`,
+      content: `<nav style="font-size:13px"><a href="/">Ana Sayfa</a> › <a href="/haberler">Koşu Rehberleri</a></nav><article><h1>${esc(b.title)}</h1>${b.kategori ? `<p style="color:#888">${esc(b.kategori)}</p>` : ''}${safeBody(b.body)}</article>` + more,
     };
   }
   if (t === 'yaris') {
@@ -180,9 +210,20 @@ async function meta(t, s) {
     const desc = short(`${r.name} — ${where}${r.date ? ', ' + trDate(r.date) : ''}${r.distance ? '. Mesafeler: ' + r.distance : ''}. ${plain(r.about)}`, 158);
     const ld = { '@context': 'https://schema.org', '@type': 'SportsEvent', name: r.name, description: desc, startDate: r.date, eventStatus: 'https://schema.org/EventScheduled', eventAttendanceMode: 'https://schema.org/OfflineEventAttendanceMode', sport: 'Running', image: r.imgUrl || DEFAULT_IMG, location: { '@type': 'Place', name: where || r.name, address: { '@type': 'PostalAddress', addressLocality: where, addressCountry: 'TR' } }, url };
     if (r.website) ld.organizer = { '@type': 'Organization', name: r.name, url: r.website };
+    let related = '';
+    try {
+      const all = await racesLite(); const today = new Date().toISOString().slice(0, 10);
+      const ct = cityOf(where);
+      const cand = all.filter(x => x.id !== r.id && x.date && x.date >= today).sort((a, b) => a.date < b.date ? -1 : 1);
+      const sameCity = ct ? cand.filter(x => cityOf(x.location) === ct) : [];
+      const rest = cand.filter(x => !sameCity.includes(x));
+      const pick = sameCity.slice(0, 5).concat(rest).slice(0, 8);
+      related = (ct ? `<p><a href="/kulupler/${slugify(ct)}">${esc(ct)} koşu kulüpleri ve yarışları</a></p>` : '') +
+        (pick.length ? `<h2>Diğer yaklaşan koşu yarışları</h2><ul>${pick.map(raceLi).join('')}</ul><p><a href="/yaris-takvimi">Tüm koşu yarışları takvimi</a></p>` : '');
+    } catch (e) { /* ilgili yarışlar alınamazsa sayfa yine de döner */ }
     return {
       title: `${r.name}${r.date ? ' — ' + trDate(r.date) : ''} | ${BRAND}`, desc, url, image: r.imgUrl, jsonld: ld,
-      content: `<nav style="font-size:13px"><a href="/">Ana Sayfa</a> › <a href="/yaris-takvimi">Yarış Takvimi</a></nav><h1>${esc(r.name)}</h1><ul>${r.date ? `<li><b>Tarih:</b> ${esc(trDate(r.date))}</li>` : ''}${where ? `<li><b>Yer:</b> ${esc(where)}</li>` : ''}${r.distance ? `<li><b>Mesafeler:</b> ${esc(r.distance)}</li>` : ''}${r.regDeadline ? `<li><b>Son kayıt:</b> ${esc(trDate(r.regDeadline))}</li>` : ''}${r.fee ? `<li><b>Ücret:</b> ${esc(r.fee)}</li>` : ''}</ul>${r.about ? `<p>${esc(plain(r.about))}</p>` : ''}${r.website ? `<p><a href="${esc(r.website)}" rel="nofollow noopener">Resmi web sitesi</a></p>` : ''}`,
+      content: `<nav style="font-size:13px"><a href="/">Ana Sayfa</a> › <a href="/yaris-takvimi">Yarış Takvimi</a></nav><h1>${esc(r.name)}</h1><ul>${r.date ? `<li><b>Tarih:</b> ${esc(trDate(r.date))}</li>` : ''}${where ? `<li><b>Yer:</b> ${esc(where)}</li>` : ''}${r.distance ? `<li><b>Mesafeler:</b> ${esc(r.distance)}</li>` : ''}${r.regDeadline ? `<li><b>Son kayıt:</b> ${esc(trDate(r.regDeadline))}</li>` : ''}${r.fee ? `<li><b>Ücret:</b> ${esc(r.fee)}</li>` : ''}</ul>${r.about ? `<p>${esc(plain(r.about))}</p>` : ''}${r.website ? `<p><a href="${esc(r.website)}" rel="nofollow noopener">Resmi web sitesi</a></p>` : ''}` + related,
     };
   }
   if (t === 'kulup') {

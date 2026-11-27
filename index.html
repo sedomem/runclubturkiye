@@ -17722,6 +17722,42 @@ window.helpReply=async function(id){
     toast('Yanıt gönderildi ✓','ok');
   }catch(e){toast('Hata: '+(e.code||e.message),'err');}
 };
+
+/* crawl-links: kart başlıklarına gerçek <a href> ekler (arama motorları sayfaları bağlantıdan keşfeder) */
+(function(){
+  var SKIP='#pg-dashboard,#pg-admin,#pg-panel,#pg-profile,#pg-discussions,#pg-community';
+  function find(arr,id){arr=arr||[];for(var i=0;i<arr.length;i++){if(arr[i].id===id)return arr[i];}return null;}
+  function hrefFor(fn,id){
+    var x;
+    if(fn==='openRace'){x=find(window.RACES,id);return x?'/yaris/'+(x.slug||x.id):null;}
+    if(fn==='openClub'){x=find(window.CLUBS,id);return x?'/kulup/'+x.id:null;}
+    if(fn==='openEvent'){x=find(window.EVENTS,id);return (x&&x.status==='approved')?'/etkinlik/'+(x.slug||x.id):null;}
+    if(fn==='openBlog'){x=find(window.BLOG_POSTS,id);return x?'/haber/'+(x.slug||x.id):null;}
+    return null;
+  }
+  function enhance(){
+    try{
+      var cards=document.querySelectorAll('[onclick^="openRace("],[onclick^="openClub("],[onclick^="openEvent("],[onclick^="openBlog("]');
+      for(var i=0;i<cards.length;i++){
+        var card=cards[i]; if(card.getAttribute('data-cl'))continue;
+        var h=card.querySelector('h3,h4'); if(!h)continue;
+        if(card.closest&&card.closest(SKIP)){card.setAttribute('data-cl','x');continue;}
+        var m=/^(open\w+)\('([^']+)'\)/.exec(card.getAttribute('onclick')||''); if(!m)continue;
+        var href=hrefFor(m[1],m[2]); if(!href)continue;
+        card.setAttribute('data-cl','1');
+        if(h.querySelector('a'))continue;
+        var a=document.createElement('a'); a.href=href; a.style.cssText='color:inherit;text-decoration:none';
+        a.addEventListener('click',function(ev){if(!(ev.ctrlKey||ev.metaKey||ev.shiftKey||ev.button))ev.preventDefault();});
+        while(h.firstChild)a.appendChild(h.firstChild);
+        h.appendChild(a);
+      }
+    }catch(e){}
+  }
+  var t=null;
+  function sched(){if(t)return;t=setTimeout(function(){t=null;enhance();},400);}
+  try{new MutationObserver(sched).observe(document.body,{childList:true,subtree:true});}catch(e){}
+  window.addEventListener('load',sched); sched();
+})();
 </script>
 </body>
 </html>

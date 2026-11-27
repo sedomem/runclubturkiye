@@ -680,6 +680,13 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .blog-body-content hr{border:none;border-top:1.5px solid var(--border);margin:24px 0}
 .blog-body-content code{background:var(--bg3);padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px}
 .blog-body-content pre{background:var(--bg3);padding:14px;border-radius:8px;overflow-x:auto;margin:14px 0}
+.blog-body-content table,.disc-report-body table,.ql-editor table{border-collapse:collapse;width:100%;margin:16px 0;font-size:13.5px;display:table}
+.blog-body-content table td,.blog-body-content table th,.disc-report-body table td,.disc-report-body table th,.ql-editor table td,.ql-editor table th{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
+.blog-body-content table th,.disc-report-body table th,.ql-editor table th{background:var(--bg2);font-weight:700}
+.blog-body-content img,.disc-report-body img{max-width:100%;border-radius:10px;margin:10px 0;display:block}
+.blog-body-content .ql-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:16px 0}
+.blog-body-content .ql-table-wrap table{margin:0}
+@media(max-width:600px){.blog-body-content table{display:block;overflow-x:auto;white-space:nowrap}}
 /* ━━ BLOG DETAIL LAYOUT + SIDEBAR ━━ */
 .blog-detail-wrap{display:grid;grid-template-columns:1fr 320px;gap:36px;align-items:start}
 .blog-cover{width:100%;padding-top:33.33%;min-height:300px;border-radius:var(--r2);overflow:hidden;margin-bottom:28px;background:linear-gradient(135deg,#1a1a1a,#2a2a2a);position:relative;box-shadow:var(--shadow-md)}
@@ -6949,9 +6956,11 @@ window.editDiscRace = async function(id) {
     if(window.Quill) {
       window._editRepQuill = new Quill('#edit-rep-ozet-editor', {
         theme: 'snow',
-        modules: { toolbar: [['bold','italic',{list:'ordered'},{list:'bullet'},'clean']] },
-        placeholder: 'Kısa özet ve değerlendirme...'
+        modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline','strike'],[{list:'ordered'},{list:'bullet'}],['blockquote'],['link','image'],['clean']] },
+        placeholder: 'Kısa özet ve değerlendirme... Word/Google Docs\'tan kopyaladığın tablo, görsel ve biçimlendirme olduğu gibi gelir.'
       });
+      window._editRepQuill.getModule('toolbar').addHandler('image',()=>window.quillPickImage&&window.quillPickImage(window._editRepQuill));
+      window.quillEnableRichPaste&&window.quillEnableRichPaste(window._editRepQuill);
       if(rep.ozet) window._editRepQuill.root.innerHTML = rep.ozet;
     }
   }, 150);
@@ -7134,9 +7143,11 @@ window.initDiscQuill = function() {
   if(!el) return;
   window._discQuill = new Quill('#new-disc-race-ozet-editor', {
     theme: 'snow',
-    modules: { toolbar: [['bold','italic',{list:'ordered'},{list:'bullet'},'clean']] },
-    placeholder: 'Kısa özet ve değerlendirme...'
+    modules: { toolbar: [[{header:[1,2,3,false]}],['bold','italic','underline','strike'],[{list:'ordered'},{list:'bullet'}],['blockquote'],['link','image'],['clean']] },
+    placeholder: 'Kısa özet ve değerlendirme... Word/Google Docs\'tan kopyaladığın tablo, görsel ve biçimlendirme olduğu gibi gelir.'
   });
+  window._discQuill.getModule('toolbar').addHandler('image',()=>window.quillPickImage&&window.quillPickImage(window._discQuill));
+  window.quillEnableRichPaste&&window.quillEnableRichPaste(window._discQuill);
 };
 
 
@@ -11580,22 +11591,56 @@ function initQuillEditor(){
     placeholder:'Haber içeriğini girin. Paragraflar, görseller ve biçimlendirme ekleyebilirsiniz.'
   });
   // Resim handler — base64 embed
-  window._quillEditor.getModule('toolbar').addHandler('image',()=>{
-    const input=document.createElement('input');
-    input.type='file';input.accept='image/*';
-    input.onchange=e=>{
-      const file=e.target.files[0];if(!file)return;
-      const reader=new FileReader();
-      reader.onload=ev=>{
-        const range=window._quillEditor.getSelection(true);
-        window._quillEditor.insertEmbed(range.index,'image',ev.target.result);
-      };
-      reader.readAsDataURL(file);
-    };
-    input.click();
-  });
+  window._quillEditor.getModule('toolbar').addHandler('image',()=>quillPickImage(window._quillEditor));
+  quillEnableRichPaste(window._quillEditor);
 }
 window.initQuillEditor=initQuillEditor;
+
+// ── Görsel yükleme handler'ı (blog + yarış editörleri ortak) ──
+function quillPickImage(quill){
+  const input=document.createElement('input');
+  input.type='file';input.accept='image/*';
+  input.onchange=e=>{
+    const file=e.target.files[0];if(!file)return;
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const range=quill.getSelection(true)||{index:quill.getLength()};
+      quill.insertEmbed(range.index,'image',ev.target.result);
+    };
+    reader.readAsDataURL(file);
+  };
+  input.click();
+}
+
+// ── Word/Google Docs'tan kopyala-yapıştırda tablo/görsel/biçim kaybını önler ──
+// Quill'in varsayılan yapıştırma mekanizması tabloları ve bazı etiketleri destek-
+// lemediği için siler. Burada yapıştırılan ham HTML'i (güvenlik için temizleyip)
+// doğrudan editöre gömüyoruz, böylece satır/tablo/görsel kaybı olmuyor.
+function quillSanitizePasteHTML(html){
+  const tmp=document.createElement('div');tmp.innerHTML=html;
+  tmp.querySelectorAll('script,style,iframe,object,embed,form,input,button,noscript,meta,link,title,head,svg').forEach(n=>n.remove());
+  tmp.querySelectorAll('*').forEach(n=>{
+    [...n.attributes].forEach(a=>{
+      const name=a.name.toLowerCase();
+      const keep=(n.tagName==='A'&&name==='href')||(n.tagName==='IMG'&&(name==='src'||name==='alt'))||(n.tagName==='TD'||n.tagName==='TH')&&(name==='colspan'||name==='rowspan');
+      if(!keep)n.removeAttribute(a.name);
+    });
+  });
+  return tmp.innerHTML;
+}
+function quillEnableRichPaste(quill){
+  if(!quill||quill.__richPaste)return;quill.__richPaste=true;
+  quill.root.addEventListener('paste',e=>{
+    const cd=e.clipboardData;if(!cd)return;
+    const html=cd.getData('text/html');
+    if(!html||!/<(table|img|h[1-6]|ul|ol)/i.test(html))return; // basit metin ise Quill'in kendi davranışına bırak
+    e.preventDefault();e.stopPropagation();
+    const clean=quillSanitizePasteHTML(html);
+    const range=quill.getSelection(true)||{index:quill.getLength()};
+    quill.clipboard.dangerouslyPasteHTML(range.index,clean,'user');
+  },true);
+}
+window.quillEnableRichPaste=quillEnableRichPaste;
 
 function initQuillRaceEditor(){
   if(typeof Quill==='undefined')return;
@@ -11604,9 +11649,19 @@ function initQuillRaceEditor(){
   if(!el)return;
   window._quillRaceEditor=new Quill('#ar-about-editor',{
     theme:'snow',
-    modules:{toolbar:[[{header:[1,2,3,false]}],['bold','italic','underline'],['link'],['clean']]},
-    placeholder:'Yarış hakkında açıklama girin...'
+    modules:{toolbar:[
+      [{header:[1,2,3,false]}],
+      ['bold','italic','underline','strike'],
+      [{list:'ordered'},{list:'bullet'}],
+      ['blockquote'],
+      ['link','image'],
+      [{align:[]}],
+      ['clean']
+    ]},
+    placeholder:'Yarış hakkında açıklama girin. Word/Google Docs\'tan kopyaladığın tablo, görsel ve biçimlendirme olduğu gibi gelir.'
   });
+  window._quillRaceEditor.getModule('toolbar').addHandler('image',()=>quillPickImage(window._quillRaceEditor));
+  quillEnableRichPaste(window._quillRaceEditor);
 }
 window.initQuillRaceEditor=initQuillRaceEditor;
 
@@ -14795,7 +14850,7 @@ window.toggleBlogFeatured=async function(id,val){
       +(isSA?'<button class="btn btn-ghost btn-sm" style="font-size:11px" onclick="editDiscRace(\''+r.id+'\')">✏️ Rapor</button><button class="btn btn-red btn-sm" style="font-size:11px" onclick="deleteDiscRace(\''+r.id+'\')">🗑</button>':'')
       +'</div></div></div>'
       +'<div class="disc-tabs"><button id="btn-tartisma-'+r.id+'" class="on" onclick="discTab(\'tartisma\',\''+r.id+'\')">💬 Yorumlar</button><button id="btn-ozet-'+r.id+'" onclick="discTab(\'ozet\',\''+r.id+'\')">📋 Yarış Raporu'+(hasRep?'':' <span style="font-weight:400;font-size:11px">(yok)</span>')+'</button></div>'
-      +'<div id="tab-ozet-'+r.id+'" style="display:none">'+(hasRep?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--muted)">PARKUR</div><div style="font-size:16px;margin-top:4px">'+stars(rep.parkurPuan)+'</div></div><div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--muted)">ORGANİZASYON</div><div style="font-size:16px;margin-top:4px">'+stars(rep.orgPuan)+'</div></div></div>'+(rep.teknik?'<p style="font-size:13px;margin-bottom:10px"><b>Teknik detaylar:</b> '+esc(rep.teknik)+'</p>':'')+(rep.ozet?'<div style="font-size:13px;line-height:1.6;color:var(--text)">'+String(rep.ozet).replace(/<script[\s\S]*?<\/script>/gi,'')+'</div>':''):'<div style="text-align:center;padding:30px 10px;color:var(--muted);font-size:13px">Bu yarış için henüz değerlendirme raporu yok.'+(isSA?'<br><button class="btn btn-or btn-sm" style="margin-top:10px" onclick="editDiscRace(\''+r.id+'\')">+ Rapor ekle</button>':'')+'</div>')+'</div>'
+      +'<div id="tab-ozet-'+r.id+'" style="display:none">'+(hasRep?'<div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px"><div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--muted)">PARKUR</div><div style="font-size:16px;margin-top:4px">'+stars(rep.parkurPuan)+'</div></div><div class="card" style="padding:12px;text-align:center"><div style="font-size:10px;font-weight:700;color:var(--muted)">ORGANİZASYON</div><div style="font-size:16px;margin-top:4px">'+stars(rep.orgPuan)+'</div></div></div>'+(rep.teknik?'<p style="font-size:13px;margin-bottom:10px"><b>Teknik detaylar:</b> '+esc(rep.teknik)+'</p>':'')+(rep.ozet?'<div class="disc-report-body" style="font-size:13px;line-height:1.6;color:var(--text)">'+String(rep.ozet).replace(/<script[\s\S]*?<\/script>/gi,'')+'</div>':''):'<div style="text-align:center;padding:30px 10px;color:var(--muted);font-size:13px">Bu yarış için henüz değerlendirme raporu yok.'+(isSA?'<br><button class="btn btn-or btn-sm" style="margin-top:10px" onclick="editDiscRace(\''+r.id+'\')">+ Rapor ekle</button>':'')+'</div>')+'</div>'
       +'<div id="tab-tartisma-'+r.id+'">'
       +(window.CU?'<div class="disc-compose"><textarea id="disc-input-'+r.id+'" maxlength="1500" placeholder="'+(past?'Bu yarışı koştun mu? Parkur, organizasyon, ipuçları…':'Bu yarışa hazırlanıyor musun? Soru sor ya da ipucu paylaş…')+'" oninput="updateDiscCharCount(\''+r.id+'\')"></textarea>'
         +'<div class="disc-chips">'+tags.map(function(t){return '<label><input type="checkbox" class="disc-tag-'+r.id+'" value="'+t+'"/><span>#'+t+'</span></label>';}).join('')+'</div>'

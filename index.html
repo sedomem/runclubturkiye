@@ -684,6 +684,7 @@ footer{background:var(--dark3);border-top:none;padding:50px 0 0;margin-top:0}
 .blog-body-content table td,.blog-body-content table th,.disc-report-body table td,.disc-report-body table th,.ql-editor table td,.ql-editor table th{border:1px solid var(--border);padding:8px 10px;text-align:left;vertical-align:top}
 .blog-body-content table th,.disc-report-body table th,.ql-editor table th{background:var(--bg2);font-weight:700}
 .blog-body-content img,.disc-report-body img{max-width:100%;border-radius:10px;margin:10px 0;display:block}
+.ql-raw{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:14px 0}.ql-raw table{margin:0}.blog-body-content svg,.disc-report-body svg,.ql-editor svg{max-width:100%;height:auto;display:block;margin:12px auto}.ql-editor .ql-raw{outline:1px dashed var(--border);border-radius:6px;padding:4px}
 .blog-body-content .ql-table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;margin:16px 0}
 .blog-body-content .ql-table-wrap table{margin:0}
 @media(max-width:600px){.blog-body-content table{display:block;overflow-x:auto;white-space:nowrap}}
@@ -11642,26 +11643,103 @@ function quillPickImage(quill){
 // doğrudan editöre gömüyoruz, böylece satır/tablo/görsel kaybı olmuyor.
 function quillSanitizePasteHTML(html){
   const tmp=document.createElement('div');tmp.innerHTML=html;
-  tmp.querySelectorAll('script,style,iframe,object,embed,form,input,button,noscript,meta,link,title,head,svg').forEach(n=>n.remove());
+  tmp.querySelectorAll('script,style,iframe,object,embed,form,input,button,select,textarea,noscript,meta,link,title,head,canvas,video,audio,foreignobject,animate,set,use').forEach(n=>n.remove());
+  const SVG_ATTR=/^(width|height|viewbox|x|y|cx|cy|r|rx|ry|x1|y1|x2|y2|d|points|fill|stroke|stroke-width|stroke-linecap|stroke-linejoin|stroke-dasharray|opacity|fill-opacity|stroke-opacity|transform|text-anchor|font-size|font-family|font-weight|dominant-baseline|offset|stop-color|stop-opacity|id|gradientunits|gradienttransform|xmlns|preserveaspectratio|clip-path|dx|dy|rotate|textlength)$/i;
   tmp.querySelectorAll('*').forEach(n=>{
+    const tag=n.tagName.toLowerCase();
+    const inSvg=!!n.closest('svg');
     [...n.attributes].forEach(a=>{
-      const name=a.name.toLowerCase();
-      const keep=(n.tagName==='A'&&name==='href')||(n.tagName==='IMG'&&(name==='src'||name==='alt'))||(n.tagName==='TD'||n.tagName==='TH')&&(name==='colspan'||name==='rowspan');
+      const name=a.name.toLowerCase(),val=a.value;
+      let keep=false;
+      if(inSvg){
+        keep=SVG_ATTR.test(name)&&!/javascript:|url\(\s*['"]?\s*(?!#)/i.test(val);
+        if(name==='style'&&/^[\w\s:;#.,%()\-]*$/.test(val)&&!/url\(|expression/i.test(val))keep=true;
+      }else if(tag==='a')keep=(name==='href'&&!/^\s*javascript:/i.test(val))||name==='title';
+      else if(tag==='img')keep=name==='src'||name==='alt'||name==='width'||name==='height';
+      else if(tag==='td'||tag==='th')keep=name==='colspan'||name==='rowspan'||name==='align';
+      else if(tag==='col'||tag==='colgroup')keep=name==='span'||name==='width';
       if(!keep)n.removeAttribute(a.name);
     });
+    if(tag==='img'){const s=(n.getAttribute('src')||'').trim();if(!/^(https?:|data:image\/(png|jpe?g|gif|webp);|blob:)/i.test(s))n.remove();}
   });
-  return tmp.innerHTML;
+  return tmp;
+}
+function quillRegisterRawBlot(){
+  if(!window.Quill||Quill.__rawReg)return;
+  const BE=Quill.import('blots/block/embed');
+  class RawHTML extends BE{
+    static create(v){const n=super.create();n.setAttribute('contenteditable','false');n.innerHTML=v;return n;}
+    static value(n){return n.innerHTML;}
+  }
+  RawHTML.blotName='rawhtml';RawHTML.tagName='div';RawHTML.className='ql-raw';
+  Quill.register(RawHTML,true);Quill.__rawReg=true;
+}
+// Tablo / SVG grafik bloklarını Quill'in sadeleştirmesinden korumak için "ham HTML bloğu" olarak ekler
+function quillPasteSegments(quill,root){
+  const RAW=/^(table|svg)$/i;
+  const segs=[];let buf='';
+  const flush=()=>{if(buf.trim())segs.push({h:buf});buf='';};
+  (function walk(parent){
+    parent.childNodes.forEach(n=>{
+      if(n.nodeType===3){buf+=n.textContent.replace(/[<>&]/g,c=>({'<':'&lt;','>':'&gt;','&':'&amp;'}[c]));return;}
+      if(n.nodeType!==1)return;
+      if(RAW.test(n.tagName)){flush();segs.push({raw:n.outerHTML});}
+      else if(n.querySelector('table,svg')&&/^(div|section|article|main|span|b|strong|figure|center|body)$/i.test(n.tagName)){flush();walk(n);}
+      else buf+=n.outerHTML;
+    });
+  })(root);
+  flush();
+  return segs;
+}
+// Yapıştırılan data:/blob: görselleri Storage'a yükler (Firestore 1 MB sınırını aşmasın); olmazsa küçültülmüş gömülü görsel kullanır
+async function quillPersistImages(quill){
+  const imgs=[...quill.root.querySelectorAll('img[src^="data:"],img[src^="blob:"]')];
+  let failed=0;
+  for(const img of imgs){
+    try{
+      const blob=await (await fetch(img.src)).blob();
+      let url='';
+      try{
+        const fb=window._fb;const ext=(blob.type.split('/')[1]||'png').replace('jpeg','jpg');
+        const r=fb.ref(fb.storage,'blog/'+Date.now()+'_'+Math.random().toString(36).slice(2,8)+'.'+ext);
+        await fb.uploadBytes(r,blob);url=await fb.getDownloadURL(r);
+      }catch(e){
+        const bmp=await createImageBitmap(blob);const sc=Math.min(1,1100/bmp.width);
+        const c=document.createElement('canvas');c.width=Math.round(bmp.width*sc);c.height=Math.round(bmp.height*sc);
+        c.getContext('2d').drawImage(bmp,0,0,c.width,c.height);url=c.toDataURL('image/jpeg',.8);
+        if(url.length>450000)throw new Error('big');
+      }
+      img.setAttribute('src',url);
+    }catch(e){failed++;img.remove();}
+  }
+  if(failed&&window.toast)toast(failed+' görsel eklenemedi (dosya olarak ekle: araç çubuğundaki 🖼 simgesi)','err');
 }
 function quillEnableRichPaste(quill){
   if(!quill||quill.__richPaste)return;quill.__richPaste=true;
-  quill.root.addEventListener('paste',e=>{
+  quillRegisterRawBlot();
+  quill.root.addEventListener('paste',async e=>{
     const cd=e.clipboardData;if(!cd)return;
     const html=cd.getData('text/html');
-    if(!html||!/<(table|img|h[1-6]|ul|ol)/i.test(html))return; // basit metin ise Quill'in kendi davranışına bırak
+    const files=[...(cd.files||[])].filter(f=>/^image\//.test(f.type));
+    const rich=html&&/<(table|img|svg|h[1-6]|ul|ol|figure)/i.test(html);
+    if(!rich&&!(files.length&&!html))return; // basit metin: Quill'in kendi davranışı
     e.preventDefault();e.stopPropagation();
-    const clean=quillSanitizePasteHTML(html);
     const range=quill.getSelection(true)||{index:quill.getLength()};
-    quill.clipboard.dangerouslyPasteHTML(range.index,clean,'user');
+    const Delta=Quill.import('delta');
+    let idx=range.index;
+    if(rich){
+      for(const sg of quillPasteSegments(quill,quillSanitizePasteHTML(html))){
+        if(sg.raw){quill.insertEmbed(idx,'rawhtml',sg.raw,'user');idx+=1;}
+        else{const dl=quill.clipboard.convert(sg.h);const lo=dl.ops[dl.ops.length-1];if(lo&&!(typeof lo.insert==='string'&&lo.insert.endsWith('\n')))dl.insert('\n');quill.updateContents(new Delta().retain(idx).concat(dl),'user');idx+=dl.length();}
+      }
+    }else{
+      for(const f of files){
+        const src=await new Promise(r=>{const fr=new FileReader();fr.onload=()=>r(fr.result);fr.readAsDataURL(f);});
+        quill.insertEmbed(idx,'image',src,'user');idx+=1;
+      }
+    }
+    try{quill.setSelection(idx,0,'silent');}catch(_){}
+    quillPersistImages(quill);
   },true);
 }
 window.quillEnableRichPaste=quillEnableRichPaste;
